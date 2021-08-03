@@ -1,0 +1,357 @@
+<?php
+
+/**
+ * The admin-specific functionality of the plugin.
+ *
+ * @link       http://example.com
+ * @since      1.0.0
+ *
+ * @package    Wp_Sdtrk
+ * @subpackage Wp_Sdtrk/admin
+ */
+
+/**
+ * The admin-specific functionality of the plugin.
+ *
+ * Defines the plugin name, version, and two examples hooks for how to
+ * enqueue the admin-specific stylesheet and JavaScript.
+ *
+ * @package    Wp_Sdtrk
+ * @subpackage Wp_Sdtrk/admin
+ * @author     Your Name <email@example.com>
+ */
+class Wp_Sdtrk_Admin {
+
+	/**
+	 * The ID of this plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $wp_sdtrk    The ID of this plugin.
+	 */
+	private $wp_sdtrk;
+
+	/**
+	 * The version of this plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $version    The current version of this plugin.
+	 */
+	private $version;
+
+	/*************************************************************
+	 * ACCESS PLUGIN ADMIN PUBLIC METHODES FROM INSIDE
+	 *
+	 * @tutorial access_plugin_admin_public_methodes_from_inside.php
+	 */
+	/**
+	 * Store plugin main class to allow public access.
+	 *
+	 * @since    20180622
+	 * @var object      The main class.
+	 */
+	public $main;
+	// ACCESS PLUGIN ADMIN PUBLIC METHODES FROM INSIDE
+
+	/**
+	 * Initialize the class and set its properties.
+	 *
+	 * @since    1.0.0
+	 * @param      string    $wp_sdtrk       The name of this plugin.
+	 * @param      string    $version    The version of this plugin.
+	 */
+	// public function __construct( $wp_sdtrk, $version ) {
+
+	// 	$this->wp_sdtrk = $wp_sdtrk;
+	// 	$this->version = $version;
+
+    // }
+
+	/*************************************************************
+	 * ACCESS PLUGIN ADMIN PUBLIC METHODES FROM INSIDE
+	 *
+	 * @tutorial access_plugin_admin_public_methodes_from_inside.php
+	 */
+	/**
+	 * Initialize the class and set its properties.
+	 *
+	 * @since    1.0.0
+	 * @param      string    $wp_sdtrk       The name of this plugin.
+	 * @param      string    $version    The version of this plugin.
+	 */
+	public function __construct( $wp_sdtrk, $version, $plugin_main ) {
+
+		$this->wp_sdtrk = $wp_sdtrk;
+        $this->version = $version;
+        $this->main = $plugin_main;
+
+    }
+    // ACCESS PLUGIN ADMIN PUBLIC METHODES FROM INSIDE
+
+	/**
+	 * Register the stylesheets for the admin area.
+	 *
+	 * @since    1.0.0
+	 */
+	public function enqueue_styles() {
+
+		/**
+		 * This function is provided for demonstration purposes only.
+		 *
+		 * An instance of this class should be passed to the run() function
+		 * defined in Wp_Sdtrk_Loader as all of the hooks are defined
+		 * in that particular class.
+		 *
+		 * The Wp_Sdtrk_Loader will then create the relationship
+		 * between the defined hooks and the functions defined in this
+		 * class.
+		 */
+
+		wp_enqueue_style( $this->wp_sdtrk, plugin_dir_url( __FILE__ ) . 'css/wp-sdtrk-admin.css', array(), $this->version, 'all' );
+
+	}
+
+	/**
+	 * Register the JavaScript for the admin area.
+	 *
+	 * @since    1.0.0
+	 */
+	public function enqueue_scripts() {
+
+		/**
+		 * This function is provided for demonstration purposes only.
+		 *
+		 * An instance of this class should be passed to the run() function
+		 * defined in Wp_Sdtrk_Loader as all of the hooks are defined
+		 * in that particular class.
+		 *
+		 * The Wp_Sdtrk_Loader will then create the relationship
+		 * between the defined hooks and the functions defined in this
+		 * class.
+		 */
+
+		wp_enqueue_script( $this->wp_sdtrk, plugin_dir_url( __FILE__ ) . 'js/wp-sdtrk-admin.js', array( 'jquery' ), $this->version, false );
+
+	}
+
+    public function test_sanitize_callback( $val ) {
+        return sanitize_text_field($val);
+    }
+
+    public function create_menu() {
+
+        /**
+         * Create a submenu page under Plugins.
+         * Framework also add "Settings" to your plugin in plugins list.
+         * @link https://github.com/JoeSz/Exopite-Simple-Options-Framework
+         */
+        $config_submenu = array(
+
+            'type'              => 'menu',                          // Required, menu or metabox
+            'id'                => $this->wp_sdtrk,              // Required, meta box id, unique per page, to save: get_option( id )
+            'parent'            => 'options-general.php',                   // Parent page of plugin menu (default Settings [options-general.php])
+            'submenu'           => true,                            // Required for submenu
+            'title'             => __( 'Demo Admin Page', 'wp-sdtrk' ), // The title of the options page and the name in admin menu
+            'capability'        => 'manage_options',                // The capability needed to view the page
+            'plugin_basename'   =>  plugin_basename( plugin_dir_path( __DIR__ ) . $this->wp_sdtrk . '.php' ),
+            // 'tabbed'            => false,
+            // 'multilang'         => false,                        // To turn of multilang, default on.
+
+        );
+        
+        /**
+         * instantiate your admin page
+         */
+        $options_panel = new Exopite_Simple_Options_Framework( $config_submenu, $this->getGeneralSettingFields());
+    }
+    
+    private function getGeneralSettingFields(){       
+        
+        $fields[] = array(
+            'name' => 'basic',
+            'title' => __('General', 'wp-sdtrk'),
+            'icon' => 'dashicons-admin-generic',
+            'fields' => array(                 
+            )
+        );
+        return $fields;
+    }   
+
+    public function add_style_to_admin_head() {
+        global $post_type;
+        if ( 'test' == $post_type ) {
+            ?>
+                <style type="text/css">
+                    .column-thumbnail {
+                        width: 80px !important;
+                    }
+                    .column-title {
+                        width: 30% !important;
+                    }
+                </style>
+            <?php
+        }
+    }
+
+    /**
+     * To sort, Exopite Simple Options Framework need 'options' => 'simple'.
+     * Simple options is stored az induvidual meta key, value pair, otherwise it is stored in an array.
+     *
+     *
+     * Meta key value paars need to sort as induvidual.
+     *
+     * I implemented this option because it is possible to search in serialized (array) post meta:
+     * @link https://wordpress.stackexchange.com/questions/16709/meta-query-with-meta-values-as-serialize-arrays
+     * @link https://stackoverflow.com/questions/15056407/wordpress-search-serialized-meta-data-with-custom-query
+     * @link https://www.simonbattersby.com/blog/2013/03/querying-wordpress-serialized-custom-post-data/
+     *
+     * but there is no way to sort them with wp_query or SQL.
+     * @link https://wordpress.stackexchange.com/questions/87265/order-by-meta-value-serialized-array/87268#87268
+     * "Not in any reliable way. You can certainly ORDER BY that value but the sorting will use the whole serialized string,
+     * which will give * you technically accurate results but not the results you want. You can't extract part of the string
+     * for sorting within the query itself. Even if you wrote raw SQL, which would give you access to database functions like
+     * SUBSTRING, I can't think of a dependable way to do it. You'd need a MySQL function that would unserialize the value--
+     * you'd have to write it yourself.
+     * Basically, if you need to sort on a meta_value you can't store it serialized. Sorry."
+     *
+     * It is possible to get all required posts and store them in an array and then sort them as an array,
+     * but what if you want multiple keys/value pair to be sorted?
+     *
+     * UPDATE
+     * it is maybe possible:
+     * @link http://www.russellengland.com/2012/07/how-to-unserialize-data-using-mysql.html
+     * but it is waaay more complicated and less documented as meta query sort and search.
+     * It should be not an excuse to use it, but it is not as reliable as it should be.
+     *
+     * @link https://wpquestions.com/Order_by_meta_key_where_value_is_serialized/7908
+     * "...meta info serialized is not a good idea. But you really are going to lose the ability to query your
+     * data in any efficient manner when serializing entries into the WP database.
+     *
+     * The overall performance saving and gain you think you are achieving by serialization is not going to be noticeable to
+     * any major extent. You might obtain a slightly smaller database size but the cost of SQL transactions is going to be
+     * heavy if you ever query those fields and try to compare them in any useful, meaningful manner.
+     *
+     * Instead, save serialization for data that you do not intend to query in that nature, but instead would only access in
+     * a passive fashion by the direct WP API call get_post_meta() - from that function you can unpack a serialized entry
+     * to access its array properties too."
+     */
+    public function manage_sortable_columns( $columns ) {
+
+        $columns['text_1'] = 'text_1';
+        $columns['color_2'] = 'color_2';
+        $columns['date_2'] = 'date_2';
+
+        return $columns;
+
+    }
+
+    public function manage_posts_orderby( $query ) {
+
+        if( ! is_admin() || ! $query->is_main_query() ) {
+            return;
+        }
+
+        /**
+         * meta_types:
+         * Possible values are 'NUMERIC', 'BINARY', 'CHAR', 'DATE', 'DATETIME', 'DECIMAL', 'SIGNED', 'TIME', 'UNSIGNED'.
+         * Default value is 'CHAR'.
+         *
+         * @link https://codex.wordpress.org/Class_Reference/WP_Meta_Query
+         */
+        $columns = array(
+            'text_1'  => 'char',
+            'color_2' => 'char',
+            'date_2'  => 'date',
+        );
+
+        foreach ( $columns as $key => $type ) {
+
+            if ( $key === $query->get( 'orderby') ) {
+                $query->set( 'orderby', 'meta_value' );
+                $query->set( 'meta_key', $key );
+                $query->set( 'meta_type', $type );
+                break;
+            }
+
+        }
+
+    }
+    // END ADD/REMOVE/REORDER/SORT CUSTOM POST TYPE LIST COLUMNS (test)
+
+    /********************************************
+     * RUN CODE ON PLUGIN UPGRADE AND ADMIN NOTICE
+     *
+     * @tutorial run_code_on_plugin_upgrade_and_admin_notice.php
+     */
+    /**
+     * This function runs when WordPress completes its upgrade process
+     * It iterates through each plugin updated to see if ours is included
+     *
+     * @param $upgrader_object Array
+     * @param $options Array
+     * @link https://catapultthemes.com/wordpress-plugin-update-hook-upgrader_process_complete/
+     */
+    public function upgrader_process_complete( $upgrader_object, $options ) {
+
+        // If an update has taken place and the updated type is plugins and the plugins element exists
+        if( $options['action'] == 'update' && $options['type'] == 'plugin' && isset( $options['plugins'] ) ) {
+
+            // Iterate through the plugins being updated and check if ours is there
+            foreach( $options['plugins'] as $plugin ) {
+                if( $plugin == WP_SDTRK_BASE_NAME ) {
+
+                    // Set a transient to record that our plugin has just been updated
+                    set_transient( 'exopite_sof_updated', 1 );
+                    set_transient( 'exopite_sof_updated_message', esc_html__( 'Thanks for updating', 'exopite_sof' ) );
+
+                }
+            }
+        }
+    }
+
+    /**
+     * Show a notice to anyone who has just updated this plugin
+     * This notice shouldn't display to anyone who has just installed the plugin for the first time
+     */
+    public function display_update_notice() {
+        // Check the transient to see if we've just activated the plugin
+        if( get_transient( 'exopite_sof_updated' ) ) {
+
+            // @link https://digwp.com/2016/05/wordpress-admin-notices/
+            echo '<div class="notice notice-success is-dismissible"><p><strong>' . get_transient( 'exopite_sof_updated_message' ) . '</strong></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+
+            // Delete the transient so we don't keep displaying the activation message
+            delete_transient( 'exopite_sof_updated' );
+            delete_transient( 'exopite_sof_updated_message' );
+        }
+    }
+    // RUN CODE ON PLUGIN UPGRADE AND ADMIN NOTICE
+    
+    /**
+     * Filter saving exopite Options *
+     *
+     * @param string[] $data
+     * @return string[]
+     */
+    public function exopiteCustomMenuSave($data)
+    {
+        // License
+        $licenseKey = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind($data, "licensekey_" . WP_SDTRK_LICENSE_TYPE_PRO);
+        // If the release button has been changed
+        $licenseStateNew = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind($data, "licensekey_activate");
+        $licenseStateOld = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", "yes"), "licensekey_activate");
+        if (strcmp($licenseStateNew, $licenseStateOld) != 0) {
+            // If the license shall be activated
+            if (strcmp($licenseStateNew, "yes") == 0) {
+                Wp_Sdtrk_License::wp_sdtrk_license_call($licenseKey, WP_SDTRK_LICENSE_TYPE_PRO, 'activate',$data);
+                $data = Wp_Sdtrk_License::wp_sdtrk_license_auto_deregister(WP_SDTRK_LICENSE_TYPE_PRO,$data);
+            } else {
+                Wp_Sdtrk_License::wp_sdtrk_license_call($licenseKey, WP_SDTRK_LICENSE_TYPE_PRO, 'deactivate',$data);
+            }
+        }
+        // Random Numbers
+        $replacedData = Wp_Sdtrk_Helper::wp_sdtrk_replace_arrayeElement($data, "-randomid-", 'wp_sdtrk_getRandomNumberAsInt', "value");
+        return $replacedData;
+    }
+}
