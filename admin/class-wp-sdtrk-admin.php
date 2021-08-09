@@ -152,7 +152,7 @@ class Wp_Sdtrk_Admin {
             'id'                => $this->wp_sdtrk,              // Required, meta box id, unique per page, to save: get_option( id )
             'parent'            => 'options-general.php',                   // Parent page of plugin menu (default Settings [options-general.php])
             'submenu'           => true,                            // Required for submenu
-            'title'             => __( 'Demo Admin Page', 'wp-sdtrk' ), // The title of the options page and the name in admin menu
+            'title'             => __( 'Server-Side-Tracking', 'wp-sdtrk' ), // The title of the options page and the name in admin menu
             'capability'        => 'manage_options',                // The capability needed to view the page
             'plugin_basename'   =>  plugin_basename( plugin_dir_path( __DIR__ ) . $this->wp_sdtrk . '.php' ),
             // 'tabbed'            => false,
@@ -173,6 +173,104 @@ class Wp_Sdtrk_Admin {
             'title' => __('General', 'wp-sdtrk'),
             'icon' => 'dashicons-admin-generic',
             'fields' => array(                 
+            )
+        );
+        $fields[] = array(
+            'name' => 'trkservices',
+            'title' => __('Services', 'wp-sdtrk'),
+            'icon' => 'dashicons-welcome-view-site',
+            'sections' => array(
+                array(
+                    'name' => 'facebook',
+                    'title' => __('Facebook', 'wp-sdtrk'),
+                    'icon' => 'dashicons-facebook',
+                    'fields' => array(
+                        array(
+                            'id'      => 'fb_pixelid',
+                            'type'    => 'text',
+                            'title'   => __('Facebook Pixel-ID', 'wp-sdtrk'),
+                            'description' => __('Insert your own Facebook Pixel ID', 'wp-sdtrk'),
+                        ),
+                        array(
+                            'type' => 'content',
+                            'dependency' => array(
+                                'fb_pixelid',
+                                '!=',
+                                ''
+                            ),
+                            'title' => '<h3>' . __('Browser based Tracking', 'wp-sdtrk') . '</h3>',
+                            'content' => ''
+                        ),
+                        array(
+                            'id'      => 'fb_trk_browser',
+                            'type'    => 'switcher',
+                            'dependency' => array(
+                                'fb_pixelid',
+                                '!=',
+                                ''
+                            ),
+                            'title'   => __( 'Activate browser based tracking', 'wp-sdtrk' ),
+                            'description' => __('Check to fire facebook browser pixel', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'type' => 'content',
+                            'dependency' => array(
+                                'fb_pixelid',
+                                '!=',
+                                ''
+                            ),
+                            'title' => '<h3>' . __('Server based Tracking', 'wp-sdtrk') . '</h3>',
+                            'content' => ''
+                        ),
+                        array(
+                            'id'      => 'fb_trk_server',
+                            'type'    => 'switcher',
+                            'dependency' => array(
+                                'fb_pixelid',
+                                '!=',
+                                ''
+                            ),
+                            'title'   => __( 'Activate server based tracking', 'wp-sdtrk' ),
+                            'description' => __('Check to fire Facebook Conversion API', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id'      => 'fb_trk_server_token',
+                            'type'    => 'text',
+                            'dependency' => array(
+                                'fb_trk_server',
+                                '==',
+                                'true'
+                            ),
+                            'title'   => __('Conversion-API Token', 'wp-sdtrk'),
+                            'description' => __('You can get the token within the facebook events-manager', 'wp-sdtrk'),
+                        ),
+                        array(
+                            'id'      => 'fb_trk_server_debug',
+                            'type'    => 'switcher',
+                            'dependency' => array(
+                                'fb_trk_server',
+                                '==',
+                                'true'
+                            ),
+                            'title'   => __( 'Activate Debugging', 'wp-sdtrk' ),
+                            'description' => __('Check to activate CAPI debugging', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id'      => 'fb_trk_server_debug_code',
+                            'type'    => 'text',
+                            'dependency' => array(
+                                'fb_trk_server_debug',
+                                '==',
+                                'true'
+                            ),
+                            'title'   => __('Test-Code', 'wp-sdtrk'),
+                            'description' => __('You can get the Test-Code within the facebook events-manager', 'wp-sdtrk'),
+                        ),
+                    )
+                )
             )
         );
         return $fields;

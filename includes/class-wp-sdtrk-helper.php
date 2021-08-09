@@ -228,4 +228,46 @@ class Wp_Sdtrk_Helper
             rocket_clean_domain();
         }
     }
+    
+    /**
+     * Send a CUrl Post
+     * @param string $url
+     * @param array $fields
+     * @return mixed
+     */
+    public static function wp_sdtrk_httpPost($url, $payload)
+    {
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);        
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_URL, $url);
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
+    }
+    
+    /**
+     * Retrieves the clients ip
+     * @return String
+     */
+    public static function wp_sdtrk_getClientIp(){
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return $ip;
+    }
+    
+    /**
+     * Retrieves the current URL
+     * @return String
+     */
+    public static function wp_sdtrk_getCurrentURL(){        
+        return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+    }
 }

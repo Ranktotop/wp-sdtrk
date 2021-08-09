@@ -13,11 +13,11 @@
  * @package           Wp_Sdtrk
  *
  * @wordpress-plugin
- * Plugin Name:       WordPress Plugin Boilerplate Tutorial
+ * Plugin Name:       Smart Server Side Tracking Plugin
  * Plugin URI:        https://www.rank-to-top.de/
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
+ * Description:       Adds server side Tracking to non-woocommerce wordpress-sites
  * Version:           1.0.0
- * Author:            Your Name or Your Company
+ * Author:            Marc Meese
  * Author URI:        https://www.rank-to-top.de/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt

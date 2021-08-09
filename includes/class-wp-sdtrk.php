@@ -327,6 +327,12 @@ class Wp_Sdtrk {
 		 *
 		 */		
 		$this->loader->add_action( 'wp_sdtrk_licensecheck_cron', $this->public, 'licensecheck' );
+		
+		/*************************************************************
+		 * Render Tracking Codes
+		 *
+		 */	
+		$this->loader->add_action('wp_head', $this->public, 'renderTracking',10);
 	}
 
 	/**
