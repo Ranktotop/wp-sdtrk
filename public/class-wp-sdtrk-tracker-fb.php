@@ -2,9 +2,11 @@
 
 class Wp_Sdtrk_Tracker_Fb
 {
-    
+
     private $pixelId;
+
     private $apiToken;
+
     private $testCode;
 
     public function __construct()
@@ -14,74 +16,86 @@ class Wp_Sdtrk_Tracker_Fb
         $this->testCode = false;
         $this->init();
     }
-    
+
     /**
      * Initialize the saved Data
      */
-    private function init(){
-        //Pixel ID
+    private function init()
+    {
+        // Pixel ID
         $fb_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_pixelid");
         $this->pixelId = ($fb_pixelId && ! empty(trim($fb_pixelId))) ? $fb_pixelId : false;
-        
-        //Srv Token
+
+        // Srv Token
         $fb_srvToken = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_token");
         $this->apiToken = ($fb_srvToken && ! empty(trim($fb_srvToken))) ? $fb_srvToken : false;
-        
-        //Test-Code
+
+        // Test-Code
         $fb_testCode = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_debug_code");
         $this->testCode = ($fb_testCode && ! empty(trim($fb_testCode))) ? $fb_testCode : false;
     }
-    
+
     /**
      * Generate an unique identifier
+     *
      * @return string
      */
-    private function generateEventId(){
+    private function generateEventId()
+    {
         return substr(str_shuffle(MD5(microtime())), 0, 10);
     }
-        
+
     /**
      * Returns the API Url to the Conversion API
+     *
      * @return string
      */
-    private function getApiUrl(){
-        if($this->pixelId && $this->apiToken){
+    private function getApiUrl()
+    {
+        if ($this->pixelId && $this->apiToken) {
             return 'https://graph.facebook.com/v11.0/' . $this->pixelId . '/events?access_token=' . $this->apiToken;
         }
-        return false;       
+        return false;
     }
-    
+
     /**
      * Checks if Browser-Tracking is enabled
+     *
      * @return boolean
      */
-    private function trackingEnabled_Browser(){
+    private function trackingEnabled_Browser()
+    {
         $setting = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser"), "yes") == 0) ? true : false;
         return ($setting && $this->pixelId !== false);
     }
-    
+
     /**
      * Checks if Server-Tracking is enabled
+     *
      * @return boolean
      */
-    private function trackingEnabled_Server(){
+    private function trackingEnabled_Server()
+    {
         $setting = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server"), "yes") == 0) ? true : false;
-        return ($setting && $this->apiToken !== false && $this->getApiUrl() !==false);
+        return ($setting && $this->apiToken !== false && $this->getApiUrl() !== false && $this->pixelId !== false);
     }
-    
+
     /**
      * Checks if Debug is enabled
+     *
      * @return boolean
      */
-    private function debugEnabled_Server(){
+    private function debugEnabled_Server()
+    {
         return (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_debug"), "yes") == 0) ? true : false;
     }
-    
+
     /**
      * Fires the Tracking
      */
-    public function fireTracking(){
-        //Collect the Data
+    public function fireTracking()
+    {
+        // Collect the Data
         $data = array(
             "baseData" => array(
                 'pixelId' => $this->pixelId,
@@ -95,45 +109,47 @@ class Wp_Sdtrk_Tracker_Fb
                 "content_name" => "custom",
                 "utm_source" => "facebook"
             )
-        );        
-        
-        //Browser
+        );
+
+        // Browser
         if ($this->trackingEnabled_Browser()) {
             $this->fireTracking_Browser($data);
         }
-        
-        //Server
+
+        // Server
         if ($this->trackingEnabled_Server()) {
             $this->fireTracking_Server($data);
         }
     }
-    
+
     /**
      * Fires the Browser-based Tracking
      */
-    private function fireTracking_Browser($data){
+    private function fireTracking_Browser($data)
+    {
         wp_localize_script("wp_sdtrk-fb", 'wp_sdtrk_fb', array(
             'wp_sdtrk_fb_data' => $data
         ));
         wp_enqueue_script('wp_sdtrk-fb');
     }
-    
+
     /**
      * Fires the Server-based Tracking
      */
-    private function fireTracking_Server($data){
+    private function fireTracking_Server($data)
+    {
         $requestData = array(
             0 => array(
                 "event_name" => "PageView",
                 "event_time" => date_create()->getTimestamp(),
-                "event_id" => $fbEventId,
+                "event_id" => $data['baseData']['eventId'],
                 "event_source_url" => Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL(),
-                "action_source"=> "website",
+                "action_source" => "website",
                 "user_data" => array(
                     "client_ip_address" => Wp_Sdtrk_Helper::wp_sdtrk_getClientIp(),
                     "client_user_agent" => $_SERVER['HTTP_USER_AGENT'],
-                    "fbc" => "",
-                    "fbp" => $_COOKIE['_fbp'] ?? ''
+                    "fbc" => $this->getFBClid(),
+                    "fbp" => Wp_Sdtrk_Helper::wp_sdtrk_getGetParamWithCookie('_fbp', false)
                 ),
                 "contents" => array(
                     array(
@@ -141,25 +157,41 @@ class Wp_Sdtrk_Tracker_Fb
                         "quantity" => 1
                     )
                 ),
-                "custom_data" => $data['customData'],
-                
+                "custom_data" => $data['customData']
             )
         );
-        
-        //Create the Payload
+
+        // Create the Payload
         $fields = array(
             "data" => $requestData
-        );        
-        if($this->debugEnabled_Server()){
+        );
+        if ($this->debugEnabled_Server()) {
             $fields["test_event_code"] = $this->testCode;
-        }        
+        }
         $payload = json_encode($fields);
-        
-        //Send Request
+
+        // Send Request
         Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload);
     }
-    
-    
-    
-    
+
+    /**
+     * Get or generate the Facebook Click ID
+     *
+     * @return string|boolean|string
+     */
+    private function getFBClid()
+    {
+        $fbc = Wp_Sdtrk_Helper::wp_sdtrk_getGetParamWithCookie('_fbc', false);
+        if (! empty($fbc)) {
+            return $fbc;
+        }
+        $fbclid = Wp_Sdtrk_Helper::wp_sdtrk_getGetParamWithCookie("fbclid", false);
+        if (! empty($fbclid)) {
+            $version = 'fb';
+            $subdomainIndex = '1';
+            $creationTime = date_create()->getTimestamp();
+            return $version . '.' . $subdomainIndex . '.' . $creationTime . '.' . $fbclid;
+        }
+        return "";
+    }
 }

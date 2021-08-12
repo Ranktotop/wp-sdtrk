@@ -29,7 +29,7 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 	 
-	function fireFBTracking(fbPixelId,eventid){
+	function fireFBTracking(baseData,customData){
 		!function(f,b,e,v,n,t,s)
 		  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 		  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -38,8 +38,8 @@
 		  t.src=v;s=b.getElementsByTagName(e)[0];
 		  s.parentNode.insertBefore(t,s)}(window, document,'script',
 		  'https://connect.facebook.net/en_US/fbevents.js');  
-		  fbq('init', fbPixelId);
-		  fbq('track', 'PageView', {eventID: eventid});
+		  fbq('init', baseData['pixelId']);
+		  fbq('track', 'PageView', customData, {eventID: baseData['eventId']});
 	}
 
 	// Load Scripts
@@ -47,10 +47,8 @@
 		if(wp_sdtrk_fb.wp_sdtrk_fb_data && wp_sdtrk_fb.wp_sdtrk_fb_data['baseData'] && wp_sdtrk_fb.wp_sdtrk_fb_data['customData']){
 			var baseData = wp_sdtrk_fb.wp_sdtrk_fb_data['baseData'];
 			var customData = wp_sdtrk_fb.wp_sdtrk_fb_data['customData'];
-			var eventId = baseData['eventId'];
-			var pixelId = baseData['pixelId'];
-			if(eventId && pixelId){
-				fireFBTracking(pixelId,eventId);
+			if(baseData && customData){
+				fireFBTracking(baseData,customData);
 			}
 		}
 	});

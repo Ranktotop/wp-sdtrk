@@ -270,4 +270,22 @@ class Wp_Sdtrk_Helper
     public static function wp_sdtrk_getCurrentURL(){        
         return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
     }
+    
+    /**
+     * Get a Get-Parameter or Cookie if no get is given
+     * @param String $name
+     * @param boolean $firstParty
+     * @return String|boolean
+     */
+    public static function wp_sdtrk_getGetParamWithCookie($name, $firstParty=true){
+        //Check for a get Param
+        if($_GET[$name]){
+            return $_GET[$name];
+        }        
+        $partyName = ($firstParty) ? "wpsdtrk_".$name : $name;
+        if($_COOKIE[$partyName]){
+            return $_COOKIE[$partyName];
+        }
+        return "";
+    }
 }
