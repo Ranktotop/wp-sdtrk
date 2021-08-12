@@ -179,6 +179,11 @@ class Wp_Sdtrk {
          */
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-sdtrk-ajax.php';
         
+        /**
+         * Tracker Facebook
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-fb.php';
+        
 
 		/**************************************
 		 * EXOPITE SIMPLE OPTIONS FRAMEWORK

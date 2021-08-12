@@ -44,8 +44,14 @@
 
 	// Load Scripts
 	$(document).ready(function() {
-		if(wp_sdtrk_fb.wp_sdtrk_fb_pixelid && wp_sdtrk_fb.wp_sdtrk_fb_eventid){
-			fireFBTracking(wp_sdtrk_fb.wp_sdtrk_fb_pixelid,wp_sdtrk_fb.wp_sdtrk_fb_eventid);
+		if(wp_sdtrk_fb.wp_sdtrk_fb_data && wp_sdtrk_fb.wp_sdtrk_fb_data['baseData'] && wp_sdtrk_fb.wp_sdtrk_fb_data['customData']){
+			var baseData = wp_sdtrk_fb.wp_sdtrk_fb_data['baseData'];
+			var customData = wp_sdtrk_fb.wp_sdtrk_fb_data['customData'];
+			var eventId = baseData['eventId'];
+			var pixelId = baseData['pixelId'];
+			if(eventId && pixelId){
+				fireFBTracking(pixelId,eventId);
+			}
 		}
 	});
 })( jQuery );
