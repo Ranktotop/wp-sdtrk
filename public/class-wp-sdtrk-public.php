@@ -144,6 +144,9 @@ class Wp_Sdtrk_Public
         wp_register_script("wp_sdtrk-fb", plugins_url("js/wp-sdtrk-fb.js", __FILE__), array(
             'jquery'
         ), "1.0", false);
+        wp_register_script("wp_sdtrk-ga", plugins_url("js/wp-sdtrk-ga.js", __FILE__), array(
+            'jquery'
+        ), "1.0", false);
     }
 
     public function licensecheck()
@@ -162,8 +165,31 @@ class Wp_Sdtrk_Public
             return;
         }
         
+        $event = new Wp_Sdtrk_Tracker_Event();
+        
         //Facebook
         $fbTracker = new Wp_Sdtrk_Tracker_Fb();
-        $fbTracker->fireTracking();
+        $fbTracker->fireTracking($event);
+        
+        //Google Analytics
+        $gaTracker = new Wp_Sdtrk_Tracker_Ga();
+        $gaTracker->fireTracking($event);
+        
+    }
+    
+    /**
+     * Looks for GET Parameters and save them in Cookies
+     */
+    public function saveCookies(){
+        // Frontend only
+        if (is_admin()) {
+            return;
+        }        
+        $cookieNames = array('utm_source','utm_medium','utm_term','utm_content','utm_campaign');
+        foreach($cookieNames as $param){
+            if(isset($_GET[$param]) && !empty($_GET[$param])){
+                Wp_Sdtrk_Helper::wp_sdtrk_setCookie($param,$_GET[$param],true,14);
+            }
+        }
     }
 }

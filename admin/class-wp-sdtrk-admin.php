@@ -160,10 +160,54 @@ class Wp_Sdtrk_Admin {
 
         );
         
+        /*
+         * To add a metabox.
+         * This normally go to your functions.php or another hook
+         */
+        $config_metabox = array(
+            
+            /*
+             * METABOX
+             */
+            'type'              => 'metabox',                       // Required, menu or metabox
+            'id'                => $this->wp_sdtrk,              // Required, meta box id, unique, for saving meta: id[field-id]
+            'post_types'        => array( 'page' ),                 // Post types to display meta box
+            // 'post_types'        => array( 'post', 'page' ),         // Could be multiple
+            'context'           => 'advanced',                      // 	The context within the screen where the boxes should display: 'normal', 'side', and 'advanced'.
+            'priority'          => 'default',                       // 	The priority within the context where the boxes should show ('high', 'low').
+            'title'             => __( 'Product Meta', 'wp-sdtrk' ),                  // The title of the metabox
+            'capability'        => 'edit_posts',                    // The capability needed to view the page
+            'tabbed'            => true,
+            // 'multilang'         => false,                        // To turn of multilang, default off except if you have qTransalte-X.
+            'options'           => 'simple',                        // Only for metabox, options is stored az induvidual meta key, value pair.
+        );
+        
         /**
          * instantiate your admin page
          */
         $options_panel = new Exopite_Simple_Options_Framework( $config_submenu, $this->getGeneralSettingFields());
+        $options_panel = new Exopite_Simple_Options_Framework( $config_metabox, $this->getMetaboxSettingFields());
+    }
+    
+    private function getMetaboxSettingFields(){        
+        //General
+        $fields[] = array(
+            'name'   => 'general',
+            'title'  => __( 'Product Meta', 'wp-sdtrk' ),
+            'icon'   => 'dashicons-admin-generic',
+            'fields' => array(
+                
+                array(
+                    'id'          => 'productid',
+                    'type'        => 'text',
+                    'title'       => __( 'Product ID', 'wp-sdtrk' ),
+                    'attributes'    => array(
+                        'placeholder' => __( 'Please enter a product id', 'wp-sdtrk' ),
+                    ),
+                ),
+            )
+        );        
+        return $fields;
     }
     
     private function getGeneralSettingFields(){       
@@ -172,7 +216,13 @@ class Wp_Sdtrk_Admin {
             'name' => 'basic',
             'title' => __('General', 'wp-sdtrk'),
             'icon' => 'dashicons-admin-generic',
-            'fields' => array(                 
+            'fields' => array(
+                array(
+                    'id'      => 'brandname',
+                    'type'    => 'text',
+                    'title'   => __('Default Brand-Name', 'wp-sdtrk'),
+                    'description' => __('This Name is used for several services', 'wp-sdtrk'),
+                ),
             )
         );
         $fields[] = array(
@@ -269,6 +319,53 @@ class Wp_Sdtrk_Admin {
                             'title'   => __('Test-Code', 'wp-sdtrk'),
                             'description' => __('You can get the Test-Code within the facebook events-manager', 'wp-sdtrk'),
                         ),
+                    )
+                ),
+                array(
+                    'name' => 'google',
+                    'title' => __('Google', 'wp-sdtrk'),
+                    'icon' => 'dashicons-google',
+                    'fields' => array(
+                        array(
+                            'id'      => 'ga_measurement_id',
+                            'type'    => 'text',
+                            'title'   => __('Google Analytics 4 ID', 'wp-sdtrk'),
+                            'description' => __('Insert your own Measurement-ID', 'wp-sdtrk'),
+                        ),
+                        array(
+                            'type' => 'content',
+                            'dependency' => array(
+                                'fb_pixelid',
+                                '!=',
+                                ''
+                            ),
+                            'title' => '<h3>' . __('Browser based Tracking', 'wp-sdtrk') . '</h3>',
+                            'content' => ''
+                        ),
+                        array(
+                            'id'      => 'ga_trk_browser',
+                            'type'    => 'switcher',
+                            'dependency' => array(
+                                'ga_measurement_id',
+                                '!=',
+                                ''
+                            ),
+                            'title'   => __( 'Activate browser based tracking', 'wp-sdtrk' ),
+                            'description' => __('Check to fire analytics browser tracking', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id'      => 'ga_trk_debug',
+                            'type'    => 'switcher',
+                            'dependency' => array(
+                                'ga_trk_browser',
+                                '==',
+                                'true'
+                            ),
+                            'title'   => __( 'Activate Debugging', 'wp-sdtrk' ),
+                            'description' => __('Check to activate GA debugging', 'wp-sdtrk'),
+                            'default' => 'no'
+                        )
                     )
                 )
             )

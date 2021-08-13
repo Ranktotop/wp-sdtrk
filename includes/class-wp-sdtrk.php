@@ -180,9 +180,19 @@ class Wp_Sdtrk {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-sdtrk-ajax.php';
         
         /**
+         * Tracker Event
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-event.php';
+        
+        /**
          * Tracker Facebook
          */
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-fb.php';
+        
+        /**
+         * Tracker Google
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-ga.php';
         
 
 		/**************************************
@@ -338,6 +348,12 @@ class Wp_Sdtrk {
 		 *
 		 */	
 		$this->loader->add_action('wp_head', $this->public, 'renderTracking',10);
+		
+		/*************************************************************
+		 * Handle Cookies
+		 *
+		 */
+		$this->loader->add_action('init', $this->public, 'saveCookies',10);
 	}
 
 	/**

@@ -244,6 +244,10 @@ class Wp_Sdtrk_Helper
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_URL, $url);
         $response = curl_exec($curl);
+        if($errno = curl_errno($curl)) {
+            $error_message = curl_strerror($errno);
+            self::wp_sdtrk_write_log("cURL error ({$errno}):\n {$error_message}");
+        }
         curl_close($curl);
         return $response;
     }
@@ -267,25 +271,73 @@ class Wp_Sdtrk_Helper
      * Retrieves the current URL
      * @return String
      */
-    public static function wp_sdtrk_getCurrentURL(){        
+    public static function wp_sdtrk_getCurrentURL(){ 
         return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
     }
     
     /**
-     * Get a Get-Parameter or Cookie if no get is given
+     * Get a Get-Parameter or Cookie if no GET-Param is given
      * @param String $name
      * @param boolean $firstParty
      * @return String|boolean
      */
     public static function wp_sdtrk_getGetParamWithCookie($name, $firstParty=true){
         //Check for a get Param
-        if($_GET[$name]){
+        if(isset($_GET[$name])){            
             return $_GET[$name];
         }        
         $partyName = ($firstParty) ? "wpsdtrk_".$name : $name;
-        if($_COOKIE[$partyName]){
+        if(isset($_COOKIE[$partyName])){
             return $_COOKIE[$partyName];
         }
         return "";
+    }
+    
+    /**
+     * Returns the root Domain
+     * @return mixed
+     */
+    public static function wp_sdtrk_getRootDomain(){
+        $host = strtolower(trim(self::wp_sdtrk_getCurrentURL()));
+        $host = ltrim(str_replace("http://","",str_replace("https://","",$host)),"www.");
+        $count = substr_count($host, '.');
+        if($count === 2){
+            if(strlen(explode('.', $host)[1]) > 3) $host = explode('.', $host, 2)[1];
+        } else if($count > 2){
+            $host = getDomainOnly(explode('.', $host, 2)[1]);
+        }
+        $host = explode('/',$host);
+        return $host[0];
+    }
+    
+    /**
+     * Sets a Cookie
+     * @param String $name
+     * @param String $value
+     * @param boolean $firstParty
+     * @param number $validDays
+     * @return boolean
+     */
+    public static function wp_sdtrk_setCookie($name,$value,$firstParty=true,$validDays=14){        
+        $partyName = ($firstParty) ? "wpsdtrk_".$name : $name;
+        $timestamp = time() + 24*60*60*$validDays;        
+        return setcookie($partyName,$value,$timestamp,"",self::wp_sdtrk_getRootDomain(),false,false);
+    }
+    
+    /**
+     * Looks for a parameter list and returns the first found value
+     * @param String[] $paramList
+     * @return string
+     */
+    public static function wp_sdtrk_searchParams($paramList){
+        $value ="";
+        //Iterate all Params and try to get the Value
+        foreach($paramList as $paramName){
+            $value = self::wp_sdtrk_getGetParamWithCookie($paramName);
+            if(!empty($value)){
+                break;
+            }
+        }
+        return $value;
     }
 }
