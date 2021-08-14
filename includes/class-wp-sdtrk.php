@@ -180,6 +180,11 @@ class Wp_Sdtrk {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-sdtrk-ajax.php';
         
         /**
+         * Tracker Cookie Consent Checker
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-cookie.php';
+        
+        /**
          * Tracker Event
          */
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-event.php';
@@ -354,6 +359,18 @@ class Wp_Sdtrk {
 		 *
 		 */
 		$this->loader->add_action('init', $this->public, 'saveCookies',10);
+		
+		/*************************************************************
+		 * The wp_ajax_ is telling wordpress to use ajax and the prefix_ajax_first is the hook name to use in JavaScript or in URL.
+		 *
+		 * Call AJAX function via URL: https://www.yourwebsite.com/wp-admin/admin-ajax.php?action=prefix_ajax_first&post_id=23&other_param=something
+		 *
+		 * The ajax_first is the callback function.
+		 * wp_ajax_ is for authenticated users
+		 * wp_ajax_nopriv_ is for NOT authenticated users
+		 */
+		$this->loader->add_action('wp_ajax_wp_sdtrk_handleAjaxCallback', $this->public, 'handleAjaxCallback');
+		$this->loader->add_action('wp_ajax_nopriv_wp_sdtrk_handleAjaxCallback', $this->public, 'handleAjaxCallback');
 	}
 
 	/**

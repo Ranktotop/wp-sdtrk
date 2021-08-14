@@ -8,12 +8,20 @@ class Wp_Sdtrk_Tracker_Ga
     private $trackBrowser;
 
     private $debugMode;
+    private $trackBrowser_cookie_service;
+    private $trackBrowser_cookie_id;
+    private $consentChecker;
+    private $localizedData;
 
     public function __construct()
     {
         $this->measurementId = false;
         $this->trackBrowser = false;
         $this->debugMode = false;
+        $this->trackBrowser_cookie_service = false;
+        $this->trackBrowser_cookie_id = false;
+        $this->consentChecker = new Wp_Sdtrk_Tracker_Cookie();
+        $this->localizedData = array();
         $this->init();
     }
 
@@ -33,6 +41,19 @@ class Wp_Sdtrk_Tracker_Ga
         // Debug Mode
         $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_debug"), "yes") == 0) ? true : false;
         $this->debugMode = ($debug && ! empty(trim($debug))) ? $debug : false;
+        
+        // Track Browser Cookie Service
+        $trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_browser_cookie_service");
+        $this->trackBrowser_cookie_service = ($trkBrowserCookieService && ! empty(trim($trkBrowserCookieService))) ? $trkBrowserCookieService : false;
+        
+        // Track Browser Cookie ID
+        $trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_browser_cookie_id");
+        $this->trackBrowser_cookie_id = ($trkBrowserCookieId && ! empty(trim($trkBrowserCookieId))) ? $trkBrowserCookieId : false;
+                
+        //LocalizedData
+        $this->localizedData['wp_sdtrk_ga_b_consent'] = $this->consentChecker->hasConsent($this->trackBrowser_cookie_service, $this->trackBrowser_cookie_id);
+        $this->localizedData['ajax_url'] = admin_url('admin-ajax.php');
+        $this->localizedData['_nonce'] = wp_create_nonce('security_wp-sdtrk');
     }
 
     /**
@@ -62,10 +83,17 @@ class Wp_Sdtrk_Tracker_Ga
      */
     public function fireTracking($event)
     {
+        //$this->localizedData['wp_sdtrk_ga_eventData'] = $event->getEventAsArray();
+        
         // Send the Data
         // Browser
         if ($this->trackingEnabled_Browser()) {
             $this->fireTracking_Browser($event);
+        }
+        else{
+            //Needed to prevent the Backload-Function from crashing
+            wp_localize_script("wp_sdtrk-ga", 'wp_sdtrk_ga', $this->localizedData);
+            wp_enqueue_script('wp_sdtrk-ga');
         }
     }
 
@@ -76,8 +104,11 @@ class Wp_Sdtrk_Tracker_Ga
      */
     private function fireTracking_Browser($event)
     {        
+        $browserLocalizedData = $this->localizedData;
+        
         $eventData = array();
         $initData = array('debug_mode' => $this->debugMode);
+        $campaignData = array();
         
         //The Base Data
         $eventData['transaction_id'] = $event->getEventId();        
@@ -85,18 +116,19 @@ class Wp_Sdtrk_Tracker_Ga
             $eventData['value'] = $event->getEventValue();
             $eventData['currency'] = "EUR";
         }        
+        //Maybe utm_campaign has to be renamed to utm_name!
         foreach($event->getUtmData() as $utmData => $value){
             $dataName = str_replace("utm_", "", $utmData);
             $dataVal = $value;
-            $eventData[$dataName] = $dataVal;
+            $campaignData[$dataName] = $dataVal;
             $initData[$dataName] = $dataVal;
+            $eventData[$dataName] = $dataVal;
         }
-        //For Testing
-        $initData['source'] = "software";
-        $initData['campaign'] = "progCampaign";
-        $initData['medium'] = "progMedium";
-        $initData['term'] = "progTerm";
-        $initData['content'] = "progContent";
+        
+        if(!empty($campaignData)){
+            $initData['campaign'] = $campaignData;
+            $eventData['campaign'] = $campaignData;
+        }
         
         //The Event Data
         if(!empty($event->getProductId())){
@@ -108,13 +140,13 @@ class Wp_Sdtrk_Tracker_Ga
                 'quantity' => 1,
             ));
         }        
+        
+        $browserLocalizedData['wp_sdtrk_ga_id'] = $this->measurementId;
+        $browserLocalizedData['wp_sdtrk_ga_eventName'] = $event->getEventName();
+        $browserLocalizedData['wp_sdtrk_ga_eventData'] = $eventData;
+        $browserLocalizedData['wp_sdtrk_ga_initData'] = $initData;
 
-        wp_localize_script("wp_sdtrk-ga", 'wp_sdtrk_ga', array(
-            'wp_sdtrk_ga_id' => $this->measurementId,
-            'wp_sdtrk_ga_eventName' => $event->getEventName(),
-            'wp_sdtrk_ga_eventData' => $eventData,
-            'wp_sdtrk_ga_initData' => $initData
-        ));
+        wp_localize_script("wp_sdtrk-ga", 'wp_sdtrk_ga', $browserLocalizedData);
         wp_enqueue_script('wp_sdtrk-ga');
     }
 }

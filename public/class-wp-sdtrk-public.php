@@ -146,7 +146,7 @@ class Wp_Sdtrk_Public
         ), "1.0", false);
         wp_register_script("wp_sdtrk-ga", plugins_url("js/wp-sdtrk-ga.js", __FILE__), array(
             'jquery'
-        ), "1.0", false);
+        ), "1.0", false);        
     }
 
     public function licensecheck()
@@ -191,5 +191,72 @@ class Wp_Sdtrk_Public
                 Wp_Sdtrk_Helper::wp_sdtrk_setCookie($param,$_GET[$param],true,14);
             }
         }
+    }
+    
+    /**
+     * ---------------------------------------------------
+     * ----------------- Ajax Functions ------------------
+     * ---------------------------------------------------
+     */
+    
+    /**
+     * Ajax generic Callback-Function
+     */
+    public function handleAjaxCallback()
+    {
+        /**
+         * Do not forget to check your nonce for security!
+         *
+         * @link https://codex.wordpress.org/Function_Reference/wp_verify_nonce
+         */
+        if (! wp_verify_nonce($_POST['_nonce'], 'security_wp-sdtrk')) {
+            wp_send_json_error();
+            die();
+        }
+        
+        // Check if given function exists
+        $functionName = $_POST['func'];
+        if (! method_exists($this, $functionName)) {
+            wp_send_json_error();
+            die();
+        }
+        
+        $_POST['data'] = (isset($_POST['data'])) ? $_POST['data'] : array();
+        $_POST['meta'] = (isset($_POST['meta'])) ? $_POST['meta'] : array();
+        
+        // Call function and send back result
+        $result = $this->$functionName($_POST['data'], $_POST['meta']);
+        die(json_encode($result));
+    }
+    
+    
+    /**
+     * Backloads the Serverside Facebook Tracking
+     * @param array $data
+     * @param array $meta
+     * @return boolean[]|NULL[]|boolean[]
+     */
+    public function backload_fb_s($data, $meta){            
+        // if all required values are passed
+        if (isset($meta['s_consent']) && $meta['eventData']) {
+            $oldConsent = ($meta['s_consent'] === '1') ? true : false;
+            //If consent was not given
+            if(!$oldConsent){
+                $event = new Wp_Sdtrk_Tracker_Event();
+                $event->setEventFromArray($meta['eventData']);
+                
+                //Facebook
+                $fbTracker = new Wp_Sdtrk_Tracker_Fb();
+                $fbTracker->fireTracking_Server($event);
+            }
+            
+                        
+            return array(
+                'state' => true
+            );
+        }
+        return array(
+            'state' => false
+        );
     }
 }

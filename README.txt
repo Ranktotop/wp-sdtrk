@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: (ranktotop2015)
-Donate link: http://example.com/
+Donate link: https://marcmeese.de/
 Tags: tag1, tag2
 Requires at least: 4.0.1
 Tested up to: 5.3

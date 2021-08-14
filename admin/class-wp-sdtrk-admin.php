@@ -212,6 +212,17 @@ class Wp_Sdtrk_Admin {
     
     private function getGeneralSettingFields(){       
         
+        //Check for activated Cookie-Plugins
+        $cookieOptions = array(
+            'none' => __( 'Fire always', 'wp-sdtrk' )
+        );
+        require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+        //Borlabs
+        if(is_plugin_active('borlabs-cookie/borlabs-cookie.php')){
+            $cookieOptions['borlabs'] = __( 'Borlabs Cookie', 'wp-sdtrk' );
+        }
+        
+        
         $fields[] = array(
             'name' => 'basic',
             'title' => __('General', 'wp-sdtrk'),
@@ -264,6 +275,30 @@ class Wp_Sdtrk_Admin {
                             'default' => 'no'
                         ),
                         array(
+                            'id'      => 'fb_trk_browser_cookie_service',
+                            'type'    => 'radio',
+                            'dependency' => array(
+                                'fb_trk_browser',
+                                '!=',
+                                'false'
+                            ),
+                            'title'   => __( 'Choose cookie consent behavior', 'wp-sdtrk' ),
+                            'options' => $cookieOptions,
+                            'default' => 'none',     // optional
+                            'style'    => 'fancy', // optional
+                        ),
+                        array(
+                            'id'      => 'fb_trk_browser_cookie_id',
+                            'type'    => 'text',
+                            'dependency' => array(
+                                'fb_trk_browser_cookie_service_borlabs|fb_trk_browser',
+                                '==|!=',
+                                'true|false'
+                            ),
+                            'title'   => __('Cookie ID', 'wp-sdtrk'),
+                            'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
+                        ),
+                        array(
                             'type' => 'content',
                             'dependency' => array(
                                 'fb_pixelid',
@@ -297,6 +332,30 @@ class Wp_Sdtrk_Admin {
                             'description' => __('You can get the token within the facebook events-manager', 'wp-sdtrk'),
                         ),
                         array(
+                            'id'      => 'fb_trk_server_cookie_service',
+                            'type'    => 'radio',
+                            'dependency' => array(
+                                'fb_trk_server|fb_trk_server_token',
+                                '!=|!=',
+                                'false|""'
+                            ),
+                            'title'   => __( 'Choose cookie consent behavior', 'wp-sdtrk' ),
+                            'options' => $cookieOptions,
+                            'default' => 'none',     // optional
+                            'style'    => 'fancy', // optional
+                        ),
+                        array(
+                            'id'      => 'fb_trk_server_cookie_id',
+                            'type'    => 'text',
+                            'dependency' => array(
+                                'fb_trk_server_cookie_service_borlabs',
+                                '==',
+                                'true'
+                            ),
+                            'title'   => __('Cookie ID', 'wp-sdtrk'),
+                            'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
+                        ),
+                        array(
                             'id'      => 'fb_trk_server_debug',
                             'type'    => 'switcher',
                             'dependency' => array(
@@ -312,9 +371,9 @@ class Wp_Sdtrk_Admin {
                             'id'      => 'fb_trk_server_debug_code',
                             'type'    => 'text',
                             'dependency' => array(
-                                'fb_trk_server_debug',
-                                '==',
-                                'true'
+                                'fb_trk_server|fb_trk_server_debug',
+                                '==|==',
+                                'true|true'
                             ),
                             'title'   => __('Test-Code', 'wp-sdtrk'),
                             'description' => __('You can get the Test-Code within the facebook events-manager', 'wp-sdtrk'),
@@ -353,6 +412,30 @@ class Wp_Sdtrk_Admin {
                             'title'   => __( 'Activate browser based tracking', 'wp-sdtrk' ),
                             'description' => __('Check to fire analytics browser tracking', 'wp-sdtrk'),
                             'default' => 'no'
+                        ),
+                        array(
+                            'id'      => 'ga_trk_browser_cookie_service',
+                            'type'    => 'radio',
+                            'dependency' => array(
+                                'ga_trk_browser',
+                                '!=',
+                                'false'
+                            ),
+                            'title'   => __( 'Choose cookie consent behavior', 'wp-sdtrk' ),
+                            'options' => $cookieOptions,
+                            'default' => 'none',     // optional
+                            'style'    => 'fancy', // optional
+                        ),
+                        array(
+                            'id'      => 'ga_trk_browser_cookie_id',
+                            'type'    => 'text',
+                            'dependency' => array(
+                                'ga_trk_browser_cookie_service_borlabs|ga_trk_browser',
+                                '==|!=',
+                                'true|false'
+                            ),
+                            'title'   => __('Cookie ID', 'wp-sdtrk'),
+                            'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
                         ),
                         array(
                             'id'      => 'ga_trk_debug',

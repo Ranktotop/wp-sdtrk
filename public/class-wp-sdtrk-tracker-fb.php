@@ -12,8 +12,13 @@ class Wp_Sdtrk_Tracker_Fb
     private $debugMode;
 
     private $trackServer;
-
+    private $trackServer_cookie_service;
+    private $trackServer_cookie_id;
     private $trackBrowser;
+    private $trackBrowser_cookie_service;
+    private $trackBrowser_cookie_id;
+    private $consentChecker;
+    private $localizedData;
 
     public function __construct()
     {
@@ -22,7 +27,13 @@ class Wp_Sdtrk_Tracker_Fb
         $this->debugCode = false;
         $this->debugMode = false;
         $this->trackServer = false;
+        $this->trackServer_cookie_service = false;
+        $this->trackServer_cookie_id = false;
         $this->trackBrowser = false;
+        $this->trackBrowser_cookie_service = false;
+        $this->trackBrowser_cookie_id = false;
+        $this->consentChecker = new Wp_Sdtrk_Tracker_Cookie();
+        $this->localizedData = array();
         $this->init();
     }
 
@@ -46,14 +57,36 @@ class Wp_Sdtrk_Tracker_Fb
         // Track Server
         $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server"), "yes") == 0) ? true : false;
         $this->trackServer = ($trkServer && ! empty(trim($trkServer))) ? $trkServer : false;
+        
+        // Track Server Cookie Service
+        $trkServerCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_cookie_service");
+        $this->trackServer_cookie_service = ($trkServerCookieService && ! empty(trim($trkServerCookieService))) ? $trkServerCookieService : false;
+        
+        // Track Server Cookie ID
+        $trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_cookie_id");
+        $this->trackServer_cookie_id = ($trkServerCookieId && ! empty(trim($trkServerCookieId))) ? $trkServerCookieId : false;
+        
+        // Debug Mode
+        $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_debug"), "yes") == 0) ? true : false;
+        $this->debugMode = ($debug && ! empty(trim($debug))) ? $debug : false;
 
         // Track Browser
         $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser"), "yes") == 0) ? true : false;
         $this->trackBrowser = ($trkBrowser && ! empty(trim($trkBrowser))) ? $trkBrowser : false;
-
-        // Debug Mode
-        $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_debug"), "yes") == 0) ? true : false;
-        $this->debugMode = ($debug && ! empty(trim($debug))) ? $debug : false;
+        
+        // Track Browser Cookie Service
+        $trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser_cookie_service");
+        $this->trackBrowser_cookie_service = ($trkBrowserCookieService && ! empty(trim($trkBrowserCookieService))) ? $trkBrowserCookieService : false;
+        
+        // Track Browser Cookie ID
+        $trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser_cookie_id");
+        $this->trackBrowser_cookie_id = ($trkBrowserCookieId && ! empty(trim($trkBrowserCookieId))) ? $trkBrowserCookieId : false;
+        
+        //LocalizedData
+        $this->localizedData['wp_sdtrk_fb_b_consent'] = $this->consentChecker->hasConsent($this->trackBrowser_cookie_service, $this->trackBrowser_cookie_id);
+        $this->localizedData['wp_sdtrk_fb_s_consent'] = $this->consentChecker->hasConsent($this->trackServer_cookie_service, $this->trackServer_cookie_id);
+        $this->localizedData['ajax_url'] = admin_url('admin-ajax.php');
+        $this->localizedData['_nonce'] = wp_create_nonce('security_wp-sdtrk');
     }
 
     /**
@@ -105,10 +138,17 @@ class Wp_Sdtrk_Tracker_Fb
      */
     public function fireTracking($event)
     {
+        $this->localizedData['wp_sdtrk_fb_eventData'] = $event->getEventAsArray();
+        
         //Send the Data
         // Browser
         if ($this->trackingEnabled_Browser()) {
             $this->fireTracking_Browser($event);
+        }
+        else{
+            //Needed to prevent the Backload-Function from crashing
+            wp_localize_script("wp_sdtrk-fb", 'wp_sdtrk_fb', $this->localizedData);
+            wp_enqueue_script('wp_sdtrk-fb');
         }
 
         // Server
@@ -121,8 +161,9 @@ class Wp_Sdtrk_Tracker_Fb
      * Fires the Browser-based Tracking
      * @param Wp_Sdtrk_Tracker_Event $event
      */
-    private function fireTracking_Browser($event)
-    {
+    public function fireTracking_Browser($event)
+    {                
+        $browserLocalizedData = $this->localizedData;
         
         // Collect the Base-Data
         $baseData = array(
@@ -153,10 +194,10 @@ class Wp_Sdtrk_Tracker_Fb
             $customData[$key] = $value;
         }   
         
-        wp_localize_script("wp_sdtrk-fb", 'wp_sdtrk_fb', array(
-            'wp_sdtrk_fb_basedata' => $baseData,
-            'wp_sdtrk_fb_customdata' => $customData
-        ));
+        $browserLocalizedData['wp_sdtrk_fb_basedata'] = $baseData;
+        $browserLocalizedData['wp_sdtrk_fb_customdata'] = $customData;
+        
+        wp_localize_script("wp_sdtrk-fb", 'wp_sdtrk_fb', $browserLocalizedData);
         wp_enqueue_script('wp_sdtrk-fb');
     }
 
@@ -164,8 +205,13 @@ class Wp_Sdtrk_Tracker_Fb
      * Fires the Server-based Tracking
      * @param Wp_Sdtrk_Tracker_Event $event
      */
-    private function fireTracking_Server($event)
+    public function fireTracking_Server($event)
     {        
+        //Abort if no consent is given
+        if(!$this->consentChecker->hasConsent($this->trackServer_cookie_service, $this->trackServer_cookie_id)){
+            return;
+        }
+        
         //---Prepare Request
         //Base-Data
         $requestData = array(

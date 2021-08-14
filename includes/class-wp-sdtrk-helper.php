@@ -46,6 +46,18 @@ class Wp_Sdtrk_Helper
     }
     
     /**
+     * Write dumb to log, if debug is enabled
+     *
+     * @param string $log
+     */
+    public static function wp_sdtrk_vardump_log($var)
+    {
+        ob_start();
+        var_dump($var);
+        return self::wp_sdtrk_write_log(ob_get_clean());
+    }
+    
+    /**
      * Get all Pages/Posts by metakey and value (usefull for exopite options)
      *
      * @param string $key

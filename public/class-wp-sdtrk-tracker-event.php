@@ -57,6 +57,54 @@ class Wp_Sdtrk_Tracker_Event
     }
     
     /**
+     * Return the Event-Data as array
+     * @return array
+     */
+    public function getEventAsArray(){
+        return array(
+            'brandName' => $this->brandName,
+            'transactionId' => $this->transactionId,            
+            'productId' => $this->productId,
+            'value'=> $this->value,            
+            'eventName'=> $this->eventName,            
+            'eventId'=> $this->eventId,            
+            'productName'=> $this->productName,            
+            'utmData'=> $this->utmData,
+        );
+    }
+    
+    /**
+     * Set Event-Data from array
+     * @param array $data
+     */
+    public function setEventFromArray($data){
+        if(isset($data['brandName'])){
+            $this->brandName = $data['brandName'];
+        }
+        if(isset($data['transactionId'])){
+            $this->transactionId = $data['transactionId'];
+        }
+        if(isset($data['productId'])){
+            $this->productId = $data['productId'];
+        }
+        if(isset($data['value'])){
+            $this->value = $data['value'];
+        }
+        if(isset($data['eventName'])){
+            $this->eventName = $data['eventName'];
+        }
+        if(isset($data['eventId'])){
+            $this->eventId = $data['eventId'];
+        }
+        if(isset($data['productName'])){
+            $this->productName = $data['productName'];
+        }
+        if(isset($data['utmData'])){
+            $this->utmData = $data['utmData'];
+        }
+    }
+    
+    /**
      * Collect UtmData
      * @return string[]
      */
@@ -106,7 +154,9 @@ class Wp_Sdtrk_Tracker_Event
         $prodId = Wp_Sdtrk_Helper::wp_sdtrk_searchParams($paramList);
         if(empty($prodId)){
             global $post;
-            $prodId = get_post_meta($post->ID, 'productid', true);
+            if($post && $post->ID){
+                $prodId = get_post_meta($post->ID, 'productid', true);
+            }
         }
         return ($prodId !== false) ? $prodId : "";
     }
