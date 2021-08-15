@@ -8,7 +8,7 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              https://www.rank-to-top.de/
+ * @link              https://marcmeese.de/
  * @since             1.0.0
  * @package           Wp_Sdtrk
  *
@@ -16,9 +16,9 @@
  * Plugin Name:       Smart Server Side Tracking Plugin
  * Plugin URI:        https://www.rank-to-top.de/
  * Description:       Adds server side Tracking to non-woocommerce wordpress-sites
- * Version:           1.0.0
+ * Version:           1.0.3
  * Author:            Marc Meese
- * Author URI:        https://www.rank-to-top.de/
+ * Author URI:        https://marcmeese.de/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       wp-sdtrk
