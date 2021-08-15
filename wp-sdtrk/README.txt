@@ -7,13 +7,13 @@ Tested up to: 5.8
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Ermöglicht Browser- und Serverseitiges Tracking für Facebook, Google & Co
+Erm&ouml;glicht Browser- und Serverseitiges Tracking f&uuml;r Facebook, Google & Co
 
 == Description ==
 
 <p>Seit dem IOS 14 Update, welches Apple im April 2021 live geschaltet hat, reicht einfaches Browser-basiertes Tracking nicht mehr aus. </p>
-<p>Daher wird mit diesem Plugin eine zusätzliche DSGVO-konforme serverseitige Möglichkeit des Trackings zur Verfügung gestellt. </p>
-<p>Das Smart Server Side Tracking Plugin ist ideal für Seitenbetreiber, die auch ohne WooCommerce auf einfache Art und Weise tracken wollen.</p>
+<p>Daher wird mit diesem Plugin eine zus&auml;tzliche DSGVO-konforme serverseitige M&ouml;glichkeit des Trackings zur Verf&uuml;gung gestellt. </p>
+<p>Das Smart Server Side Tracking Plugin ist ideal f&uuml;r Seitenbetreiber, die auch ohne WooCommerce auf einfache Art und Weise tracken wollen.</p>
 
 == Installation ==
 
@@ -24,13 +24,19 @@ Ermöglicht Browser- und Serverseitiges Tracking für Facebook, Google & Co
 
 = Warum serverseitig tracken? =
 
-Das serverseitige Tracking ermöglicht es, auch bei Änderungen wie dem iOS 14-Update und einer Ad-Blocking-Software genaue Berichte zu erhalten.
+Das serverseitige Tracking erm&ouml;glicht es, auch bei &Auml;nderungen wie dem iOS 14-Update und einer Ad-Blocking-Software genaue Berichte zu erhalten.
 
 = Ist das DSGVO-Konform? =
 
-Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers zur Erfassung seiner Daten benötigt. Daher ist dieses Plugin mit mehreren Cookie-Diensten kompatibel.
+Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers zur Erfassung seiner Daten ben&ouml;tigt. Daher ist dieses Plugin mit mehreren Cookie-Diensten kompatibel.
 
 == Changelog ==
+
+= 1.0.5 =
+* TODO
+
+= 1.0.4 =
+* Added backload-function for cookie consents
 
 = 1.0.3 =
 * Added Borlabs Cookie-Support
