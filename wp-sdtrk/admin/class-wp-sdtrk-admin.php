@@ -297,6 +297,7 @@ class Wp_Sdtrk_Admin {
                             ),
                             'title'   => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
+                            'after' => '<p>'.__('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk').'</p><p><code>'.htmlentities('<script>backloadFB_b();</script>').'</code></p>'
                         ),
                         array(
                             'type' => 'content',
@@ -354,7 +355,8 @@ class Wp_Sdtrk_Admin {
                             ),
                             'title'   => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                        ),
+                            'after' => '<p>'.__('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk').'</p><p><code>'.htmlentities('<script>backloadFB_s();</script>').'</code></p>'
+                        ),                        
                         array(
                             'id'      => 'fb_trk_server_debug',
                             'type'    => 'switcher',
@@ -436,6 +438,7 @@ class Wp_Sdtrk_Admin {
                             ),
                             'title'   => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
+                            'after' => '<p>'.__('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk').'</p><p><code>'.htmlentities('<script>backloadGA_b();</script>').'</code></p>'
                         ),
                         array(
                             'id'      => 'ga_trk_debug',
@@ -467,7 +470,7 @@ class Wp_Sdtrk_Admin {
                 array(
                     'type' => 'content',
                     'title' => '<h3>' . __('Setup Tutorial', 'wp-sdtrk') . '</h3>',
-                    'content' => '<iframe src="https://player.vimeo.com/video/549610539?h=6660e0f5f6" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>'
+                    'content' => '<iframe src="https://player.vimeo.com/video/587429111?h=6660e0f5f6" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>'
                 ),
                 array(
                     'type' => 'content',
