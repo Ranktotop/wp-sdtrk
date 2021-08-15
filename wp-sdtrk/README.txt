@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.0.6 =
+* Fixed bug when using caching
+
 = 1.0.5 =
 * Added help-section to plugin
 
