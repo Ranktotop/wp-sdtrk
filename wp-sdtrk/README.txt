@@ -33,19 +33,19 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 == Changelog ==
 
 = 1.0.5 =
-* TODO
+* Added help-section to plugin
 
 = 1.0.4 =
 * Added backload-function for cookie consents
 
 = 1.0.3 =
-* Added Borlabs Cookie-Support
+* Added Borlabs Cookie-support
 
 = 1.0.2 =
 * Added Google-Analytics to services
 
 = 1.0.0 =
-* Initial Release
+* Initial release
 
 == Marc Meese ==
 

@@ -21,133 +21,133 @@
  * @author     Your Name <email@example.com>
  */
 class Wp_Sdtrk_Admin {
-
-	/**
-	 * The ID of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $wp_sdtrk    The ID of this plugin.
-	 */
-	private $wp_sdtrk;
-
-	/**
-	 * The version of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
-	 */
-	private $version;
-
-	/*************************************************************
-	 * ACCESS PLUGIN ADMIN PUBLIC METHODES FROM INSIDE
-	 *
-	 * @tutorial access_plugin_admin_public_methodes_from_inside.php
-	 */
-	/**
-	 * Store plugin main class to allow public access.
-	 *
-	 * @since    20180622
-	 * @var object      The main class.
-	 */
-	public $main;
-	// ACCESS PLUGIN ADMIN PUBLIC METHODES FROM INSIDE
-
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $wp_sdtrk       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
-	// public function __construct( $wp_sdtrk, $version ) {
-
-	// 	$this->wp_sdtrk = $wp_sdtrk;
-	// 	$this->version = $version;
-
+    
+    /**
+     * The ID of this plugin.
+     *
+     * @since    1.0.0
+     * @access   private
+     * @var      string    $wp_sdtrk    The ID of this plugin.
+     */
+    private $wp_sdtrk;
+    
+    /**
+     * The version of this plugin.
+     *
+     * @since    1.0.0
+     * @access   private
+     * @var      string    $version    The current version of this plugin.
+     */
+    private $version;
+    
+    /*************************************************************
+     * ACCESS PLUGIN ADMIN PUBLIC METHODES FROM INSIDE
+     *
+     * @tutorial access_plugin_admin_public_methodes_from_inside.php
+     */
+    /**
+     * Store plugin main class to allow public access.
+     *
+     * @since    20180622
+     * @var object      The main class.
+     */
+    public $main;
+    // ACCESS PLUGIN ADMIN PUBLIC METHODES FROM INSIDE
+    
+    /**
+     * Initialize the class and set its properties.
+     *
+     * @since    1.0.0
+     * @param      string    $wp_sdtrk       The name of this plugin.
+     * @param      string    $version    The version of this plugin.
+     */
+    // public function __construct( $wp_sdtrk, $version ) {
+    
+    // 	$this->wp_sdtrk = $wp_sdtrk;
+    // 	$this->version = $version;
+    
     // }
-
-	/*************************************************************
-	 * ACCESS PLUGIN ADMIN PUBLIC METHODES FROM INSIDE
-	 *
-	 * @tutorial access_plugin_admin_public_methodes_from_inside.php
-	 */
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $wp_sdtrk       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
-	public function __construct( $wp_sdtrk, $version, $plugin_main ) {
-
-		$this->wp_sdtrk = $wp_sdtrk;
+    
+    /*************************************************************
+     * ACCESS PLUGIN ADMIN PUBLIC METHODES FROM INSIDE
+     *
+     * @tutorial access_plugin_admin_public_methodes_from_inside.php
+     */
+    /**
+     * Initialize the class and set its properties.
+     *
+     * @since    1.0.0
+     * @param      string    $wp_sdtrk       The name of this plugin.
+     * @param      string    $version    The version of this plugin.
+     */
+    public function __construct( $wp_sdtrk, $version, $plugin_main ) {
+        
+        $this->wp_sdtrk = $wp_sdtrk;
         $this->version = $version;
         $this->main = $plugin_main;
-
+        
     }
     // ACCESS PLUGIN ADMIN PUBLIC METHODES FROM INSIDE
-
-	/**
-	 * Register the stylesheets for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_styles() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Wp_Sdtrk_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Wp_Sdtrk_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
-		wp_enqueue_style( $this->wp_sdtrk, plugin_dir_url( __FILE__ ) . 'css/wp-sdtrk-admin.css', array(), $this->version, 'all' );
-
-	}
-
-	/**
-	 * Register the JavaScript for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_scripts() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Wp_Sdtrk_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Wp_Sdtrk_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
-		wp_enqueue_script( $this->wp_sdtrk, plugin_dir_url( __FILE__ ) . 'js/wp-sdtrk-admin.js', array( 'jquery' ), $this->version, false );
-
-	}
-
+    
+    /**
+     * Register the stylesheets for the admin area.
+     *
+     * @since    1.0.0
+     */
+    public function enqueue_styles() {
+        
+        /**
+         * This function is provided for demonstration purposes only.
+         *
+         * An instance of this class should be passed to the run() function
+         * defined in Wp_Sdtrk_Loader as all of the hooks are defined
+         * in that particular class.
+         *
+         * The Wp_Sdtrk_Loader will then create the relationship
+         * between the defined hooks and the functions defined in this
+         * class.
+         */
+        
+        wp_enqueue_style( $this->wp_sdtrk, plugin_dir_url( __FILE__ ) . 'css/wp-sdtrk-admin.css', array(), $this->version, 'all' );
+        
+    }
+    
+    /**
+     * Register the JavaScript for the admin area.
+     *
+     * @since    1.0.0
+     */
+    public function enqueue_scripts() {
+        
+        /**
+         * This function is provided for demonstration purposes only.
+         *
+         * An instance of this class should be passed to the run() function
+         * defined in Wp_Sdtrk_Loader as all of the hooks are defined
+         * in that particular class.
+         *
+         * The Wp_Sdtrk_Loader will then create the relationship
+         * between the defined hooks and the functions defined in this
+         * class.
+         */
+        
+        wp_enqueue_script( $this->wp_sdtrk, plugin_dir_url( __FILE__ ) . 'js/wp-sdtrk-admin.js', array( 'jquery' ), $this->version, false );
+        
+    }
+    
     public function test_sanitize_callback( $val ) {
         return sanitize_text_field($val);
     }
-
+    
     public function create_menu() {
-
+        
         /**
          * Create a submenu page under Plugins.
          * Framework also add "Settings" to your plugin in plugins list.
          * @link https://github.com/JoeSz/Exopite-Simple-Options-Framework
          */
         $config_submenu = array(
-
+            
             'type'              => 'menu',                          // Required, menu or metabox
             'id'                => $this->wp_sdtrk,              // Required, meta box id, unique per page, to save: get_option( id )
             'parent'            => 'options-general.php',                   // Parent page of plugin menu (default Settings [options-general.php])
@@ -157,7 +157,7 @@ class Wp_Sdtrk_Admin {
             'plugin_basename'   =>  plugin_basename( plugin_dir_path( __DIR__ ) . $this->wp_sdtrk . '.php' ),
             // 'tabbed'            => false,
             // 'multilang'         => false,                        // To turn of multilang, default on.
-
+            
         );
         
         /*
@@ -189,7 +189,7 @@ class Wp_Sdtrk_Admin {
         $options_panel = new Exopite_Simple_Options_Framework( $config_metabox, $this->getMetaboxSettingFields());
     }
     
-    private function getMetaboxSettingFields(){        
+    private function getMetaboxSettingFields(){
         //General
         $fields[] = array(
             'name'   => 'general',
@@ -206,11 +206,11 @@ class Wp_Sdtrk_Admin {
                     ),
                 ),
             )
-        );        
+        );
         return $fields;
     }
     
-    private function getGeneralSettingFields(){       
+    private function getGeneralSettingFields(){
         
         //Check for activated Cookie-Plugins
         $cookieOptions = array(
@@ -388,8 +388,8 @@ class Wp_Sdtrk_Admin {
                         array(
                             'id'      => 'ga_measurement_id',
                             'type'    => 'text',
-                            'title'   => __('Google Analytics 4 ID', 'wp-sdtrk'),
-                            'description' => __('Insert your own Measurement-ID', 'wp-sdtrk'),
+                            'title'   => __('Google Analytics ID', 'wp-sdtrk'),
+                            'description' => __('Insert your own Measurement-ID / Universal Analytics ID', 'wp-sdtrk'),
                         ),
                         array(
                             'type' => 'content',
@@ -453,9 +453,62 @@ class Wp_Sdtrk_Admin {
                 )
             )
         );
+        
+        $paramNameString = '<b>'.__('Parameter-Name(s)', 'wp-sdtrk').':</b> ';
+        $acceptsString = '<b>'.__('Accepts', 'wp-sdtrk').':</b> ';
+        $exampleString = '<b>'.__('Example', 'wp-sdtrk').':</b> ';
+        $exampleDomain = get_home_url();
+        
+        $fields[] = array(
+            'name' => 'tutorials',
+            'title' => __('Tutorials', 'wp-sdtrk'),
+            'icon' => 'dashicons-sos',
+            'fields' => array(
+                array(
+                    'type' => 'content',
+                    'title' => '<h3>' . __('Setup Tutorial', 'wp-sdtrk') . '</h3>',
+                    'content' => '<iframe src="https://player.vimeo.com/video/549610539?h=6660e0f5f6" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>'
+                ),
+                array(
+                    'type' => 'content',
+                    'title' => '<h3>' . __('Supported GET-Parameters', 'wp-sdtrk') . '</h3>',
+                    'content' => '<b>'.__('Note', 'wp-sdtrk').':</b> '.__('Enable "appending order details to thank you URL" on services like Digistore24 so that the parameters below are passed automatically.', 'wp-sdtrk')
+                ),
+                array(
+                    'type' => 'content',
+                    'title' => __('Transaction-ID', 'wp-sdtrk'),
+                    'content' => '<p>'.$paramNameString.'order_id</p><p>'.$acceptsString.'string</p><p>'.$exampleString.'<i>'.$exampleDomain.'?<b>order_id=9854</b></p></i>'
+                ),
+                array(
+                    'type' => 'content',
+                    'title' => __('Product-ID', 'wp-sdtrk'),
+                    'content' => '<p>'.$paramNameString.'prodid | product_id</p><p>'.$acceptsString.'string</p><p>'.$exampleString.'<i>'.$exampleDomain.'?<b>prodid=1337</b></p></i>'
+                ),
+                array(
+                    'type' => 'content',
+                    'title' => __('Product-Name', 'wp-sdtrk'),
+                    'content' => '<p>'.$paramNameString.'product_name</p><p>'.$acceptsString.'string</p><p>'.$exampleString.'<i>'.$exampleDomain.'?<b>product_name=newproduct</b></p></i>'
+                ),
+                array(
+                    'type' => 'content',
+                    'title' => __('Value', 'wp-sdtrk'),
+                    'content' => '<p>'.$paramNameString.'value | net_amount | amount</p><p>'.$acceptsString.'number</p><p>'.$exampleString.'<i>'.$exampleDomain.'?<b>value=99</b></p></i>'
+                ),
+                array(
+                    'type' => 'content',
+                    'title' => __('Type', 'wp-sdtrk'),
+                    'content' => '<p>'.$paramNameString.'type</p><p>'.$acceptsString.'AddToCart | Purchase | CompleteRegistration | Lead | InitiateCheckout | ViewContent</p><p>'.$exampleString.'<i>'.$exampleDomain.'?<b>type=Lead</b></p></i>'
+                ),  
+                array(
+                    'type' => 'content',
+                    'title' => __('UTM', 'wp-sdtrk'),
+                    'content' => '<p>'.$paramNameString.'utm_source | utm_campaign | utm_term | utm_medium | utm_content</p><p>'.$acceptsString.'string</p><p>'.$exampleString.'<i>'.$exampleDomain.'?<b>utm_source=facebook&utm_medium=cpc</b></p></i><p><b>'.__('Note', 'wp-sdtrk').':</b> '.__('UTM parameters are stored in cookies and automatically passed on further visits', 'wp-sdtrk').'</p>'
+                ),  
+            )
+        );
         return $fields;
-    }   
-
+    }
+    
     public function add_style_to_admin_head() {
         global $post_type;
         if ( 'test' == $post_type ) {

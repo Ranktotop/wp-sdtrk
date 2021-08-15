@@ -1,374 +1,388 @@
-#, fuzzy
 msgid ""
 msgstr ""
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 "Project-Id-Version: Smart Server Side Tracking Plugin\n"
 "POT-Creation-Date: 2021-08-15 11:33+0200\n"
-"PO-Revision-Date: 2021-03-29 12:05+0200\n"
+"PO-Revision-Date: 2021-08-15 11:39+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.0\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-Flags-xgettext: --add-comments=translators:\n"
 "X-Poedit-WPHeader: wp-sdtrk.php\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
-"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;"
-"_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 "X-Poedit-SearchPathExcluded-1: vendor\n"
 
 #: admin/class-wp-sdtrk-admin.php:155
 msgid "Server-Side-Tracking"
-msgstr ""
+msgstr "Serverseitiges Tracking"
 
 #: admin/class-wp-sdtrk-admin.php:178 admin/class-wp-sdtrk-admin.php:196
 msgid "Product Meta"
-msgstr ""
+msgstr "Produkt-Tracking-Daten"
 
 #: admin/class-wp-sdtrk-admin.php:203
 msgid "Product ID"
-msgstr ""
+msgstr "Produkt-ID"
 
 #: admin/class-wp-sdtrk-admin.php:205
 msgid "Please enter a product id"
-msgstr ""
+msgstr "Bitte gib eine Produkt-ID ein"
 
 #: admin/class-wp-sdtrk-admin.php:217
 msgid "Fire always"
-msgstr ""
+msgstr "Immer auslösen"
 
 #: admin/class-wp-sdtrk-admin.php:222
 msgid "Borlabs Cookie"
-msgstr ""
+msgstr "Borlabs Cookie"
 
 #: admin/class-wp-sdtrk-admin.php:228
 msgid "General"
-msgstr ""
+msgstr "Allgemein"
 
 #: admin/class-wp-sdtrk-admin.php:234
 msgid "Default Brand-Name"
-msgstr ""
+msgstr "Standard Brand-Name"
 
 #: admin/class-wp-sdtrk-admin.php:235
 msgid "This Name is used for several services"
-msgstr ""
+msgstr "Dieser Wert wird für verschiedene Dienste genutzt"
 
 #: admin/class-wp-sdtrk-admin.php:241
 msgid "Services"
-msgstr ""
+msgstr "Dienste"
 
 #: admin/class-wp-sdtrk-admin.php:246
 msgid "Facebook"
-msgstr ""
+msgstr "Facebook"
 
 #: admin/class-wp-sdtrk-admin.php:252
 msgid "Facebook Pixel-ID"
-msgstr ""
+msgstr "Facebook Pixel-ID"
 
 #: admin/class-wp-sdtrk-admin.php:253
 msgid "Insert your own Facebook Pixel ID"
-msgstr ""
+msgstr "Gib deine Facebook-Pixel-ID ein"
 
 #: admin/class-wp-sdtrk-admin.php:262 admin/class-wp-sdtrk-admin.php:401
 msgid "Browser based Tracking"
-msgstr ""
+msgstr "Tracking im Browser"
 
 #: admin/class-wp-sdtrk-admin.php:273 admin/class-wp-sdtrk-admin.php:412
 msgid "Activate browser based tracking"
-msgstr ""
+msgstr "Aktiviert das Tracking im Browser des Besuchers"
 
 #: admin/class-wp-sdtrk-admin.php:274
 msgid "Check to fire facebook browser pixel"
 msgstr ""
+"Aktivieren, um den Facebook-Pixel im Besucher-Browser zu aktivieren "
+"(klassische Integration)"
 
 #: admin/class-wp-sdtrk-admin.php:285 admin/class-wp-sdtrk-admin.php:342
 #: admin/class-wp-sdtrk-admin.php:424
 msgid "Choose cookie consent behavior"
-msgstr ""
+msgstr "Cookie-Zustimmungsverhalten"
 
 #: admin/class-wp-sdtrk-admin.php:298 admin/class-wp-sdtrk-admin.php:355
 #: admin/class-wp-sdtrk-admin.php:437
 msgid "Cookie ID"
-msgstr ""
+msgstr "Cookie-ID"
 
 #: admin/class-wp-sdtrk-admin.php:299 admin/class-wp-sdtrk-admin.php:356
 #: admin/class-wp-sdtrk-admin.php:438
 msgid "You can get this information in the Plugins Consent-Settings"
 msgstr ""
+"Diese Information kannst du in den Einstellungen deines Cookie-Plugins finden"
 
 #: admin/class-wp-sdtrk-admin.php:308
 msgid "Server based Tracking"
-msgstr ""
+msgstr "Tracking über Server"
 
 #: admin/class-wp-sdtrk-admin.php:319
 msgid "Activate server based tracking"
-msgstr ""
+msgstr "Aktiviert das Tracking auf deinem Server"
 
 #: admin/class-wp-sdtrk-admin.php:320
 msgid "Check to fire Facebook Conversion API"
-msgstr ""
+msgstr "Aktivieren, um die Integration der Conversion-API zu aktivieren"
 
 #: admin/class-wp-sdtrk-admin.php:331
 msgid "Conversion-API Token"
-msgstr ""
+msgstr "Conversion-API Token"
 
 #: admin/class-wp-sdtrk-admin.php:332
 msgid "You can get the token within the facebook events-manager"
-msgstr ""
+msgstr "Diesen Wert findest du im Facebook Events-Manager"
 
 #: admin/class-wp-sdtrk-admin.php:366 admin/class-wp-sdtrk-admin.php:448
 msgid "Activate Debugging"
-msgstr ""
+msgstr "Aktiviere Debugging"
 
 #: admin/class-wp-sdtrk-admin.php:367
 msgid "Check to activate CAPI debugging"
 msgstr ""
+"Aktivieren, um die Conversion-API im Facebook Events-Manager zu überprüfen"
 
 #: admin/class-wp-sdtrk-admin.php:378
 msgid "Test-Code"
-msgstr ""
+msgstr "Test-Code"
 
 #: admin/class-wp-sdtrk-admin.php:379
 msgid "You can get the Test-Code within the facebook events-manager"
-msgstr ""
+msgstr "Diesen Wert findest du im Facebook Events-Manager"
 
 #: admin/class-wp-sdtrk-admin.php:385
 msgid "Google"
-msgstr ""
+msgstr "Google"
 
 #: admin/class-wp-sdtrk-admin.php:391
 msgid "Google Analytics ID"
-msgstr ""
+msgstr "Google Analytics ID"
 
 #: admin/class-wp-sdtrk-admin.php:392
 msgid "Insert your own Measurement-ID / Universal Analytics ID"
-msgstr ""
+msgstr "Gib hier deine Mess-ID / Universal Analytics ID ein"
 
 #: admin/class-wp-sdtrk-admin.php:413
 msgid "Check to fire analytics browser tracking"
 msgstr ""
+"Aktivieren, um den Analytics-Code im Besucher-Browser zu aktivieren "
+"(klassische Integration)"
 
 #: admin/class-wp-sdtrk-admin.php:449
 msgid "Check to activate GA debugging"
 msgstr ""
+"Aktivieren, um die Aktivitäten im Google Analytics Dashboard zu überprüfen"
 
 #: admin/class-wp-sdtrk-admin.php:457
 msgid "Parameter-Name(s)"
-msgstr ""
+msgstr "Parameter-Name(n)"
 
 #: admin/class-wp-sdtrk-admin.php:458
 msgid "Accepts"
-msgstr ""
+msgstr "Akzeptiert"
 
 #: admin/class-wp-sdtrk-admin.php:459
 msgid "Example"
-msgstr ""
+msgstr "Beispiel"
 
 #: admin/class-wp-sdtrk-admin.php:464
 msgid "Tutorials"
-msgstr ""
+msgstr "Tutorials"
 
 #: admin/class-wp-sdtrk-admin.php:469
 msgid "Setup Tutorial"
-msgstr ""
+msgstr "Setup-Anleitung"
 
 #: admin/class-wp-sdtrk-admin.php:474
 msgid "Supported GET-Parameters"
-msgstr ""
+msgstr "Unterstützte GET-Parameter"
 
 #: admin/class-wp-sdtrk-admin.php:475 admin/class-wp-sdtrk-admin.php:505
 msgid "Note"
-msgstr ""
+msgstr "Hinweis"
 
 #: admin/class-wp-sdtrk-admin.php:475
 msgid ""
 "Enable \"appending order details to thank you URL\" on services like "
 "Digistore24 so that the parameters below are passed automatically."
 msgstr ""
+"Aktiviere bei Diensten wie Digistore24 die Option \"Bestelldaten an die "
+"Danke-Seite-URL anhängen\", damit die unten aufgeführten Parameter "
+"automatisch übergeben werden."
 
 #: admin/class-wp-sdtrk-admin.php:479
 msgid "Transaction-ID"
-msgstr ""
+msgstr "Transaktions-ID"
 
 #: admin/class-wp-sdtrk-admin.php:484
 msgid "Product-ID"
-msgstr ""
+msgstr "Produkt-ID"
 
 #: admin/class-wp-sdtrk-admin.php:489
 msgid "Product-Name"
-msgstr ""
+msgstr "Produkt-Name"
 
 #: admin/class-wp-sdtrk-admin.php:494
 msgid "Value"
-msgstr ""
+msgstr "Wert"
 
 #: admin/class-wp-sdtrk-admin.php:499
 msgid "Type"
-msgstr ""
+msgstr "Typ"
 
 #: admin/class-wp-sdtrk-admin.php:504
 msgid "UTM"
-msgstr ""
+msgstr "UTM"
 
 #: admin/class-wp-sdtrk-admin.php:505
 msgid ""
 "UTM parameters are stored in cookies and automatically passed on further "
 "visits"
 msgstr ""
+"UTM-Parameter werden in Cookies gespeichert und bei weiteren Besuchen "
+"automatisch weitergegeben"
 
 #: admin/class-wp-sdtrk-admin.php:637
 msgid "Thanks for updating"
-msgstr ""
+msgstr "Danke für die Aktualisierung"
 
 #: admin/exopite-simple-options/assets/editors/ace/worker-coffee.js:1
 msgid "arguments"
-msgstr ""
+msgstr "Argumente"
 
 #: admin/exopite-simple-options/assets/editors/ace/worker-coffee.js:1
 msgid "RegExp"
-msgstr ""
+msgstr "Regulärer Ausdruck"
 
 #: admin/exopite-simple-options/assets/editors/ace/worker-coffee.js:1
 msgid "Math"
-msgstr ""
+msgstr "Mathematik"
 
 #: admin/exopite-simple-options/exopite-simple-options-framework-class.php:706
 #: admin/exopite-simple-options/exopite-simple-options-framework-class.php:729
 msgid "Settings"
-msgstr ""
+msgstr "Einstellungen"
 
 #: admin/exopite-simple-options/exopite-simple-options-framework-class.php:792
 #: admin/exopite-simple-options/exopite-simple-options-framework-class.php:796
 msgid "Plugin Options"
-msgstr ""
+msgstr "Plugin-Einstellungen"
 
 #: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1485
 msgid "ERROR:"
-msgstr ""
+msgstr "Fehler:"
 
 #: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1486
 msgid "This field class is not available!"
-msgstr ""
+msgstr "Diese Feldklasse ist nicht verfügbar!"
 
 #: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1558
 msgid "Saving..."
-msgstr ""
+msgstr "Speichern..."
 
 #: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1558
 msgid "Saved Successfully."
-msgstr ""
+msgstr "Erfolgreich gespeichert."
 
 #: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1574
 #: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1589
 msgid "Save Settings"
-msgstr ""
+msgstr "Einstellungen speichern"
 
 #: admin/exopite-simple-options/fields/attached.php:45
 #, php-format
 msgid "There is no attachment with type %s for this %s."
-msgstr ""
+msgstr "Es gibt keinen Anhang mit dem Typ %s für %s."
 
 #: admin/exopite-simple-options/fields/backup.php:41
 msgid "copy-paste your backup string here"
-msgstr ""
+msgstr "Füge einen Backup-String hier ein"
 
 #: admin/exopite-simple-options/fields/backup.php:42
 msgid "Are you sure, you want to overwrite existing options?"
-msgstr ""
+msgstr "Bist du sicher, dass du die Einstellungen überschreiben möchtest?"
 
 #: admin/exopite-simple-options/fields/backup.php:42
 msgid "Import a Backup"
-msgstr ""
+msgstr "Backup importieren"
 
 #: admin/exopite-simple-options/fields/backup.php:46
 msgid "Download Backup"
-msgstr ""
+msgstr "Backup herunterladen"
 
 #: admin/exopite-simple-options/fields/backup.php:49
 msgid "Please be sure for reset all of framework options."
 msgstr ""
+"Bitte sei dir sicher, dass du alle Framework-Einstellungen zurücksetzen "
+"möchtest."
 
 #: admin/exopite-simple-options/fields/backup.php:50
 msgid "Are you sure, you want to reset all options?"
-msgstr ""
+msgstr "Bist du sicher, dass du alle Optionen zurücksetzen möchtest?"
 
 #: admin/exopite-simple-options/fields/backup.php:50
 msgid "Reset All Options"
-msgstr ""
+msgstr "Alle Optionen zurücksetzen"
 
 #: admin/exopite-simple-options/fields/custom_userinputgroup.php:371
 #: admin/exopite-simple-options/fields/group.php:351
 msgid "Max items:"
-msgstr ""
+msgstr "Max. Elemente:"
 
 #: admin/exopite-simple-options/fields/gallery.php:25
 #: includes/libraries/class-exopite-meta-boxes.php:572
 msgid "Add to gallery"
-msgstr ""
+msgstr "Zur Galerie hinzufügen"
 
 #: admin/exopite-simple-options/fields/gallery.php:26
 #: includes/libraries/class-exopite-meta-boxes.php:573
 msgid "Select images for gallery"
-msgstr ""
+msgstr "Bilder für Galerie auswählen"
 
 #: admin/exopite-simple-options/fields/gallery.php:27
 #: includes/libraries/class-exopite-meta-boxes.php:574
 msgid "Add"
-msgstr ""
+msgstr "Hinzufügen"
 
 #: admin/exopite-simple-options/fields/image.php:77
 msgid "Add Image"
-msgstr ""
+msgstr "Bild hinzufügen"
 
 #: admin/exopite-simple-options/fields/typography.php:81
 msgid "Web Safe Fonts"
-msgstr ""
+msgstr "Websichere Schriftarten"
 
 #: admin/exopite-simple-options/fields/typography.php:87
 msgid "Google Fonts"
-msgstr ""
+msgstr "Google Fonts"
 
 #: admin/exopite-simple-options/fields/typography.php:177
 msgid "Error! Can not load json file."
-msgstr ""
+msgstr "Fehler! Die json Datei kann nicht geladen werden."
 
 #: admin/exopite-simple-options/fields/upload.php:73
 msgid "Drop files here"
-msgstr ""
+msgstr "Dateien hierher ziehen"
 
 #: admin/exopite-simple-options/fields/upload.php:83
 msgid "Select files"
-msgstr ""
+msgstr "Dateien auswählen"
 
 #: admin/exopite-simple-options/fields/upload.php:86
 msgid "Upload"
-msgstr ""
+msgstr "Hochladen"
 
 #: admin/exopite-simple-options/fields/upload.php:90
 msgid "Processing dropped files..."
-msgstr ""
+msgstr "Verarbeite Dateien..."
 
 #: admin/exopite-simple-options/fields/upload.php:108
 #: admin/exopite-simple-options/fields/upload.php:140
 msgid "Cancel"
-msgstr ""
+msgstr "Abbrechen"
 
 #: admin/exopite-simple-options/fields/upload.php:110
 msgid "Retry"
-msgstr ""
+msgstr "Wiederholen"
 
 #: admin/exopite-simple-options/fields/upload.php:112
 msgid "Delete"
-msgstr ""
+msgstr "Löschen"
 
 #: admin/exopite-simple-options/fields/upload.php:121
 msgid "Close"
-msgstr ""
+msgstr "Schließen"
 
 #: admin/exopite-simple-options/fields/upload.php:129
 msgid "No"
@@ -376,231 +390,236 @@ msgstr ""
 
 #: admin/exopite-simple-options/fields/upload.php:131
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
 
 #: admin/exopite-simple-options/fields/upload.php:142
 msgid "Ok"
-msgstr ""
+msgstr "Ok"
 
 #: admin/exopite-simple-options/fields/upload.php:181
 msgid "Max amount of files: "
-msgstr ""
+msgstr "Maximale Anzahl von Dateien "
 
 #: admin/exopite-simple-options/fields/upload.php:182
 msgid "Max file upload size: "
-msgstr ""
+msgstr "Maximale Datei-Upload-Größe "
 
 #: admin/exopite-simple-options/fields/video.php:74
 msgid "Add Video"
-msgstr ""
+msgstr "Video hinzufügen"
 
 #: includes/class-wp-sdtrk-license.php:335
 msgid "This feature is available in the Pro-Version only!"
-msgstr ""
+msgstr "Diese Funktion ist nur in der Pro-Version verfügbar!"
 
 #: includes/class-wp-sdtrk-license.php:357
 msgid "Pro Version only!"
-msgstr ""
+msgstr "Nur Pro Version!"
 
 #: includes/class-wp-sdtrk-license.php:371
 msgid "Something went from with the license-Server. Please contact support!"
-msgstr ""
+msgstr "Fehler beim Verbinden mit Lizenzserver. Bitte Support kontaktieren!"
 
 #: includes/class-wp-sdtrk-license.php:372
 msgid "Unable to connect to license-server. Please try again later!"
 msgstr ""
+"Keine Verbindung zum Lizenzserver! Bitte versuche es später noch einmal!"
 
 #: includes/class-wp-sdtrk-license.php:373
 msgid "Your license is blocked"
-msgstr ""
+msgstr "Deine aktuelle Lizenz ist blockiert"
 
 #: includes/class-wp-sdtrk-license.php:374
 msgid "Your license is expired"
-msgstr ""
+msgstr "Deine aktuelle Lizenz ist abgelaufen"
 
 #: includes/class-wp-sdtrk-license.php:375
 msgid "You reached the maximum Number of registered Domains"
-msgstr ""
+msgstr "Du hast die maximale Anzahl verfügbarer Domains erreicht"
 
 #: includes/class-wp-sdtrk-license.php:376
 msgid "Your license-Key is invalid"
-msgstr ""
+msgstr "Der Lizenzschlüssel ist ungültig"
 
 #: includes/class-wp-sdtrk-license.php:377
 msgid "Domain is not registered"
-msgstr ""
+msgstr "Domain nicht registriert"
 
 #: includes/class-wp-sdtrk-license.php:378
 msgid "This Domain has already been released"
-msgstr ""
+msgstr "Die Lizenz wurde bereits für diese Domain freigegeben"
 
 #: includes/class-wp-sdtrk-license.php:379
 msgid "Your license key could not be verified"
-msgstr ""
+msgstr "Die Lizenz konnte nicht verifiziert werden"
 
 #: includes/class-wp-sdtrk-license.php:380
-msgid ""
-"Your license is already activated for this domain. Please release first"
+msgid "Your license is already activated for this domain. Please release first"
 msgstr ""
+"Die Lizenz ist für diese Domain bereits registriert. Bitte Lizenz vorher "
+"freigeben"
 
 #: includes/class-wp-sdtrk-license.php:381
 msgid "License is not registered. Please try to register again"
 msgstr ""
+"Lizenz nicht registriert. Bitte versuche die Lizenz erneut zu registrieren"
 
 #: includes/class-wp-sdtrk-license.php:382
 msgid "This product is not registered for this domain"
-msgstr ""
+msgstr "Dieses Produkt ist für diese Domain nicht registriert"
 
 #: includes/class-wp-sdtrk-license.php:383
 msgid "Your license is invalid for this product"
-msgstr ""
+msgstr "Die Lizenz ist ungültig für dieses Produkt"
 
 #: includes/class-wp-sdtrk-license.php:384
 msgid "This domain is not registered"
-msgstr ""
+msgstr "Diese Domain ist nicht registriert"
 
 #: includes/class-wp-sdtrk-license.php:385
 msgid "License successfully registered"
-msgstr ""
+msgstr "Lizenz erfolgreich registriert"
 
 #: includes/class-wp-sdtrk-license.php:386
 msgid "License is valid and registered"
-msgstr ""
+msgstr "Lizenz registriert und gültig"
 
 #: includes/class-wp-sdtrk-license.php:387
 msgid "License successfully released"
-msgstr ""
+msgstr "Lizenz erfolgreich freigegeben"
 
 #: includes/class-wp-sdtrk-license.php:389
 msgid "unknown"
-msgstr ""
+msgstr "unbekannt"
 
 #: includes/libraries/class-exopite-post-types.php:40
 #, php-format
 msgid "New %s"
-msgstr ""
+msgstr "Neu %s"
 
 #: includes/libraries/class-exopite-post-types.php:41
 #, php-format
 msgid "Add new %s"
-msgstr ""
+msgstr "Neue %s hinzufügen"
 
 #: includes/libraries/class-exopite-post-types.php:42
 #: includes/libraries/class-exopite-post-types.php:177
 #, php-format
 msgid "Edit %s"
-msgstr ""
+msgstr "%s bearbeiten"
 
 #: includes/libraries/class-exopite-post-types.php:43
 #: includes/libraries/class-exopite-post-types.php:44
 #: includes/libraries/class-exopite-post-types.php:178
 #, php-format
 msgid "View %s"
-msgstr ""
+msgstr "%s ansehen"
 
 #: includes/libraries/class-exopite-post-types.php:45
 #: includes/libraries/class-exopite-post-types.php:184
 #, php-format
 msgid "Search %s"
-msgstr ""
+msgstr "Suche %s"
 
 #: includes/libraries/class-exopite-post-types.php:46
 #: includes/libraries/class-exopite-post-types.php:189
 #, php-format
 msgid "No %s found"
-msgstr ""
+msgstr "Keine %s gefunden"
 
 #: includes/libraries/class-exopite-post-types.php:47
 #, php-format
 msgid "No %s found in trash"
-msgstr ""
+msgstr "Keine %s im Papierkorb gefunden"
 
 #: includes/libraries/class-exopite-post-types.php:48
 #: includes/libraries/class-exopite-post-types.php:176
 #, php-format
 msgid "All %s"
-msgstr ""
+msgstr "Alle %s"
 
 #: includes/libraries/class-exopite-post-types.php:49
 #, php-format
 msgid "%s Archives"
-msgstr ""
+msgstr "%s Archive"
 
 #: includes/libraries/class-exopite-post-types.php:50
 #, php-format
 msgid "%s Attributes"
-msgstr ""
+msgstr "Attribute für %s"
 
 #: includes/libraries/class-exopite-post-types.php:51
 #, php-format
 msgid "Insert into %s"
-msgstr ""
+msgstr "In %s einfügen"
 
 #: includes/libraries/class-exopite-post-types.php:52
 #, php-format
 msgid "Uploaded to this %s"
-msgstr ""
+msgstr "Zu diesem %s hochgeladen"
 
 #: includes/libraries/class-exopite-post-types.php:55
 #: includes/libraries/class-exopite-post-types.php:182
 #, php-format
 msgid "Parent %s"
-msgstr ""
+msgstr "Übergeordnet %s"
 
 #: includes/libraries/class-exopite-post-types.php:56
 #: includes/libraries/class-exopite-post-types.php:183
 #, php-format
 msgid "Parent %s:"
-msgstr ""
+msgstr "Übergeordnet %s:"
 
 #: includes/libraries/class-exopite-post-types.php:179
 #, php-format
 msgid "Update %s"
-msgstr ""
+msgstr "%s aktualisieren"
 
 #: includes/libraries/class-exopite-post-types.php:180
 #, php-format
 msgid "Add New %s"
-msgstr ""
+msgstr "Neu hinzufügen %s"
 
 #: includes/libraries/class-exopite-post-types.php:181
 #, php-format
 msgid "New %s Name"
-msgstr ""
+msgstr "Neu %s Name"
 
 #: includes/libraries/class-exopite-post-types.php:185
 #, php-format
 msgid "Popular %s"
-msgstr ""
+msgstr "Beliebt %s"
 
 #: includes/libraries/class-exopite-post-types.php:186
 #, php-format
 msgid "Separate %s with commas"
-msgstr ""
+msgstr "Trenne %s mit Kommas"
 
 #: includes/libraries/class-exopite-post-types.php:187
 #, php-format
 msgid "Add or remove %s"
-msgstr ""
+msgstr "Ergänze oder entferne %s"
 
 #: includes/libraries/class-exopite-post-types.php:188
 #, php-format
 msgid "Choose from the most used %s"
-msgstr ""
+msgstr "Wähle aus den meistgenutzten %s"
 
 #. Plugin Name of the plugin/theme
 msgid "Smart Server Side Tracking Plugin"
-msgstr ""
+msgstr "Smart Server Side Tracking Plugin"
 
 #. Plugin URI of the plugin/theme
 #. Author URI of the plugin/theme
 msgid "https://marcmeese.de/"
-msgstr ""
+msgstr "https://marcmeese.de/"
 
 #. Description of the plugin/theme
 msgid "Adds server side tracking to non-woocommerce wordpress-sites"
 msgstr ""
+"Aktiviert Unterstützung für serverseitiges Tracking bei Wordpress-Seiten "
+"ohne Shop-System"
 
 #. Author of the plugin/theme
 msgid "Marc Meese"
-msgstr ""
+msgstr "Marc Meese"
