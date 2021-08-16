@@ -1,6 +1,6 @@
 let wp_sdtrk_event = new Wp_Sdtrk_Event();
 wp_sdtrk_collectEventObject();
-console.log(wp_sdtrk_event);
+//console.log(wp_sdtrk_event);
 
 /**
 * Collects all available data for wp_sdtrk_event-Object
@@ -149,7 +149,7 @@ function wp_sdtrk_sendAjax(metaData) {
 		url: wp_sdtrk.ajax_url,
 		data: dataJSON,
 		success: function(response) {
-			console.log(response);
+			//console.log(response);
 		},
 		error: function(xhr, status, error) {
 			console.log('Status: ' + xhr.status);

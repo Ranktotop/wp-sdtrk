@@ -356,8 +356,7 @@ class Wp_Sdtrk_Public
                     $fbTracker = new Wp_Sdtrk_Tracker_Fb();
                     $fbTracker->fireTracking_Server($event,$fbp,$fbc);
                     return array(
-                        'state' => true,
-                        'data' => $event->getEventAsArray()
+                        'state' => true
                     );
                     break;
             }

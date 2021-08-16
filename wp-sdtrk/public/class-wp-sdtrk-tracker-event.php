@@ -38,8 +38,8 @@ class Wp_Sdtrk_Tracker_Event
     public function getEventName()
     {
         $rawEventName = "";
-        if (isset($this->eventData['type'])) {
-            foreach ($this->eventData['type'] as $value) {
+        if (isset($this->eventData['eventName'])) {
+            foreach ($this->eventData['eventName'] as $value) {
                 if (! empty($value)) {
                     $rawEventName = $value;
                     break;
@@ -173,8 +173,8 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getEventIp()
     {
-        if (isset($this->eventData['adress']) && ! empty($this->eventData['adress'])) {
-            return $this->eventData['adress'];
+        if (isset($this->eventData['eventSourceAdress']) && ! empty($this->eventData['eventSourceAdress'])) {
+            return $this->eventData['eventSourceAdress'];
         }
         return Wp_Sdtrk_Helper::wp_sdtrk_getClientIp();
     }
@@ -185,8 +185,8 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getEventAgent()
     {
-        if (isset($this->eventData['agent']) && ! empty($this->eventData['agent'])) {
-            return $this->eventData['agent'];
+        if (isset($this->eventData['eventSourceAgent']) && ! empty($this->eventData['eventSourceAgent'])) {
+            return $this->eventData['eventSourceAgent'];
         }
         return (isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : "";
     }
@@ -197,8 +197,8 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getEventSource()
     {
-        if (isset($this->eventData['source']) && ! empty($this->eventData['source'])) {
-            return $this->eventData['source'];
+        if (isset($this->eventData['eventSource']) && ! empty($this->eventData['eventSource'])) {
+            return $this->eventData['eventSource'];
         }
         return Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL();
     }
@@ -209,8 +209,8 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getTime()
     {
-        if (isset($this->eventData['time']) && ! empty($this->eventData['time'])) {
-            return $this->eventData['time'];
+        if (isset($this->eventData['eventTime']) && ! empty($this->eventData['eventTime'])) {
+            return $this->eventData['eventTime'];
         }
         return date_create()->getTimestamp();
     }

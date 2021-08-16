@@ -68,7 +68,7 @@ function wp_sdtrk_track_fb() {
 	}
 	fbEventData.bc = wp_sdtrk_checkServiceConsent(wp_sdtrk_fb.c_fb_b_i, wp_sdtrk_fb.c_fb_b_s);
 	fbEventData.sc = wp_sdtrk_checkServiceConsent(wp_sdtrk_fb.c_fb_s_i, wp_sdtrk_fb.c_fb_s_s);
-	console.log(fbEventData);
+	//console.log(fbEventData);
 
 	//Browser: If consent is given
 	if (fbEventData.bc !== false && wp_sdtrk_fb.fb_b_e !== "") {
@@ -126,7 +126,7 @@ function wp_sdtrk_track_fb_b() {
 //Backload FB Pixel on Server
 function wp_sdtrk_backload_fb_s() {
 	//Dont fire if the consent was already given or the backload is called to 
-	if (fbEventData === false || fbEventData.sc !== false || wp_sdtrk_fb.fb_s_e !== "" || !fbEventData_finishedLoading) {
+	if (fbEventData === false || fbEventData.sc !== false || wp_sdtrk_fb.fb_s_e === "" || !fbEventData_finishedLoading) {
 		return;
 	}
 	//Save the given consent
@@ -137,7 +137,7 @@ function wp_sdtrk_backload_fb_s() {
 //Backload FB Pixel in Browser
 function wp_sdtrk_backload_fb_b() {
 	//Dont fire if the consent was already given or the backload is called to 
-	if (fbEventData === false || fbEventData.bc !== false || wp_sdtrk_fb.fb_b_e !== "" || !fbEventData_finishedLoading) {
+	if (fbEventData === false || fbEventData.bc !== false || wp_sdtrk_fb.fb_b_e === "" || !fbEventData_finishedLoading) {
 		return;
 	}
 	//Save the given consent

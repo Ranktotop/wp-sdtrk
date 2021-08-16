@@ -80,7 +80,7 @@ function wp_sdtrk_track_ga() {
 		return;
 	}
 	gaEventData.bc = wp_sdtrk_checkServiceConsent(wp_sdtrk_ga.c_ga_b_i, wp_sdtrk_ga.c_ga_b_s);
-	console.log(gaEventData);
+	//console.log(gaEventData);
 
 	//Browser: If consent is given
 	if (gaEventData.bc !== false && wp_sdtrk_ga.ga_b_e !== "") {
@@ -110,7 +110,7 @@ function wp_sdtrk_track_ga_b() {
 //Backload Analytics in Browser
 function wp_sdtrk_backload_ga_b() {
 	//Dont fire if the consent was already given or the backload is called to 
-	if (gaEventData === false || gaEventData.bc !== false || wp_sdtrk_ga.ga_b_e !== "" || !gaEventData_finishedLoading) {
+	if (gaEventData === false || gaEventData.bc !== false || wp_sdtrk_ga.ga_b_e === "" || !gaEventData_finishedLoading) {
 		return;
 	}
 	//Save the given consent
