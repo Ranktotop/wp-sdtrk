@@ -349,18 +349,6 @@ class Wp_Sdtrk {
 		$this->loader->add_action( 'wp_sdtrk_licensecheck_cron', $this->public, 'licensecheck' );
 		
 		/*************************************************************
-		 * Render Tracking Codes
-		 *
-		 */	
-		$this->loader->add_action('wp_head', $this->public, 'renderTracking',10);
-		
-		/*************************************************************
-		 * Handle Cookies
-		 *
-		 */
-		$this->loader->add_action('init', $this->public, 'saveCookies',10);
-		
-		/*************************************************************
 		 * The wp_ajax_ is telling wordpress to use ajax and the prefix_ajax_first is the hook name to use in JavaScript or in URL.
 		 *
 		 * Call AJAX function via URL: https://www.yourwebsite.com/wp-admin/admin-ajax.php?action=prefix_ajax_first&post_id=23&other_param=something

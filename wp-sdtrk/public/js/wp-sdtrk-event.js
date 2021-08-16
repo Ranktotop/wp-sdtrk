@@ -1,0 +1,196 @@
+class Wp_Sdtrk_Event {
+	constructor() {
+	}
+
+	//Sets the UTM-Parameters
+	setUtm(value) {
+		this.utm = value;
+	}
+
+	//Gets the UTM-Parameters
+	getUtm() {
+		return this.utm;
+	}
+
+	//Sets the Product-ID
+	setProdId(value) {
+		this.prodId = value;
+	}
+
+	//Adds a Product-ID
+	addProdId(key, value) {
+		this.prodId[key] = value;
+	}
+
+	//Grabs the first entry in Product-ID
+	grabProdId() {
+		return this.grabFirstValue(this.prodId);
+	}
+
+	//Gets the Product-ID
+	getProdId() {
+		return this.prodId;
+	}
+
+	//Sets the Product-Name
+	setProdName(value) {
+		this.prodName = value;
+	}
+
+	//Gets the Product-Name
+	getProdName() {
+		return this.prodName;
+	}
+
+	//Grabs the first entry in Product-Name and fallback to 'custom'
+	grabProdName() {
+		var name = this.grabFirstValue(this.prodName);
+		return (name === "") ? 'custom' : name;
+	}
+
+	//Sets the Order-ID
+	setOrderId(value) {
+		this.orderId = value;
+	}
+
+	//Gets the Order-ID
+	getOrderId() {
+		return this.orderId;
+	}
+
+	//Grabs the first entry in Order-ID and fallback to eventId
+	grabOrderId() {
+		var name = this.grabFirstValue(this.orderId);
+		return (name === "") ? this.getEventId() : name;
+	}
+
+	//Sets the Event-ID
+	setEventId(value) {
+		this.eventId = value;
+	}
+
+	//Gets the Event-ID
+	getEventId() {
+		return this.eventId;
+	}
+
+	//Sets the Value
+	setValue(value) {
+		this.value = value;
+	}
+
+	//Gets the Value
+	getValue() {
+		return this.value;
+	}
+
+	//Grabs the first entry in Value and validates it
+	grabValue() {
+		var value = this.grabFirstValue(this.value);
+		return ((+(value) + 0.0) !== NaN) ? (+(value) + 0.0) : 0;
+	}
+
+	//Sets the Event-Name
+	setEventName(value) {
+		this.eventName = value;
+	}
+
+	//Gets the Type
+	getEventName() {
+		return this.eventName;
+	}
+
+	//Grabs the first entry in Event-Name and parses it
+	grabEventName() {
+		var name = this.grabFirstValue(this.eventName);
+		return this.parseEventName(name);
+	}
+
+	//Sets the Brand-Name
+	setBrandName(value) {
+		this.brandName = value;
+	}
+
+	//Gets the Brand-Name
+	getBrandName() {
+		return this.brandName;
+	}
+
+	//Sets the Event-Time
+	setEventTime(value) {
+		this.eventTime = value;
+	}
+
+	//Gets the Brand-Name
+	getEventTime() {
+		return this.eventTime;
+	}
+
+	//Sets the Event-Source
+	setEventSource(value) {
+		this.eventSource = value;
+	}
+
+	//Gets the Event-Source
+	getEventSource() {
+		return this.eventSource;
+	}
+
+	//Sets the Event-SourceAgent
+	setEventSourceAgent(value) {
+		this.eventSourceAgent = value;
+	}
+
+	//Gets the Event-SourceAgent
+	getEventSourceAgent() {
+		return this.eventSourceAgent;
+	}
+
+	//Sets the Event-SourceAdress
+	setEventSourceAdress(value) {
+		this.eventSourceAdress = value;
+	}
+
+	//Gets the Event-SourceAdress
+	getEventSourceAdress() {
+		return this.eventSourceAdress;
+	}
+
+	//Grab first Value of object
+	grabFirstValue(customObj) {
+		for (var k in customObj) {
+			if (customObj[k] !== "") {
+				return customObj[k];
+			}
+		}
+		return "";
+	}
+
+	//Converts the Event-Name to GA
+	parseEventName(name) {
+		if (name === "" && this.grabFirstValue(this.orderId) !== "") {
+			return "purchase";
+		}
+		if (name === "" && this.grabProdId() !== "") {
+			return 'view_item';
+		}
+		switch (name.toLowerCase()) {
+			case 'pageview':
+				return 'page_view';
+			case 'addtocart':
+				return 'add_to_cart';
+			case 'purchase':
+				return 'purchase';
+			case 'completeregistration':
+				return 'sign_up';
+			case 'lead':
+				return 'generate_lead';
+			case 'initiatecheckout':
+				return 'begin_checkout';
+			case 'viewcontent':
+				return 'view_item';
+			default:
+				return name === "" ? false : name;
+		}
+	}
+}

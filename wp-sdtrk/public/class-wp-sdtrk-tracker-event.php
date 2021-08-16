@@ -2,208 +2,71 @@
 
 class Wp_Sdtrk_Tracker_Event
 {
+    private $eventData;
 
-    private $brandName;
-
-    private $transactionId;
-
-    private $productId;
-
-    private $value;
-
-    private $eventName;
-
-    private $eventId;
-    
-    private $productName;
-    
-    private $utmData;
-
-    public function __construct()
+    public function __construct($eventData)
     {
-        $this->init();
+        $this->eventData = $eventData;
     }
 
-    /**
-     * Initialize the saved Data
-     */
-    private function init()
-    {
-        // Brandname
-        $brandName = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "brandname");
-        $this->brandName = ($brandName && ! empty(trim($brandName))) ? $brandName : get_bloginfo('name');
-
-        // Event-ID
-        $this->eventId = $this->generateEventId();
-
-        // Transaction-ID
-        $this->transactionId = $this->fetchTransactionId();
-
-        // Product-ID
-        $this->productId = $this->fetchProductId();
-
-        // Value
-        $this->value = $this->fetchEventValue();
-        
-        // Product-Name
-        $this->productName = $this->fetchProductName();
-        
-        //UTM-Parameters
-        $this->utmData = $this->saveAndGetUTM();
-        
-        // Eventname
-        $this->eventName = $this->fetchEventName();
-        
-    }
-    
     /**
      * Return the Event-Data as array
+     *
      * @return array
      */
-    public function getEventAsArray(){
+    public function getEventAsArray()
+    {
         return array(
-            'brandName' => $this->brandName,
-            'transactionId' => $this->transactionId,            
-            'productId' => $this->productId,
-            'value'=> $this->value,            
-            'eventName'=> $this->eventName,            
-            'eventId'=> $this->eventId,            
-            'productName'=> $this->productName,            
-            'utmData'=> $this->utmData,
+            'brandName' => $this->getBrandName(),
+            'transactionId' => $this->getTransactionId(),
+            'productId' => $this->getProductId(),
+            'value' => $this->getEventValue(),
+            'eventName' => $this->getEventName(),
+            'eventId' => $this->getEventId(),
+            'productName' => $this->getProductName(),
+            'utmData' => $this->getUtmData(),
+            'adress' => $this->getEventIp(),
+            'source' => $this->getEventSource(),
+            'agent' => $this->getEventAgent(),
+            'time' => $this->getTime()
         );
     }
-    
+
     /**
-     * Set Event-Data from array
-     * @param array $data
+     * Returns the event name
      */
-    public function setEventFromArray($data){
-        if(isset($data['brandName'])){
-            $this->brandName = $data['brandName'];
-        }
-        if(isset($data['transactionId'])){
-            $this->transactionId = $data['transactionId'];
-        }
-        if(isset($data['productId'])){
-            $this->productId = $data['productId'];
-        }
-        if(isset($data['value'])){
-            $this->value = $data['value'];
-        }
-        if(isset($data['eventName'])){
-            $this->eventName = $data['eventName'];
-        }
-        if(isset($data['eventId'])){
-            $this->eventId = $data['eventId'];
-        }
-        if(isset($data['productName'])){
-            $this->productName = $data['productName'];
-        }
-        if(isset($data['utmData'])){
-            $this->utmData = $data['utmData'];
-        }
-    }
-    
-    /**
-     * Collect UtmData
-     * @return string[]
-     */
-    private function saveAndGetUTM(){
-        $utmParams = array('source','medium','term','content','campaign');
-        $utmData = array();
-        foreach($utmParams as $param){
-            $value = Wp_Sdtrk_Helper::wp_sdtrk_getGetParamWithCookie('utm_'.$param,true,true,14);
-            if(!empty($value)){
-                $utmData['utm_'.$param] = $value;
+    public function getEventName()
+    {
+        $rawEventName = "";
+        if (isset($this->eventData['type'])) {
+            foreach ($this->eventData['type'] as $value) {
+                if (! empty($value)) {
+                    $rawEventName = $value;
+                    break;
+                }
             }
         }
-        return $utmData;
-    }
 
-    /**
-     * Generate an unique identifier
-     *
-     * @return string
-     */
-    private function generateEventId()
-    {
-        return substr(str_shuffle(MD5(microtime())), 0, 10);
-    }
-
-    /**
-     * Returns the Transaction-ID
-     */
-    private function fetchTransactionId()
-    {
-        $paramList = array(
-            'order_id'
-        );
-        return Wp_Sdtrk_Helper::wp_sdtrk_searchParams($paramList);
-    }
-
-    /**
-     * Returns the product ID
-     */
-    private function fetchProductId()
-    {
-        $paramList = array(
-            'prodid',
-            'product_id'
-        );
-        
-        $prodId = Wp_Sdtrk_Helper::wp_sdtrk_searchParams($paramList);
-        if(empty($prodId)){
-            global $post;
-            if($post && $post->ID){
-                $prodId = get_post_meta($post->ID, 'productid', true);
-            }
-        }
-        return ($prodId !== false) ? $prodId : "";
-    }
-
-    /**
-     * Returns the Event-Value
-     */
-    private function fetchEventValue()
-    {
-        $paramList = array(
-            'value',
-            'net_amount',
-            'amount'
-        );
-        $value = Wp_Sdtrk_Helper::wp_sdtrk_searchParams($paramList);
-        return (!empty($value)) ? floatval($value) : 0;
-    }
-
-    /**
-     * Returns the Event-Name
-     */
-    private function fetchEventName()
-    {
-        $paramList = array(
-            'type'
-        );
-        $rawEventName = Wp_Sdtrk_Helper::wp_sdtrk_searchParams($paramList);
         if (empty($rawEventName) && ! empty($this->transactionId)) {
             return "purchase";
         }
-        if(empty($rawEventName) && !empty($this->productId)){
+        if (empty($rawEventName) && ! empty($this->productId)) {
             return 'view_item';
         }
-        switch ($rawEventName) {
-            case 'PageView':
+        switch (strtolower($rawEventName)) {
+            case 'pageview':
                 return 'page_view';
-            case 'AddToCart':
+            case 'addtocart':
                 return 'add_to_cart';
-            case 'Purchase':
+            case 'purchase':
                 return 'purchase';
-            case 'CompleteRegistration':
+            case 'completeregistration':
                 return 'sign_up';
-            case 'Lead':
+            case 'lead':
                 return 'generate_lead';
-            case 'InitiateCheckout':
+            case 'initiatecheckout':
                 return 'begin_checkout';
-            case 'ViewContent':
+            case 'viewcontent':
                 return 'view_item';
             default:
                 return (empty($rawEventName)) ? false : $rawEventName;
@@ -211,46 +74,160 @@ class Wp_Sdtrk_Tracker_Event
     }
 
     /**
-     * Returns the product Name
+     * Return the event value
+     * @return number
      */
-    private function fetchProductName()
+    public function getEventValue()
     {
-        $paramList = array(
-            'product_name'
-        );
-        $name = Wp_Sdtrk_Helper::wp_sdtrk_searchParams($paramList);
-        return (!empty($name)) ? $name : 'custom';
+        if (isset($this->eventData['value'])) {
+            foreach ($this->eventData['value'] as $value) {
+                if (! empty($value)) {
+                    return floatval($value);
+                }
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Return the product-id
+     * @return string
+     */
+    public function getProductId()
+    {
+        if (isset($this->eventData['prodId'])) {
+            foreach ($this->eventData['prodId'] as $value) {
+                if (! empty($value)) {
+                    return $value;
+                }
+            }
+        }
+        return "";
+    }
+
+    /**
+     * Return the product-name
+     * @return string
+     */
+    public function getProductName()
+    {
+        if (isset($this->eventData['prodName'])) {
+            foreach ($this->eventData['prodName'] as $value) {
+                if (! empty($value)) {
+                    return $value;
+                }
+            }
+        }
+        return "custom";
+    }
+
+    /**
+     * Return the Brandname
+     * @return string
+     */
+    public function getBrandName()
+    {
+        if (isset($this->eventData['brandName']) && ! empty($this->eventData['brandName'])) {
+            return $this->eventData['brandName'];
+        }
+        $brandName = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "brandname");
+        return ($brandName && ! empty(trim($brandName))) ? $brandName : get_bloginfo('name');
+    }
+
+    /**
+     * Return UTM-Data
+     * @return string[]
+     */
+    public function getUtmData()
+    {
+        $utmData = array();
+        if (isset($this->eventData['utm'])) {
+            foreach ($this->eventData['utm'] as $key => $value) {
+                if (! empty($value)) {
+                    $utmData[str_replace('utm_', '', $key)] = $value;
+                }
+            }
+        }
+        return $utmData;
+    }
+
+    /**
+     * Return a random event-id
+     * @return string
+     */
+    public function getEventId()
+    {
+        if(!empty($this->getTransactionId())){
+            return $this->getTransactionId();
+        }
+        
+        if (isset($this->eventData['eventId']) && ! empty($this->eventData['eventId'])) {
+            return $this->eventData['eventId'];
+        }
+        return substr(str_shuffle(MD5(microtime())), 0, 10);
     }
     
     /**
-     * Getter for the Eventname
-     * @return string|boolean
+     * Return the IP-Adress
+     * @return string
      */
-    public function getEventName(){
-        return $this->eventName;
+    public function getEventIp()
+    {
+        if (isset($this->eventData['adress']) && ! empty($this->eventData['adress'])) {
+            return $this->eventData['adress'];
+        }
+        return Wp_Sdtrk_Helper::wp_sdtrk_getClientIp();
     }
     
-    public function getEventValue(){
-        return $this->value;
+    /**
+     * Return the User-Agent
+     * @return string
+     */
+    public function getEventAgent()
+    {
+        if (isset($this->eventData['agent']) && ! empty($this->eventData['agent'])) {
+            return $this->eventData['agent'];
+        }
+        return (isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : "";
     }
     
-    public function getProductId(){
-        return $this->productId;
+    /**
+     * Return the Source-URL
+     * @return string
+     */
+    public function getEventSource()
+    {
+        if (isset($this->eventData['source']) && ! empty($this->eventData['source'])) {
+            return $this->eventData['source'];
+        }
+        return Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL();
     }
     
-    public function getProductName(){
-        return $this->productName;
+    /**
+     * Return the Event-Time
+     * @return string
+     */
+    public function getTime()
+    {
+        if (isset($this->eventData['time']) && ! empty($this->eventData['time'])) {
+            return $this->eventData['time'];
+        }
+        return date_create()->getTimestamp();
     }
     
-    public function getBrandName(){
-        return $this->brandName;
-    }
-    
-    public function getUtmData(){
-        return $this->utmData;
-    }
-    
-    public function getEventId(){
-        return (!empty($this->transactionId)) ? $this->transactionId : $this->eventId;
+    /**
+     * Return the transaction/order-id
+     * @return string
+     */
+    public function getTransactionId()
+    {
+        if (isset($this->eventData['orderId'])) {
+            foreach ($this->eventData['orderId'] as $value) {
+                if (! empty($value)) {
+                    return $value;
+                }
+            }
+        }
+        return "";
     }
 }

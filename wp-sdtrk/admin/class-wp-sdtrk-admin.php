@@ -254,22 +254,12 @@ class Wp_Sdtrk_Admin {
                         ),
                         array(
                             'type' => 'content',
-                            'dependency' => array(
-                                'fb_pixelid',
-                                '!=',
-                                ''
-                            ),
                             'title' => '<h3>' . __('Browser based Tracking', 'wp-sdtrk') . '</h3>',
                             'content' => ''
                         ),
                         array(
                             'id'      => 'fb_trk_browser',
                             'type'    => 'switcher',
-                            'dependency' => array(
-                                'fb_pixelid',
-                                '!=',
-                                ''
-                            ),
                             'title'   => __( 'Activate browser based tracking', 'wp-sdtrk' ),
                             'description' => __('Check to fire facebook browser pixel', 'wp-sdtrk'),
                             'default' => 'no'
@@ -297,26 +287,16 @@ class Wp_Sdtrk_Admin {
                             ),
                             'title'   => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>'.__('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk').'</p><p><code>'.htmlentities('<script>backloadFB_b();</script>').'</code></p>'
+                            'after' => '<p>'.__('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk').'</p><p><code>'.htmlentities('<script>wp_sdtrk_backload_fb_b();</script>').'</code></p>'
                         ),
                         array(
                             'type' => 'content',
-                            'dependency' => array(
-                                'fb_pixelid',
-                                '!=',
-                                ''
-                            ),
                             'title' => '<h3>' . __('Server based Tracking', 'wp-sdtrk') . '</h3>',
                             'content' => ''
                         ),
                         array(
                             'id'      => 'fb_trk_server',
                             'type'    => 'switcher',
-                            'dependency' => array(
-                                'fb_pixelid',
-                                '!=',
-                                ''
-                            ),
                             'title'   => __( 'Activate server based tracking', 'wp-sdtrk' ),
                             'description' => __('Check to fire Facebook Conversion API', 'wp-sdtrk'),
                             'default' => 'no'
@@ -336,9 +316,9 @@ class Wp_Sdtrk_Admin {
                             'id'      => 'fb_trk_server_cookie_service',
                             'type'    => 'radio',
                             'dependency' => array(
-                                'fb_trk_server|fb_trk_server_token',
-                                '!=|!=',
-                                'false|""'
+                                'fb_trk_server',
+                                '!=',
+                                'false'
                             ),
                             'title'   => __( 'Choose cookie consent behavior', 'wp-sdtrk' ),
                             'options' => $cookieOptions,
@@ -349,13 +329,13 @@ class Wp_Sdtrk_Admin {
                             'id'      => 'fb_trk_server_cookie_id',
                             'type'    => 'text',
                             'dependency' => array(
-                                'fb_trk_server_cookie_service_borlabs',
-                                '==',
-                                'true'
+                                'fb_trk_server_cookie_service_borlabs|fb_trk_server',
+                                '==|!=',
+                                'true|false'
                             ),
                             'title'   => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>'.__('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk').'</p><p><code>'.htmlentities('<script>backloadFB_s();</script>').'</code></p>'
+                            'after' => '<p>'.__('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk').'</p><p><code>'.htmlentities('<script>wp_sdtrk_backload_fb_s();</script>').'</code></p>'
                         ),                        
                         array(
                             'id'      => 'fb_trk_server_debug',
@@ -438,7 +418,7 @@ class Wp_Sdtrk_Admin {
                             ),
                             'title'   => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>'.__('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk').'</p><p><code>'.htmlentities('<script>backloadGA_b();</script>').'</code></p>'
+                            'after' => '<p>'.__('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk').'</p><p><code>'.htmlentities('<script>wp_sdtrk_backload_ga_b();</script>').'</code></p>'
                         ),
                         array(
                             'id'      => 'ga_trk_debug',
