@@ -10,29 +10,6 @@ class Wp_Sdtrk_Tracker_Event
     }
 
     /**
-     * Return the Event-Data as array
-     *
-     * @return array
-     */
-    public function getEventAsArray()
-    {
-        return array(
-            'brandName' => $this->getBrandName(),
-            'transactionId' => $this->getTransactionId(),
-            'productId' => $this->getProductId(),
-            'value' => $this->getEventValue(),
-            'eventName' => $this->getEventName(),
-            'eventId' => $this->getEventId(),
-            'productName' => $this->getProductName(),
-            'utmData' => $this->getUtmData(),
-            'adress' => $this->getEventIp(),
-            'source' => $this->getEventSource(),
-            'agent' => $this->getEventAgent(),
-            'time' => $this->getTime()
-        );
-    }
-
-    /**
      * Returns the event name
      */
     public function getEventName()
@@ -47,10 +24,10 @@ class Wp_Sdtrk_Tracker_Event
             }
         }
 
-        if (empty($rawEventName) && ! empty($this->transactionId)) {
+        if (empty($rawEventName) && ! empty($this->getTransactionId())) {
             return "purchase";
         }
-        if (empty($rawEventName) && ! empty($this->productId)) {
+        if (empty($rawEventName) && ! empty($this->getProductId())) {
             return 'view_item';
         }
         switch (strtolower($rawEventName)) {

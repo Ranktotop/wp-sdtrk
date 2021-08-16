@@ -177,12 +177,7 @@ class Wp_Sdtrk {
         /**
          * The class responsible for defining all actions for AJAX
          */
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-sdtrk-ajax.php';
-        
-        /**
-         * Tracker Cookie Consent Checker
-         */
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-cookie.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-sdtrk-ajax.php';        
         
         /**
          * Tracker Event
