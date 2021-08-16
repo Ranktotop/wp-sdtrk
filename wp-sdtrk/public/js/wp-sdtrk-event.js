@@ -168,13 +168,14 @@ class Wp_Sdtrk_Event {
 
 	//Converts the Event-Name to GA
 	parseEventName(name) {
+		name = (!name || name === "") ? name : name.toLowerCase();
 		if (name === "" && this.grabFirstValue(this.orderId) !== "") {
 			return "purchase";
 		}
 		if (name === "" && this.grabProdId() !== "") {
 			return 'view_item';
-		}
-		switch (name.toLowerCase()) {
+		}		
+		switch (name) {
 			case 'pageview':
 				return 'page_view';
 			case 'addtocart':

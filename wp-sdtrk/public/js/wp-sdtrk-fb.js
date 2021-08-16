@@ -147,7 +147,8 @@ function wp_sdtrk_backload_fb_b() {
 
 //Converts an EventName to FB-EventName
 function wp_sdtrk_convertEventNameToFb(name) {
-	switch (name.toLowerCase()) {
+	name = (!name || name === "") ? name : name.toLowerCase();
+	switch (name) {
 		case 'page_view':
 			return 'PageView';
 		case 'add_to_cart':
