@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.0.7 =
+* Fixed bug with name.toLowerCase() is not a defined
+
 = 1.0.6 =
 * Fixed bug when using caching
 
