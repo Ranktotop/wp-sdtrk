@@ -1,4 +1,8 @@
 let wp_sdtrk_event = new Wp_Sdtrk_Event();
+//Backup for IE8
+if (!Date.now) {
+    Date.now = function() { return new Date().getTime(); }
+}
 wp_sdtrk_collectEventObject();
 //console.log(wp_sdtrk_event);
 
@@ -20,7 +24,7 @@ function wp_sdtrk_collectEventObject() {
 	wp_sdtrk_event.setValue(wp_sdtrk_collectParams(['value', 'net_amount', 'amount']));
 	wp_sdtrk_event.setEventName(wp_sdtrk_collectParams(['type']));
 	wp_sdtrk_event.setBrandName(wp_sdtrk.brandName);
-	wp_sdtrk_event.setEventTime(+ new Date());
+	wp_sdtrk_event.setEventTime(Date.now() / 1000 | 0);
 	wp_sdtrk_event.setEventSource(wp_sdtrk.source);
 	wp_sdtrk_event.setEventSourceAdress(wp_sdtrk.addr);
 	wp_sdtrk_event.setEventSourceAgent(wp_sdtrk.agent);

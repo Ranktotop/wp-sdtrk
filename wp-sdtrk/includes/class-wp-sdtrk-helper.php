@@ -260,6 +260,20 @@ class Wp_Sdtrk_Helper
             $error_message = curl_strerror($errno);
             self::wp_sdtrk_write_log("cURL error ({$errno}):\n {$error_message}");
         }
+        
+        try {
+            $msg = json_decode($response);
+            if(isset($msg->error)){
+                Wp_Sdtrk_Helper::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
+                Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($msg);
+                Wp_Sdtrk_Helper::wp_sdtrk_write_log('------ END CURL Error-Response: -----');
+                Wp_Sdtrk_Helper::wp_sdtrk_write_log('------ START Payload: -----');
+                Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($payload);
+                Wp_Sdtrk_Helper::wp_sdtrk_write_log('Payload was sent to: '.$url);
+                Wp_Sdtrk_Helper::wp_sdtrk_write_log('------ END Payload: -----');                
+            }
+        } catch (Exception $e) {            
+        }
         curl_close($curl);
         return $response;
     }
@@ -316,7 +330,7 @@ class Wp_Sdtrk_Helper
         if($count === 2){
             if(strlen(explode('.', $host)[1]) > 3) $host = explode('.', $host, 2)[1];
         } else if($count > 2){
-            $host = getDomainOnly(explode('.', $host, 2)[1]);
+            $host = self::wp_sdtrk_getRootDomain(explode('.', $host, 2)[1]);
         }
         $host = explode('/',$host);
         return $host[0];

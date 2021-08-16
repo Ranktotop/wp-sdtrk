@@ -208,7 +208,7 @@ class Wp_Sdtrk_Tracker_Event
      * @return string
      */
     public function getTime()
-    {
+    {        
         if (isset($this->eventData['eventTime']) && ! empty($this->eventData['eventTime'])) {
             return $this->eventData['eventTime'];
         }

@@ -44,8 +44,7 @@ class Wp_Sdtrk_Tracker_Fb
         $this->trackServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server"), "yes") == 0) ? true : false;
 
         // Debug Mode
-        $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_debug"), "yes") == 0) ? true : false;
-        $this->debugMode = ($debug && ! empty(trim($debug))) ? $debug : false;
+        $this->debugMode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_debug"), "yes") == 0) ? true : false;
     }
 
     /**
@@ -123,7 +122,6 @@ class Wp_Sdtrk_Tracker_Fb
                 )
             );
         }
-
         // ---Send Request
         // The PageView
         $requestData['event_name'] = "PageView";
@@ -158,7 +156,7 @@ class Wp_Sdtrk_Tracker_Fb
         if ($this->debugEnabled_Server()) {
             $fields["test_event_code"] = $this->debugCode;
         }
-        $payload = json_encode($fields);
+        $payload = json_encode($fields);        
 
         // Send Request
         Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload);
