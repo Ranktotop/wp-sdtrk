@@ -28,8 +28,10 @@ function wp_sdtrk_collectGAData() {
 	var eventData = {};
 	var campaignData = {};
 
-	//Debug Mode
-	initData.debug_mode = wp_sdtrk_ga.ga_debug;
+	//Debug Mode	
+	if(wp_sdtrk_ga.ga_debug === "1"){
+		initData.debug_mode = true;
+	}
 
 	//Transaction Data
 	eventData.transaction_id = eventId;
