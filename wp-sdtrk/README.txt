@@ -32,6 +32,12 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.1.2 =
+* Added automatic click- and scroll-tracking
+
+= 1.1.1 =
+* Fixed Bug when using utm_content with facebook-pixel
+
 = 1.1.0 =
 * Fixed Bug with Analytics Debugging
 

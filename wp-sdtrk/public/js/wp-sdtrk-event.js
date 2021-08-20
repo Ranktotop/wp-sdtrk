@@ -168,6 +168,32 @@ class Wp_Sdtrk_Event {
 		}
 		return [];
 	}
+	
+	//Sets the Scroll-Trigger
+	setScrollTrigger(value) {
+		this.scrollTrigger = value;
+	}
+	
+	//Gets the Scroll-Trigger
+	getScrollTrigger() {
+		if(this.scrollTrigger){
+			return this.scrollTrigger;
+		}
+		return false;
+	}
+	
+	//Sets the Click-Trigger
+	setClickTrigger(value) {
+		this.clickTrigger = value;
+	}
+	
+	//Gets the Click-Trigger
+	getClickTrigger() {
+		if(this.clickTrigger === '1'){
+			return true;
+		}
+		return false;
+	}
 
 	//Grab first Value of object
 	grabFirstValue(customObj) {

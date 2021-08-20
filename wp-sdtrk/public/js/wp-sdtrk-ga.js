@@ -1,5 +1,7 @@
 var gaEventData = false;
 var gaEventData_finishedLoading = false;
+var gaScrollTracked_b = false;
+var gaClickedButtons_b = [];
 wp_sdtrk_collectGAData();
 
 // Load Listener
@@ -23,13 +25,15 @@ function wp_sdtrk_collectGAData() {
 	var value = wp_sdtrk_event.grabValue();
 	var brandName = wp_sdtrk_event.getBrandName();
 	var timeTrigger = wp_sdtrk_event.getTimeTrigger();
+	var scrollTrigger = wp_sdtrk_event.getScrollTrigger();
+	var clickTrigger = wp_sdtrk_event.getClickTrigger();
 
 	var initData = {};
 	var eventData = {};
 	var campaignData = {};
 
 	//Debug Mode	
-	if(wp_sdtrk_ga.ga_debug === "1"){
+	if (wp_sdtrk_ga.ga_debug === "1") {
 		initData.debug_mode = true;
 	}
 
@@ -76,6 +80,8 @@ function wp_sdtrk_collectGAData() {
 	gaEventData.eventData = eventData;
 	gaEventData.eventName = eventName;
 	gaEventData.timeTrigger = timeTrigger;
+	gaEventData.scrollTrigger = scrollTrigger;
+	gaEventData.clickTrigger = clickTrigger;
 }
 
 //Inits the tracker
@@ -114,6 +120,16 @@ function wp_sdtrk_track_ga_b() {
 	if (gaEventData.timeTrigger.length > 0) {
 		wp_sdtrk_track_ga_b_timeTracker(gtag);
 	}
+
+	//Scroll-Trigger
+	if (gaEventData.scrollTrigger !== false) {
+		wp_sdtrk_track_ga_b_scrollTracker(gtag);
+	}
+
+	//Click-Trigger
+	if (gaEventData.clickTrigger !== false) {
+		wp_sdtrk_track_ga_b_clickTracker(gtag);
+	}
 }
 
 //Activate time-tracker for Browser
@@ -132,6 +148,47 @@ function wp_sdtrk_track_ga_b_timeTracker(gtag) {
 				}, time);
 			});
 		}
+
+	});
+}
+
+//Activate scroll-tracker for Browser
+function wp_sdtrk_track_ga_b_scrollTracker(gtag) {
+	if (gaEventData.scrollTrigger === false || !gtag || gaScrollTracked_b === true) {
+		return;
+	}
+	window.addEventListener('scroll', function() {
+		if (gaScrollTracked_b === true) {
+			return;
+		}
+		var st = jQuery(this).scrollTop();
+		var wh = jQuery(document).height() - jQuery(window).height();
+		var target = gaEventData.scrollTrigger;
+		var perc = Math.ceil((st * 100) / wh)
+
+		if (perc >= target) {
+			gaScrollTracked_b = true;
+			var scrollEventName = 'Scrolldepth-' + gaEventData.scrollTrigger + '-Percent';
+			gtag("event", scrollEventName, gaEventData.initData);
+		}
+	});
+}
+
+//Activate click-tracker for Browser
+function wp_sdtrk_track_ga_b_clickTracker(gtag) {
+	if (gaEventData.clickTrigger === false || !gtag || wp_sdtrk_buttons.length < 1) {
+		return;
+	}
+	wp_sdtrk_buttons.forEach((el) => {
+		jQuery(el[0]).on('click', function() {
+			if (!gaClickedButtons_b.includes(el[1])) {
+				gaClickedButtons_b.push(el[1]);
+				var btnCustomData = wp_sdtrk_clone(gaEventData.initData);
+				var clickEventName = 'ButtonClick';
+				btnCustomData.buttonTag = el[1];
+				gtag("event", clickEventName, btnCustomData);
+			}
+		});
 
 	});
 }

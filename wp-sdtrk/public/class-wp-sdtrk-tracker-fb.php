@@ -91,9 +91,11 @@ class Wp_Sdtrk_Tracker_Fb
         if (! $this->trackingEnabled_Server()) {
             return;
         }
-        
-        //is TimeTracker-Event
+
+        // is TimeTracker-Event
         $isTimeTrigger = ($event->getTimeTriggerData() !== false) ? true : false;
+        $isScrollTrigger = ($event->getScrollTriggerData() !== false) ? true : false;
+        $isClickTrigger = ($event->getClickTriggerData() !== false) ? true : false;
 
         // ---Prepare Request
         // Base-Data
@@ -129,20 +131,40 @@ class Wp_Sdtrk_Tracker_Fb
         // The PageView
         $requestData['event_name'] = "PageView";
         $requestData['custom_data'] = $customData;
-        
-        //Check for time-trigger
-        if($isTimeTrigger){
+
+        // Check for time-trigger
+        if ($isTimeTrigger) {
             $timeTriggerData = $event->getTimeTriggerData();
             $timeTriggerEventName = $timeTriggerData['name'];
             $timeTriggerEventId = $timeTriggerData['id'];
             $requestData['event_name'] = $timeTriggerEventName;
             $requestData['event_id'] = $timeTriggerEventId;
         }
+
+        // Check for scroll-trigger
+        if ($isScrollTrigger) {
+            $scrollTriggerData = $event->getScrollTriggerData();
+            $scrollTriggerEventName = $scrollTriggerData['name'];
+            $scrollTriggerEventId = $scrollTriggerData['id'];
+            $requestData['event_name'] = $scrollTriggerEventName;
+            $requestData['event_id'] = $scrollTriggerEventId;
+        }
         
+        // Check for click-trigger
+        if ($isClickTrigger) {
+            $clickTriggerData = $event->getClickTriggerData();
+            $clickTriggerEventName = $clickTriggerData['name'];
+            $clickTriggerEventId = $clickTriggerData['id'];
+            $clickTriggerEventTag = $clickTriggerData['tag'];
+            $requestData['event_name'] = $clickTriggerEventName;
+            $requestData['event_id'] = $clickTriggerEventId;
+            $requestData['custom_data']['buttonTag'] = $clickTriggerEventTag;
+        }
+
         $this->payLoadServerRequest($requestData);
 
         // The Event
-        if ($this->readEventName($event) !== false && $this->readEventName($event) !== 'PageView' && $isTimeTrigger ===false) {
+        if ($this->readEventName($event) !== false && $this->readEventName($event) !== 'PageView' && $isTimeTrigger === false && $isScrollTrigger === false) {
             if ($event->getEventValue() > 0 || $this->readEventName($event) === 'Purchase') {
                 $customData['currency'] = "EUR";
                 $customData['value'] = $event->getEventValue();
@@ -169,7 +191,7 @@ class Wp_Sdtrk_Tracker_Fb
         if ($this->debugEnabled_Server()) {
             $fields["test_event_code"] = $this->debugCode;
         }
-        $payload = json_encode($fields);        
+        $payload = json_encode($fields);
 
         // Send Request
         Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload);

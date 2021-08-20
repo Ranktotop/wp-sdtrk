@@ -1,6 +1,10 @@
 var fbEventData = false;
 var fbEventData_finishedLoading = false;
 var fbCustomEvent = false;
+var fbScrollTracked_b = false;
+var fbScrollTracked_s = false;
+var fbClickedButtons_b = [];
+var fbClickedButtons_s = [];
 wp_sdtrk_collectFBData();
 
 // Load Listener
@@ -23,6 +27,8 @@ function wp_sdtrk_collectFBData() {
 	var eventName = wp_sdtrk_convertEventNameToFb(wp_sdtrk_event.grabEventName());
 	var value = wp_sdtrk_event.grabValue();
 	var timeTrigger = wp_sdtrk_event.getTimeTrigger();
+	var scrollTrigger = wp_sdtrk_event.getScrollTrigger();
+	var clickTrigger = wp_sdtrk_event.getClickTrigger();
 
 	// Collect the Base-Data
 	var baseData = {
@@ -51,7 +57,7 @@ function wp_sdtrk_collectFBData() {
 	//UTM
 	for (var k in wp_sdtrk_event.getUtm()) {
 		if (wp_sdtrk_event.getUtm()[k] !== "") {
-			customData[k.replace("utm_", "")] = wp_sdtrk_event.getUtm()[k];
+			customData[k] = wp_sdtrk_event.getUtm()[k];
 		}
 	}
 
@@ -62,6 +68,8 @@ function wp_sdtrk_collectFBData() {
 	fbEventData.fbc = wp_sdtrk_getFbc();
 	fbEventData.fbp = wp_sdtrk_getFbp();
 	fbEventData.timeTrigger = timeTrigger;
+	fbEventData.scrollTrigger = scrollTrigger;
+	fbEventData.clickTrigger = clickTrigger;
 }
 
 //Inits the tracker
@@ -92,6 +100,16 @@ function wp_sdtrk_track_fb_s() {
 	if (fbEventData.timeTrigger.length > 0) {
 		wp_sdtrk_track_fb_s_timeTracker();
 	}
+
+	//Scroll-Trigger
+	if (fbEventData.scrollTrigger !== false) {
+		wp_sdtrk_track_fb_s_scrollTracker();
+	}
+	
+	//Click-Trigger
+	if (fbEventData.clickTrigger !== false) {
+		wp_sdtrk_track_fb_s_clickTracker();
+	}
 }
 
 //Activate time-tracker for Server
@@ -108,7 +126,7 @@ function wp_sdtrk_track_fb_s_timeTracker() {
 				time = time * 1000;
 				jQuery(document).ready(function() {
 					setTimeout(function() {
-						var timeEventId = eventId + "-" + triggerTime;
+						var timeEventId = eventId + "-t" + triggerTime;
 						var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
 						metaData.timeEventId = timeEventId;
 						metaData.timeEventName = timeEventName;
@@ -116,6 +134,60 @@ function wp_sdtrk_track_fb_s_timeTracker() {
 					}, time);
 				});
 			}
+
+		});
+	}
+}
+
+//Activate scroll-tracker for Server
+function wp_sdtrk_track_fb_s_scrollTracker() {
+	if (fbEventData.scrollTrigger === false || fbScrollTracked_s === true) {
+		return;
+	}
+	var metaData = { fbp: fbEventData.fbp, fbc: fbEventData.fbc, event: wp_sdtrk_event, type: 'fb-sd' };
+	var eventId = (fbEventData.baseData['eventId']) ? fbEventData.baseData['eventId'] : false;
+	if (eventId !== false) {
+		window.addEventListener('scroll', function() {
+			if (fbScrollTracked_s === true) {
+				return;
+			}
+			var st = jQuery(this).scrollTop();
+			var wh = jQuery(document).height() - jQuery(window).height();
+			var target = fbEventData.scrollTrigger;
+			var perc = Math.ceil((st * 100) / wh)
+
+			if (perc >= target) {
+				fbScrollTracked_s = true;
+				var scrollEventId = eventId + "-s" + fbEventData.scrollTrigger;
+				var scrollEventName = 'Scrolldepth-' + fbEventData.scrollTrigger + '-Percent';
+				metaData.scrollEventId = scrollEventId;
+				metaData.scrollEventName = scrollEventName;
+				wp_sdtrk_sendAjax(metaData);
+			}
+		});
+	}
+}
+
+//Activate click-tracker for Server
+function wp_sdtrk_track_fb_s_clickTracker() {
+	if (fbEventData.clickTrigger === false || wp_sdtrk_buttons.length < 1) {
+		return;
+	}
+	var metaData = { fbp: fbEventData.fbp, fbc: fbEventData.fbc, event: wp_sdtrk_event, type: 'fb-bc' };
+	var eventId = (fbEventData.baseData['eventId']) ? fbEventData.baseData['eventId'] : false;
+	if (eventId !== false) {
+		wp_sdtrk_buttons.forEach((el) => {
+			jQuery(el[0]).on('click', function() {
+				if (!fbClickedButtons_s.includes(el[1])) {
+					fbClickedButtons_s.push(el[1]);
+					var clickEventId = eventId + "-b" + el[1];
+					var clickEventName = 'ButtonClick';
+					metaData.clickEventId = clickEventId;
+					metaData.clickEventName = clickEventName;
+					metaData.clickEventTag = el[1];
+					wp_sdtrk_sendAjax(metaData);
+				}
+			});
 
 		});
 	}
@@ -166,6 +238,15 @@ function wp_sdtrk_track_fb_b() {
 			wp_sdtrk_track_fb_b_timeTracker(pixelId, eventId, cusD);
 		}
 
+		//Scroll-Trigger
+		if (fbEventData.scrollTrigger !== false) {
+			wp_sdtrk_track_fb_b_scrollTracker(pixelId, eventId, cusD);
+		}
+
+		//Click-Trigger
+		if (fbEventData.clickTrigger !== false) {
+			wp_sdtrk_track_fb_b_clickTracker(pixelId, eventId, cusD);
+		}
 	}
 }
 
@@ -180,12 +261,55 @@ function wp_sdtrk_track_fb_b_timeTracker(pixelId, eventId, customData) {
 			time = time * 1000;
 			jQuery(document).ready(function() {
 				setTimeout(function() {
-					var timeEventId = eventId + "-" + triggerTime;
+					var timeEventId = eventId + "-t" + triggerTime;
 					var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
 					fbq('trackCustom', timeEventName, customData, { eventID: timeEventId });
 				}, time);
 			});
 		}
+
+	});
+}
+
+//Activate scroll-tracker for Browser
+function wp_sdtrk_track_fb_b_scrollTracker(pixelId, eventId, customData) {
+	if (pixelId === false || eventId === false || fbEventData.scrollTrigger === false || !fbq || fbScrollTracked_b === true) {
+		return;
+	}
+	window.addEventListener('scroll', function() {
+		if (fbScrollTracked_b === true) {
+			return;
+		}
+		var st = jQuery(this).scrollTop();
+		var wh = jQuery(document).height() - jQuery(window).height();
+		var target = fbEventData.scrollTrigger;
+		var perc = Math.ceil((st * 100) / wh)
+
+		if (perc >= target) {
+			fbScrollTracked_b = true;
+			var scrollEventId = eventId + "-s" + fbEventData.scrollTrigger;
+			var scrollEventName = 'Scrolldepth-' + fbEventData.scrollTrigger + '-Percent';
+			fbq('trackCustom', scrollEventName, customData, { eventID: scrollEventId });
+		}
+	});
+}
+
+//Activate click-tracker for Browser
+function wp_sdtrk_track_fb_b_clickTracker(pixelId, eventId, customData) {
+	if (pixelId === false || eventId === false || fbEventData.clickTrigger === false || !fbq || wp_sdtrk_buttons.length < 1) {
+		return;
+	}
+	wp_sdtrk_buttons.forEach((el) => {
+		jQuery(el[0]).on('click', function() {
+			if (!fbClickedButtons_b.includes(el[1])) {
+				fbClickedButtons_b.push(el[1]);
+				var btnCustomData = wp_sdtrk_clone(customData);
+				var clickEventId = eventId + "-b" + el[1];
+				var clickEventName = 'ButtonClick';
+				btnCustomData.buttonTag = el[1];
+				fbq('trackCustom', clickEventName, btnCustomData, { eventID: clickEventId });
+			}
+		});
 
 	});
 }

@@ -1,10 +1,11 @@
 let wp_sdtrk_event = new Wp_Sdtrk_Event();
+let wp_sdtrk_buttons = [];
 //Backup for IE8
 if (!Date.now) {
-    Date.now = function() { return new Date().getTime(); }
+	Date.now = function() { return new Date().getTime(); }
 }
 wp_sdtrk_collectEventObject();
-//console.log(wp_sdtrk_event);
+wp_sdtrk_collectTrackerButtons();
 
 /**
 * Collects all available data for wp_sdtrk_event-Object
@@ -13,11 +14,11 @@ function wp_sdtrk_collectEventObject() {
 	//UTMs
 	wp_sdtrk_event.setUtm(wp_sdtrk_collectParams(['utm_source', 'utm_medium', 'utm_term', 'utm_content', 'utm_campaign']));
 	wp_sdtrk_persistData(wp_sdtrk_event.getUtm());
-	wp_sdtrk_event.setUtm(wp_sdtrk_collectCookies(wp_sdtrk_event.getUtm()));	
+	wp_sdtrk_event.setUtm(wp_sdtrk_collectCookies(wp_sdtrk_event.getUtm()));
 
 	//Event
 	wp_sdtrk_event.setProdId(wp_sdtrk_collectParams(['prodid', 'product_id']));
-	wp_sdtrk_event.addProdId('postProdId',wp_sdtrk.prodId);
+	wp_sdtrk_event.addProdId('postProdId', wp_sdtrk.prodId);
 	wp_sdtrk_event.setProdName(wp_sdtrk_collectParams(['product_name']));
 	wp_sdtrk_event.setOrderId(wp_sdtrk_collectParams(['order_id']));
 	wp_sdtrk_event.setEventId(Math.floor(Math.random() * 100) + "" + Date.now());
@@ -28,10 +29,42 @@ function wp_sdtrk_collectEventObject() {
 	wp_sdtrk_event.setEventSource(wp_sdtrk.source);
 	wp_sdtrk_event.setEventSourceAdress(wp_sdtrk.addr);
 	wp_sdtrk_event.setEventSourceAgent(wp_sdtrk.agent);
-	
+
 	//Additional
-	if(wp_sdtrk.timeTrigger){
+	//TimeTrigger
+	if (wp_sdtrk.timeTrigger) {
 		wp_sdtrk_event.setTimeTrigger(wp_sdtrk.timeTrigger);
+	}
+	//ScrollTrigger
+	if (wp_sdtrk.scrollTrigger) {
+		wp_sdtrk_event.setScrollTrigger(wp_sdtrk.scrollTrigger);
+	}
+
+	//ClickTrigger
+	if (wp_sdtrk.clickTrigger) {
+		wp_sdtrk_event.setClickTrigger(wp_sdtrk.clickTrigger);
+	}
+}
+
+/**
+* Collects all tracker-buttons
+ */
+function wp_sdtrk_collectTrackerButtons() {
+	if (wp_sdtrk_event.getClickTrigger() !== false) {
+		jQuery(document).ready(function() {
+			elements = [];
+			jQuery("[class*='trkbtn-']").each(function(index) {
+				var el = jQuery(this);
+				var classes = el.attr("class").split(/\s+/);
+				for (const className of classes) {
+					if (className.includes("trkbtn-")) {
+						var tagName = className.replace('trkbtn-', "").replace('-trkbtn', "");
+						elements.push([el, tagName]);
+					}
+				}
+			});
+			wp_sdtrk_buttons = elements;
+		});
 	}
 }
 

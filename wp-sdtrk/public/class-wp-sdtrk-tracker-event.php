@@ -5,11 +5,15 @@ class Wp_Sdtrk_Tracker_Event
     private $eventData;
     
     private $timeTriggerData;
+    private $scrollTriggerData;
+    private $clickTriggerData;
 
     public function __construct($eventData)
     {
         $this->eventData = $eventData;
         $this->timeTriggerData = false;
+        $this->scrollTriggerData = false;
+        $this->clickTriggerData = false;
     }
 
     /**
@@ -101,6 +105,40 @@ class Wp_Sdtrk_Tracker_Event
     public function getTimeTriggerData(){
         return $this->timeTriggerData;
     }
+    
+    /**
+     * Sets the Scroll Data for Scroll-Events
+     * @param String $eventName
+     * @param String $eventId
+     */
+    public function setScrollTriggerData($eventName,$eventId)
+    {
+        if(empty($eventName) || empty($eventId)){
+            $this->scrollTriggerData = false;
+        }
+        $this->scrollTriggerData = ['name' => $eventName,'id' => $eventId];
+    }
+    
+    public function getScrollTriggerData(){
+        return $this->scrollTriggerData;
+    }
+    
+    /**
+     * Sets the Click Data for Click-Events
+     * @param String $eventName
+     * @param String $eventId
+     */
+    public function setClickTriggerData($eventName,$eventId,$tag)
+    {
+        if(empty($eventName) || empty($eventId) || $tag){
+            $this->clickTriggerData = false;
+        }
+        $this->clickTriggerData = ['name' => $eventName,'id' => $eventId,'tag' => $tag];
+    }
+    
+    public function getClickTriggerData(){
+        return $this->clickTriggerData;
+    }
 
     /**
      * Return the product-name
@@ -141,7 +179,7 @@ class Wp_Sdtrk_Tracker_Event
         if (isset($this->eventData['utm'])) {
             foreach ($this->eventData['utm'] as $key => $value) {
                 if (! empty($value)) {
-                    $utmData[str_replace('utm_', '', $key)] = $value;
+                    $utmData[$key] = $value;
                 }
             }
         }

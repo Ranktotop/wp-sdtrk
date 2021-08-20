@@ -194,6 +194,21 @@ class Wp_Sdtrk_Public
                 $localizedData['timeTrigger'] = $cleanTimeData;
             }
         }
+        
+        // Get Scroll-Data from Settings
+        $scrollTracking = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_scrolling"), "yes") == 0) ? true : false;
+        if($scrollTracking){
+            $scrollData = intval(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", array()), "trk_scrolling_depth"));
+            if($scrollData>0){
+                $localizedData['scrollTrigger'] = $scrollData;
+            }
+        }
+        
+        // Get Klick-Data from Settings
+        $clickTracking = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_buttons"), "yes") == 0) ? true : false;
+        if($clickTracking){
+            $localizedData['clickTrigger'] = $clickTracking;
+        }
 
         $localizedData['prodId'] = $prodId;
         $localizedData['rootDomain'] = Wp_Sdtrk_Helper::wp_sdtrk_getRootDomain();
@@ -361,6 +376,31 @@ class Wp_Sdtrk_Public
                     $timeEventId = (isset($meta['timeEventId'])) ? $meta['timeEventId'] : "";
                     $timeEventName = (isset($meta['timeEventName'])) ? $meta['timeEventName'] : "";
                     $event->setTimeTriggerData($timeEventName, $timeEventId);
+                    $fbTracker = new Wp_Sdtrk_Tracker_Fb();
+                    $fbTracker->fireTracking_Server($event, $fbp, $fbc);
+                    return array(
+                        'state' => true
+                    );
+                    break;
+                case 'fb-sd':
+                    $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
+                    $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
+                    $scrollEventId = (isset($meta['scrollEventId'])) ? $meta['scrollEventId'] : "";
+                    $scrollEventName = (isset($meta['scrollEventName'])) ? $meta['scrollEventName'] : "";
+                    $event->setScrollTriggerData($scrollEventName, $scrollEventId);
+                    $fbTracker = new Wp_Sdtrk_Tracker_Fb();
+                    $fbTracker->fireTracking_Server($event, $fbp, $fbc);
+                    return array(
+                        'state' => true
+                    );
+                    break;
+                case 'fb-bc':
+                    $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
+                    $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
+                    $clickEventId = (isset($meta['clickEventId'])) ? $meta['clickEventId'] : "";
+                    $clickEventName = (isset($meta['clickEventName'])) ? $meta['clickEventName'] : "";
+                    $clickEventTag = (isset($meta['clickEventTag'])) ? $meta['clickEventTag'] : "";
+                    $event->setClickTriggerData($clickEventName, $clickEventId,$clickEventTag);
                     $fbTracker = new Wp_Sdtrk_Tracker_Fb();
                     $fbTracker->fireTracking_Server($event, $fbp, $fbc);
                     return array(
