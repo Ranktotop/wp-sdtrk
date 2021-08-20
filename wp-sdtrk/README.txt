@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.1.0 =
+* Fixed Bug with Analytics Debugging
+
 = 1.0.9 =
 * Added support for automatic time tracking
 
