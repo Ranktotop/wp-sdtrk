@@ -1,5 +1,6 @@
 var fbEventData = false;
 var fbEventData_finishedLoading = false;
+var fbCustomEvent = false;
 wp_sdtrk_collectFBData();
 
 // Load Listener
@@ -21,6 +22,7 @@ function wp_sdtrk_collectFBData() {
 	var eventId = wp_sdtrk_event.grabOrderId();
 	var eventName = wp_sdtrk_convertEventNameToFb(wp_sdtrk_event.grabEventName());
 	var value = wp_sdtrk_event.grabValue();
+	var timeTrigger = wp_sdtrk_event.getTimeTrigger();
 
 	// Collect the Base-Data
 	var baseData = {
@@ -59,6 +61,7 @@ function wp_sdtrk_collectFBData() {
 	fbEventData.customData = customData;
 	fbEventData.fbc = wp_sdtrk_getFbc();
 	fbEventData.fbp = wp_sdtrk_getFbp();
+	fbEventData.timeTrigger = timeTrigger;
 }
 
 //Inits the tracker
@@ -84,6 +87,38 @@ function wp_sdtrk_track_fb() {
 function wp_sdtrk_track_fb_s() {
 	var metaData = { fbp: fbEventData.fbp, fbc: fbEventData.fbc, event: wp_sdtrk_event, type: 'fb' };
 	wp_sdtrk_sendAjax(metaData);
+
+	//Time Trigger
+	if (fbEventData.timeTrigger.length > 0) {
+		wp_sdtrk_track_fb_s_timeTracker();
+	}
+}
+
+//Activate time-tracker for Server
+function wp_sdtrk_track_fb_s_timeTracker() {
+	if (fbEventData.timeTrigger.length < 1) {
+		return;
+	}
+	var metaData = { fbp: fbEventData.fbp, fbc: fbEventData.fbc, event: wp_sdtrk_event, type: 'fb-tt' };
+	var eventId = (fbEventData.baseData['eventId']) ? fbEventData.baseData['eventId'] : false;
+	if (eventId !== false) {
+		fbEventData.timeTrigger.forEach((triggerTime) => {
+			var time = parseInt(triggerTime);
+			if (!isNaN(time)) {
+				time = time * 1000;
+				jQuery(document).ready(function() {
+					setTimeout(function() {
+						var timeEventId = eventId + "-" + triggerTime;
+						var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
+						metaData.timeEventId = timeEventId;
+						metaData.timeEventName = timeEventName;
+						wp_sdtrk_sendAjax(metaData);
+					}, time);
+				});
+			}
+
+		});
+	}
 }
 
 //Fire FB Pixel in Browser
@@ -118,9 +153,41 @@ function wp_sdtrk_track_fb_b() {
 
 		//Event Pixel
 		if (eventName !== false && eventName !== 'PageView') {
-			fbq('trackSingle', pixelId, eventName, customData, { eventID: eventId });
+			if (fbCustomEvent) {
+				fbq('trackCustom', eventName, customData, { eventID: eventId });
+			}
+			else {
+				fbq('trackSingle', pixelId, eventName, customData, { eventID: eventId });
+			}
 		}
+
+		//Time Trigger
+		if (fbEventData.timeTrigger.length > 0) {
+			wp_sdtrk_track_fb_b_timeTracker(pixelId, eventId, cusD);
+		}
+
 	}
+}
+
+//Activate time-tracker for Browser
+function wp_sdtrk_track_fb_b_timeTracker(pixelId, eventId, customData) {
+	if (pixelId === false || eventId === false || fbEventData.timeTrigger.length < 1 || !fbq) {
+		return;
+	}
+	fbEventData.timeTrigger.forEach((triggerTime) => {
+		var time = parseInt(triggerTime);
+		if (!isNaN(time)) {
+			time = time * 1000;
+			jQuery(document).ready(function() {
+				setTimeout(function() {
+					var timeEventId = eventId + "-" + triggerTime;
+					var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
+					fbq('trackCustom', timeEventName, customData, { eventID: timeEventId });
+				}, time);
+			});
+		}
+
+	});
 }
 
 //Backload FB Pixel on Server
@@ -164,6 +231,7 @@ function wp_sdtrk_convertEventNameToFb(name) {
 		case 'view_item':
 			return 'ViewContent';
 		default:
+			fbCustomEvent = true;
 			return name;
 	}
 }

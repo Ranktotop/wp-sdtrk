@@ -229,10 +229,65 @@ class Wp_Sdtrk_Admin {
             'icon' => 'dashicons-admin-generic',
             'fields' => array(
                 array(
+                    'type' => 'content',
+                    'title' => '<h3>' . __('Basic Data Settings', 'wp-sdtrk') . '</h3>',
+                    'content' => ''
+                ),
+                array(
                     'id'      => 'brandname',
                     'type'    => 'text',
                     'title'   => __('Default Brand-Name', 'wp-sdtrk'),
                     'description' => __('This Name is used for several services', 'wp-sdtrk'),
+                ),
+                array(
+                    'type' => 'content',
+                    'title' => '<h3>' . __('Basic Tracking Settings', 'wp-sdtrk') . '</h3>',
+                    'content' => ''
+                ),
+                array(
+                    'id'      => 'trk_time',
+                    'type'    => 'switcher',
+                    'title'   => __( 'Fire signal-event after time', 'wp-sdtrk' ),
+                    'description' => __('Check to fire a signal event after time', 'wp-sdtrk'),
+                    'default' => 'no'
+                ),
+                array(
+                    'type'    => 'group',
+                    'id'      => 'trk_time_group',
+                    'title'   => __( 'Time-Settings', 'wp-sdtrk' ),
+                    'description' => __('Fire a signal-event after X Seconds', 'wp-sdtrk'),
+                    'after' => __('Attention: Every event must be processed! Make sure that the frequency is therefore not too high and not several events are triggered at the same time!', 'wp-sdtrk'),
+                    'dependency' => array(
+                        'trk_time',
+                        '!=',
+                        'false'
+                    ),
+                    'options' => array(
+                        'repeater'          => true,
+                        'accordion'         => true,
+                        'button_title'      => __( 'Add new', 'wp-sdtrk' ),
+                        'group_title'       => __( 'Time-Settings', 'wp-sdtrk' ),
+                        'limit'             => 5,
+                        'sortable'          => true,
+                        'mode'              => 'compact',
+                    ),
+                    'fields'  => array(
+                        
+                        array(
+                            'id'      => 'trk_time_group_seconds',
+                            'type'    => 'number',
+                            'min'     => '1',
+                            'step'    => '1',
+                            'default' => '10',
+                            'max'     => '18000',
+                            'attributes' => array(
+                                // mark this field az title, on type this will change group item title
+                                'data-title' => 'title',
+                                'placeholder' => __( 'Seconds to fire after', 'wp-sdtrk' ),
+                            ),
+                        ),
+                        
+                    ),
                 ),
             )
         );

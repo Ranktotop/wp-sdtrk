@@ -87,7 +87,7 @@ class Wp_Sdtrk_Event {
 	//Grabs the first entry in Value and validates it
 	grabValue() {
 		var value = this.grabFirstValue(this.value);
-		return ((+(value) + 0.0) !== NaN) ? (+(value) + 0.0) : 0;
+		return (!isNaN(+(value) + 0.0)) ? (+(value) + 0.0) : 0;
 	}
 
 	//Sets the Event-Name
@@ -154,6 +154,19 @@ class Wp_Sdtrk_Event {
 	//Gets the Event-SourceAdress
 	getEventSourceAdress() {
 		return this.eventSourceAdress;
+	}
+	
+	//Sets the Time-Triggers
+	setTimeTrigger(value) {
+		this.timeTrigger = value;
+	}
+	
+	//Gets the Time-Triggers
+	getTimeTrigger() {
+		if(this.timeTrigger){
+			return this.timeTrigger;
+		}
+		return [];
 	}
 
 	//Grab first Value of object

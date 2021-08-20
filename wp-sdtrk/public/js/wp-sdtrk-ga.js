@@ -22,11 +22,12 @@ function wp_sdtrk_collectGAData() {
 	var eventName = wp_sdtrk_event.grabEventName();
 	var value = wp_sdtrk_event.grabValue();
 	var brandName = wp_sdtrk_event.getBrandName();
+	var timeTrigger = wp_sdtrk_event.getTimeTrigger();
 
 	var initData = {};
 	var eventData = {};
 	var campaignData = {};
-	
+
 	//Debug Mode
 	initData.debug_mode = wp_sdtrk_ga.ga_debug;
 
@@ -38,7 +39,7 @@ function wp_sdtrk_collectGAData() {
 		eventData.value = value;
 		eventData.currency = "EUR";
 	}
-	
+
 	//UTM
 	var campaignSet = false;
 	for (var k in wp_sdtrk_event.getUtm()) {
@@ -72,6 +73,7 @@ function wp_sdtrk_collectGAData() {
 	gaEventData.initData = initData;
 	gaEventData.eventData = eventData;
 	gaEventData.eventName = eventName;
+	gaEventData.timeTrigger = timeTrigger;
 }
 
 //Inits the tracker
@@ -100,11 +102,36 @@ function wp_sdtrk_track_ga_b() {
 	function gtag() { dataLayer.push(arguments); }
 	gtag('js', new Date());
 	gtag('config', wp_sdtrk_ga.ga_id, gaEventData.initData);
-	
+
 	var name = gaEventData.eventName;
 	if (name && name !== "" && name !== 'page_view') {
 		gtag("event", name, gaEventData.eventData);
 	}
+
+	//Time Trigger
+	if (gaEventData.timeTrigger.length > 0) {
+		wp_sdtrk_track_ga_b_timeTracker(gtag);
+	}
+}
+
+//Activate time-tracker for Browser
+function wp_sdtrk_track_ga_b_timeTracker(gtag) {
+	if (!gtag || gaEventData.timeTrigger.length < 1) {
+		return;
+	}
+	gaEventData.timeTrigger.forEach((triggerTime) => {
+		var time = parseInt(triggerTime);
+		if (!isNaN(time)) {
+			time = time * 1000;
+			jQuery(document).ready(function() {
+				setTimeout(function() {
+					var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
+					gtag("event", timeEventName, gaEventData.initData);
+				}, time);
+			});
+		}
+
+	});
 }
 
 //Backload Analytics in Browser

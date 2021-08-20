@@ -3,10 +3,13 @@
 class Wp_Sdtrk_Tracker_Event
 {
     private $eventData;
+    
+    private $timeTriggerData;
 
     public function __construct($eventData)
     {
         $this->eventData = $eventData;
+        $this->timeTriggerData = false;
     }
 
     /**
@@ -80,6 +83,23 @@ class Wp_Sdtrk_Tracker_Event
             }
         }
         return "";
+    }
+    
+    /**
+     * Sets the Time Data for Time-Events
+     * @param String $eventName
+     * @param String $eventId
+     */
+    public function setTimeTriggerData($eventName,$eventId)
+    {
+        if(empty($eventName) || empty($eventId)){
+            $this->timeTriggerData = false;
+        }
+        $this->timeTriggerData = ['name' => $eventName,'id' => $eventId];
+    }
+    
+    public function getTimeTriggerData(){
+        return $this->timeTriggerData;
     }
 
     /**

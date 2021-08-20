@@ -91,6 +91,9 @@ class Wp_Sdtrk_Tracker_Fb
         if (! $this->trackingEnabled_Server()) {
             return;
         }
+        
+        //is TimeTracker-Event
+        $isTimeTrigger = ($event->getTimeTriggerData() !== false) ? true : false;
 
         // ---Prepare Request
         // Base-Data
@@ -126,10 +129,20 @@ class Wp_Sdtrk_Tracker_Fb
         // The PageView
         $requestData['event_name'] = "PageView";
         $requestData['custom_data'] = $customData;
+        
+        //Check for time-trigger
+        if($isTimeTrigger){
+            $timeTriggerData = $event->getTimeTriggerData();
+            $timeTriggerEventName = $timeTriggerData['name'];
+            $timeTriggerEventId = $timeTriggerData['id'];
+            $requestData['event_name'] = $timeTriggerEventName;
+            $requestData['event_id'] = $timeTriggerEventId;
+        }
+        
         $this->payLoadServerRequest($requestData);
 
         // The Event
-        if ($this->readEventName($event) !== false && $this->readEventName($event) !== 'PageView') {
+        if ($this->readEventName($event) !== false && $this->readEventName($event) !== 'PageView' && $isTimeTrigger ===false) {
             if ($event->getEventValue() > 0 || $this->readEventName($event) === 'Purchase') {
                 $customData['currency'] = "EUR";
                 $customData['value'] = $event->getEventValue();

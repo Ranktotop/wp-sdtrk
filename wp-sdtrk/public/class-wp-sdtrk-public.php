@@ -138,29 +138,8 @@ class Wp_Sdtrk_Public
          * between the defined hooks and the functions defined in this
          * class.
          */
-
-        // Register Script for JS Event-Data-Class
-        wp_register_script("wp_sdtrk_event", plugins_url("js/wp-sdtrk-event.js", __FILE__), array(
-            'jquery'
-        ), "1.0", false);
-        wp_enqueue_script('wp_sdtrk_event');
-
-        // Register Script for collecting Event-Data in Browser
-        wp_enqueue_script($this->wp_sdtrk, plugin_dir_url(__FILE__) . 'js/wp-sdtrk-public.js', array(
-            'jquery'
-        ), $this->version, false);
         $this->localize_eventData();
-
-        // Register Script for Facebook-Tracking
-        wp_register_script("wp_sdtrk-fb", plugins_url("js/wp-sdtrk-fb.js", __FILE__), array(
-            'jquery'
-        ), "1.0", false);
         $this->localize_fbData();
-
-        // Register Script for Google-Tracking
-        wp_register_script("wp_sdtrk-ga", plugins_url("js/wp-sdtrk-ga.js", __FILE__), array(
-            'jquery'
-        ), "1.0", false);
         $this->localize_gaData();
     }
 
@@ -176,6 +155,17 @@ class Wp_Sdtrk_Public
     private function localize_eventData()
     {
         // Init
+        // Register Script for JS Event-Data-Class
+        wp_register_script("wp_sdtrk_event", plugins_url("js/wp-sdtrk-event.js", __FILE__), array(
+            'jquery'
+        ), "1.0", false);
+        wp_enqueue_script('wp_sdtrk_event');
+
+        // Register Script for collecting Event-Data in Browser
+        wp_enqueue_script($this->wp_sdtrk, plugin_dir_url(__FILE__) . 'js/wp-sdtrk-public.js', array(
+            'jquery'
+        ), $this->version, false);
+
         $localizedData = array();
         $localizedData['ajax_url'] = admin_url('admin-ajax.php');
         $localizedData['_nonce'] = wp_create_nonce('security_wp-sdtrk');
@@ -189,29 +179,25 @@ class Wp_Sdtrk_Public
         $brandName = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "brandname");
         $brandName = ($brandName && ! empty(trim($brandName))) ? $brandName : get_bloginfo('name');
 
-        // ID
-        $ga_id = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_measurement_id");
-        $ga_id = ($ga_id && ! empty(trim($ga_id))) ? $ga_id : false;
-
-        // GA Debug Mode
-        $ga_debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_debug"), "yes") == 0) ? true : false;
-        $ga_debug = ($ga_debug && ! empty(trim($ga_debug))) ? $ga_debug : false;
-
-        // Google: Track Browser Cookie Service
-        $ga_trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_browser_cookie_service");
-        $ga_trkBrowserCookieService = ($ga_trkBrowserCookieService && ! empty(trim($ga_trkBrowserCookieService))) ? $ga_trkBrowserCookieService : false;
-
-        // Google: Track Browser Cookie ID
-        $ga_trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_browser_cookie_id");
-        $ga_trkBrowserCookieId = ($ga_trkBrowserCookieId && ! empty(trim($ga_trkBrowserCookieId))) ? $ga_trkBrowserCookieId : false;
+        // Get the timeData from Settings
+        $timeTracking = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_time"), "yes") == 0) ? true : false;
+        if ($timeTracking) {
+            $timeData = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", array()), "trk_time_group");
+            $timeData = (! is_array($timeData)) ? array() : $timeData;
+            if (sizeof($timeData) > 0) {
+                $cleanTimeData = array();
+                foreach ($timeData as $time) {
+                    if (isset($time["trk_time_group_seconds"]) && ! empty($time["trk_time_group_seconds"])) {
+                        array_push($cleanTimeData, floatval($time["trk_time_group_seconds"]));
+                    }
+                }
+                $localizedData['timeTrigger'] = $cleanTimeData;
+            }
+        }
 
         $localizedData['prodId'] = $prodId;
         $localizedData['rootDomain'] = Wp_Sdtrk_Helper::wp_sdtrk_getRootDomain();
         $localizedData['brandName'] = $brandName;
-        $localizedData['ga_id'] = $ga_id;
-        $localizedData['ga_debug'] = $ga_debug;
-        $localizedData['c_ga_b_i'] = $ga_trkBrowserCookieId;
-        $localizedData['c_ga_b_s'] = $ga_trkBrowserCookieService;
         $localizedData['addr'] = Wp_Sdtrk_Helper::wp_sdtrk_getClientIp();
         $localizedData['agent'] = $_SERVER['HTTP_USER_AGENT'];
         $localizedData['source'] = Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL();
@@ -225,12 +211,17 @@ class Wp_Sdtrk_Public
     private function localize_fbData()
     {
         // Init
+        // Register Script for Facebook-Tracking
+        wp_register_script("wp_sdtrk-fb", plugins_url("js/wp-sdtrk-fb.js", __FILE__), array(
+            'jquery'
+        ), "1.0", false);
+
         $localizedData = array();
 
         // Pixel ID
         $fb_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_pixelid");
         $fb_pixelId = ($fb_pixelId && ! empty(trim($fb_pixelId))) ? $fb_pixelId : false;
-        
+
         // Track Browser Enabled
         $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser"), "yes") == 0) ? true : false;
 
@@ -244,7 +235,7 @@ class Wp_Sdtrk_Public
 
         // Track Server Enabled
         $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server"), "yes") == 0) ? true : false;
-        
+
         // Facebook: Track Server Cookie Service
         $fb_trkServerCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_cookie_service");
         $fb_trkServerCookieService = ($fb_trkServerCookieService && ! empty(trim($fb_trkServerCookieService))) ? $fb_trkServerCookieService : false;
@@ -252,7 +243,7 @@ class Wp_Sdtrk_Public
         // Facebook: Track Server Cookie ID
         $fb_trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_cookie_id");
         $fb_trkServerCookieId = ($fb_trkServerCookieId && ! empty(trim($fb_trkServerCookieId))) ? $fb_trkServerCookieId : false;
-        
+
         $localizedData['fb_id'] = $fb_pixelId;
         $localizedData['fb_b_e'] = $trkBrowser;
         $localizedData['c_fb_b_i'] = $fb_trkBrowserCookieId;
@@ -264,39 +255,43 @@ class Wp_Sdtrk_Public
         wp_localize_script("wp_sdtrk-fb", 'wp_sdtrk_fb', $localizedData);
         wp_enqueue_script('wp_sdtrk-fb');
     }
-    
+
     /**
      * Collect all GA-Data and pass them to JS
      */
     private function localize_gaData()
     {
         // Init
+        // Register Script for Google-Tracking
+        wp_register_script("wp_sdtrk-ga", plugins_url("js/wp-sdtrk-ga.js", __FILE__), array(
+            'jquery'
+        ), "1.0", false);
         $localizedData = array();
-        
+
         // Mess ID
         $messId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_measurement_id");
         $messId = ($messId && ! empty(trim($messId))) ? $messId : false;
-        
+
         // Track Browser Enabled
         $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_browser"), "yes") == 0) ? true : false;
-        
+
         // Debug Mode
         $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_debug"), "yes") == 0) ? true : false;
-        
+
         // Google: Track Browser Cookie Service
         $trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_browser_cookie_service");
         $trkBrowserCookieService = ($trkBrowserCookieService && ! empty(trim($trkBrowserCookieService))) ? $trkBrowserCookieService : false;
-        
+
         // Google: Track Browser Cookie ID
         $trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_browser_cookie_id");
         $trkBrowserCookieId = ($trkBrowserCookieId && ! empty(trim($trkBrowserCookieId))) ? $trkBrowserCookieId : false;
-                
+
         $localizedData['ga_id'] = $messId;
         $localizedData['ga_debug'] = $debug;
         $localizedData['ga_b_e'] = $trkBrowser;
         $localizedData['c_ga_b_i'] = $trkBrowserCookieId;
         $localizedData['c_ga_b_s'] = $trkBrowserCookieService;
-        
+
         wp_localize_script("wp_sdtrk-ga", 'wp_sdtrk_ga', $localizedData);
         wp_enqueue_script('wp_sdtrk-ga');
     }
@@ -354,7 +349,20 @@ class Wp_Sdtrk_Public
                     $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
                     $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
                     $fbTracker = new Wp_Sdtrk_Tracker_Fb();
-                    $fbTracker->fireTracking_Server($event,$fbp,$fbc);
+                    $fbTracker->fireTracking_Server($event, $fbp, $fbc);
+                    return array(
+                        'state' => true
+                    );
+                    break;
+                // Facebook CAPI Time-Events
+                case 'fb-tt':
+                    $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
+                    $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
+                    $timeEventId = (isset($meta['timeEventId'])) ? $meta['timeEventId'] : "";
+                    $timeEventName = (isset($meta['timeEventName'])) ? $meta['timeEventName'] : "";
+                    $event->setTimeTriggerData($timeEventName, $timeEventId);
+                    $fbTracker = new Wp_Sdtrk_Tracker_Fb();
+                    $fbTracker->fireTracking_Server($event, $fbp, $fbc);
                     return array(
                         'state' => true
                     );

@@ -28,6 +28,11 @@ function wp_sdtrk_collectEventObject() {
 	wp_sdtrk_event.setEventSource(wp_sdtrk.source);
 	wp_sdtrk_event.setEventSourceAdress(wp_sdtrk.addr);
 	wp_sdtrk_event.setEventSourceAgent(wp_sdtrk.agent);
+	
+	//Additional
+	if(wp_sdtrk.timeTrigger){
+		wp_sdtrk_event.setTimeTrigger(wp_sdtrk.timeTrigger);
+	}
 }
 
 /**
