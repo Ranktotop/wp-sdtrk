@@ -362,10 +362,12 @@ function wp_sdtrk_convertEventNameToFb(name) {
 
 //Get fbp or calculate new fbp
 function wp_sdtrk_getFbp() {
-	if (wp_sdtrk_getCookie('_fbp', false)) {
-		return wp_sdtrk_getCookie('_fbp', false);
-	}
 	var validDays = 90;
+	if (wp_sdtrk_getCookie('_fbp', false)) {
+		var value = wp_sdtrk_getCookie('_fbp', false);
+		wp_sdtrk_setCookie('_fbp', value, validDays, false);		
+		return value;
+	}	
 	var version = 'fb';
 	var subdomainIndex = '1';
 	var creationTime = + new Date();
@@ -377,11 +379,13 @@ function wp_sdtrk_getFbp() {
 
 //Get fbc or calculate new fbc
 function wp_sdtrk_getFbc() {
+	var validDays = 90;
 	if (wp_sdtrk_getCookie('_fbc', false)) {
-		return wp_sdtrk_getCookie('_fbc', false);
+		var value = wp_sdtrk_getCookie('_fbc', false);
+		wp_sdtrk_setCookie('_fbc', value, validDays, false);		
+		return value;
 	}
-	else if (wp_sdtrk_getParam("fbclid")) {
-		var validDays = 90;
+	else if (wp_sdtrk_getParam("fbclid")) {		
 		var version = 'fb';
 		var subdomainIndex = '1';
 		var creationTime = + new Date();

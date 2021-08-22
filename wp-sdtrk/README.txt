@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.1.3 =
+* FBP and FBC cookies are now refreshing automatically
+
 = 1.1.2 =
 * Added automatic click- and scroll-tracking
 
