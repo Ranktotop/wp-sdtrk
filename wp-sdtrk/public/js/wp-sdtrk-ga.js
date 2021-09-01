@@ -27,6 +27,7 @@ function wp_sdtrk_collectGAData() {
 	var timeTrigger = wp_sdtrk_event.getTimeTrigger();
 	var scrollTrigger = wp_sdtrk_event.getScrollTrigger();
 	var clickTrigger = wp_sdtrk_event.getClickTrigger();
+	var isGa4 = true;
 
 	var initData = {};
 	var eventData = {};
@@ -52,13 +53,16 @@ function wp_sdtrk_collectGAData() {
 		if (wp_sdtrk_event.getUtm()[k] !== "") {
 			initData[k.replace("utm_", "")] = wp_sdtrk_event.getUtm()[k];
 			eventData[k.replace("utm_", "")] = wp_sdtrk_event.getUtm()[k];
-			//Renaming utm_campaign to utm_name could be needed for GA4
-			campaignData[k.replace("utm_", "")] = wp_sdtrk_event.getUtm()[k];
-			campaignSet = true;
+			// Universal Analytics way (Not needed for GA4)
+			if (isGa4 === false) {
+				campaignData[k.replace("utm_", "")] = wp_sdtrk_event.getUtm()[k];
+				campaignSet = true;
+			}
 		}
 	}
 	//Replace Campaign to support GA assignment
 	if (campaignSet) {
+		// Universal Analytics way (Not needed for GA4)
 		initData.campaign = campaignData;
 		eventData.campaign = campaignData;
 	}
@@ -107,9 +111,33 @@ function wp_sdtrk_track_ga_b() {
 	var x = document.getElementsByTagName('script')[0];
 	x.parentNode.insertBefore(s, x);
 	window.dataLayer = window.dataLayer || [];
+
+
+	//V1 -working for ga4
 	function gtag() { dataLayer.push(arguments); }
 	gtag('js', new Date());
 	gtag('config', wp_sdtrk_ga.ga_id, gaEventData.initData);
+
+	// -> working for GA4
+	//gtag('config', wp_sdtrk_ga.ga_id, {
+	//	'debug_mode': true,
+	//	'campaign': 'transferv20c2',
+	//	'source': 'transferv20s2',
+	//	'medium': 'transferv20m2',
+	//	'name': 'transferv20n2',
+	//	'content': 'transferv20ct2',
+	//	'term': 'transferv20t2'
+	//});
+
+	// -> working for Universal Analytics
+	//gtag('config', wp_sdtrk_ga.ga_id, gaEventData.initData);
+	/**
+	output:
+	campaign: {source: "1154", medium: "def", content: "abc"}
+	content: "abc"
+	debug_mode: true
+	medium: "def"
+	 */
 
 	var name = gaEventData.eventName;
 	if (name && name !== "" && name !== 'page_view') {
@@ -202,4 +230,9 @@ function wp_sdtrk_backload_ga_b() {
 	//Save the given consent
 	gaEventData.bc = true
 	wp_sdtrk_track_ga_b();
+}
+
+//For testing only
+function randomInteger(min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
 }

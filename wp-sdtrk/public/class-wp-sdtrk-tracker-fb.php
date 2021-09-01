@@ -89,7 +89,7 @@ class Wp_Sdtrk_Tracker_Fb
     {
         // Abort if tracking is disabled
         if (! $this->trackingEnabled_Server()) {
-            return;
+            return 'Tracking disabled for server';
         }
 
         // is TimeTracker-Event
@@ -161,7 +161,8 @@ class Wp_Sdtrk_Tracker_Fb
             $requestData['custom_data']['buttonTag'] = $clickTriggerEventTag;
         }
 
-        $this->payLoadServerRequest($requestData);
+        $responses = array();
+        array_push($responses,$this->payLoadServerRequest($requestData));
 
         // The Event
         if ($this->readEventName($event) !== false && $this->readEventName($event) !== 'PageView' && $isTimeTrigger === false && $isScrollTrigger === false) {
@@ -171,8 +172,11 @@ class Wp_Sdtrk_Tracker_Fb
             }
             $requestData['event_name'] = $this->readEventName($event);
             $requestData['custom_data'] = $customData;
-            $this->payLoadServerRequest($requestData);
+            array_push($responses,$this->payLoadServerRequest($requestData));
         }
+        
+        //Return
+        return $responses;
     }
 
     /**
@@ -194,7 +198,7 @@ class Wp_Sdtrk_Tracker_Fb
         $payload = json_encode($fields);
 
         // Send Request
-        Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload);
+        return Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload);
     }
 
     /**

@@ -215,7 +215,7 @@ class Wp_Sdtrk_Public
         $localizedData['brandName'] = $brandName;
         $localizedData['addr'] = Wp_Sdtrk_Helper::wp_sdtrk_getClientIp();
         $localizedData['agent'] = $_SERVER['HTTP_USER_AGENT'];
-        $localizedData['source'] = Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL();
+        $localizedData['source'] = Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL(true);
 
         wp_localize_script($this->wp_sdtrk, 'wp_sdtrk', $localizedData);
     }
@@ -363,7 +363,7 @@ class Wp_Sdtrk_Public
                 case 'fb':
                     $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
                     $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
-                    $fbTracker = new Wp_Sdtrk_Tracker_Fb();
+                    $fbTracker = new Wp_Sdtrk_Tracker_Fb();                    
                     $fbTracker->fireTracking_Server($event, $fbp, $fbc);
                     return array(
                         'state' => true
@@ -407,7 +407,7 @@ class Wp_Sdtrk_Public
                         'state' => true
                     );
                     break;
-            }
+            }            
         }
         return array(
             'state' => false

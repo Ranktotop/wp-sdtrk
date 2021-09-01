@@ -255,25 +255,46 @@ class Wp_Sdtrk_Helper
         curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);        
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_URL, $url);
-        $response = curl_exec($curl);
+        $response = curl_exec($curl);        
+        
+        //If Curl Error
         if($errno = curl_errno($curl)) {
             $error_message = curl_strerror($errno);
-            self::wp_sdtrk_write_log("cURL error ({$errno}):\n {$error_message}");
+            $response = ['state'=>false,'code' => $errno, 'msg'=>$error_message, 'payload' => json_decode($payload)];            
+            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
+            self::wp_sdtrk_vardump_log($response);
+            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----');
+            curl_close($curl);
+            return $response;
         }
         
-        try {
-            $msg = json_decode($response);
-            if(isset($msg->error)){
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
-                Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($msg);
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log('------ END CURL Error-Response: -----');
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log('------ START Payload: -----');
-                Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($payload);
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log('Payload was sent to: '.$url);
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log('------ END Payload: -----');                
-            }
-        } catch (Exception $e) {            
+        //If response is no JSON
+        $msg = json_decode($response);
+        if(is_null($msg)){
+            $response = ['state'=>false,'code' => 'json_decode failed', 'msg'=>$response, 'payload' => json_decode($payload)];  
+            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
+            self::wp_sdtrk_vardump_log($response);
+            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----');
+            curl_close($curl);
+            return $response;
+        }        
+        
+        //If response is error
+        if(isset($msg->error)){
+            $response = ['state'=>false,'code' => $msg->error, 'msg'=>$msg, 'payload' => json_decode($payload)]; 
+            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
+            self::wp_sdtrk_vardump_log($msg);
+            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----');
+            self::wp_sdtrk_write_log('------ START Payload: -----');
+            self::wp_sdtrk_vardump_log($payload);
+            self::wp_sdtrk_write_log('Payload was sent to: '.$url);
+            self::wp_sdtrk_write_log('------ END Payload: -----');
+            curl_close($curl);
+            return $response;
         }
+        
+        //If all is fine
+        $response = ['state'=>true,'code' => '1', 'msg'=>$msg, 'payload' => json_decode($payload)]; 
         curl_close($curl);
         return $response;
     }
@@ -297,8 +318,14 @@ class Wp_Sdtrk_Helper
      * Retrieves the current URL
      * @return String
      */
-    public static function wp_sdtrk_getCurrentURL(){ 
-        return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+    public static function wp_sdtrk_getCurrentURL($trimQuery=false){         
+        $currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";        
+        if(!$trimQuery){
+            return $currentUrl;
+        }
+        else{
+            return strstr($currentUrl, '?', true) ?: $currentUrl;
+        }
     }
     
     /**
@@ -325,6 +352,7 @@ class Wp_Sdtrk_Helper
      */
     public static function wp_sdtrk_getRootDomain(){
         $host = strtolower(trim(self::wp_sdtrk_getCurrentURL()));
+        $host = strstr($host, '?', true) ?: $host;
         $host = ltrim(str_replace("http://","",str_replace("https://","",$host)),"www.");
         $count = substr_count($host, '.');
         if($count === 2){
