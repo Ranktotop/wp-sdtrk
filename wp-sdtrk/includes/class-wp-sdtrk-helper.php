@@ -247,15 +247,20 @@ class Wp_Sdtrk_Helper
      * @param array $fields
      * @return mixed
      */
-    public static function wp_sdtrk_httpPost($url, $payload)
+    public static function wp_sdtrk_httpPost($url, $payload, $headers = array())
     {
+        $curlHeaders = array('Content-Type:application/json');
+        foreach($headers as $header){
+            array_push($curlHeaders, $header);
+        }   
+        
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $curlHeaders);
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);        
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_URL, $url);
-        $response = curl_exec($curl);        
+        $response = curl_exec($curl);     
         
         //If Curl Error
         if($errno = curl_errno($curl)) {

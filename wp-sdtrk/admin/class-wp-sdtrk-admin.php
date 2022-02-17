@@ -530,6 +530,127 @@ class Wp_Sdtrk_Admin
                             'default' => 'no'
                         )
                     )
+                ),
+                array(
+                    'name' => 'tiktok',
+                    'title' => __('Tik Tok', 'wp-sdtrk'),
+                    'icon' => 'dashicons-embed-audio',
+                    'fields' => array(
+                        array(
+                            'id' => 'tt_pixelid',
+                            'type' => 'text',
+                            'title' => __('Tik Tok Pixel-ID', 'wp-sdtrk'),
+                            'description' => __('Insert your own Tik Tok Pixel ID', 'wp-sdtrk')
+                        ),
+                        array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Browser based Tracking', 'wp-sdtrk') . '</h3>',
+                            'content' => ''
+                        ),
+                        array(
+                            'id' => 'tt_trk_browser',
+                            'type' => 'switcher',
+                            'title' => __('Activate browser based tracking', 'wp-sdtrk'),
+                            'description' => __('Check to fire Tik Tok browser pixel', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id' => 'tt_trk_browser_cookie_service',
+                            'type' => 'radio',
+                            'dependency' => array(
+                                'tt_trk_browser',
+                                '!=',
+                                'false'
+                            ),
+                            'title' => __('Choose cookie consent behavior', 'wp-sdtrk'),
+                            'options' => $cookieOptions,
+                            'default' => 'none', // optional
+                            'style' => 'fancy' // optional
+                        ),
+                        array(
+                            'id' => 'tt_trk_browser_cookie_id',
+                            'type' => 'text',
+                            'dependency' => array(
+                                'tt_trk_browser_cookie_service_borlabs|tt_trk_browser',
+                                '==|!=',
+                                'true|false'
+                            ),
+                            'title' => __('Cookie ID', 'wp-sdtrk'),
+                            'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
+                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_tt_b();</script>') . '</code></p>'
+                        ),
+                        array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Server based Tracking', 'wp-sdtrk') . '</h3>',
+                            'content' => ''
+                        ),
+                        array(
+                            'id' => 'tt_trk_server',
+                            'type' => 'switcher',
+                            'title' => __('Activate server based tracking', 'wp-sdtrk'),
+                            'description' => __('Check to fire Tik Tok Conversion API', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id' => 'tt_trk_server_token',
+                            'type' => 'text',
+                            'dependency' => array(
+                                'tt_trk_server',
+                                '==',
+                                'true'
+                            ),
+                            'title' => __('Conversion-API Token', 'wp-sdtrk'),
+                            'description' => __('You can get the token within the Tik Tok events-manager', 'wp-sdtrk')
+                        ),
+                        array(
+                            'id' => 'tt_trk_server_cookie_service',
+                            'type' => 'radio',
+                            'dependency' => array(
+                                'tt_trk_server',
+                                '!=',
+                                'false'
+                            ),
+                            'title' => __('Choose cookie consent behavior', 'wp-sdtrk'),
+                            'options' => $cookieOptions,
+                            'default' => 'none', // optional
+                            'style' => 'fancy' // optional
+                        ),
+                        array(
+                            'id' => 'tt_trk_server_cookie_id',
+                            'type' => 'text',
+                            'dependency' => array(
+                                'tt_trk_server_cookie_service_borlabs|tt_trk_server',
+                                '==|!=',
+                                'true|false'
+                            ),
+                            'title' => __('Cookie ID', 'wp-sdtrk'),
+                            'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
+                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_tt_s();</script>') . '</code></p>'
+                        ),
+                        array(
+                            'id' => 'tt_trk_server_debug',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'tt_trk_server',
+                                '==',
+                                'true'
+                            ),
+                            'title' => __('Activate Debugging', 'wp-sdtrk'),
+                            'description' => __('Check to activate CAPI debugging', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id' => 'tt_trk_server_debug_code',
+                            'type' => 'text',
+                            'dependency' => array(
+                                'tt_trk_server|tt_trk_server_debug',
+                                '==|==',
+                                'true|true'
+                            ),
+                            'title' => __('Test-Code', 'wp-sdtrk'),
+                            'description' => __('You can get the Test-Code within the Tik Tok events-manager', 'wp-sdtrk')
+                        )
+                    )
                 )
             )
         );

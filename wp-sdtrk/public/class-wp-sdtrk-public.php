@@ -140,6 +140,7 @@ class Wp_Sdtrk_Public
          */
         $this->localize_eventData();
         $this->localize_fbData();
+        $this->localize_ttData();
         $this->localize_gaData();
     }
 
@@ -270,6 +271,64 @@ class Wp_Sdtrk_Public
         wp_localize_script("wp_sdtrk-fb", 'wp_sdtrk_fb', $localizedData);
         wp_enqueue_script('wp_sdtrk-fb');
     }
+    
+    /**
+     * Collect all TT-Data and pass them to JS
+     */
+    private function localize_ttData()
+    {
+        // Init
+        // Register Script for Facebook-Tracking
+        wp_register_script("wp_sdtrk-tt", plugins_url("js/wp-sdtrk-tt.js", __FILE__), array(
+            'jquery'
+        ), "1.0", false);
+        
+        $localizedData = array();
+        
+        // Pixel ID
+        $tt_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_pixelid");
+        $tt_pixelId = ($tt_pixelId && ! empty(trim($tt_pixelId))) ? $tt_pixelId : false;
+        
+        // Track Browser Enabled
+        $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_browser"), "yes") == 0) ? true : false;
+        
+        // Tik Tok: Track Browser Cookie Service
+        $tt_trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_browser_cookie_service");
+        $tt_trkBrowserCookieService = ($tt_trkBrowserCookieService && ! empty(trim($tt_trkBrowserCookieService))) ? $tt_trkBrowserCookieService : false;
+        
+        // Tik Tok: Track Browser Cookie ID
+        $tt_trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_browser_cookie_id");
+        $tt_trkBrowserCookieId = ($tt_trkBrowserCookieId && ! empty(trim($tt_trkBrowserCookieId))) ? $tt_trkBrowserCookieId : false;
+        
+        // Track Server Enabled
+        $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server"), "yes") == 0) ? true : false;
+        
+        // Facebook: Track Server Cookie Service
+        $tt_trkServerCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server_cookie_service");
+        $tt_trkServerCookieService = ($tt_trkServerCookieService && ! empty(trim($tt_trkServerCookieService))) ? $tt_trkServerCookieService : false;
+        
+        // Tik Tok: Track Server Cookie ID
+        $tt_trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server_cookie_id");
+        $tt_trkServerCookieId = ($tt_trkServerCookieId && ! empty(trim($tt_trkServerCookieId))) ? $tt_trkServerCookieId : false;
+        
+        //Content-ID
+        global $post;
+        $postId = ($post && $post->ID) ? $post->ID : false;
+        $title = $postId ? get_the_title($post) : "";
+        
+        $localizedData['tt_id'] = $tt_pixelId;
+        $localizedData['tt_b_e'] = $trkBrowser;
+        $localizedData['c_tt_b_i'] = $tt_trkBrowserCookieId;
+        $localizedData['c_tt_b_s'] = $tt_trkBrowserCookieService;
+        $localizedData['tt_s_e'] = $trkServer;
+        $localizedData['c_tt_s_i'] = $tt_trkServerCookieId;
+        $localizedData['c_tt_s_s'] = $tt_trkServerCookieService;
+        $localizedData['tt_content'] = $postId;
+        $localizedData['tt_title'] = $title;
+        
+        wp_localize_script("wp_sdtrk-tt", 'wp_sdtrk_tt', $localizedData);
+        wp_enqueue_script('wp_sdtrk-tt');
+    }
 
     /**
      * Collect all GA-Data and pass them to JS
@@ -382,6 +441,7 @@ class Wp_Sdtrk_Public
                         'state' => true
                     );
                     break;
+                // Facebook CAPI Scroll-Events
                 case 'fb-sd':
                     $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
                     $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
@@ -394,6 +454,7 @@ class Wp_Sdtrk_Public
                         'state' => true
                     );
                     break;
+                // Facebook CAPI Button-Events
                 case 'fb-bc':
                     $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
                     $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
@@ -403,6 +464,56 @@ class Wp_Sdtrk_Public
                     $event->setClickTriggerData($clickEventName, $clickEventId,$clickEventTag);
                     $fbTracker = new Wp_Sdtrk_Tracker_Fb();
                     $fbTracker->fireTracking_Server($event, $fbp, $fbc);
+                    return array(
+                        'state' => true
+                    );
+                    break;
+                // Tik Tok CAPI
+                case 'tt':
+                    $hashId = (isset($meta['hashId'])) ? $meta['hashId'] : "";
+                    $ttc = (isset($meta['ttc'])) ? $meta['ttc'] : "";
+                    $ttTracker = new Wp_Sdtrk_Tracker_Tt();
+                    $ttTracker->fireTracking_Server($event, $hashId, $ttc);
+                    return array(
+                        'state' => true
+                    );
+                    break;
+                // Tik Tok CAPI Time-Events
+                case 'tt-tt':
+                    $hashId = (isset($meta['hashId'])) ? $meta['hashId'] : "";
+                    $ttc = (isset($meta['ttc'])) ? $meta['ttc'] : "";
+                    $timeEventId = (isset($meta['timeEventId'])) ? $meta['timeEventId'] : "";
+                    $timeEventName = (isset($meta['timeEventName'])) ? $meta['timeEventName'] : "";
+                    $event->setTimeTriggerData($timeEventName, $timeEventId);
+                    $ttTracker = new Wp_Sdtrk_Tracker_Tt();
+                    $ttTracker->fireTracking_Server($event, $hashId, $ttc);
+                    return array(
+                        'state' => true
+                    );
+                    break;
+                // Tik Tok CAPI Scroll-Events
+                case 'tt-sd':
+                    $hashId = (isset($meta['hashId'])) ? $meta['hashId'] : "";
+                    $ttc = (isset($meta['ttc'])) ? $meta['ttc'] : "";
+                    $scrollEventId = (isset($meta['scrollEventId'])) ? $meta['scrollEventId'] : "";
+                    $scrollEventName = (isset($meta['scrollEventName'])) ? $meta['scrollEventName'] : "";
+                    $event->setScrollTriggerData($scrollEventName, $scrollEventId);
+                    $ttTracker = new Wp_Sdtrk_Tracker_Tt();
+                    $ttTracker->fireTracking_Server($event, $hashId, $ttc);
+                    return array(
+                        'state' => true
+                    );
+                    break;
+                // Tik Tok CAPI Button-Events
+                case 'tt-bc':
+                    $hashId = (isset($meta['hashId'])) ? $meta['hashId'] : "";
+                    $ttc = (isset($meta['ttc'])) ? $meta['ttc'] : "";
+                    $clickEventId = (isset($meta['clickEventId'])) ? $meta['clickEventId'] : "";
+                    $clickEventName = (isset($meta['clickEventName'])) ? $meta['clickEventName'] : "";
+                    $clickEventTag = (isset($meta['clickEventTag'])) ? $meta['clickEventTag'] : "";
+                    $event->setClickTriggerData($clickEventName, $clickEventId,$clickEventTag);
+                    $ttTracker = new Wp_Sdtrk_Tracker_Tt();
+                    $ttTracker->fireTracking_Server($event, $hashId, $ttc);
                     return array(
                         'state' => true
                     );

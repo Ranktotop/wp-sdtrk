@@ -194,6 +194,11 @@ class Wp_Sdtrk {
          */
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-ga.php';
         
+        /**
+         * Tracker Tik Tok
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-tt.php';
+        
 
 		/**************************************
 		 * EXOPITE SIMPLE OPTIONS FRAMEWORK
