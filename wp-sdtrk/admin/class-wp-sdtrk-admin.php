@@ -533,14 +533,14 @@ class Wp_Sdtrk_Admin
                 ),
                 array(
                     'name' => 'tiktok',
-                    'title' => __('Tik Tok', 'wp-sdtrk'),
+                    'title' => __('TikTok', 'wp-sdtrk'),
                     'icon' => 'dashicons-embed-audio',
                     'fields' => array(
                         array(
                             'id' => 'tt_pixelid',
                             'type' => 'text',
-                            'title' => __('Tik Tok Pixel-ID', 'wp-sdtrk'),
-                            'description' => __('Insert your own Tik Tok Pixel ID', 'wp-sdtrk')
+                            'title' => __('TikTok Pixel-ID', 'wp-sdtrk'),
+                            'description' => __('Insert your own TikTok Pixel ID', 'wp-sdtrk')
                         ),
                         array(
                             'type' => 'content',
@@ -551,7 +551,7 @@ class Wp_Sdtrk_Admin
                             'id' => 'tt_trk_browser',
                             'type' => 'switcher',
                             'title' => __('Activate browser based tracking', 'wp-sdtrk'),
-                            'description' => __('Check to fire Tik Tok browser pixel', 'wp-sdtrk'),
+                            'description' => __('Check to fire TikTok browser pixel', 'wp-sdtrk'),
                             'default' => 'no'
                         ),
                         array(
@@ -588,7 +588,7 @@ class Wp_Sdtrk_Admin
                             'id' => 'tt_trk_server',
                             'type' => 'switcher',
                             'title' => __('Activate server based tracking', 'wp-sdtrk'),
-                            'description' => __('Check to fire Tik Tok Conversion API', 'wp-sdtrk'),
+                            'description' => __('Check to fire TikTok Event-API', 'wp-sdtrk'),
                             'default' => 'no'
                         ),
                         array(
@@ -600,7 +600,7 @@ class Wp_Sdtrk_Admin
                                 'true'
                             ),
                             'title' => __('Conversion-API Token', 'wp-sdtrk'),
-                            'description' => __('You can get the token within the Tik Tok events-manager', 'wp-sdtrk')
+                            'description' => __('You can get the token within the TikTok events-manager', 'wp-sdtrk')
                         ),
                         array(
                             'id' => 'tt_trk_server_cookie_service',
@@ -648,7 +648,7 @@ class Wp_Sdtrk_Admin
                                 'true|true'
                             ),
                             'title' => __('Test-Code', 'wp-sdtrk'),
-                            'description' => __('You can get the Test-Code within the Tik Tok events-manager', 'wp-sdtrk')
+                            'description' => __('You can get the Test-Code within the TikTok events-manager', 'wp-sdtrk')
                         )
                     )
                 )

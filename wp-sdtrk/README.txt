@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.2.0 =
+* Added TikTok to Tracking-Services
+
 = 1.1.4 =
 * Fixed issues with URLs containing other domains in parameters
 

@@ -145,6 +145,16 @@ class Wp_Sdtrk_Event {
 	getEventSourceAgent() {
 		return this.eventSourceAgent;
 	}
+	
+	//Sets the Event-SourceReferer
+	setEventSourceReferer(value) {
+		this.eventSourceReferer = value;
+	}
+
+	//Gets the Event-SourceReferer
+	getEventSourceReferer() {
+		return this.eventSourceReferer;
+	}
 
 	//Sets the Event-SourceAdress
 	setEventSourceAdress(value) {

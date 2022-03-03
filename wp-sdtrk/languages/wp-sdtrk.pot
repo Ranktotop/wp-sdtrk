@@ -1,16 +1,16 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 "Project-Id-Version: Smart Server Side Tracking Plugin\n"
-"POT-Creation-Date: 2021-08-20 19:13+0200\n"
+"POT-Creation-Date: 2022-03-03 18:02+0100\n"
 "PO-Revision-Date: 2021-03-29 12:05+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.0\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"X-Generator: Poedit 3.0.1\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-Flags-xgettext: --add-comments=translators:\n"
 "X-Poedit-WPHeader: wp-sdtrk.php\n"
@@ -21,6 +21,7 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 "X-Poedit-SearchPathExcluded-1: vendor\n"
+"X-Poedit-SearchPathExcluded-2: admin/exopite-simple-options\n"
 
 #: admin/class-wp-sdtrk-admin.php:166
 msgid "Server-Side-Tracking"
@@ -149,10 +150,12 @@ msgid "Insert your own Facebook Pixel ID"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:354 admin/class-wp-sdtrk-admin.php:480
+#: admin/class-wp-sdtrk-admin.php:547
 msgid "Browser based Tracking"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:360 admin/class-wp-sdtrk-admin.php:491
+#: admin/class-wp-sdtrk-admin.php:553
 msgid "Activate browser based tracking"
 msgstr ""
 
@@ -161,32 +164,36 @@ msgid "Check to fire facebook browser pixel"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:372 admin/class-wp-sdtrk-admin.php:420
-#: admin/class-wp-sdtrk-admin.php:503
+#: admin/class-wp-sdtrk-admin.php:503 admin/class-wp-sdtrk-admin.php:565
+#: admin/class-wp-sdtrk-admin.php:613
 msgid "Choose cookie consent behavior"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:385 admin/class-wp-sdtrk-admin.php:433
-#: admin/class-wp-sdtrk-admin.php:516
+#: admin/class-wp-sdtrk-admin.php:516 admin/class-wp-sdtrk-admin.php:578
+#: admin/class-wp-sdtrk-admin.php:626
 msgid "Cookie ID"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:386 admin/class-wp-sdtrk-admin.php:434
-#: admin/class-wp-sdtrk-admin.php:517
+#: admin/class-wp-sdtrk-admin.php:517 admin/class-wp-sdtrk-admin.php:579
+#: admin/class-wp-sdtrk-admin.php:627
 msgid "You can get this information in the Plugins Consent-Settings"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:387 admin/class-wp-sdtrk-admin.php:435
-#: admin/class-wp-sdtrk-admin.php:518
+#: admin/class-wp-sdtrk-admin.php:518 admin/class-wp-sdtrk-admin.php:580
+#: admin/class-wp-sdtrk-admin.php:628
 msgid ""
 "For more accurate tracking, the following opt-in code should be stored in "
 "the cookie settings of Borlabs:"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:391
+#: admin/class-wp-sdtrk-admin.php:391 admin/class-wp-sdtrk-admin.php:584
 msgid "Server based Tracking"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:397
+#: admin/class-wp-sdtrk-admin.php:397 admin/class-wp-sdtrk-admin.php:590
 msgid "Activate server based tracking"
 msgstr ""
 
@@ -194,7 +201,7 @@ msgstr ""
 msgid "Check to fire Facebook Conversion API"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:409
+#: admin/class-wp-sdtrk-admin.php:409 admin/class-wp-sdtrk-admin.php:602
 msgid "Conversion-API Token"
 msgstr ""
 
@@ -203,14 +210,15 @@ msgid "You can get the token within the facebook events-manager"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:445 admin/class-wp-sdtrk-admin.php:528
+#: admin/class-wp-sdtrk-admin.php:638
 msgid "Activate Debugging"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:446
+#: admin/class-wp-sdtrk-admin.php:446 admin/class-wp-sdtrk-admin.php:639
 msgid "Check to activate CAPI debugging"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:457
+#: admin/class-wp-sdtrk-admin.php:457 admin/class-wp-sdtrk-admin.php:650
 msgid "Test-Code"
 msgstr ""
 
@@ -238,241 +246,100 @@ msgstr ""
 msgid "Check to activate GA debugging"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:537
-msgid "Parameter-Name(s)"
+#: admin/class-wp-sdtrk-admin.php:536
+msgid "TikTok"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:538
-msgid "Accepts"
+#: admin/class-wp-sdtrk-admin.php:542
+msgid "TikTok Pixel-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:539
-msgid "Example"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:544
-msgid "Tutorials"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:549
-msgid "Setup Tutorial"
+#: admin/class-wp-sdtrk-admin.php:543
+msgid "Insert your own TikTok Pixel ID"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:554
+msgid "Check to fire TikTok browser pixel"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:591
+msgid "Check to fire TikTok Event-API"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:603
+msgid "You can get the token within the TikTok events-manager"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:651
+msgid "You can get the Test-Code within the TikTok events-manager"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:658
+msgid "Parameter-Name(s)"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:659
+msgid "Accepts"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:660
+msgid "Example"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:665
+msgid "Tutorials"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:670
+msgid "Setup Tutorial"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:675
 msgid "Supported GET-Parameters"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:555 admin/class-wp-sdtrk-admin.php:585
+#: admin/class-wp-sdtrk-admin.php:676 admin/class-wp-sdtrk-admin.php:706
 msgid "Note"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:555
+#: admin/class-wp-sdtrk-admin.php:676
 msgid ""
 "Enable \"appending order details to thank you URL\" on services like "
 "Digistore24 so that the parameters below are passed automatically."
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:559
+#: admin/class-wp-sdtrk-admin.php:680
 msgid "Transaction-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:564
+#: admin/class-wp-sdtrk-admin.php:685
 msgid "Product-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:569
+#: admin/class-wp-sdtrk-admin.php:690
 msgid "Product-Name"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:574
+#: admin/class-wp-sdtrk-admin.php:695
 msgid "Value"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:579
+#: admin/class-wp-sdtrk-admin.php:700
 msgid "Type"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:584
+#: admin/class-wp-sdtrk-admin.php:705
 msgid "UTM"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:585
+#: admin/class-wp-sdtrk-admin.php:706
 msgid ""
 "UTM parameters are stored in cookies and automatically passed on further "
 "visits"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:720
+#: admin/class-wp-sdtrk-admin.php:841
 msgid "Thanks for updating"
-msgstr ""
-
-#: admin/exopite-simple-options/assets/editors/ace/worker-coffee.js:1
-msgid "arguments"
-msgstr ""
-
-#: admin/exopite-simple-options/assets/editors/ace/worker-coffee.js:1
-msgid "RegExp"
-msgstr ""
-
-#: admin/exopite-simple-options/assets/editors/ace/worker-coffee.js:1
-msgid "Math"
-msgstr ""
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:706
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:729
-msgid "Settings"
-msgstr ""
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:792
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:796
-msgid "Plugin Options"
-msgstr ""
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1485
-msgid "ERROR:"
-msgstr ""
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1486
-msgid "This field class is not available!"
-msgstr ""
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1558
-msgid "Saving..."
-msgstr ""
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1558
-msgid "Saved Successfully."
-msgstr ""
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1574
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1589
-msgid "Save Settings"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/attached.php:45
-#, php-format
-msgid "There is no attachment with type %s for this %s."
-msgstr ""
-
-#: admin/exopite-simple-options/fields/backup.php:41
-msgid "copy-paste your backup string here"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/backup.php:42
-msgid "Are you sure, you want to overwrite existing options?"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/backup.php:42
-msgid "Import a Backup"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/backup.php:46
-msgid "Download Backup"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/backup.php:49
-msgid "Please be sure for reset all of framework options."
-msgstr ""
-
-#: admin/exopite-simple-options/fields/backup.php:50
-msgid "Are you sure, you want to reset all options?"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/backup.php:50
-msgid "Reset All Options"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/custom_userinputgroup.php:371
-#: admin/exopite-simple-options/fields/group.php:351
-msgid "Max items:"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/gallery.php:25
-#: includes/libraries/class-exopite-meta-boxes.php:572
-msgid "Add to gallery"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/gallery.php:26
-#: includes/libraries/class-exopite-meta-boxes.php:573
-msgid "Select images for gallery"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/gallery.php:27
-#: includes/libraries/class-exopite-meta-boxes.php:574
-msgid "Add"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/image.php:77
-msgid "Add Image"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/typography.php:81
-msgid "Web Safe Fonts"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/typography.php:87
-msgid "Google Fonts"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/typography.php:177
-msgid "Error! Can not load json file."
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:73
-msgid "Drop files here"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:83
-msgid "Select files"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:86
-msgid "Upload"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:90
-msgid "Processing dropped files..."
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:108
-#: admin/exopite-simple-options/fields/upload.php:140
-msgid "Cancel"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:110
-msgid "Retry"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:112
-msgid "Delete"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:121
-msgid "Close"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:129
-msgid "No"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:131
-msgid "Yes"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:142
-msgid "Ok"
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:181
-msgid "Max amount of files: "
-msgstr ""
-
-#: admin/exopite-simple-options/fields/upload.php:182
-msgid "Max file upload size: "
-msgstr ""
-
-#: admin/exopite-simple-options/fields/video.php:74
-msgid "Add Video"
 msgstr ""
 
 #: includes/class-wp-sdtrk-license.php:335
@@ -554,6 +421,18 @@ msgstr ""
 
 #: includes/class-wp-sdtrk-license.php:389
 msgid "unknown"
+msgstr ""
+
+#: includes/libraries/class-exopite-meta-boxes.php:572
+msgid "Add to gallery"
+msgstr ""
+
+#: includes/libraries/class-exopite-meta-boxes.php:573
+msgid "Select images for gallery"
+msgstr ""
+
+#: includes/libraries/class-exopite-meta-boxes.php:574
+msgid "Add"
 msgstr ""
 
 #: includes/libraries/class-exopite-post-types.php:40

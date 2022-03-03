@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Smart Server Side Tracking Plugin\n"
-"POT-Creation-Date: 2021-08-20 19:13+0200\n"
-"PO-Revision-Date: 2021-08-20 19:14+0200\n"
+"POT-Creation-Date: 2022-03-03 18:02+0100\n"
+"PO-Revision-Date: 2022-03-03 18:03+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.0\n"
+"X-Generator: Poedit 3.0.1\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-Flags-xgettext: --add-comments=translators:\n"
 "X-Poedit-WPHeader: wp-sdtrk.php\n"
@@ -157,10 +157,12 @@ msgid "Insert your own Facebook Pixel ID"
 msgstr "Gib deine Facebook-Pixel-ID ein"
 
 #: admin/class-wp-sdtrk-admin.php:354 admin/class-wp-sdtrk-admin.php:480
+#: admin/class-wp-sdtrk-admin.php:547
 msgid "Browser based Tracking"
 msgstr "Tracking im Browser"
 
 #: admin/class-wp-sdtrk-admin.php:360 admin/class-wp-sdtrk-admin.php:491
+#: admin/class-wp-sdtrk-admin.php:553
 msgid "Activate browser based tracking"
 msgstr "Aktiviert das Tracking im Browser des Besuchers"
 
@@ -171,23 +173,27 @@ msgstr ""
 "(klassische Integration)"
 
 #: admin/class-wp-sdtrk-admin.php:372 admin/class-wp-sdtrk-admin.php:420
-#: admin/class-wp-sdtrk-admin.php:503
+#: admin/class-wp-sdtrk-admin.php:503 admin/class-wp-sdtrk-admin.php:565
+#: admin/class-wp-sdtrk-admin.php:613
 msgid "Choose cookie consent behavior"
 msgstr "Cookie-Zustimmungsverhalten"
 
 #: admin/class-wp-sdtrk-admin.php:385 admin/class-wp-sdtrk-admin.php:433
-#: admin/class-wp-sdtrk-admin.php:516
+#: admin/class-wp-sdtrk-admin.php:516 admin/class-wp-sdtrk-admin.php:578
+#: admin/class-wp-sdtrk-admin.php:626
 msgid "Cookie ID"
 msgstr "Cookie-ID"
 
 #: admin/class-wp-sdtrk-admin.php:386 admin/class-wp-sdtrk-admin.php:434
-#: admin/class-wp-sdtrk-admin.php:517
+#: admin/class-wp-sdtrk-admin.php:517 admin/class-wp-sdtrk-admin.php:579
+#: admin/class-wp-sdtrk-admin.php:627
 msgid "You can get this information in the Plugins Consent-Settings"
 msgstr ""
 "Diese Information kannst du in den Einstellungen deines Cookie-Plugins finden"
 
 #: admin/class-wp-sdtrk-admin.php:387 admin/class-wp-sdtrk-admin.php:435
-#: admin/class-wp-sdtrk-admin.php:518
+#: admin/class-wp-sdtrk-admin.php:518 admin/class-wp-sdtrk-admin.php:580
+#: admin/class-wp-sdtrk-admin.php:628
 msgid ""
 "For more accurate tracking, the following opt-in code should be stored in "
 "the cookie settings of Borlabs:"
@@ -195,11 +201,11 @@ msgstr ""
 "Für ein genaueres Tracking sollte in den Cookie-Einstellungen von Borlabs "
 "folgender Opt-in Code hinterlegt werden:"
 
-#: admin/class-wp-sdtrk-admin.php:391
+#: admin/class-wp-sdtrk-admin.php:391 admin/class-wp-sdtrk-admin.php:584
 msgid "Server based Tracking"
 msgstr "Tracking über Server"
 
-#: admin/class-wp-sdtrk-admin.php:397
+#: admin/class-wp-sdtrk-admin.php:397 admin/class-wp-sdtrk-admin.php:590
 msgid "Activate server based tracking"
 msgstr "Aktiviert das Tracking auf deinem Server"
 
@@ -207,7 +213,7 @@ msgstr "Aktiviert das Tracking auf deinem Server"
 msgid "Check to fire Facebook Conversion API"
 msgstr "Aktivieren, um die Integration der Conversion-API zu aktivieren"
 
-#: admin/class-wp-sdtrk-admin.php:409
+#: admin/class-wp-sdtrk-admin.php:409 admin/class-wp-sdtrk-admin.php:602
 msgid "Conversion-API Token"
 msgstr "Conversion-API Token"
 
@@ -216,15 +222,16 @@ msgid "You can get the token within the facebook events-manager"
 msgstr "Diesen Wert findest du im Facebook Events-Manager"
 
 #: admin/class-wp-sdtrk-admin.php:445 admin/class-wp-sdtrk-admin.php:528
+#: admin/class-wp-sdtrk-admin.php:638
 msgid "Activate Debugging"
 msgstr "Aktiviere Debugging"
 
-#: admin/class-wp-sdtrk-admin.php:446
+#: admin/class-wp-sdtrk-admin.php:446 admin/class-wp-sdtrk-admin.php:639
 msgid "Check to activate CAPI debugging"
 msgstr ""
 "Aktivieren, um die Conversion-API im Facebook Events-Manager zu überprüfen"
 
-#: admin/class-wp-sdtrk-admin.php:457
+#: admin/class-wp-sdtrk-admin.php:457 admin/class-wp-sdtrk-admin.php:650
 msgid "Test-Code"
 msgstr "Test-Code"
 
@@ -255,35 +262,65 @@ msgid "Check to activate GA debugging"
 msgstr ""
 "Aktivieren, um die Aktivitäten im Google Analytics Dashboard zu überprüfen"
 
-#: admin/class-wp-sdtrk-admin.php:537
+#: admin/class-wp-sdtrk-admin.php:536
+msgid "TikTok"
+msgstr "TikTok"
+
+#: admin/class-wp-sdtrk-admin.php:542
+msgid "TikTok Pixel-ID"
+msgstr "TikTok Pixel-ID"
+
+#: admin/class-wp-sdtrk-admin.php:543
+msgid "Insert your own TikTok Pixel ID"
+msgstr "Gib deine TikTok-Pixel-ID ein"
+
+#: admin/class-wp-sdtrk-admin.php:554
+msgid "Check to fire TikTok browser pixel"
+msgstr ""
+"Aktivieren, um den TikTok-Pixel im Besucher-Browser zu aktivieren "
+"(klassische Integration)"
+
+#: admin/class-wp-sdtrk-admin.php:591
+msgid "Check to fire TikTok Event-API"
+msgstr "Aktivieren, um die Integration der TikTok-Event-API zu aktivieren"
+
+#: admin/class-wp-sdtrk-admin.php:603
+msgid "You can get the token within the TikTok events-manager"
+msgstr "Diesen Wert findest du im TikTok Events-Manager"
+
+#: admin/class-wp-sdtrk-admin.php:651
+msgid "You can get the Test-Code within the TikTok events-manager"
+msgstr "Diesen Wert findest du im TikTok Events-Manager"
+
+#: admin/class-wp-sdtrk-admin.php:658
 msgid "Parameter-Name(s)"
 msgstr "Parameter-Name(n)"
 
-#: admin/class-wp-sdtrk-admin.php:538
+#: admin/class-wp-sdtrk-admin.php:659
 msgid "Accepts"
 msgstr "Akzeptiert"
 
-#: admin/class-wp-sdtrk-admin.php:539
+#: admin/class-wp-sdtrk-admin.php:660
 msgid "Example"
 msgstr "Beispiel"
 
-#: admin/class-wp-sdtrk-admin.php:544
+#: admin/class-wp-sdtrk-admin.php:665
 msgid "Tutorials"
 msgstr "Tutorials"
 
-#: admin/class-wp-sdtrk-admin.php:549
+#: admin/class-wp-sdtrk-admin.php:670
 msgid "Setup Tutorial"
 msgstr "Setup-Anleitung"
 
-#: admin/class-wp-sdtrk-admin.php:554
+#: admin/class-wp-sdtrk-admin.php:675
 msgid "Supported GET-Parameters"
 msgstr "Unterstützte GET-Parameter"
 
-#: admin/class-wp-sdtrk-admin.php:555 admin/class-wp-sdtrk-admin.php:585
+#: admin/class-wp-sdtrk-admin.php:676 admin/class-wp-sdtrk-admin.php:706
 msgid "Note"
 msgstr "Hinweis"
 
-#: admin/class-wp-sdtrk-admin.php:555
+#: admin/class-wp-sdtrk-admin.php:676
 msgid ""
 "Enable \"appending order details to thank you URL\" on services like "
 "Digistore24 so that the parameters below are passed automatically."
@@ -292,31 +329,31 @@ msgstr ""
 "Danke-Seite-URL anhängen\", damit die unten aufgeführten Parameter "
 "automatisch übergeben werden."
 
-#: admin/class-wp-sdtrk-admin.php:559
+#: admin/class-wp-sdtrk-admin.php:680
 msgid "Transaction-ID"
 msgstr "Transaktions-ID"
 
-#: admin/class-wp-sdtrk-admin.php:564
+#: admin/class-wp-sdtrk-admin.php:685
 msgid "Product-ID"
 msgstr "Produkt-ID"
 
-#: admin/class-wp-sdtrk-admin.php:569
+#: admin/class-wp-sdtrk-admin.php:690
 msgid "Product-Name"
 msgstr "Produkt-Name"
 
-#: admin/class-wp-sdtrk-admin.php:574
+#: admin/class-wp-sdtrk-admin.php:695
 msgid "Value"
 msgstr "Wert"
 
-#: admin/class-wp-sdtrk-admin.php:579
+#: admin/class-wp-sdtrk-admin.php:700
 msgid "Type"
 msgstr "Typ"
 
-#: admin/class-wp-sdtrk-admin.php:584
+#: admin/class-wp-sdtrk-admin.php:705
 msgid "UTM"
 msgstr "UTM"
 
-#: admin/class-wp-sdtrk-admin.php:585
+#: admin/class-wp-sdtrk-admin.php:706
 msgid ""
 "UTM parameters are stored in cookies and automatically passed on further "
 "visits"
@@ -324,180 +361,9 @@ msgstr ""
 "UTM-Parameter werden in Cookies gespeichert und bei weiteren Besuchen "
 "automatisch weitergegeben"
 
-#: admin/class-wp-sdtrk-admin.php:720
+#: admin/class-wp-sdtrk-admin.php:841
 msgid "Thanks for updating"
 msgstr "Danke für die Aktualisierung"
-
-#: admin/exopite-simple-options/assets/editors/ace/worker-coffee.js:1
-msgid "arguments"
-msgstr "Argumente"
-
-#: admin/exopite-simple-options/assets/editors/ace/worker-coffee.js:1
-msgid "RegExp"
-msgstr "Regulärer Ausdruck"
-
-#: admin/exopite-simple-options/assets/editors/ace/worker-coffee.js:1
-msgid "Math"
-msgstr "Mathematik"
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:706
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:729
-msgid "Settings"
-msgstr "Einstellungen"
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:792
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:796
-msgid "Plugin Options"
-msgstr "Plugin-Einstellungen"
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1485
-msgid "ERROR:"
-msgstr "Fehler:"
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1486
-msgid "This field class is not available!"
-msgstr "Diese Feldklasse ist nicht verfügbar!"
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1558
-msgid "Saving..."
-msgstr "Speichern..."
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1558
-msgid "Saved Successfully."
-msgstr "Erfolgreich gespeichert."
-
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1574
-#: admin/exopite-simple-options/exopite-simple-options-framework-class.php:1589
-msgid "Save Settings"
-msgstr "Einstellungen speichern"
-
-#: admin/exopite-simple-options/fields/attached.php:45
-#, php-format
-msgid "There is no attachment with type %s for this %s."
-msgstr "Es gibt keinen Anhang mit dem Typ %s für %s."
-
-#: admin/exopite-simple-options/fields/backup.php:41
-msgid "copy-paste your backup string here"
-msgstr "Füge einen Backup-String hier ein"
-
-#: admin/exopite-simple-options/fields/backup.php:42
-msgid "Are you sure, you want to overwrite existing options?"
-msgstr "Bist du sicher, dass du die Einstellungen überschreiben möchtest?"
-
-#: admin/exopite-simple-options/fields/backup.php:42
-msgid "Import a Backup"
-msgstr "Backup importieren"
-
-#: admin/exopite-simple-options/fields/backup.php:46
-msgid "Download Backup"
-msgstr "Backup herunterladen"
-
-#: admin/exopite-simple-options/fields/backup.php:49
-msgid "Please be sure for reset all of framework options."
-msgstr ""
-"Bitte sei dir sicher, dass du alle Framework-Einstellungen zurücksetzen "
-"möchtest."
-
-#: admin/exopite-simple-options/fields/backup.php:50
-msgid "Are you sure, you want to reset all options?"
-msgstr "Bist du sicher, dass du alle Optionen zurücksetzen möchtest?"
-
-#: admin/exopite-simple-options/fields/backup.php:50
-msgid "Reset All Options"
-msgstr "Alle Optionen zurücksetzen"
-
-#: admin/exopite-simple-options/fields/custom_userinputgroup.php:371
-#: admin/exopite-simple-options/fields/group.php:351
-msgid "Max items:"
-msgstr "Max. Elemente:"
-
-#: admin/exopite-simple-options/fields/gallery.php:25
-#: includes/libraries/class-exopite-meta-boxes.php:572
-msgid "Add to gallery"
-msgstr "Zur Galerie hinzufügen"
-
-#: admin/exopite-simple-options/fields/gallery.php:26
-#: includes/libraries/class-exopite-meta-boxes.php:573
-msgid "Select images for gallery"
-msgstr "Bilder für Galerie auswählen"
-
-#: admin/exopite-simple-options/fields/gallery.php:27
-#: includes/libraries/class-exopite-meta-boxes.php:574
-msgid "Add"
-msgstr "Hinzufügen"
-
-#: admin/exopite-simple-options/fields/image.php:77
-msgid "Add Image"
-msgstr "Bild hinzufügen"
-
-#: admin/exopite-simple-options/fields/typography.php:81
-msgid "Web Safe Fonts"
-msgstr "Websichere Schriftarten"
-
-#: admin/exopite-simple-options/fields/typography.php:87
-msgid "Google Fonts"
-msgstr "Google Fonts"
-
-#: admin/exopite-simple-options/fields/typography.php:177
-msgid "Error! Can not load json file."
-msgstr "Fehler! Die json Datei kann nicht geladen werden."
-
-#: admin/exopite-simple-options/fields/upload.php:73
-msgid "Drop files here"
-msgstr "Dateien hierher ziehen"
-
-#: admin/exopite-simple-options/fields/upload.php:83
-msgid "Select files"
-msgstr "Dateien auswählen"
-
-#: admin/exopite-simple-options/fields/upload.php:86
-msgid "Upload"
-msgstr "Hochladen"
-
-#: admin/exopite-simple-options/fields/upload.php:90
-msgid "Processing dropped files..."
-msgstr "Verarbeite Dateien..."
-
-#: admin/exopite-simple-options/fields/upload.php:108
-#: admin/exopite-simple-options/fields/upload.php:140
-msgid "Cancel"
-msgstr "Abbrechen"
-
-#: admin/exopite-simple-options/fields/upload.php:110
-msgid "Retry"
-msgstr "Wiederholen"
-
-#: admin/exopite-simple-options/fields/upload.php:112
-msgid "Delete"
-msgstr "Löschen"
-
-#: admin/exopite-simple-options/fields/upload.php:121
-msgid "Close"
-msgstr "Schließen"
-
-#: admin/exopite-simple-options/fields/upload.php:129
-msgid "No"
-msgstr "Nein"
-
-#: admin/exopite-simple-options/fields/upload.php:131
-msgid "Yes"
-msgstr "Ja"
-
-#: admin/exopite-simple-options/fields/upload.php:142
-msgid "Ok"
-msgstr "Ok"
-
-#: admin/exopite-simple-options/fields/upload.php:181
-msgid "Max amount of files: "
-msgstr "Maximale Anzahl von Dateien "
-
-#: admin/exopite-simple-options/fields/upload.php:182
-msgid "Max file upload size: "
-msgstr "Maximale Datei-Upload-Größe "
-
-#: admin/exopite-simple-options/fields/video.php:74
-msgid "Add Video"
-msgstr "Video hinzufügen"
 
 #: includes/class-wp-sdtrk-license.php:335
 msgid "This feature is available in the Pro-Version only!"
@@ -582,6 +448,18 @@ msgstr "Lizenz erfolgreich freigegeben"
 #: includes/class-wp-sdtrk-license.php:389
 msgid "unknown"
 msgstr "unbekannt"
+
+#: includes/libraries/class-exopite-meta-boxes.php:572
+msgid "Add to gallery"
+msgstr "Zur Galerie hinzufügen"
+
+#: includes/libraries/class-exopite-meta-boxes.php:573
+msgid "Select images for gallery"
+msgstr "Bilder für Galerie auswählen"
+
+#: includes/libraries/class-exopite-meta-boxes.php:574
+msgid "Add"
+msgstr "Hinzufügen"
 
 #: includes/libraries/class-exopite-post-types.php:40
 #, php-format
@@ -714,6 +592,120 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Marc Meese"
 msgstr "Marc Meese"
+
+#~ msgid "arguments"
+#~ msgstr "Argumente"
+
+#~ msgid "RegExp"
+#~ msgstr "Regulärer Ausdruck"
+
+#~ msgid "Math"
+#~ msgstr "Mathematik"
+
+#~ msgid "Settings"
+#~ msgstr "Einstellungen"
+
+#~ msgid "Plugin Options"
+#~ msgstr "Plugin-Einstellungen"
+
+#~ msgid "ERROR:"
+#~ msgstr "Fehler:"
+
+#~ msgid "This field class is not available!"
+#~ msgstr "Diese Feldklasse ist nicht verfügbar!"
+
+#~ msgid "Saving..."
+#~ msgstr "Speichern..."
+
+#~ msgid "Saved Successfully."
+#~ msgstr "Erfolgreich gespeichert."
+
+#~ msgid "Save Settings"
+#~ msgstr "Einstellungen speichern"
+
+#, php-format
+#~ msgid "There is no attachment with type %s for this %s."
+#~ msgstr "Es gibt keinen Anhang mit dem Typ %s für %s."
+
+#~ msgid "copy-paste your backup string here"
+#~ msgstr "Füge einen Backup-String hier ein"
+
+#~ msgid "Are you sure, you want to overwrite existing options?"
+#~ msgstr "Bist du sicher, dass du die Einstellungen überschreiben möchtest?"
+
+#~ msgid "Import a Backup"
+#~ msgstr "Backup importieren"
+
+#~ msgid "Download Backup"
+#~ msgstr "Backup herunterladen"
+
+#~ msgid "Please be sure for reset all of framework options."
+#~ msgstr ""
+#~ "Bitte sei dir sicher, dass du alle Framework-Einstellungen zurücksetzen "
+#~ "möchtest."
+
+#~ msgid "Are you sure, you want to reset all options?"
+#~ msgstr "Bist du sicher, dass du alle Optionen zurücksetzen möchtest?"
+
+#~ msgid "Reset All Options"
+#~ msgstr "Alle Optionen zurücksetzen"
+
+#~ msgid "Max items:"
+#~ msgstr "Max. Elemente:"
+
+#~ msgid "Add Image"
+#~ msgstr "Bild hinzufügen"
+
+#~ msgid "Web Safe Fonts"
+#~ msgstr "Websichere Schriftarten"
+
+#~ msgid "Google Fonts"
+#~ msgstr "Google Fonts"
+
+#~ msgid "Error! Can not load json file."
+#~ msgstr "Fehler! Die json Datei kann nicht geladen werden."
+
+#~ msgid "Drop files here"
+#~ msgstr "Dateien hierher ziehen"
+
+#~ msgid "Select files"
+#~ msgstr "Dateien auswählen"
+
+#~ msgid "Upload"
+#~ msgstr "Hochladen"
+
+#~ msgid "Processing dropped files..."
+#~ msgstr "Verarbeite Dateien..."
+
+#~ msgid "Cancel"
+#~ msgstr "Abbrechen"
+
+#~ msgid "Retry"
+#~ msgstr "Wiederholen"
+
+#~ msgid "Delete"
+#~ msgstr "Löschen"
+
+#~ msgid "Close"
+#~ msgstr "Schließen"
+
+#~ msgid "No"
+#~ msgstr "Nein"
+
+#~ msgid "Yes"
+#~ msgstr "Ja"
+
+#~ msgid "Ok"
+#~ msgstr "Ok"
+
+#~ msgid "Max amount of files: "
+#~ msgstr "Maximale Anzahl von Dateien "
+
+#~ msgid "Max file upload size: "
+#~ msgstr "Maximale Datei-Upload-Größe "
+
+#~ msgid "Add Video"
+#~ msgstr "Video hinzufügen"
 
 #, fuzzy
 #~| msgid "Settings"

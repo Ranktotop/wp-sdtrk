@@ -29,6 +29,7 @@ function wp_sdtrk_collectEventObject() {
 	wp_sdtrk_event.setEventSource(wp_sdtrk.source);
 	wp_sdtrk_event.setEventSourceAdress(wp_sdtrk.addr);
 	wp_sdtrk_event.setEventSourceAgent(wp_sdtrk.agent);
+	wp_sdtrk_event.setEventSourceReferer(wp_sdtrk.referer);
 
 	//Additional
 	//TimeTrigger

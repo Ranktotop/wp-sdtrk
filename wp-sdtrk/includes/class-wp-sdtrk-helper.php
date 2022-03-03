@@ -334,6 +334,20 @@ class Wp_Sdtrk_Helper
     }
     
     /**
+     * Retrieves the current Referer
+     * @return String
+     */
+    public static function wp_sdtrk_getCurrentReferer($trimQuery=false){
+        $currentUrl = (isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
+        if(!$trimQuery){
+            return $currentUrl;
+        }
+        else{
+            return strstr($currentUrl, '?', true) ?: $currentUrl;
+        }
+    }
+    
+    /**
      * Get a Get-Parameter or Cookie if no GET-Param is given
      * @param String $name
      * @param boolean $firstParty

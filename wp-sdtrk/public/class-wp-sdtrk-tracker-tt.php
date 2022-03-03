@@ -102,7 +102,7 @@ class Wp_Sdtrk_Tracker_Tt
         $requestData = array(
             "pixel_code" => $this->pixelId,
             "event_id" => $event->getEventId() . "_" . $externalId,
-            "timestamp" => str_replace('+00:00', 'Z', date('c', $event->getTime())),
+            "timestamp" => date('c', $event->getTime()),
             //"timestamp" => strval(intval($event->getTime())*1000),
             "context" => array(
                 "ad" => array(
@@ -110,15 +110,15 @@ class Wp_Sdtrk_Tracker_Tt
                 ),
                 "page" => array(
                     "url" => $event->getEventSource(),
-                    "referrer" => ""
+                    "referrer" => $event->getEventReferer()
                 ),
                 "user" => array(
                     "external_id" => $externalId,
                     "phone_number" => "",
                     "email" => ""
                 ),
-                "ip" => '"'.$event->getEventIp().'"',
-                "user_agent" => '"'.$event->getEventAgent().'"'
+                "ip" => $event->getEventIp(),
+                "user_agent" => $event->getEventAgent()
             ),
             "properties" => array(
                 "contents" => [],
@@ -208,7 +208,7 @@ class Wp_Sdtrk_Tracker_Tt
         $fields = $requestData;
         //Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($fields);
         $payload = json_encode($fields);
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($payload);
+        //Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($payload);
         $headers = array();
         array_push($headers, "Access-Token:" . $this->apiToken);
 
@@ -269,7 +269,7 @@ class Wp_Sdtrk_Tracker_Tt
                     "phone_number" => "2f9d2b4df907e5c9a7b3434351b55700167b998a83dc479b825096486ffcf4ea",
                     "email" => "dd6ff77f54e2106661089bae4d40cdb600979bf7edc9eb65c0942ba55c7c2d7f"
                 ),
-                "user_agent" => "Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion",
+                "user_agent" => "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 musical_ly_21.1.0 JsSdk/2.0 NetType/WIFI Channel/App Store ByteLocale/en Region/US RevealType/Dialog isDarkMode/0 WKWebView/1",
                 "ip" => "13.57.97.131"
             ),
             "properties" => array(
@@ -277,13 +277,13 @@ class Wp_Sdtrk_Tracker_Tt
                     array(
                         "price" => 8,
                         "quantity" => 2,
-                        "content_type" => "socks",
+                        "content_type" => "product",
                         "content_id" => "1077218"
                     ),
                     array(
                         "price" => 30,
                         "quantity" => 1,
-                        "content_type" => "dress",
+                        "content_type" => "product",
                         "content_id" => "1197218"
                     )
                 ],
@@ -305,7 +305,7 @@ class Wp_Sdtrk_Tracker_Tt
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => json_encode($fields),
-            //CURLOPT_POSTFIELDS => '{"pixel_code":"C872O6BSVD34VNSUBREG","event":"InitiateCheckout","event_id":"1616318632825_357","timestamp":"1645131187000","context":{"ad":{"callback":"123ATXSfe"},"page":{"url":"http://demo.mywebsite.com/purchase","referrer":"http://demo.mywebsite.com"},"user":{"external_id":"f0e388f53921a51f0bb0fc8a2944109ec188b59172935d8f23020b1614cc44bc","phone_number":"2f9d2b4df907e5c9a7b3434351b55700167b998a83dc479b825096486ffcf4ea","email":"dd6ff77f54e2106661089bae4d40cdb600979bf7edc9eb65c0942ba55c7c2d7f"},"user_agent":"Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion","ip":"13.57.97.131"},"properties":{"contents":[{"price":8,"quantity":2,"content_type":"socks","content_id":"1077218"},{"price":30,"quantity":1,"content_type":"dress","content_id":"1197218"}],"currency":"USD","value":46},"test_event_code":"TEST01381"}',
+            //CURLOPT_POSTFIELDS => '{"pixel_code":"'.$this->pixelId.'","event":"InitiateCheckout","event_id":"1616318632825_357","timestamp":"1645131187000","context":{"ad":{"callback":"123ATXSfe"},"page":{"url":"http://demo.mywebsite.com/purchase","referrer":"http://demo.mywebsite.com"},"user":{"external_id":"f0e388f53921a51f0bb0fc8a2944109ec188b59172935d8f23020b1614cc44bc","phone_number":"2f9d2b4df907e5c9a7b3434351b55700167b998a83dc479b825096486ffcf4ea","email":"dd6ff77f54e2106661089bae4d40cdb600979bf7edc9eb65c0942ba55c7c2d7f"},"user_agent":"Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion","ip":"13.57.97.131"},"properties":{"contents":[{"price":8,"quantity":2,"content_type":"product","content_id":"1077218"},{"price":30,"quantity":1,"content_type":"product","content_id":"1197218"}],"currency":"USD","value":46},"test_event_code":"'.$this->debugCode.'"}',
             CURLOPT_HTTPHEADER => array(
                 'Access-Token: ' . $this->apiToken,
                 'Content-Type: application/json'

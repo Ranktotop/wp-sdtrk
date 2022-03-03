@@ -217,6 +217,7 @@ class Wp_Sdtrk_Public
         $localizedData['addr'] = Wp_Sdtrk_Helper::wp_sdtrk_getClientIp();
         $localizedData['agent'] = $_SERVER['HTTP_USER_AGENT'];
         $localizedData['source'] = Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL(true);
+        $localizedData['referer'] = Wp_Sdtrk_Helper::wp_sdtrk_getCurrentReferer(true);
 
         wp_localize_script($this->wp_sdtrk, 'wp_sdtrk', $localizedData);
     }

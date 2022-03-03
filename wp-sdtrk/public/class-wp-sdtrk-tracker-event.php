@@ -239,6 +239,18 @@ class Wp_Sdtrk_Tracker_Event
     }
     
     /**
+     * Return the Referer-URL
+     * @return string
+     */
+    public function getEventReferer()
+    {
+        if (isset($this->eventData['eventSourceReferer']) && ! empty($this->eventData['eventSourceReferer'])) {
+            return $this->eventData['eventSourceReferer'];
+        }
+        return Wp_Sdtrk_Helper::wp_sdtrk_getCurrentReferer();
+    }
+    
+    /**
      * Return the Event-Time
      * @return string
      */
