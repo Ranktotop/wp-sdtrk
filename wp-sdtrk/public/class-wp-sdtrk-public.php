@@ -210,8 +210,15 @@ class Wp_Sdtrk_Public
         if($clickTracking){
             $localizedData['clickTrigger'] = $clickTracking;
         }
+        
+        //Content-ID
+        global $post;
+        $postId = ($post && $post->ID) ? $post->ID : false;
+        $title = $postId ? get_the_title($post) : "";
 
         $localizedData['prodId'] = $prodId;
+        $localizedData['pageId'] = $postId;
+        $localizedData['pageTitle'] = $title;
         $localizedData['rootDomain'] = Wp_Sdtrk_Helper::wp_sdtrk_getRootDomain();
         $localizedData['brandName'] = $brandName;
         $localizedData['addr'] = Wp_Sdtrk_Helper::wp_sdtrk_getClientIp();
@@ -310,12 +317,7 @@ class Wp_Sdtrk_Public
         
         // Tik Tok: Track Server Cookie ID
         $tt_trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server_cookie_id");
-        $tt_trkServerCookieId = ($tt_trkServerCookieId && ! empty(trim($tt_trkServerCookieId))) ? $tt_trkServerCookieId : false;
-        
-        //Content-ID
-        global $post;
-        $postId = ($post && $post->ID) ? $post->ID : false;
-        $title = $postId ? get_the_title($post) : "";
+        $tt_trkServerCookieId = ($tt_trkServerCookieId && ! empty(trim($tt_trkServerCookieId))) ? $tt_trkServerCookieId : false;        
         
         $localizedData['tt_id'] = $tt_pixelId;
         $localizedData['tt_b_e'] = $trkBrowser;
@@ -324,8 +326,6 @@ class Wp_Sdtrk_Public
         $localizedData['tt_s_e'] = $trkServer;
         $localizedData['c_tt_s_i'] = $tt_trkServerCookieId;
         $localizedData['c_tt_s_s'] = $tt_trkServerCookieService;
-        $localizedData['tt_content'] = $postId;
-        $localizedData['tt_title'] = $title;
         
         wp_localize_script("wp_sdtrk-tt", 'wp_sdtrk_tt', $localizedData);
         wp_enqueue_script('wp_sdtrk-tt');

@@ -21,20 +21,15 @@ function wp_sdtrk_collectTTData() {
 		return;
 	}
 	//Initialize	
-	var prodName = wp_sdtrk_event.grabProdName();
 	var prodId = wp_sdtrk_event.grabProdId();
-	var eventId = wp_sdtrk_event.grabOrderId();
 	var eventName = wp_sdtrk_convertEventNameToTt(wp_sdtrk_event.grabEventName());
 	var value = wp_sdtrk_event.grabValue();
-	var timeTrigger = wp_sdtrk_event.getTimeTrigger();
-	var scrollTrigger = wp_sdtrk_event.getScrollTrigger();
-	var clickTrigger = wp_sdtrk_event.getClickTrigger();
 
 	// Collect the Base-Data
 	var baseData = {
 		'pixelId': wp_sdtrk_tt.tt_id,
 		'event': eventName,
-		'event_id': eventId+"_"+wp_sdtrk_hashId()
+		'event_id': wp_sdtrk_event.grabOrderId()+"_"+wp_sdtrk_hashId()
 	};
 	
 	//Collect the Custom-Data
@@ -51,14 +46,14 @@ function wp_sdtrk_collectTTData() {
 	//Product
 	if (prodId !== "") {
 		customData.content_id = prodId;
-		customData.content_name = prodName;
+		customData.content_name = wp_sdtrk_event.grabProdName();
 		customData.content_type = "product";
 		customData.quantity = 1;
 	}
 	else{
 		if(wp_sdtrk_tt.tt_content){
-			customData.content_id = wp_sdtrk_tt.tt_content;
-			customData.content_name = wp_sdtrk_tt.tt_title;
+			customData.content_id =  wp_sdtrk_event.getPageId();
+			customData.content_name = wp_sdtrk_event.getPageName();
 			customData.content_type = "product";
 			customData.quantity = 1;
 		}		
@@ -70,9 +65,9 @@ function wp_sdtrk_collectTTData() {
 	ttEventData.customData = customData;
 	ttEventData.ttc = wp_sdtrk_getTtc();
 	ttEventData.hashId = wp_sdtrk_hashId();
-	ttEventData.timeTrigger = timeTrigger;
-	ttEventData.scrollTrigger = scrollTrigger;
-	ttEventData.clickTrigger = clickTrigger;
+	ttEventData.timeTrigger = wp_sdtrk_event.getTimeTrigger();
+	ttEventData.scrollTrigger = wp_sdtrk_event.getScrollTrigger();
+	ttEventData.clickTrigger = wp_sdtrk_event.getClickTrigger();
 }
 
 //Inits the tracker
@@ -409,18 +404,18 @@ function wp_sdtrk_hashId() {
 	}
 }
 
-//Get ttclid from cookie or param
+//Get ttclid from param or cookies
 function wp_sdtrk_getTtc() {
 	var validDays = 7;
-	if (wp_sdtrk_getCookie('_ttc', false)) {
-		var value = wp_sdtrk_getCookie('_ttc', false);
-		wp_sdtrk_setCookie('_ttc', value, validDays, false);		
-		return value;
-	}
-	else if (wp_sdtrk_getParam("ttclid")) {		
+	if (wp_sdtrk_getParam("ttclid")) {		
 		var clid = wp_sdtrk_getParam("ttclid");
 		wp_sdtrk_setCookie('_ttc', clid, validDays, false);
 		return clid;
+	}
+	else if (wp_sdtrk_getCookie('_ttc', false)) {
+		var value = wp_sdtrk_getCookie('_ttc', false);
+		wp_sdtrk_setCookie('_ttc', value, validDays, false);		
+		return value;
 	}
 	return ""
 }

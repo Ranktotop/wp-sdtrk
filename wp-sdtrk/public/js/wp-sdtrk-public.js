@@ -20,6 +20,8 @@ function wp_sdtrk_collectEventObject() {
 	wp_sdtrk_event.setProdId(wp_sdtrk_collectParams(['prodid', 'product_id']));
 	wp_sdtrk_event.addProdId('postProdId', wp_sdtrk.prodId);
 	wp_sdtrk_event.setProdName(wp_sdtrk_collectParams(['product_name']));
+	wp_sdtrk_event.setPageName(wp_sdtrk.pageTitle);
+	wp_sdtrk_event.setPageId(wp_sdtrk.pageId);
 	wp_sdtrk_event.setOrderId(wp_sdtrk_collectParams(['order_id']));
 	wp_sdtrk_event.setEventId(Math.floor(Math.random() * 100) + "" + Date.now());
 	wp_sdtrk_event.setValue(wp_sdtrk_collectParams(['value', 'net_amount', 'amount']));
@@ -199,4 +201,22 @@ function wp_sdtrk_sendAjax(metaData) {
 			console.log('Error: ' + xhr.responseText);
 		}
 	});
+}
+
+//Get Datetime
+function wp_sdtrk_getDateTime() {
+	var dateTime = new Array();
+	var date = new Date(),
+		days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+		months = ['January', 'February', 'March', 'April', 'May', 'June',
+			'July', 'August', 'September', 'October', 'November', 'December'
+		],
+		hours = ['00-01', '01-02', '02-03', '03-04', '04-05', '05-06', '06-07', '07-08',
+			'08-09', '09-10', '10-11', '11-12', '12-13', '13-14', '14-15', '15-16', '16-17',
+			'17-18', '18-19', '19-20', '20-21', '21-22', '22-23', '23-24'
+		];
+	dateTime.push(hours[date.getHours()]);
+	dateTime.push(days[date.getDay()]);
+	dateTime.push(months[date.getMonth()]);
+	return dateTime;
 }

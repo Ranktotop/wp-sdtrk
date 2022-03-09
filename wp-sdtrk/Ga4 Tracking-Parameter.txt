@@ -1,0 +1,147 @@
+**************************
+******Start Config********
+**************************
+******PixelYourSite:******
+[
+	"config", 
+	"G-B9PRVRDF3W", 
+	{
+		link_attribution: false, 
+		anonymize_ip: false, 
+		custom_map: {
+			dimension1: "event_hour", 
+			dimension2: "event_day", 
+			dimension3: "event_month", 
+			dimension4: "ecomm_prodid", 
+			dimension5: "ecomm_pagetype", 
+			dimension6: "ecomm_totalvalue"}, 
+		debug_mode: true
+	}
+]
+********Wp-Sdtrk:*********
+[
+	"config", 
+	"G-B9PRVRDF3W", 
+	{
+		source: "google",
+		medium: "cpc", 
+		term: "69980654879", 
+		content: "351460433468", 
+		campaign: "1953583350"
+	}
+]
+**************************
+*****Start View Item******
+**************************
+******PixelYourSite:******
+[
+	"event", 
+	"view_item", 
+	{
+		items: [{
+			id: "9478", 
+			name: "Dein eigenes Business", 
+			category: "Videocoaching", 
+			quantity: 1, 
+			price: 599}], 
+		non_interaction: 
+		true, page_title: "Dein eigenes Business", 
+		post_type: "product", 
+		post_id: 9478, 
+		plugin: "PixelYourSite", 
+		event_url: "store.calvinhollywood.com/produkt/dein-eigenes-business/", 
+		user_role: "administrator", 
+		utm_source: "google", 
+		utm_medium: "cpc", 
+		utm_campaign: "1953583350", 
+		utm_term: "69980654879", 
+		utm_content: "351460433468", 
+		event_time: "12-13", 
+		event_day: "Wednesday", 
+		event_month: "March", 
+		landing_page: "https://store.calvinhollywood.com/", 
+		send_to: "G-B9PRVRDF3W"
+	}
+]
+********Wp-Sdtrk:*********
+[
+	"event", 
+	"generate_lead", 
+	{
+		items: [{
+			item_name: "custom", 
+			item_id: "debwf2", 
+			price: 0, 
+			item_brand: "CalvinHollywood", 
+			quantity: 1}],
+		transaction_id: "301646826330310", 
+		source: "google", 
+		medium: "cpc", 
+		term: "69980654879", 
+		content: "351460433468", 
+		campaign: "1953583350"
+	}
+]
+**************************
+******End View Item*******
+**************************
+
+**************************
+******Start Purchase******
+**************************
+******PixelYourSite:******
+[
+	"event", 
+	"purchase", 
+	{
+		transaction_id: 25207, 
+		value: 24.9, 
+		currency: "EUR", 
+		items: [{
+			id: "20573", 
+			name: "Hater vs. Community (Calvin Hollywood Edition)", 
+			category: "Produkte/Unkategorisiert", 
+			quantity: 1, 
+			price: 24.9}], 
+		tax: 3.98, 
+		shipping: "Versandkostenpauschale", 
+		non_interaction: true, 
+		page_title: "Kasse", 
+		post_type: "page", 
+		post_id: 12, 
+		plugin: "PixelYourSite", 
+		event_url: "store.calvinhollywood.com/kasse/order-received/25207/", 
+		user_role: "administrator", 
+		utm_source: "call", 
+		utm_medium: "browser", 
+		utm_campaign: "debug", 
+		utm_term: "wpsdtrk", 
+		event_time: "14-15", 
+		event_day: "Wednesday", 
+		event_month: "March", 
+		landing_page: "https://store.calvinhollywood.com/produkt/dein-eigenes-business/", 
+		send_to: "G-B9PRVRDF3W"
+	}
+]
+​********Wp-Sdtrk:*********
+[
+	"event", 
+	"purchase", 
+	{
+		transaction_id: "123456", 
+		value: 10, 
+		currency: "EUR", 
+		items: [{
+			item_name: "def", 
+			item_id: "abc", 
+			price: 10, 
+			item_brand: "CalvinHollywood", 
+			quantity: 1}],
+		source: "call", 
+		medium: "browser", 
+		term: "wpsdtrk", 
+		content: "351460433468", 
+		campaign: "debug"		
+	}
+]
+​

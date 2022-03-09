@@ -2,6 +2,8 @@ var gaEventData = false;
 var gaEventData_finishedLoading = false;
 var gaScrollTracked_b = false;
 var gaClickedButtons_b = [];
+var gaLoaded = false;
+var gaInitialized = false;
 wp_sdtrk_collectGAData();
 
 // Load Listener
@@ -18,74 +20,59 @@ function wp_sdtrk_collectGAData() {
 		return;
 	}
 	//Initialize	
-	var prodName = wp_sdtrk_event.grabProdName();
 	var prodId = wp_sdtrk_event.grabProdId();
-	var eventId = wp_sdtrk_event.grabOrderId();
 	var eventName = wp_sdtrk_event.grabEventName();
 	var value = wp_sdtrk_event.grabValue();
-	var brandName = wp_sdtrk_event.getBrandName();
-	var timeTrigger = wp_sdtrk_event.getTimeTrigger();
-	var scrollTrigger = wp_sdtrk_event.getScrollTrigger();
-	var clickTrigger = wp_sdtrk_event.getClickTrigger();
-	var isGa4 = true;
-
-	var initData = {};
 	var eventData = {};
-	var campaignData = {};
-
-	//Debug Mode	
-	if (wp_sdtrk_ga.ga_debug === "1") {
-		initData.debug_mode = true;
-	}
-
-	//Transaction Data
-	eventData.transaction_id = eventId;
-
+	
+	//The Event-Data	
+	eventData['transaction_id'] = wp_sdtrk_event.grabOrderId();
+	
 	//Value
 	if (value > 0 || eventName == 'purchase') {
-		eventData.value = value;
-		eventData.currency = "EUR";
+		eventData['value'] = value;
+		eventData['currency'] = "EUR";
 	}
-
-	//UTM
-	var campaignSet = false;
-	for (var k in wp_sdtrk_event.getUtm()) {
-		if (wp_sdtrk_event.getUtm()[k] !== "") {
-			initData[k.replace("utm_", "")] = wp_sdtrk_event.getUtm()[k];
-			eventData[k.replace("utm_", "")] = wp_sdtrk_event.getUtm()[k];
-			// Universal Analytics way (Not needed for GA4)
-			if (isGa4 === false) {
-				campaignData[k.replace("utm_", "")] = wp_sdtrk_event.getUtm()[k];
-				campaignSet = true;
-			}
-		}
-	}
-	//Replace Campaign to support GA assignment
-	if (campaignSet) {
-		// Universal Analytics way (Not needed for GA4)
-		initData.campaign = campaignData;
-		eventData.campaign = campaignData;
-	}
-
-	//The Event Data
+	
+	//Items
 	if (prodId !== "") {
-		eventData['items'] = [{
-			'item_name': prodName,
-			'item_id': prodId,
-			'price': value,
-			'item_brand': brandName,
+		eventData['items'] = [{			
+			'id': prodId,
+			'name': wp_sdtrk_event.grabProdName(),
+			//'category': "SomeCategory",			
 			'quantity': 1,
+			'price': value,
+			'brand': wp_sdtrk_event.getBrandName(),
 		}]
 	}
+	//Meta-Data
+	eventData['non_interaction'] = true;
+	eventData['page_title']= wp_sdtrk_event.getPageName(); 
+	eventData['post_type']= "product"; 
+	eventData['post_id']= wp_sdtrk_event.getPageId(); 
+	eventData['plugin']= "Wp-Sdtrk"; 
+	eventData['event_url']= wp_sdtrk_event.getEventSource();
+	//eventData['user_role']= "administrator"; 	
+	eventData['event_time']= wp_sdtrk_getDateTime()[0]; 
+	eventData['event_day']= wp_sdtrk_getDateTime()[1];
+	eventData['event_month']= wp_sdtrk_getDateTime()[2];
+	//eventData['landing_page']= "https://store.calvinhollywood.com/"; 
+	eventData['send_to']= wp_sdtrk_ga.ga_id;
+	
+	//UTM
+	for (var k in wp_sdtrk_event.getUtm()) {
+		if (wp_sdtrk_event.getUtm()[k] !== "") {
+			eventData[k] = wp_sdtrk_event.getUtm()[k];
+		}
+	}	
 
 	//Save to global
 	gaEventData = {};
-	gaEventData.initData = initData;
 	gaEventData.eventData = eventData;
 	gaEventData.eventName = eventName;
-	gaEventData.timeTrigger = timeTrigger;
-	gaEventData.scrollTrigger = scrollTrigger;
-	gaEventData.clickTrigger = clickTrigger;
+	gaEventData.timeTrigger = wp_sdtrk_event.getTimeTrigger();
+	gaEventData.scrollTrigger = wp_sdtrk_event.getScrollTrigger();
+	gaEventData.clickTrigger = wp_sdtrk_event.getClickTrigger();
 }
 
 //Inits the tracker
@@ -102,42 +89,64 @@ function wp_sdtrk_track_ga() {
 	}
 }
 
+//Initialize Base-Tag
+function wp_sdtrk_initialize_ga() {
+	if (!gaInitialized) {
+		if (!gaLoaded) {
+			(function(window, document, src) {
+				var a = document.createElement('script'),
+					m = document.getElementsByTagName('script')[0];
+				a.async = 1;
+				a.src = src;
+				m.parentNode.insertBefore(a, m);
+			})(window, document, '//www.googletagmanager.com/gtag/js?id=' + wp_sdtrk_ga.ga_id);
+
+			window.dataLayer = window.dataLayer || [];
+			window.gtag = window.gtag || function gtag() {
+				dataLayer.push(arguments);
+			};
+
+			gtag('js', new Date());
+			gaLoaded = true;
+		}
+
+		// configure custom dimensions
+		var cd = {
+			'dimension1': 'event_hour',
+			'dimension2': 'event_day',
+			'dimension3': 'event_month'
+		};
+
+		var isEcom = false;
+		// configure Dynamic Remarketing CDs
+		if (isEcom) {
+			cd.dimension4 = 'ecomm_prodid';
+			cd.dimension5 = 'ecomm_pagetype';
+			cd.dimension6 = 'ecomm_totalvalue';
+		}
+		else {
+			cd.dimension4 = 'dynx_itemid';
+			cd.dimension5 = 'dynx_pagetype';
+			cd.dimension6 = 'dynx_totalvalue';
+		}
+
+		var config = {
+			//'link_attribution': options.ga.enhanceLinkAttr,
+			'anonymize_ip': true,
+			'custom_map': cd,
+			'debug_mode': wp_sdtrk_ga.ga_debug === "1"
+		};
+
+		gtag('config', wp_sdtrk_ga.ga_id, config);
+		gaInitialized = true;
+	}
+
+}
+
 //Fire Analytics in Browser
 function wp_sdtrk_track_ga_b() {
-	var s = document.createElement('script');
-	s.type = 'text/javascript';
-	s.async = true;
-	s.src = 'https://www.googletagmanager.com/gtag/js?id=' + wp_sdtrk_ga.ga_id;
-	var x = document.getElementsByTagName('script')[0];
-	x.parentNode.insertBefore(s, x);
-	window.dataLayer = window.dataLayer || [];
-
-
-	//V1 -working for ga4
-	function gtag() { dataLayer.push(arguments); }
-	gtag('js', new Date());
-	gtag('config', wp_sdtrk_ga.ga_id, gaEventData.initData);
-
-	// -> working for GA4
-	//gtag('config', wp_sdtrk_ga.ga_id, {
-	//	'debug_mode': true,
-	//	'campaign': 'transferv20c2',
-	//	'source': 'transferv20s2',
-	//	'medium': 'transferv20m2',
-	//	'name': 'transferv20n2',
-	//	'content': 'transferv20ct2',
-	//	'term': 'transferv20t2'
-	//});
-
-	// -> working for Universal Analytics
-	//gtag('config', wp_sdtrk_ga.ga_id, gaEventData.initData);
-	/**
-	output:
-	campaign: {source: "1154", medium: "def", content: "abc"}
-	content: "abc"
-	debug_mode: true
-	medium: "def"
-	 */
+	//Load Google Analytics, if its not already loaded
+	wp_sdtrk_initialize_ga();
 
 	var name = gaEventData.eventName;
 	if (name && name !== "" && name !== 'page_view') {
@@ -146,23 +155,23 @@ function wp_sdtrk_track_ga_b() {
 
 	//Time Trigger
 	if (gaEventData.timeTrigger.length > 0) {
-		wp_sdtrk_track_ga_b_timeTracker(gtag);
+		wp_sdtrk_track_ga_b_timeTracker();
 	}
 
 	//Scroll-Trigger
 	if (gaEventData.scrollTrigger !== false) {
-		wp_sdtrk_track_ga_b_scrollTracker(gtag);
+		wp_sdtrk_track_ga_b_scrollTracker();
 	}
 
 	//Click-Trigger
 	if (gaEventData.clickTrigger !== false) {
-		wp_sdtrk_track_ga_b_clickTracker(gtag);
+		wp_sdtrk_track_ga_b_clickTracker();
 	}
 }
 
 //Activate time-tracker for Browser
-function wp_sdtrk_track_ga_b_timeTracker(gtag) {
-	if (!gtag || gaEventData.timeTrigger.length < 1) {
+function wp_sdtrk_track_ga_b_timeTracker() {
+	if (!gaInitialized || gaEventData.timeTrigger.length < 1) {
 		return;
 	}
 	gaEventData.timeTrigger.forEach((triggerTime) => {
@@ -181,8 +190,8 @@ function wp_sdtrk_track_ga_b_timeTracker(gtag) {
 }
 
 //Activate scroll-tracker for Browser
-function wp_sdtrk_track_ga_b_scrollTracker(gtag) {
-	if (gaEventData.scrollTrigger === false || !gtag || gaScrollTracked_b === true) {
+function wp_sdtrk_track_ga_b_scrollTracker() {
+	if (gaEventData.scrollTrigger === false || !gaInitialized || gaScrollTracked_b === true) {
 		return;
 	}
 	window.addEventListener('scroll', function() {
@@ -203,8 +212,8 @@ function wp_sdtrk_track_ga_b_scrollTracker(gtag) {
 }
 
 //Activate click-tracker for Browser
-function wp_sdtrk_track_ga_b_clickTracker(gtag) {
-	if (gaEventData.clickTrigger === false || !gtag || wp_sdtrk_buttons.length < 1) {
+function wp_sdtrk_track_ga_b_clickTracker() {
+	if (gaEventData.clickTrigger === false || !gaInitialized || wp_sdtrk_buttons.length < 1) {
 		return;
 	}
 	wp_sdtrk_buttons.forEach((el) => {
@@ -235,4 +244,20 @@ function wp_sdtrk_backload_ga_b() {
 //For testing only
 function randomInteger(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+//Get gclid from param or cookies
+function wp_sdtrk_getGclid() {
+	var validDays = 90;
+	if (wp_sdtrk_getParam("gclid")) {
+		var clid = wp_sdtrk_getParam("gclid");
+		wp_sdtrk_setCookie('_gc', clid, validDays, false);
+		return clid;
+	}
+	else if (wp_sdtrk_getCookie('_gc', false)) {
+		var value = wp_sdtrk_getCookie('_gc', false);
+		wp_sdtrk_setCookie('_gc', value, validDays, false);
+		return value;
+	}
+	return ""
 }

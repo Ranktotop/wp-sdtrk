@@ -115,6 +115,26 @@ class Wp_Sdtrk_Event {
 	getBrandName() {
 		return this.brandName;
 	}
+	
+	//Sets the Page-Name
+	setPageName(value) {
+		this.pageName = value;
+	}
+
+	//Gets the Page-Name
+	getPageName() {
+		return this.pageName;
+	}
+	
+	//Sets the Page-ID
+	setPageId(value) {
+		this.pageId = value;
+	}
+
+	//Gets the Page-ID
+	getPageId() {
+		return this.pageId;
+	}
 
 	//Sets the Event-Time
 	setEventTime(value) {

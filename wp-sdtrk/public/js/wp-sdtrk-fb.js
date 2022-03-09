@@ -379,13 +379,8 @@ function wp_sdtrk_getFbp() {
 
 //Get fbc or calculate new fbc
 function wp_sdtrk_getFbc() {
-	var validDays = 90;
-	if (wp_sdtrk_getCookie('_fbc', false)) {
-		var value = wp_sdtrk_getCookie('_fbc', false);
-		wp_sdtrk_setCookie('_fbc', value, validDays, false);		
-		return value;
-	}
-	else if (wp_sdtrk_getParam("fbclid")) {		
+	var validDays = 90;	
+	if (wp_sdtrk_getParam("fbclid")) {		
 		var version = 'fb';
 		var subdomainIndex = '1';
 		var creationTime = + new Date();
@@ -393,6 +388,11 @@ function wp_sdtrk_getFbc() {
 		var cValue = version + '.' + subdomainIndex + '.' + creationTime + '.' + clid;
 		wp_sdtrk_setCookie('_fbc', cValue, validDays, false);
 		return cValue;
+	}
+	else if (wp_sdtrk_getCookie('_fbc', false)) {
+		var value = wp_sdtrk_getCookie('_fbc', false);
+		wp_sdtrk_setCookie('_fbc', value, validDays, false);		
+		return value;
 	}
 	return ""
 }
