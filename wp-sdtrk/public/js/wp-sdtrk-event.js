@@ -106,6 +106,16 @@ class Wp_Sdtrk_Event {
 		return this.parseEventName(name);
 	}
 
+	//Sets the Landingpage-URL
+	setLandingPage(value) {
+		this.landingPage = value;
+	}
+
+	//Gets the Brand-Name
+	getLandingPage() {
+		return this.landingPage;
+	}
+
 	//Sets the Brand-Name
 	setBrandName(value) {
 		this.brandName = value;

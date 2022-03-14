@@ -16,7 +16,7 @@
  * Plugin Name:       Smart Server Side Tracking Plugin
  * Plugin URI:        https://marcmeese.de/
  * Description:       Adds server side tracking to non-woocommerce wordpress-sites
- * Version:           1.2.1
+ * Version:           1.2.2
  * Author:            Marc Meese
  * Author URI:        https://marcmeese.de/
  * License:           GPL-2.0+
@@ -27,7 +27,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-	die;
+    die;
 }
 
 define( 'WP_SDTRK_WP_SDTRK', 'wp-sdtrk' );
@@ -44,10 +44,10 @@ define('WP_SDTRK_LICENSE_TYPE_PRO', 'wp_sdtrk_pro');
 define( 'WP_SDTRK_BASE_DIR', plugin_dir_path( __FILE__ ) );
 
 /********************************************
-* RUN CODE ON PLUGIN UPGRADE AND ADMIN NOTICE
-*
-* @tutorial run_code_on_plugin_upgrade_and_admin_notice.php
-*/
+ * RUN CODE ON PLUGIN UPGRADE AND ADMIN NOTICE
+ *
+ * @tutorial run_code_on_plugin_upgrade_and_admin_notice.php
+ */
 define( 'WP_SDTRK_BASE_NAME', plugin_basename( __FILE__ ) );
 // RUN CODE ON PLUGIN UPGRADE AND ADMIN NOTICE
 
@@ -63,8 +63,8 @@ if( ! class_exists( 'Exopite_Template' ) ) {
  * This action is documented in includes/class-wp-sdtrk-activator.php
  */
 function activate_wp_sdtrk() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wp-sdtrk-activator.php';
-	Wp_Sdtrk_Activator::activate();
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-wp-sdtrk-activator.php';
+    Wp_Sdtrk_Activator::activate();
 }
 
 /**
@@ -72,8 +72,8 @@ function activate_wp_sdtrk() {
  * This action is documented in includes/class-wp-sdtrk-deactivator.php
  */
 function deactivate_wp_sdtrk() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wp-sdtrk-deactivator.php';
-	Wp_Sdtrk_Deactivator::deactivate();
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-wp-sdtrk-deactivator.php';
+    Wp_Sdtrk_Deactivator::deactivate();
 }
 
 register_activation_hook( __FILE__, 'activate_wp_sdtrk' );
@@ -84,63 +84,63 @@ register_deactivation_hook( __FILE__, 'deactivate_wp_sdtrk' );
  * @tutorial custom_updater_for_plugin.php
  */
 if ( is_admin() ) {
-
-	/**
-	 * A custom update checker for WordPress plugins.
-	 *
-	 * How to use:
-	 * - Copy vendor/plugin-update-checker to your plugin OR
-	 *   Download https://github.com/YahnisElsts/plugin-update-checker to the folder
-	 * - Create a subdomain or a folder for the update server eg. https://updates.example.net
-	 *   Download https://github.com/YahnisElsts/wp-update-server and copy to the subdomain or folder
-	 * - Add plguin zip to the 'packages' folder
-	 *
-	 * Useful if you don't want to host your project
-	 * in the official WP repository, but would still like it to support automatic updates.
-	 * Despite the name, it also works with themes.
-	 *
-	 * @link http://w-shadow.com/blog/2011/06/02/automatic-updates-for-commercial-themes/
-	 * @link https://github.com/YahnisElsts/plugin-update-checker
-	 * @link https://github.com/YahnisElsts/wp-update-server
-	 */
-	if( ! class_exists( 'Puc_v4_Factory' ) ) {
-
-		require_once join( DIRECTORY_SEPARATOR, array( WP_SDTRK_BASE_DIR, 'vendor', 'plugin-update-checker', 'plugin-update-checker.php' ) );
-
-	}
-
-	$MyUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
-		// CHANGE THIS FOR YOUR UPDATE URL
-		'https://update.rank-to-top.de/?action=get_metadata&slug=' . WP_SDTRK_WP_SDTRK, //Metadata URL.
-		__FILE__, //Full path to the main plugin file.
-		WP_SDTRK_WP_SDTRK //Plugin slug. Usually it's the same as the name of the directory.
-	);
-
-	/**
-	 * add plugin upgrade notification
-	 * https://andidittrich.de/2015/05/howto-upgrade-notice-for-wordpress-plugins.html
-	 */
-	add_action( 'in_plugin_update_message-' . WP_SDTRK_WP_SDTRK . '/' . WP_SDTRK_WP_SDTRK .'.php', 'wp_sdtrk_show_upgrade_notification', 10, 2 );
-	function wp_sdtrk_show_upgrade_notification( $current_plugin_metadata, $new_plugin_metadata ) {
-
-		/**
-		 * Check "upgrade_notice" in readme.txt.
-		 *
-		 * Eg.:
-		 * == Upgrade Notice ==
-		 * = 20180624 = <- new version
-		 * Notice		<- message
-		 *
-		 */
-		if ( isset( $new_plugin_metadata->upgrade_notice ) && strlen( trim( $new_plugin_metadata->upgrade_notice ) ) > 0 ) {
-
-			// Display "upgrade_notice".
-			echo sprintf( '<span style="background-color:#d54e21;padding:10px;color:#f9f9f9;margin-top:10px;display:block;"><strong>%1$s: </strong>%2$s</span>', esc_attr( 'Important Upgrade Notice', 'exopite-multifilter' ), esc_html( rtrim( $new_plugin_metadata->upgrade_notice ) ) );
-
-		}
-	}
-
-
+    
+    /**
+     * A custom update checker for WordPress plugins.
+     *
+     * How to use:
+     * - Copy vendor/plugin-update-checker to your plugin OR
+     *   Download https://github.com/YahnisElsts/plugin-update-checker to the folder
+     * - Create a subdomain or a folder for the update server eg. https://updates.example.net
+     *   Download https://github.com/YahnisElsts/wp-update-server and copy to the subdomain or folder
+     * - Add plguin zip to the 'packages' folder
+     *
+     * Useful if you don't want to host your project
+     * in the official WP repository, but would still like it to support automatic updates.
+     * Despite the name, it also works with themes.
+     *
+     * @link http://w-shadow.com/blog/2011/06/02/automatic-updates-for-commercial-themes/
+     * @link https://github.com/YahnisElsts/plugin-update-checker
+     * @link https://github.com/YahnisElsts/wp-update-server
+     */
+    if( ! class_exists( 'Puc_v4_Factory' ) ) {
+        
+        require_once join( DIRECTORY_SEPARATOR, array( WP_SDTRK_BASE_DIR, 'vendor', 'plugin-update-checker', 'plugin-update-checker.php' ) );
+        
+    }
+    
+    $MyUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
+        // CHANGE THIS FOR YOUR UPDATE URL
+        'https://update.rank-to-top.de/?action=get_metadata&slug=' . WP_SDTRK_WP_SDTRK, //Metadata URL.
+        __FILE__, //Full path to the main plugin file.
+        WP_SDTRK_WP_SDTRK //Plugin slug. Usually it's the same as the name of the directory.
+        );
+    
+    /**
+     * add plugin upgrade notification
+     * https://andidittrich.de/2015/05/howto-upgrade-notice-for-wordpress-plugins.html
+     */
+    add_action( 'in_plugin_update_message-' . WP_SDTRK_WP_SDTRK . '/' . WP_SDTRK_WP_SDTRK .'.php', 'wp_sdtrk_show_upgrade_notification', 10, 2 );
+    function wp_sdtrk_show_upgrade_notification( $current_plugin_metadata, $new_plugin_metadata ) {
+        
+        /**
+         * Check "upgrade_notice" in readme.txt.
+         *
+         * Eg.:
+         * == Upgrade Notice ==
+         * = 20180624 = <- new version
+         * Notice		<- message
+         *
+         */
+        if ( isset( $new_plugin_metadata->upgrade_notice ) && strlen( trim( $new_plugin_metadata->upgrade_notice ) ) > 0 ) {
+            
+            // Display "upgrade_notice".
+            echo sprintf( '<span style="background-color:#d54e21;padding:10px;color:#f9f9f9;margin-top:10px;display:block;"><strong>%1$s: </strong>%2$s</span>', esc_attr( 'Important Upgrade Notice', 'exopite-multifilter' ), esc_html( rtrim( $new_plugin_metadata->upgrade_notice ) ) );
+            
+        }
+    }
+    
+    
 }
 // END CUSTOM UPDATER FOR PLUGIN
 

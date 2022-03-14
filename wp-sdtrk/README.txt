@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.2.2 =
+* Saves Google Ads click-ID if user came from google ad
+
 = 1.2.1 =
 * Changed GA4 Behavior
 

@@ -220,6 +220,7 @@ class Wp_Sdtrk_Public
         $localizedData['pageId'] = $postId;
         $localizedData['pageTitle'] = $title;
         $localizedData['rootDomain'] = Wp_Sdtrk_Helper::wp_sdtrk_getRootDomain();
+        $localizedData['currentDomain'] = rtrim(get_site_url() ,"/").'/';
         $localizedData['brandName'] = $brandName;
         $localizedData['addr'] = Wp_Sdtrk_Helper::wp_sdtrk_getClientIp();
         $localizedData['agent'] = $_SERVER['HTTP_USER_AGENT'];

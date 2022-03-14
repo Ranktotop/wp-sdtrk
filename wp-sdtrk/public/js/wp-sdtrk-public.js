@@ -27,6 +27,7 @@ function wp_sdtrk_collectEventObject() {
 	wp_sdtrk_event.setValue(wp_sdtrk_collectParams(['value', 'net_amount', 'amount']));
 	wp_sdtrk_event.setEventName(wp_sdtrk_collectParams(['type']));
 	wp_sdtrk_event.setBrandName(wp_sdtrk.brandName);
+	wp_sdtrk_event.setLandingPage(wp_sdtrk.currentDomain);
 	wp_sdtrk_event.setEventTime(Date.now() / 1000 | 0);
 	wp_sdtrk_event.setEventSource(wp_sdtrk.source);
 	wp_sdtrk_event.setEventSourceAdress(wp_sdtrk.addr);

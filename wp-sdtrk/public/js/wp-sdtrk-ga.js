@@ -24,19 +24,17 @@ function wp_sdtrk_collectGAData() {
 	var eventName = wp_sdtrk_event.grabEventName();
 	var value = wp_sdtrk_event.grabValue();
 	var eventData = {};
-	
-	//The Event-Data	
-	eventData['transaction_id'] = wp_sdtrk_event.grabOrderId();
-	
+	var post_type = "page";
+
 	//Value
 	if (value > 0 || eventName == 'purchase') {
-		eventData['value'] = value;
-		eventData['currency'] = "EUR";
+		eventData['transaction_id'] = wp_sdtrk_event.grabOrderId();
+		post_type = "product";
 	}
-	
+
 	//Items
 	if (prodId !== "") {
-		eventData['items'] = [{			
+		eventData['items'] = [{
 			'id': prodId,
 			'name': wp_sdtrk_event.grabProdName(),
 			//'category': "SomeCategory",			
@@ -46,25 +44,28 @@ function wp_sdtrk_collectGAData() {
 		}]
 	}
 	//Meta-Data
+	eventData['value'] = value;
+	eventData['currency'] = "EUR";
 	eventData['non_interaction'] = true;
-	eventData['page_title']= wp_sdtrk_event.getPageName(); 
-	eventData['post_type']= "product"; 
-	eventData['post_id']= wp_sdtrk_event.getPageId(); 
-	eventData['plugin']= "Wp-Sdtrk"; 
-	eventData['event_url']= wp_sdtrk_event.getEventSource();
-	//eventData['user_role']= "administrator"; 	
-	eventData['event_time']= wp_sdtrk_getDateTime()[0]; 
-	eventData['event_day']= wp_sdtrk_getDateTime()[1];
-	eventData['event_month']= wp_sdtrk_getDateTime()[2];
-	//eventData['landing_page']= "https://store.calvinhollywood.com/"; 
-	eventData['send_to']= wp_sdtrk_ga.ga_id;
-	
+	eventData['page_title'] = wp_sdtrk_event.getPageName();
+	eventData['post_type'] = post_type;
+	eventData['post_id'] = wp_sdtrk_event.getPageId();
+	eventData['plugin'] = "Wp-Sdtrk";
+	eventData['event_url'] = wp_sdtrk_event.getEventSource();
+	eventData['user_role'] = "guest";
+
 	//UTM
 	for (var k in wp_sdtrk_event.getUtm()) {
 		if (wp_sdtrk_event.getUtm()[k] !== "") {
 			eventData[k] = wp_sdtrk_event.getUtm()[k];
 		}
-	}	
+	}
+	eventData['event_time'] = wp_sdtrk_getDateTime()[0];
+	eventData['event_day'] = wp_sdtrk_getDateTime()[1];
+	eventData['event_month'] = wp_sdtrk_getDateTime()[2];
+	eventData['landing_page'] = wp_sdtrk_event.getLandingPage();
+
+	eventData['send_to'] = wp_sdtrk_ga.ga_id;
 
 	//Save to global
 	gaEventData = {};
@@ -84,7 +85,7 @@ function wp_sdtrk_track_ga() {
 	//console.log(gaEventData);
 
 	//Browser: If consent is given
-	if (gaEventData.bc !== false && wp_sdtrk_ga.ga_b_e !== "") {
+	if (gaEventData.bc !== false && wp_sdtrk_ga.ga_b_e !== "") {		
 		wp_sdtrk_track_ga_b();
 	}
 }
@@ -106,6 +107,13 @@ function wp_sdtrk_initialize_ga() {
 				dataLayer.push(arguments);
 			};
 
+			//The config object for campaigns
+			var campaignData = wp_sdtrk_getStoredCampaignData();
+			if (campaignData) {
+				gtag('set', campaignData)
+			}
+
+			//init
 			gtag('js', new Date());
 			gaLoaded = true;
 		}
@@ -131,13 +139,16 @@ function wp_sdtrk_initialize_ga() {
 		}
 
 		var config = {
-			//'link_attribution': options.ga.enhanceLinkAttr,
+			'link_attribution': false,
 			'anonymize_ip': true,
 			'custom_map': cd,
 			'debug_mode': wp_sdtrk_ga.ga_debug === "1"
 		};
 
 		gtag('config', wp_sdtrk_ga.ga_id, config);
+
+
+
 		gaInitialized = true;
 	}
 
@@ -146,6 +157,7 @@ function wp_sdtrk_initialize_ga() {
 //Fire Analytics in Browser
 function wp_sdtrk_track_ga_b() {
 	//Load Google Analytics, if its not already loaded
+	wp_sdtrk_save_ga_CampaignData();
 	wp_sdtrk_initialize_ga();
 
 	var name = gaEventData.eventName;
@@ -260,4 +272,42 @@ function wp_sdtrk_getGclid() {
 		return value;
 	}
 	return ""
+}
+
+//Check for stored campaign-data and load them
+function wp_sdtrk_getStoredCampaignData() {
+	var ref = wp_sdtrk_getCookie('_rd', true);
+	var cd = wp_sdtrk_getCookie('_cd', true);
+	if (ref || cd) {
+		//The config object for campaigns
+		var campaignData = {};
+		if (ref) {
+			campaignData['referrer'] = ref;
+			//Delete Referrer
+			wp_sdtrk_setCookie('_rd', '', 0, true);
+		}
+		if (cd) {
+			campaignData['location'] = cd;
+		}
+		campaignData['page'] = document.location.pathname + document.location.search;
+		return campaignData;
+	}
+	return false;
+}
+
+//Save campaign-data if one of the required params are given
+function wp_sdtrk_save_ga_CampaignData() {
+	var paramsToFind = ['gclid']; // 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id', 'gclid'
+	for (var param of paramsToFind) {
+		var value = wp_sdtrk_getParam(param);
+		if (value) {
+			wp_sdtrk_setCookie('_cd', window.location.href, 14, true);
+		}
+		break;
+	}
+	// Save referrer if it does not contain current hostname
+	var referrerHost = wp_sdtrk.referer;
+	if (referrerHost.indexOf(window.location.host) === -1 && referrerHost !== '') {
+		wp_sdtrk_setCookie('_rd', wp_sdtrk.referer, 14, true);
+	}
 }
