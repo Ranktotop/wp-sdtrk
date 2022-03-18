@@ -110,7 +110,7 @@ function wp_sdtrk_initialize_ga() {
 			//The config object for campaigns
 			var campaignData = wp_sdtrk_getStoredCampaignData();
 			if (campaignData) {
-				gtag('set', campaignData)
+				//gtag('set', campaignData) Testing other way, see below
 			}
 
 			//init
@@ -142,8 +142,21 @@ function wp_sdtrk_initialize_ga() {
 			'link_attribution': false,
 			'anonymize_ip': true,
 			'custom_map': cd,
-			'debug_mode': wp_sdtrk_ga.ga_debug === "1"
+			'debug_mode': wp_sdtrk_ga.ga_debug === "1"			
 		};
+		var campaignData = wp_sdtrk_getStoredCampaignData(); // try to restore lost campaign-data		
+		if (campaignData) {
+			if (typeof campaignData.referrer !== 'undefined') {
+			  config['page_referrer'] = campaignData.referrer
+			}
+			if (typeof campaignData.location !== 'undefined') {
+			  config['page_location'] = campaignData.location
+			}
+			if (typeof campaignData.page !== 'undefined') {
+			  config['page_path'] = campaignData.page
+			}
+				
+		}
 
 		gtag('config', wp_sdtrk_ga.ga_id, config);
 
