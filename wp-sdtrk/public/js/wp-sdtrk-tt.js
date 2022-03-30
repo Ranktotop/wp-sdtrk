@@ -241,7 +241,7 @@ function wp_sdtrk_track_tt_b() {
 			
 
 		//Event Pixel
-		if (eventName !== false && eventName !== 'ViewContent') {
+		if (eventName !== false && eventName !== 'PageView') {
 			ttq.track(eventName, customData,{"event_id":eventId});
 		}
 
