@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.2.3 =
+* Fixed error with ViewContent Events on TikTok-Browser-Pixel
+
 = 1.2.2 =
 * Saves Google Ads click-ID if user came from google ad
 

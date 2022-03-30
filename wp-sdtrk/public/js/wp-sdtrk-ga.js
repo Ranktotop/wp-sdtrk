@@ -24,12 +24,13 @@ function wp_sdtrk_collectGAData() {
 	var eventName = wp_sdtrk_event.grabEventName();
 	var value = wp_sdtrk_event.grabValue();
 	var eventData = {};
-	var post_type = "page";
+	//var post_type = "page"; //product was sent only if value or purchase was sent, else page was sent. Testing this combination
 
 	//Value
-	if (value > 0 || eventName == 'purchase') {
-		eventData['transaction_id'] = wp_sdtrk_event.grabOrderId();
-		post_type = "product";
+	if (value > 0 || eventName == 'purchase') {		
+		//Transaction id was here and value/currency was ever sent before and ga4 worked. Testing this combination
+		eventData['value'] = value;
+		eventData['currency'] = "EUR";
 	}
 
 	//Items
@@ -44,11 +45,10 @@ function wp_sdtrk_collectGAData() {
 		}]
 	}
 	//Meta-Data
-	eventData['value'] = value;
-	eventData['currency'] = "EUR";
+	eventData['transaction_id'] = wp_sdtrk_event.grabOrderId();	
 	eventData['non_interaction'] = true;
 	eventData['page_title'] = wp_sdtrk_event.getPageName();
-	eventData['post_type'] = post_type;
+	eventData['post_type'] = "product";
 	eventData['post_id'] = wp_sdtrk_event.getPageId();
 	eventData['plugin'] = "Wp-Sdtrk";
 	eventData['event_url'] = wp_sdtrk_event.getEventSource();
