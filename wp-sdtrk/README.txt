@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.2.4 =
+* Fixed error when tracking button clicks to ga4
+
 = 1.2.3 =
 * Fixed error with ViewContent Events on TikTok-Browser-Pixel
 

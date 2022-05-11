@@ -206,7 +206,7 @@ function wp_sdtrk_track_ga_b_timeTracker() {
 			jQuery(document).ready(function() {
 				setTimeout(function() {
 					var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
-					gtag("event", timeEventName, gaEventData.initData);
+					gtag("event", timeEventName, gaEventData.eventData);
 				}, time);
 			});
 		}
@@ -231,7 +231,7 @@ function wp_sdtrk_track_ga_b_scrollTracker() {
 		if (perc >= target) {
 			gaScrollTracked_b = true;
 			var scrollEventName = 'Scrolldepth-' + gaEventData.scrollTrigger + '-Percent';
-			gtag("event", scrollEventName, gaEventData.initData);
+			gtag("event", scrollEventName, gaEventData.eventData);
 		}
 	});
 }
@@ -245,7 +245,7 @@ function wp_sdtrk_track_ga_b_clickTracker() {
 		jQuery(el[0]).on('click', function() {
 			if (!gaClickedButtons_b.includes(el[1])) {
 				gaClickedButtons_b.push(el[1]);
-				var btnCustomData = wp_sdtrk_clone(gaEventData.initData);
+				var btnCustomData = wp_sdtrk_clone(gaEventData.eventData);
 				var clickEventName = 'ButtonClick';
 				btnCustomData.buttonTag = el[1];
 				gtag("event", clickEventName, btnCustomData);
