@@ -661,7 +661,8 @@ class Wp_Sdtrk_Admin
                             'id' => 'fl_tracking_id',
                             'type' => 'text',
                             'title' => __('Funnelytics Tracking-ID', 'wp-sdtrk'),
-                            'description' => __('Insert your own funnelytics tracking id', 'wp-sdtrk')
+                            'description' => __('Insert your own funnelytics tracking id', 'wp-sdtrk'),
+                            'after' => '<a href="https://funnelytics.io/">'.__('What is funnelytics?', 'wp-sdtrk').'</a>'
                         ),
                         array(
                             'type' => 'content',

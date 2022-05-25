@@ -35,14 +35,11 @@ function wp_sdtrk_collectFLData() {
 
 	//Items
 	if (prodId !== "") {
-		eventData['items'] = [{
-			'id': prodId,
-			'name': wp_sdtrk_event.grabProdName(),
-			//'category': "SomeCategory",			
-			'quantity': 1,
-			'price': value,
-			'brand': wp_sdtrk_event.getBrandName(),
-		}]
+		eventData['item_id'] = prodId;
+		eventData['item_name'] = wp_sdtrk_event.grabProdName();
+		eventData['item_quantity'] = 1;
+		eventData['item_price'] = value;
+		eventData['item_brand'] = wp_sdtrk_event.getBrandName();
 	}
 	//Meta-Data
 	eventData['transaction_id'] = wp_sdtrk_event.grabOrderId();
@@ -119,12 +116,16 @@ function wp_sdtrk_initialize_fl() {
 function wp_sdtrk_track_fl_b() {
 	//Load Funnelytics, if its not already loaded
 	wp_sdtrk_initialize_fl();
+
 	var name = flEventData.eventName;
-	
-	//Track each event
-	if (name && name !== "") {
-		window.funnelytics.events.trigger(name, flEventData.eventData);
+	if (!name || name === "") {
+		name = 'page_view';
 	}
+	
+	//Fire all events with data
+	window.addEventListener('load', function() {
+		window.funnelytics.events.trigger(name, flEventData.eventData);
+	})
 
 	//Time Trigger
 	if (flEventData.timeTrigger.length > 0) {

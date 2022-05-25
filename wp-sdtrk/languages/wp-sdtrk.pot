@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Smart Server Side Tracking Plugin\n"
-"POT-Creation-Date: 2022-03-03 18:02+0100\n"
+"POT-Creation-Date: 2022-05-25 20:37+0200\n"
 "PO-Revision-Date: 2021-03-29 12:05+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -150,12 +150,12 @@ msgid "Insert your own Facebook Pixel ID"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:354 admin/class-wp-sdtrk-admin.php:480
-#: admin/class-wp-sdtrk-admin.php:547
+#: admin/class-wp-sdtrk-admin.php:547 admin/class-wp-sdtrk-admin.php:674
 msgid "Browser based Tracking"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:360 admin/class-wp-sdtrk-admin.php:491
-#: admin/class-wp-sdtrk-admin.php:553
+#: admin/class-wp-sdtrk-admin.php:553 admin/class-wp-sdtrk-admin.php:685
 msgid "Activate browser based tracking"
 msgstr ""
 
@@ -165,25 +165,25 @@ msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:372 admin/class-wp-sdtrk-admin.php:420
 #: admin/class-wp-sdtrk-admin.php:503 admin/class-wp-sdtrk-admin.php:565
-#: admin/class-wp-sdtrk-admin.php:613
+#: admin/class-wp-sdtrk-admin.php:613 admin/class-wp-sdtrk-admin.php:697
 msgid "Choose cookie consent behavior"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:385 admin/class-wp-sdtrk-admin.php:433
 #: admin/class-wp-sdtrk-admin.php:516 admin/class-wp-sdtrk-admin.php:578
-#: admin/class-wp-sdtrk-admin.php:626
+#: admin/class-wp-sdtrk-admin.php:626 admin/class-wp-sdtrk-admin.php:710
 msgid "Cookie ID"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:386 admin/class-wp-sdtrk-admin.php:434
 #: admin/class-wp-sdtrk-admin.php:517 admin/class-wp-sdtrk-admin.php:579
-#: admin/class-wp-sdtrk-admin.php:627
+#: admin/class-wp-sdtrk-admin.php:627 admin/class-wp-sdtrk-admin.php:711
 msgid "You can get this information in the Plugins Consent-Settings"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:387 admin/class-wp-sdtrk-admin.php:435
 #: admin/class-wp-sdtrk-admin.php:518 admin/class-wp-sdtrk-admin.php:580
-#: admin/class-wp-sdtrk-admin.php:628
+#: admin/class-wp-sdtrk-admin.php:628 admin/class-wp-sdtrk-admin.php:712
 msgid ""
 "For more accurate tracking, the following opt-in code should be stored in "
 "the cookie settings of Borlabs:"
@@ -274,71 +274,91 @@ msgstr ""
 msgid "You can get the Test-Code within the TikTok events-manager"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:658
-msgid "Parameter-Name(s)"
+#: admin/class-wp-sdtrk-admin.php:657
+msgid "Funnelytics"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:659
-msgid "Accepts"
+#: admin/class-wp-sdtrk-admin.php:663
+msgid "Funnelytics Tracking-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:660
-msgid "Example"
+#: admin/class-wp-sdtrk-admin.php:664
+msgid "Insert your own funnelytics tracking id"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:665
+msgid "What is funnelytics?"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:686
+msgid "Check to fire funnelytics browser tracking"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:719
+msgid "Parameter-Name(s)"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:720
+msgid "Accepts"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:721
+msgid "Example"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:726
 msgid "Tutorials"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:670
+#: admin/class-wp-sdtrk-admin.php:731
 msgid "Setup Tutorial"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:675
+#: admin/class-wp-sdtrk-admin.php:736
 msgid "Supported GET-Parameters"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:676 admin/class-wp-sdtrk-admin.php:706
+#: admin/class-wp-sdtrk-admin.php:737 admin/class-wp-sdtrk-admin.php:767
 msgid "Note"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:676
+#: admin/class-wp-sdtrk-admin.php:737
 msgid ""
 "Enable \"appending order details to thank you URL\" on services like "
 "Digistore24 so that the parameters below are passed automatically."
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:680
+#: admin/class-wp-sdtrk-admin.php:741
 msgid "Transaction-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:685
+#: admin/class-wp-sdtrk-admin.php:746
 msgid "Product-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:690
+#: admin/class-wp-sdtrk-admin.php:751
 msgid "Product-Name"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:695
+#: admin/class-wp-sdtrk-admin.php:756
 msgid "Value"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:700
+#: admin/class-wp-sdtrk-admin.php:761
 msgid "Type"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:705
+#: admin/class-wp-sdtrk-admin.php:766
 msgid "UTM"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:706
+#: admin/class-wp-sdtrk-admin.php:767
 msgid ""
 "UTM parameters are stored in cookies and automatically passed on further "
 "visits"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:841
+#: admin/class-wp-sdtrk-admin.php:819
 msgid "Thanks for updating"
 msgstr ""
 
