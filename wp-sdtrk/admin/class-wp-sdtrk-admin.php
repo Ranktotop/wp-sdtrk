@@ -651,6 +651,66 @@ class Wp_Sdtrk_Admin
                             'description' => __('You can get the Test-Code within the TikTok events-manager', 'wp-sdtrk')
                         )
                     )
+                ),
+                array(
+                    'name' => 'funnelytics',
+                    'title' => __('Funnelytics', 'wp-sdtrk'),
+                    'icon' => 'dashicons-chart-area',
+                    'fields' => array(
+                        array(
+                            'id' => 'fl_tracking_id',
+                            'type' => 'text',
+                            'title' => __('Funnelytics Tracking-ID', 'wp-sdtrk'),
+                            'description' => __('Insert your own funnelytics tracking id', 'wp-sdtrk')
+                        ),
+                        array(
+                            'type' => 'content',
+                            'dependency' => array(
+                                'fl_tracking_id',
+                                '!=',
+                                ''
+                            ),
+                            'title' => '<h3>' . __('Browser based Tracking', 'wp-sdtrk') . '</h3>',
+                            'content' => ''
+                        ),
+                        array(
+                            'id' => 'fl_trk_browser',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'fl_tracking_id',
+                                '!=',
+                                ''
+                            ),
+                            'title' => __('Activate browser based tracking', 'wp-sdtrk'),
+                            'description' => __('Check to fire funnelytics browser tracking', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id' => 'fl_trk_browser_cookie_service',
+                            'type' => 'radio',
+                            'dependency' => array(
+                                'fl_trk_browser',
+                                '!=',
+                                'false'
+                            ),
+                            'title' => __('Choose cookie consent behavior', 'wp-sdtrk'),
+                            'options' => $cookieOptions,
+                            'default' => 'none', // optional
+                            'style' => 'fancy' // optional
+                        ),
+                        array(
+                            'id' => 'fl_trk_browser_cookie_id',
+                            'type' => 'text',
+                            'dependency' => array(
+                                'fl_trk_browser_cookie_service_borlabs|fl_trk_browser',
+                                '==|!=',
+                                'true|false'
+                            ),
+                            'title' => __('Cookie ID', 'wp-sdtrk'),
+                            'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
+                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_fl_b();</script>') . '</code></p>'
+                        )
+                    )
                 )
             )
         );

@@ -160,8 +160,6 @@ function wp_sdtrk_initialize_ga() {
 
 		gtag('config', wp_sdtrk_ga.ga_id, config);
 
-
-
 		gaInitialized = true;
 	}
 

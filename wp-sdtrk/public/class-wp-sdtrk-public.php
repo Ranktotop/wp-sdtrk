@@ -142,6 +142,7 @@ class Wp_Sdtrk_Public
         $this->localize_fbData();
         $this->localize_ttData();
         $this->localize_gaData();
+        $this->localize_flData();
     }
 
     public function licensecheck()
@@ -370,6 +371,42 @@ class Wp_Sdtrk_Public
 
         wp_localize_script("wp_sdtrk-ga", 'wp_sdtrk_ga', $localizedData);
         wp_enqueue_script('wp_sdtrk-ga');
+    }
+    
+    /**
+     * Collect all FL-Data and pass them to JS
+     */
+    private function localize_flData()
+    {
+        // Init
+        // Register Script for Google-Tracking
+        wp_register_script("wp_sdtrk-fl", plugins_url("js/wp-sdtrk-fl.js", __FILE__), array(
+            'jquery'
+        ), "1.0", false);
+        $localizedData = array();
+        
+        // Mess ID
+        $trkId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fl_tracking_id");
+        $trkId = ($trkId && ! empty(trim($trkId))) ? $trkId : false;
+        
+        // Track Browser Enabled
+        $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fl_trk_browser"), "yes") == 0) ? true : false; 
+        
+        // Funnelytics: Track Browser Cookie Service
+        $trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fl_trk_browser_cookie_service");
+        $trkBrowserCookieService = ($trkBrowserCookieService && ! empty(trim($trkBrowserCookieService))) ? $trkBrowserCookieService : false;
+        
+        // Google: Track Browser Cookie ID
+        $trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fl_trk_browser_cookie_id");
+        $trkBrowserCookieId = ($trkBrowserCookieId && ! empty(trim($trkBrowserCookieId))) ? $trkBrowserCookieId : false;
+        
+        $localizedData['fl_id'] = $trkId;
+        $localizedData['fl_b_e'] = $trkBrowser;
+        $localizedData['c_fl_b_i'] = $trkBrowserCookieId;
+        $localizedData['c_fl_b_s'] = $trkBrowserCookieService;
+        
+        wp_localize_script("wp_sdtrk-fl", 'wp_sdtrk_fl', $localizedData);
+        wp_enqueue_script('wp_sdtrk-fl');
     }
 
     /**
