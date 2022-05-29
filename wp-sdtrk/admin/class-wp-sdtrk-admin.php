@@ -712,6 +712,67 @@ class Wp_Sdtrk_Admin
                             'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_fl_b();</script>') . '</code></p>'
                         )
                     )
+                ),
+                array(
+                    'name' => 'mautic',
+                    'title' => __('Mautic', 'wp-sdtrk'),
+                    'icon' => 'dashicons-email-alt',
+                    'fields' => array(
+                        array(
+                            'id' => 'mtc_tracking_id',
+                            'type' => 'text',
+                            'title' => __('Mautic Base URL', 'wp-sdtrk'),
+                            'description' => __('Insert the base-url of your mautic installation', 'wp-sdtrk'),
+                            'after' => '<a href="https://www.mautic.org/">'.__('What is mautic?', 'wp-sdtrk').'</a>'
+                        ),
+                        array(
+                            'type' => 'content',
+                            'dependency' => array(
+                                'mtc_tracking_id',
+                                '!=',
+                                ''
+                            ),
+                            'title' => '<h3>' . __('Browser based Tracking', 'wp-sdtrk') . '</h3>',
+                            'content' => ''
+                        ),
+                        array(
+                            'id' => 'mtc_trk_browser',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'mtc_tracking_id',
+                                '!=',
+                                ''
+                            ),
+                            'title' => __('Activate browser based tracking', 'wp-sdtrk'),
+                            'description' => __('Check to fire mautic browser tracking', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id' => 'mtc_trk_browser_cookie_service',
+                            'type' => 'radio',
+                            'dependency' => array(
+                                'mtc_trk_browser',
+                                '!=',
+                                'false'
+                            ),
+                            'title' => __('Choose cookie consent behavior', 'wp-sdtrk'),
+                            'options' => $cookieOptions,
+                            'default' => 'none', // optional
+                            'style' => 'fancy' // optional
+                        ),
+                        array(
+                            'id' => 'mtc_trk_browser_cookie_id',
+                            'type' => 'text',
+                            'dependency' => array(
+                                'mtc_trk_browser_cookie_service_borlabs|mtc_trk_browser',
+                                '==|!=',
+                                'true|false'
+                            ),
+                            'title' => __('Cookie ID', 'wp-sdtrk'),
+                            'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
+                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_fl_b();</script>') . '</code></p>'
+                        )
+                    )
                 )
             )
         );

@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.2.6 =
+* Added mautic tracking
+
 = 1.2.5 =
 * Added funnelytics tracking
 

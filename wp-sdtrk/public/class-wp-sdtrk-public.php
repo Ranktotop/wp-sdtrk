@@ -143,6 +143,7 @@ class Wp_Sdtrk_Public
         $this->localize_ttData();
         $this->localize_gaData();
         $this->localize_flData();
+        $this->localize_mtcData();
     }
 
     public function licensecheck()
@@ -396,7 +397,7 @@ class Wp_Sdtrk_Public
         $trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fl_trk_browser_cookie_service");
         $trkBrowserCookieService = ($trkBrowserCookieService && ! empty(trim($trkBrowserCookieService))) ? $trkBrowserCookieService : false;
         
-        // Google: Track Browser Cookie ID
+        // Funnelytics: Track Browser Cookie ID
         $trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fl_trk_browser_cookie_id");
         $trkBrowserCookieId = ($trkBrowserCookieId && ! empty(trim($trkBrowserCookieId))) ? $trkBrowserCookieId : false;
         
@@ -407,6 +408,42 @@ class Wp_Sdtrk_Public
         
         wp_localize_script("wp_sdtrk-fl", 'wp_sdtrk_fl', $localizedData);
         wp_enqueue_script('wp_sdtrk-fl');
+    }
+    
+    /**
+     * Collect all MTC-Data and pass them to JS
+     */
+    private function localize_mtcData()
+    {
+        // Init
+        // Register Script for Google-Tracking
+        wp_register_script("wp_sdtrk-mtc", plugins_url("js/wp-sdtrk-mtc.js", __FILE__), array(
+            'jquery'
+        ), "1.0", false);
+        $localizedData = array();
+        
+        // Mess ID
+        $trkId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "mtc_tracking_id");
+        $trkId = ($trkId && ! empty(trim($trkId))) ? $trkId : false;
+        
+        // Track Browser Enabled
+        $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "mtc_trk_browser"), "yes") == 0) ? true : false;
+        
+        // Mautic: Track Browser Cookie Service
+        $trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "mtc_trk_browser_cookie_service");
+        $trkBrowserCookieService = ($trkBrowserCookieService && ! empty(trim($trkBrowserCookieService))) ? $trkBrowserCookieService : false;
+        
+        // Mautic: Track Browser Cookie ID
+        $trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "mtc_trk_browser_cookie_id");
+        $trkBrowserCookieId = ($trkBrowserCookieId && ! empty(trim($trkBrowserCookieId))) ? $trkBrowserCookieId : false;
+        
+        $localizedData['mtc_id'] = $trkId;
+        $localizedData['mtc_b_e'] = $trkBrowser;
+        $localizedData['c_mtc_b_i'] = $trkBrowserCookieId;
+        $localizedData['c_mtc_b_s'] = $trkBrowserCookieService;
+        
+        wp_localize_script("wp_sdtrk-mtc", 'wp_sdtrk_mtc', $localizedData);
+        wp_enqueue_script('wp_sdtrk-mtc');
     }
 
     /**
