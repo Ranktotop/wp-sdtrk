@@ -770,7 +770,7 @@ class Wp_Sdtrk_Admin
                             ),
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_fl_b();</script>') . '</code></p>'
+                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_mtc_b();</script>') . '</code></p>'
                         )
                     )
                 )
