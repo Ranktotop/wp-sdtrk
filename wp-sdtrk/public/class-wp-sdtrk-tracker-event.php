@@ -2,10 +2,13 @@
 
 class Wp_Sdtrk_Tracker_Event
 {
+
     private $eventData;
-    
+
     private $timeTriggerData;
+
     private $scrollTriggerData;
+
     private $clickTriggerData;
 
     public function __construct($eventData)
@@ -59,6 +62,7 @@ class Wp_Sdtrk_Tracker_Event
 
     /**
      * Return the event value
+     *
      * @return number
      */
     public function getEventValue()
@@ -75,6 +79,7 @@ class Wp_Sdtrk_Tracker_Event
 
     /**
      * Return the product-id
+     *
      * @return string
      */
     public function getProductId()
@@ -88,60 +93,103 @@ class Wp_Sdtrk_Tracker_Event
         }
         return "";
     }
+
+    /**
+     * Return the page-id
+     *
+     * @return string
+     */
+    public function getPageId()
+    {
+        if (isset($this->eventData['pageId'])) {
+            return $this->eventData['pageId'];
+        }
+        return "";
+    }
     
+    /**
+     * Return the page-name
+     *
+     * @return string
+     */
+    public function getPageName()
+    {
+        if (isset($this->eventData['pageName'])) {
+            return $this->eventData['pageName'];
+        }
+        return "";
+    }
+
     /**
      * Sets the Time Data for Time-Events
+     *
      * @param String $eventName
      * @param String $eventId
      */
-    public function setTimeTriggerData($eventName,$eventId)
+    public function setTimeTriggerData($eventName, $eventId)
     {
-        if(empty($eventName) || empty($eventId)){
+        if (empty($eventName) || empty($eventId)) {
             $this->timeTriggerData = false;
         }
-        $this->timeTriggerData = ['name' => $eventName,'id' => $eventId];
+        $this->timeTriggerData = [
+            'name' => $eventName,
+            'id' => $eventId
+        ];
     }
-    
-    public function getTimeTriggerData(){
+
+    public function getTimeTriggerData()
+    {
         return $this->timeTriggerData;
     }
-    
+
     /**
      * Sets the Scroll Data for Scroll-Events
+     *
      * @param String $eventName
      * @param String $eventId
      */
-    public function setScrollTriggerData($eventName,$eventId)
+    public function setScrollTriggerData($eventName, $eventId)
     {
-        if(empty($eventName) || empty($eventId)){
+        if (empty($eventName) || empty($eventId)) {
             $this->scrollTriggerData = false;
         }
-        $this->scrollTriggerData = ['name' => $eventName,'id' => $eventId];
+        $this->scrollTriggerData = [
+            'name' => $eventName,
+            'id' => $eventId
+        ];
     }
-    
-    public function getScrollTriggerData(){
+
+    public function getScrollTriggerData()
+    {
         return $this->scrollTriggerData;
     }
-    
+
     /**
      * Sets the Click Data for Click-Events
+     *
      * @param String $eventName
      * @param String $eventId
      */
-    public function setClickTriggerData($eventName,$eventId,$tag)
+    public function setClickTriggerData($eventName, $eventId, $tag)
     {
-        if(empty($eventName) || empty($eventId) || $tag){
+        if (empty($eventName) || empty($eventId) || $tag) {
             $this->clickTriggerData = false;
         }
-        $this->clickTriggerData = ['name' => $eventName,'id' => $eventId,'tag' => $tag];
+        $this->clickTriggerData = [
+            'name' => $eventName,
+            'id' => $eventId,
+            'tag' => $tag
+        ];
     }
-    
-    public function getClickTriggerData(){
+
+    public function getClickTriggerData()
+    {
         return $this->clickTriggerData;
     }
 
     /**
      * Return the product-name
+     *
      * @return string
      */
     public function getProductName()
@@ -157,7 +205,59 @@ class Wp_Sdtrk_Tracker_Event
     }
 
     /**
+     * Return the user-firstname
+     *
+     * @return string
+     */
+    public function getUserFirstName()
+    {
+        if (isset($this->eventData['userFirstName'])) {
+            foreach ($this->eventData['userFirstName'] as $value) {
+                if (! empty($value)) {
+                    return $value;
+                }
+            }
+        }
+        return False;
+    }
+
+    /**
+     * Return the user-lastname
+     *
+     * @return string
+     */
+    public function getUserLastName()
+    {
+        if (isset($this->eventData['userLastName'])) {
+            foreach ($this->eventData['userLastName'] as $value) {
+                if (! empty($value)) {
+                    return $value;
+                }
+            }
+        }
+        return False;
+    }
+
+    /**
+     * Return the user-email
+     *
+     * @return string
+     */
+    public function getUserEmail()
+    {
+        if (isset($this->eventData['userEmail'])) {
+            foreach ($this->eventData['userEmail'] as $value) {
+                if (! empty($value)) {
+                    return $value;
+                }
+            }
+        }
+        return False;
+    }
+
+    /**
      * Return the Brandname
+     *
      * @return string
      */
     public function getBrandName()
@@ -171,6 +271,7 @@ class Wp_Sdtrk_Tracker_Event
 
     /**
      * Return UTM-Data
+     *
      * @return string[]
      */
     public function getUtmData()
@@ -188,22 +289,24 @@ class Wp_Sdtrk_Tracker_Event
 
     /**
      * Return a random event-id
+     *
      * @return string
      */
     public function getEventId()
     {
-        if(!empty($this->getTransactionId())){
+        if (! empty($this->getTransactionId())) {
             return $this->getTransactionId();
         }
-        
+
         if (isset($this->eventData['eventId']) && ! empty($this->eventData['eventId'])) {
             return $this->eventData['eventId'];
         }
         return substr(str_shuffle(MD5(microtime())), 0, 10);
     }
-    
+
     /**
      * Return the IP-Adress
+     *
      * @return string
      */
     public function getEventIp()
@@ -213,9 +316,10 @@ class Wp_Sdtrk_Tracker_Event
         }
         return Wp_Sdtrk_Helper::wp_sdtrk_getClientIp();
     }
-    
+
     /**
      * Return the User-Agent
+     *
      * @return string
      */
     public function getEventAgent()
@@ -225,9 +329,10 @@ class Wp_Sdtrk_Tracker_Event
         }
         return (isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : "";
     }
-    
+
     /**
      * Return the Source-URL
+     *
      * @return string
      */
     public function getEventSource()
@@ -237,9 +342,10 @@ class Wp_Sdtrk_Tracker_Event
         }
         return Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL();
     }
-    
+
     /**
      * Return the Referer-URL
+     *
      * @return string
      */
     public function getEventReferer()
@@ -249,21 +355,23 @@ class Wp_Sdtrk_Tracker_Event
         }
         return Wp_Sdtrk_Helper::wp_sdtrk_getCurrentReferer();
     }
-    
+
     /**
      * Return the Event-Time
+     *
      * @return string
      */
     public function getTime()
-    {        
+    {
         if (isset($this->eventData['eventTime']) && ! empty($this->eventData['eventTime'])) {
             return $this->eventData['eventTime'];
         }
         return date_create()->getTimestamp();
     }
-    
+
     /**
      * Return the transaction/order-id
+     *
      * @return string
      */
     public function getTransactionId()

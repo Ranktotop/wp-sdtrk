@@ -112,11 +112,6 @@ class Wp_Sdtrk_Tracker_Tt
                     "url" => $event->getEventSource(),
                     "referrer" => $event->getEventReferer()
                 ),
-                "user" => array(
-                    "external_id" => $externalId,
-                    "phone_number" => "",
-                    "email" => ""
-                ),
                 "ip" => $event->getEventIp(),
                 "user_agent" => $event->getEventAgent()
             ),
@@ -126,6 +121,18 @@ class Wp_Sdtrk_Tracker_Tt
                 //"query" => "" // you can pass a keyword from on-page-search here
             )
         );
+        
+        //User-Data
+        $userData = array();
+        if($event->getUserEmail()){
+            $userData["email"] = hash('sha256', $event->getUserEmail());
+        }
+        if($externalId){
+            $userData["external_id"] = $externalId;
+        }
+        if(!empty($userData)){
+            $requestData["context"]["user"] = $userData;   
+        }        
 
         // Product
         if (! empty($event->getProductId())) {
@@ -137,10 +144,20 @@ class Wp_Sdtrk_Tracker_Tt
                 )
             );
         }
+        //Needed for preventing errors with empty contents
+        else{
+            array_push($requestData["properties"]["contents"],array(
+                'content_id' => $event->getPageId(),
+                'content_name' => $event->getPageName(),
+                'content_type' =>"product",
+                'quantity' => 1
+            )
+                );
+        }
 
         // ---Send Request
         // The PageView
-        $requestData['event'] = "ViewContent";
+        $requestData['event'] = "PageView";
 
         // Check for time-trigger
         if ($isTimeTrigger) {

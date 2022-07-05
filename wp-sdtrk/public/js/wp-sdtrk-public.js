@@ -33,6 +33,9 @@ function wp_sdtrk_collectEventObject() {
 	wp_sdtrk_event.setEventSourceAdress(wp_sdtrk.addr);
 	wp_sdtrk_event.setEventSourceAgent(wp_sdtrk.agent);
 	wp_sdtrk_event.setEventSourceReferer(wp_sdtrk.referer);
+	wp_sdtrk_event.setUserFirstName(wp_sdtrk_collectParams(['buyer_first_name']));
+	wp_sdtrk_event.setUserLastName(wp_sdtrk_collectParams(['buyer_last_name']));
+	wp_sdtrk_event.setUserEmail(wp_sdtrk_collectParams(['buyer_email']));
 
 	//Additional
 	//TimeTrigger
@@ -48,6 +51,9 @@ function wp_sdtrk_collectEventObject() {
 	if (wp_sdtrk.clickTrigger) {
 		wp_sdtrk_event.setClickTrigger(wp_sdtrk.clickTrigger);
 	}
+	
+	//Remove sensible queries from url
+	window.history.replaceState({}, document.title, wp_sdtrk_getPrivacyUrl());
 }
 
 /**
@@ -220,4 +226,24 @@ function wp_sdtrk_getDateTime() {
 	dateTime.push(days[date.getDay()]);
 	dateTime.push(months[date.getMonth()]);
 	return dateTime;
+}
+
+//Get privacy valid url
+function wp_sdtrk_getPrivacyUrl(){
+	var privacyParams = ["buyer_first_name","buyer_last_name","buyer_email","license_data_username"];	
+	var baseUrl =  window.location.protocol +  "//" +  window.location.host +  window.location.pathname;
+	var urlParams = new URLSearchParams(window.location.search);
+	var hash = (window.location.hash) ? "#"+window.location.hash.substring(1) :"";
+	
+	//Delete sensitive params
+	privacyParams.forEach(function (param) {
+  		if(urlParams.has(param)){
+			urlParams.delete(param);
+		}
+	});	
+	var params = urlParams.toString();
+	if(params !=""){
+		return baseUrl + "?"+params+hash;
+	}
+	return baseUrl+hash
 }

@@ -41,6 +41,36 @@ class Wp_Sdtrk_Event {
 	getProdName() {
 		return this.prodName;
 	}
+	
+	//Sets the User-FirstName
+	setUserFirstName(value) {
+		this.userFirstName = value;
+	}
+
+	//Gets the User-FirstName
+	getUserFirstName() {
+		return this.grabFirstValue(this.userFirstName);
+	}
+	
+	//Sets the User-LastName
+	setUserLastName(value) {
+		this.userLastName = value;
+	}
+
+	//Gets the User-LastName
+	getUserLastName() {
+		return this.grabFirstValue(this.userLastName);
+	}
+	
+	//Sets the User-Email
+	setUserEmail(value) {
+		this.userEmail = value;
+	}
+
+	//Gets the User-LastName
+	getUserEmail() {
+		return this.grabFirstValue(this.userEmail);;
+	}
 
 	//Grabs the first entry in Product-Name and fallback to 'custom'
 	grabProdName() {

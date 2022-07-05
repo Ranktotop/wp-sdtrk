@@ -24,14 +24,16 @@ function wp_sdtrk_collectTTData() {
 	var prodId = wp_sdtrk_event.grabProdId();
 	var eventName = wp_sdtrk_convertEventNameToTt(wp_sdtrk_event.grabEventName());
 	var value = wp_sdtrk_event.grabValue();
+	var email = wp_sdtrk_event.getUserEmail();
+	var hash = wp_sdtrk_hashId();
 
 	// Collect the Base-Data
 	var baseData = {
-		'pixelId': wp_sdtrk_tt.tt_id,
-		'event': eventName,
-		'event_id': wp_sdtrk_event.grabOrderId()+"_"+wp_sdtrk_hashId()
+		pixelId: wp_sdtrk_tt.tt_id,
+		event: eventName,
+		event_id: wp_sdtrk_event.grabOrderId() + "_" + wp_sdtrk_hashId()
 	};
-	
+
 	//Collect the Custom-Data
 	var customData = {
 	};
@@ -50,13 +52,21 @@ function wp_sdtrk_collectTTData() {
 		customData.content_type = "product";
 		customData.quantity = 1;
 	}
-	else{
-		if(wp_sdtrk_tt.tt_content){
-			customData.content_id =  wp_sdtrk_event.getPageId();
-			customData.content_name = wp_sdtrk_event.getPageName();
-			customData.content_type = "product";
-			customData.quantity = 1;
-		}		
+	//Needed for preventing pixel-helper errors with empty contents
+	else {
+		customData.content_id = wp_sdtrk_event.getPageId();
+		customData.content_name = wp_sdtrk_event.getPageName();
+		customData.content_type = "product";
+		customData.quantity = 1;
+	}
+
+	//User-Data
+	var userData = {};
+	if (email !== "") {
+		userData.email = email;
+	}
+	if (hash !== "") {
+		userData.external_id = hash;
 	}
 
 	//Save to global
@@ -64,10 +74,11 @@ function wp_sdtrk_collectTTData() {
 	ttEventData.baseData = baseData;
 	ttEventData.customData = customData;
 	ttEventData.ttc = wp_sdtrk_getTtc();
-	ttEventData.hashId = wp_sdtrk_hashId();
 	ttEventData.timeTrigger = wp_sdtrk_event.getTimeTrigger();
 	ttEventData.scrollTrigger = wp_sdtrk_event.getScrollTrigger();
 	ttEventData.clickTrigger = wp_sdtrk_event.getClickTrigger();
+	ttEventData.userData = userData;
+	ttEventData.hash = hash;	
 }
 
 //Inits the tracker
@@ -91,7 +102,7 @@ function wp_sdtrk_track_tt() {
 
 //Fire FB Pixel on Server
 function wp_sdtrk_track_tt_s() {
-	var metaData = { hashId: ttEventData.hashId, ttc: ttEventData.ttc, event: wp_sdtrk_event, type: 'tt'};
+	var metaData = { hashId: ttEventData.hash, ttc: ttEventData.ttc, event: wp_sdtrk_event, type: 'tt' };
 	wp_sdtrk_sendAjax(metaData);
 
 	//Time Trigger
@@ -103,7 +114,7 @@ function wp_sdtrk_track_tt_s() {
 	if (ttEventData.scrollTrigger !== false) {
 		wp_sdtrk_track_tt_s_scrollTracker();
 	}
-	
+
 	//Click-Trigger
 	if (ttEventData.clickTrigger !== false) {
 		wp_sdtrk_track_tt_s_clickTracker();
@@ -115,7 +126,7 @@ function wp_sdtrk_track_tt_s_timeTracker() {
 	if (ttEventData.timeTrigger.length < 1) {
 		return;
 	}
-	var metaData = { hashId: ttEventData.hashId, ttc: ttEventData.ttc, event: wp_sdtrk_event, type: 'tt-tt'};
+	var metaData = { hashId: ttEventData.hash, ttc: ttEventData.ttc, event: wp_sdtrk_event, type: 'tt-tt' };
 	var eventId = (ttEventData.baseData['event_id']) ? ttEventData.baseData['event_id'] : false;
 	if (eventId !== false) {
 		ttEventData.timeTrigger.forEach((triggerTime) => {
@@ -124,8 +135,8 @@ function wp_sdtrk_track_tt_s_timeTracker() {
 				time = time * 1000;
 				jQuery(document).ready(function() {
 					setTimeout(function() {
-						cleanEventId = eventId.replace("_"+wp_sdtrk_hashId(), "");
-						var timeEventId = cleanEventId + "-t" + triggerTime+"_"+wp_sdtrk_hashId();
+						cleanEventId = eventId.replace("_" + wp_sdtrk_hashId(), "");
+						var timeEventId = cleanEventId + "-t" + triggerTime + "_" + wp_sdtrk_hashId();
 						var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
 						metaData.timeEventId = timeEventId;
 						metaData.timeEventName = timeEventName;
@@ -143,7 +154,7 @@ function wp_sdtrk_track_tt_s_scrollTracker() {
 	if (ttEventData.scrollTrigger === false || ttScrollTracked_s === true) {
 		return;
 	}
-	var metaData = { hashId: ttEventData.hashId, ttc: ttEventData.ttc, event: wp_sdtrk_event, type: 'tt-sd'};
+	var metaData = { hashId: ttEventData.hash, ttc: ttEventData.ttc, event: wp_sdtrk_event, type: 'tt-sd' };
 	var eventId = (ttEventData.baseData['event_id']) ? ttEventData.baseData['event_id'] : false;
 	if (eventId !== false) {
 		window.addEventListener('scroll', function() {
@@ -157,8 +168,8 @@ function wp_sdtrk_track_tt_s_scrollTracker() {
 
 			if (perc >= target) {
 				ttScrollTracked_s = true;
-				cleanEventId = eventId.replace("_"+wp_sdtrk_hashId(), "");	
-				var scrollEventId = cleanEventId + "-s" + ttEventData.scrollTrigger+"_"+wp_sdtrk_hashId();
+				cleanEventId = eventId.replace("_" + wp_sdtrk_hashId(), "");
+				var scrollEventId = cleanEventId + "-s" + ttEventData.scrollTrigger + "_" + wp_sdtrk_hashId();
 				var scrollEventName = 'Scrolldepth-' + ttEventData.scrollTrigger + '-Percent';
 				metaData.scrollEventId = scrollEventId;
 				metaData.scrollEventName = scrollEventName;
@@ -173,15 +184,15 @@ function wp_sdtrk_track_tt_s_clickTracker() {
 	if (ttEventData.clickTrigger === false || wp_sdtrk_buttons.length < 1) {
 		return;
 	}
-	var metaData = { hashId: ttEventData.hashId, ttc: ttEventData.ttc, event: wp_sdtrk_event, type: 'tt-bc'};
+	var metaData = { hashId: ttEventData.hash, ttc: ttEventData.ttc, event: wp_sdtrk_event, type: 'tt-bc' };
 	var eventId = (ttEventData.baseData['event_id']) ? ttEventData.baseData['event_id'] : false;
 	if (eventId !== false) {
 		wp_sdtrk_buttons.forEach((el) => {
 			jQuery(el[0]).on('click', function() {
 				if (!ttClickedButtons_s.includes(el[1])) {
 					ttClickedButtons_s.push(el[1]);
-					cleanEventId = eventId.replace("_"+wp_sdtrk_hashId(), "");	
-					var clickEventId = cleanEventId + "-b" + el[1]+"_"+wp_sdtrk_hashId();
+					cleanEventId = eventId.replace("_" + wp_sdtrk_hashId(), "");
+					var clickEventId = cleanEventId + "-b" + el[1] + "_" + wp_sdtrk_hashId();
 					var clickEventName = 'ButtonClick';
 					metaData.clickEventId = clickEventId;
 					metaData.clickEventName = clickEventName;
@@ -207,42 +218,40 @@ function wp_sdtrk_track_tt_b() {
 		delete cusD['currency'];
 	}
 	if (pixelId !== false && eventId !== false) {
-		
+
 		//Base Pixel
 		! function(w, d, t) {
-    		w.TiktokAnalyticsObject = t;
-		    var ttq = w[t] = w[t] || [];
-		    ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie"], ttq.setAndDefer = function(t, e) {
-		        t[e] = function() {
-		            t.push([e].concat(Array.prototype.slice.call(arguments, 0)))
-		        }
-		    };
-		    for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
-		    ttq.instance = function(t) {
-		        for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++) ttq.setAndDefer(e, ttq.methods[n]);
-		        return e
-		    }, ttq.load = function(e, n) {
-		        var i = "https://analytics.tiktok.com/i18n/pixel/events.js";
-		        ttq._i = ttq._i || {}, ttq._i[e] = [], ttq._i[e]._u = i, ttq._t = ttq._t || {}, ttq._t[e] = +new Date, ttq._o = ttq._o || {}, ttq._o[e] = n || {};
-		        var o = document.createElement("script");
-		        o.type = "text/javascript", o.async = !0, o.src = i + "?sdkid=" + e + "&lib=" + t;
-		        var a = document.getElementsByTagName("script")[0];
-		        a.parentNode.insertBefore(o, a)
-		    };
-		
-		    ttq.load(pixelId);
-		    ttq.page();
+			w.TiktokAnalyticsObject = t;
+			var ttq = w[t] = w[t] || [];
+			ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie"], ttq.setAndDefer = function(t, e) {
+				t[e] = function() {
+					t.push([e].concat(Array.prototype.slice.call(arguments, 0)))
+				}
+			};
+			for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
+			ttq.instance = function(t) {
+				for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++) ttq.setAndDefer(e, ttq.methods[n]);
+				return e
+			}, ttq.load = function(e, n) {
+				var i = "https://analytics.tiktok.com/i18n/pixel/events.js";
+				ttq._i = ttq._i || {}, ttq._i[e] = [], ttq._i[e]._u = i, ttq._t = ttq._t || {}, ttq._t[e] = +new Date, ttq._o = ttq._o || {}, ttq._o[e] = n || {};
+				var o = document.createElement("script");
+				o.type = "text/javascript", o.async = !0, o.src = i + "?sdkid=" + e + "&lib=" + t;
+				var a = document.getElementsByTagName("script")[0];
+				a.parentNode.insertBefore(o, a)
+			};
+
+			ttq.load(pixelId);
+			//The Page View Note: This Event is neither shown in PixelHelper nor in Events Test Webkit
+			ttq.page();
 		}(window, document, 'ttq');
-		
+
 		//Identify
-		if (ttEventData.hashId){
-			ttq.identify({external_id: ttEventData.hashId});
-		}
-			
+		ttq.identify(ttEventData.userData);
 
 		//Event Pixel
 		if (eventName !== false && eventName !== 'PageView') {
-			ttq.track(eventName, customData,{"event_id":eventId});
+			ttq.track(eventName, customData, {event_id: eventId });
 		}
 
 		//Time Trigger
@@ -273,10 +282,10 @@ function wp_sdtrk_track_tt_b_timeTracker(pixelId, eventId, customData) {
 			time = time * 1000;
 			jQuery(document).ready(function() {
 				setTimeout(function() {
-					cleanEventId = eventId.replace("_"+wp_sdtrk_hashId(), "");					
-					var timeEventId = cleanEventId + "-t" + triggerTime+"_"+wp_sdtrk_hashId();
-					var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';		
-					ttq.track(timeEventName, customData,{"event_id":timeEventId})
+					cleanEventId = eventId.replace("_" + wp_sdtrk_hashId(), "");
+					var timeEventId = cleanEventId + "-t" + triggerTime + "_" + wp_sdtrk_hashId();
+					var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
+					ttq.track(timeEventName, customData, {event_id: timeEventId })
 				}, time);
 			});
 		}
@@ -300,10 +309,10 @@ function wp_sdtrk_track_tt_b_scrollTracker(pixelId, eventId, customData) {
 
 		if (perc >= target) {
 			ttScrollTracked_b = true;
-			cleanEventId = eventId.replace("_"+wp_sdtrk_hashId(), "");					
-			var scrollEventId = cleanEventId + "-s" + ttEventData.scrollTrigger+"_"+wp_sdtrk_hashId();;
+			cleanEventId = eventId.replace("_" + wp_sdtrk_hashId(), "");
+			var scrollEventId = cleanEventId + "-s" + ttEventData.scrollTrigger + "_" + wp_sdtrk_hashId();;
 			var scrollEventName = 'Scrolldepth-' + ttEventData.scrollTrigger + '-Percent';
-			ttq.track(scrollEventName, customData,{"event_id":scrollEventId})
+			ttq.track(scrollEventName, customData, {event_id: scrollEventId })
 		}
 	});
 }
@@ -318,11 +327,11 @@ function wp_sdtrk_track_tt_b_clickTracker(pixelId, eventId, customData) {
 			if (!ttClickedButtons_b.includes(el[1])) {
 				ttClickedButtons_b.push(el[1]);
 				var btnCustomData = wp_sdtrk_clone(customData);
-				cleanEventId = eventId.replace("_"+wp_sdtrk_hashId(), "");				
-				var clickEventId = cleanEventId + "-b" + el[1]+"_"+wp_sdtrk_hashId();
+				cleanEventId = eventId.replace("_" + wp_sdtrk_hashId(), "");
+				var clickEventId = cleanEventId + "-b" + el[1] + "_" + wp_sdtrk_hashId();
 				var clickEventName = 'ButtonClick';
-				btnCustomData.buttonTag = el[1];					
-				ttq.track(clickEventName, customData,{"event_id":clickEventId})
+				btnCustomData.buttonTag = el[1];
+				ttq.track(clickEventName, customData, {event_id: clickEventId })
 			}
 		});
 
@@ -380,26 +389,26 @@ function wp_sdtrk_hashId() {
 	var validDays = 90;
 	if (wp_sdtrk_getCookie('_tthash', false)) {
 		var value = wp_sdtrk_getCookie('_tthash', false);
-		wp_sdtrk_setCookie('_tthash', value, validDays, false);		
+		wp_sdtrk_setCookie('_tthash', value, validDays, false);
 		return value;
 	}
-	else{	
+	else {
 		sag = wp_sdtrk_event.getEventSourceAgent();
 		sad = wp_sdtrk_event.getEventSourceAdress();
-		key = sag.toLowerCase()+sad.toLowerCase();
+		key = sag.toLowerCase() + sad.toLowerCase();
 		regex = /[\W_]+/g;
-		key = key.replace(regex,"")	
+		key = key.replace(regex, "")
 		var hash = 0;
 		if (key.length == 0) return hash;
 		for (i = 0; i < key.length; i++) {
 			char = key.charCodeAt(i);
-			hash = ((hash<<5)-hash)+char;
+			hash = ((hash << 5) - hash) + char;
 			hash = hash & hash; // Convert to 32bit integer
-		}		
-		if(hash<0){
-			hash = hash*-1;
 		}
-		wp_sdtrk_setCookie('_tthash', hash, validDays, false);		
+		if (hash < 0) {
+			hash = hash * -1;
+		}
+		wp_sdtrk_setCookie('_tthash', hash, validDays, false);
 		return hash;
 	}
 }
@@ -407,15 +416,25 @@ function wp_sdtrk_hashId() {
 //Get ttclid from param or cookies
 function wp_sdtrk_getTtc() {
 	var validDays = 7;
-	if (wp_sdtrk_getParam("ttclid")) {		
+	if (wp_sdtrk_getParam("ttclid")) {
 		var clid = wp_sdtrk_getParam("ttclid");
 		wp_sdtrk_setCookie('_ttc', clid, validDays, false);
 		return clid;
 	}
 	else if (wp_sdtrk_getCookie('_ttc', false)) {
 		var value = wp_sdtrk_getCookie('_ttc', false);
-		wp_sdtrk_setCookie('_ttc', value, validDays, false);		
+		wp_sdtrk_setCookie('_ttc', value, validDays, false);
 		return value;
 	}
 	return ""
+}
+
+//Get ttp or calculate new ttp
+function wp_sdtrk_getTtp() {
+	var validDays = 90;
+	if (wp_sdtrk_getCookie('_ttp', false)) {
+		var value = wp_sdtrk_getCookie('_ttp', false);
+		wp_sdtrk_setCookie('_ttp', value, validDays, false);
+		return value;
+	}
 }

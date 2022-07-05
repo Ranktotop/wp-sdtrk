@@ -103,14 +103,26 @@ class Wp_Sdtrk_Tracker_Fb
             "event_time" => $event->getTime(),
             "event_id" => $event->getEventId(),
             "event_source_url" => $event->getEventSource(),
-            "action_source" => "website",
-            "user_data" => array(
-                "client_ip_address" => $event->getEventIp(),
-                "client_user_agent" => $event->getEventAgent(),
-                "fbc" => $fbc,
-                "fbp" => $fbp
-            )
+            "action_source" => "website"
         );
+        
+        //User-Data
+        $userData = array(
+            "client_ip_address" => $event->getEventIp(),
+            "client_user_agent" => $event->getEventAgent(),
+            "fbc" => $fbc,
+            "fbp" => $fbp
+        );
+        if($event->getUserFirstName()){
+            $userData["fn"] = hash('sha256', $event->getUserFirstName());
+        }
+        if($event->getUserLastName()){
+            $userData["ln"] = hash('sha256', $event->getUserLastName());
+        }
+        if($event->getUserEmail()){
+            $userData["em"] = hash('sha256', $event->getUserEmail());
+        }        
+        $requestData["user_data"] = $userData;   
 
         // Collect the Custom-Data
         $customData = $event->getUtmData();
