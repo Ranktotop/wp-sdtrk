@@ -5,13 +5,14 @@ var ttScrollTracked_b = false;
 var ttScrollTracked_s = false;
 var ttClickedButtons_b = [];
 var ttClickedButtons_s = [];
-wp_sdtrk_collectTTData();
 
-// Load Listener
-jQuery(document).ready(function() {
-	wp_sdtrk_track_tt();
-	ttEventData_finishedLoading = true;
-});
+function wp_sdtrk_runTT() {
+	jQuery(document).ready(function() {
+		wp_sdtrk_collectTTData();
+		wp_sdtrk_track_tt();
+		ttEventData_finishedLoading = true;
+	});
+}
 
 /**
 * Collects all available data for FB

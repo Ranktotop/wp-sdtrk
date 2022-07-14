@@ -9,7 +9,7 @@
  */
 class Wp_Sdtrk_Helper
 {
-    
+
     /**
      * Get value of given key in multidimensional Array
      *
@@ -30,7 +30,7 @@ class Wp_Sdtrk_Helper
             }
         }
     }
-    
+
     /**
      * Write to log, if debug is enabled
      *
@@ -44,7 +44,7 @@ class Wp_Sdtrk_Helper
             error_log($log);
         }
     }
-    
+
     /**
      * Write dumb to log, if debug is enabled
      *
@@ -56,7 +56,27 @@ class Wp_Sdtrk_Helper
         var_dump($var);
         return self::wp_sdtrk_write_log(ob_get_clean());
     }
-    
+
+    /**
+     * Checks if a string starts with another string
+     * @param string $string
+     * @param string $substring
+     * @return boolean
+     */
+    public static function wp_sdtrk_strStartsWith($string, $substring)
+    {
+        if ($substring === '') {
+            return true;
+        }
+        if (strlen($string) < strlen($substring)) {
+            return false;
+        }
+        if ($string[0] != $substring[0]) {
+            return false;
+        }
+        return substr($string, 0, strlen($substring)) === $substring;
+    }
+
     /**
      * Get all Pages/Posts by metakey and value (usefull for exopite options)
      *
@@ -64,7 +84,7 @@ class Wp_Sdtrk_Helper
      * @param string $value
      * @return array
      */
-    public static function wp_sdtrk_getPagesByMeta($key, $value, $limit = -1)
+    public static function wp_sdtrk_getPagesByMeta($key, $value, $limit = - 1)
     {
         // Prepare query
         $args = array(
@@ -81,7 +101,7 @@ class Wp_Sdtrk_Helper
                 )
             )
         );
-        
+
         // Get all pages within this category
         $query = new WP_Query($args);
         if (isset($query->posts)) {
@@ -89,9 +109,10 @@ class Wp_Sdtrk_Helper
         }
         return array();
     }
-    
+
     /**
      * Replace Value for Key recursive in array
+     *
      * @param array $array
      * @param String $searchkey
      * @param String $newValue
@@ -103,17 +124,17 @@ class Wp_Sdtrk_Helper
             if (is_array($value)) {
                 self::wp_sdtrk_replaceValueForKey_recursive($value, $searchkey, $newValue);
             } else {
-                
+
                 if (strcmp($key, $searchkey) == 0) {
                     $array[$key] = $newValue;
                     break;
                 }
             }
         }
-        
+
         return $array;
     }
-    
+
     /**
      * Replaces key or value in array (recursive) with given value (or function)
      *
@@ -129,14 +150,14 @@ class Wp_Sdtrk_Helper
         if (! is_array($subject)) {
             return $subject;
         }
-        
+
         $helper = array();
         foreach ($subject as $key => $value) {
             $compareItem = (strcasecmp($type, "key") == 0) ? $key : $value;
-            
+
             // If the key or value match the searched term
             if (! is_array($compareItem) && strcmp($compareItem, $oldValue) == 0) {
-                
+
                 // Get the new term
                 if (method_exists('Wp_Sdtrk_Helper', $newValue)) {
                     $newItem = forward_static_call([
@@ -146,7 +167,7 @@ class Wp_Sdtrk_Helper
                 } else {
                     $newItem = $newValue;
                 }
-                
+
                 $newKey = (strcasecmp($type, "key") == 0) ? $newItem : $key;
                 $newValue = (strcasecmp($type, "key") == 0) ? $value : $newItem;
                 $helper[$newKey] = (is_array($value)) ? self::wp_sdtrk_replace_arrayeElement($value, $oldValue, $newValue, $type) : $newValue;
@@ -156,7 +177,7 @@ class Wp_Sdtrk_Helper
         }
         return $helper;
     }
-    
+
     /**
      * Generates a random Number as String
      *
@@ -166,7 +187,7 @@ class Wp_Sdtrk_Helper
     {
         return strval(rand(10000, 99999));
     }
-    
+
     /**
      * Update Wordpress Option, create if it doesnt exist
      *
@@ -181,7 +202,7 @@ class Wp_Sdtrk_Helper
             add_option($opt, $val);
         }
     }
-    
+
     /**
      * Checks if a key exists anywhere in the array
      *
@@ -201,7 +222,7 @@ class Wp_Sdtrk_Helper
         }
         return false;
     }
-    
+
     /**
      * Gets all array keys and keep its path
      *
@@ -222,192 +243,229 @@ class Wp_Sdtrk_Helper
                 }
             }
         }
-        
+
         return $arrayKeys;
     }
-    
+
     /**
      * Clear the Cache from common plugins
      */
-    public static function wp_sdtrk_clear_caches(){
-        
-        //Wordpress
+    public static function wp_sdtrk_clear_caches()
+    {
+
+        // Wordpress
         global $wp_object_cache;
         $wp_object_cache->flush();
-        
+
         // WP Rocket
-        if ( function_exists( 'rocket_clean_domain' ) ) {
+        if (function_exists('rocket_clean_domain')) {
             rocket_clean_domain();
         }
     }
-    
+
     /**
      * Send a CUrl Post
+     *
      * @param string $url
      * @param array $fields
      * @return mixed
      */
     public static function wp_sdtrk_httpPost($url, $payload, $headers = array())
     {
-        $curlHeaders = array('Content-Type:application/json');
-        foreach($headers as $header){
+        $curlHeaders = array(
+            'Content-Type:application/json'
+        );
+        foreach ($headers as $header) {
             array_push($curlHeaders, $header);
-        }   
-        
+        }
+
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_HTTPHEADER, $curlHeaders);
         curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);        
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_URL, $url);
-        $response = curl_exec($curl);     
-        
-        //If Curl Error
-        if($errno = curl_errno($curl)) {
+        $response = curl_exec($curl);
+
+        // If Curl Error
+        if ($errno = curl_errno($curl)) {
             $error_message = curl_strerror($errno);
-            $response = ['state'=>false,'code' => $errno, 'msg'=>$error_message, 'payload' => json_decode($payload)];            
+            $response = [
+                'state' => false,
+                'code' => $errno,
+                'msg' => $error_message,
+                'payload' => json_decode($payload)
+            ];
             self::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
             self::wp_sdtrk_vardump_log($response);
             self::wp_sdtrk_write_log('------ END CURL Error-Response: -----');
             curl_close($curl);
             return $response;
         }
-        
-        //If response is no JSON
+
+        // If response is no JSON
         $msg = json_decode($response);
-        if(is_null($msg)){
-            $response = ['state'=>false,'code' => 'json_decode failed', 'msg'=>$response, 'payload' => json_decode($payload)];  
+        if (is_null($msg)) {
+            $response = [
+                'state' => false,
+                'code' => 'json_decode failed',
+                'msg' => $response,
+                'payload' => json_decode($payload)
+            ];
             self::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
             self::wp_sdtrk_vardump_log($response);
             self::wp_sdtrk_write_log('------ END CURL Error-Response: -----');
             curl_close($curl);
             return $response;
-        }        
-        
-        //If response is error
-        if(isset($msg->error)){
-            $response = ['state'=>false,'code' => $msg->error, 'msg'=>$msg, 'payload' => json_decode($payload)]; 
+        }
+
+        // If response is error
+        if (isset($msg->error)) {
+            $response = [
+                'state' => false,
+                'code' => $msg->error,
+                'msg' => $msg,
+                'payload' => json_decode($payload)
+            ];
             self::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
             self::wp_sdtrk_vardump_log($msg);
             self::wp_sdtrk_write_log('------ END CURL Error-Response: -----');
             self::wp_sdtrk_write_log('------ START Payload: -----');
             self::wp_sdtrk_vardump_log($payload);
-            self::wp_sdtrk_write_log('Payload was sent to: '.$url);
+            self::wp_sdtrk_write_log('Payload was sent to: ' . $url);
             self::wp_sdtrk_write_log('------ END Payload: -----');
             curl_close($curl);
             return $response;
         }
-        
-        //If all is fine
-        $response = ['state'=>true,'code' => '1', 'msg'=>$msg, 'payload' => json_decode($payload)]; 
+
+        // If all is fine
+        $response = [
+            'state' => true,
+            'code' => '1',
+            'msg' => $msg,
+            'payload' => json_decode($payload)
+        ];
         curl_close($curl);
         return $response;
     }
-    
+
     /**
      * Retrieves the clients ip
+     *
      * @return String
      */
-    public static function wp_sdtrk_getClientIp(){
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+    public static function wp_sdtrk_getClientIp()
+    {
+        if (! empty($_SERVER['HTTP_CLIENT_IP'])) {
             $ip = $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        } elseif (! empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
         } else {
             $ip = $_SERVER['REMOTE_ADDR'];
         }
         return $ip;
     }
-    
+
     /**
      * Retrieves the current URL
+     *
      * @return String
      */
-    public static function wp_sdtrk_getCurrentURL($trimQuery=false){         
-        $currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";        
-        if(!$trimQuery){
+    public static function wp_sdtrk_getCurrentURL($trimQuery = false)
+    {
+        $currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+        if (! $trimQuery) {
             return $currentUrl;
-        }
-        else{
+        } else {
             return strstr($currentUrl, '?', true) ?: $currentUrl;
         }
     }
-    
+
     /**
      * Retrieves the current Referer
+     *
      * @return String
      */
-    public static function wp_sdtrk_getCurrentReferer($trimQuery=false){
+    public static function wp_sdtrk_getCurrentReferer($trimQuery = false)
+    {
         $currentUrl = (isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
-        if(!$trimQuery){
+        if (! $trimQuery) {
             return $currentUrl;
-        }
-        else{
+        } else {
             return strstr($currentUrl, '?', true) ?: $currentUrl;
         }
     }
-    
+
     /**
      * Get a Get-Parameter or Cookie if no GET-Param is given
+     *
      * @param String $name
      * @param boolean $firstParty
      * @return String|boolean
      */
-    public static function wp_sdtrk_getGetParamWithCookie($name, $firstParty=true){
-        //Check for a get Param
-        if(isset($_GET[$name])){            
+    public static function wp_sdtrk_getGetParamWithCookie($name, $firstParty = true)
+    {
+        // Check for a get Param
+        if (isset($_GET[$name])) {
             return $_GET[$name];
-        }        
-        $partyName = ($firstParty) ? "wpsdtrk_".$name : $name;
-        if(isset($_COOKIE[$partyName])){
+        }
+        $partyName = ($firstParty) ? "wpsdtrk_" . $name : $name;
+        if (isset($_COOKIE[$partyName])) {
             return $_COOKIE[$partyName];
         }
         return "";
     }
-    
+
     /**
      * Returns the root Domain
+     *
      * @return mixed
      */
-    public static function wp_sdtrk_getRootDomain(){
+    public static function wp_sdtrk_getRootDomain()
+    {
         $host = strtolower(trim(self::wp_sdtrk_getCurrentURL()));
         $host = strstr($host, '?', true) ?: $host;
-        $host = ltrim(str_replace("http://","",str_replace("https://","",$host)),"www.");
+        $host = ltrim(str_replace("http://", "", str_replace("https://", "", $host)), "www.");
         $count = substr_count($host, '.');
-        if($count === 2){
-            if(strlen(explode('.', $host)[1]) > 3) $host = explode('.', $host, 2)[1];
-        } else if($count > 2){
+        if ($count === 2) {
+            if (strlen(explode('.', $host)[1]) > 3)
+                $host = explode('.', $host, 2)[1];
+        } else if ($count > 2) {
             $host = self::wp_sdtrk_getRootDomain(explode('.', $host, 2)[1]);
         }
-        $host = explode('/',$host);
+        $host = explode('/', $host);
         return $host[0];
     }
-    
+
     /**
      * Sets a Cookie
+     *
      * @param String $name
      * @param String $value
      * @param boolean $firstParty
      * @param number $validDays
      * @return boolean
      */
-    public static function wp_sdtrk_setCookie($name,$value,$firstParty=true,$validDays=14){        
-        $partyName = ($firstParty) ? "wpsdtrk_".$name : $name;
-        $timestamp = time() + 24*60*60*$validDays;        
-        return setcookie($partyName,$value,$timestamp,"",self::wp_sdtrk_getRootDomain(),false,false);
+    public static function wp_sdtrk_setCookie($name, $value, $firstParty = true, $validDays = 14)
+    {
+        $partyName = ($firstParty) ? "wpsdtrk_" . $name : $name;
+        $timestamp = time() + 24 * 60 * 60 * $validDays;
+        return setcookie($partyName, $value, $timestamp, "", self::wp_sdtrk_getRootDomain(), false, false);
     }
-    
+
     /**
      * Looks for a parameter list and returns the first found value
+     *
      * @param String[] $paramList
      * @return string
      */
-    public static function wp_sdtrk_searchParams($paramList){
-        $value ="";
-        //Iterate all Params and try to get the Value
-        foreach($paramList as $paramName){
+    public static function wp_sdtrk_searchParams($paramList)
+    {
+        $value = "";
+        // Iterate all Params and try to get the Value
+        foreach ($paramList as $paramName) {
             $value = self::wp_sdtrk_getGetParamWithCookie($paramName);
-            if(!empty($value)){
+            if (! empty($value)) {
                 break;
             }
         }

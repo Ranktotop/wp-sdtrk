@@ -4,13 +4,14 @@ var mtcScrollTracked_b = false;
 var mtcClickedButtons_b = [];
 var mtcLoaded = false;
 var mtcInitialized = false;
-wp_sdtrk_collectMTCData();
 
-// Load Listener
-jQuery(document).ready(function() {
-	wp_sdtrk_track_mtc();
-	mtcEventData_finishedLoading = true;
-});
+function wp_sdtrk_runMTC() {
+	jQuery(document).ready(function() {
+		wp_sdtrk_collectMTCData();
+		wp_sdtrk_track_mtc();
+		mtcEventData_finishedLoading = true;
+	});
+}
 
 /**
 * Collects all available data for GA

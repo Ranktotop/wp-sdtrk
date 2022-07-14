@@ -4,13 +4,14 @@ var flScrollTracked_b = false;
 var flClickedButtons_b = [];
 var flLoaded = false;
 var flInitialized = false;
-wp_sdtrk_collectFLData();
 
-// Load Listener
-jQuery(document).ready(function() {
-	wp_sdtrk_track_fl();
-	flEventData_finishedLoading = true;
-});
+function wp_sdtrk_runFL() {
+	jQuery(document).ready(function() {
+		wp_sdtrk_collectFLData();
+		wp_sdtrk_track_fl();
+		flEventData_finishedLoading = true;
+	});
+}
 
 /**
 * Collects all available data for GA
@@ -121,7 +122,7 @@ function wp_sdtrk_track_fl_b() {
 	if (!name || name === "") {
 		name = 'page_view';
 	}
-	
+
 	//Fire all events with data
 	window.addEventListener('load', function() {
 		window.funnelytics.events.trigger(name, flEventData.eventData);

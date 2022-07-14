@@ -4,13 +4,14 @@ var gaScrollTracked_b = false;
 var gaClickedButtons_b = [];
 var gaLoaded = false;
 var gaInitialized = false;
-wp_sdtrk_collectGAData();
 
-// Load Listener
-jQuery(document).ready(function() {
-	wp_sdtrk_track_ga();
-	gaEventData_finishedLoading = true;
-});
+function wp_sdtrk_runGA() {
+	jQuery(document).ready(function() {
+		wp_sdtrk_collectGAData();
+		wp_sdtrk_track_ga();
+		gaEventData_finishedLoading = true;
+	});
+}
 
 /**
 * Collects all available data for GA

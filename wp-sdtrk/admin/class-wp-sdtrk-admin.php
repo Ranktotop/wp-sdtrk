@@ -335,7 +335,7 @@ class Wp_Sdtrk_Admin
         );
         $fields[] = array(
             'name' => 'trkservices',
-            'title' => __('Services', 'wp-sdtrk'),
+            'title' => __('Tracking Services', 'wp-sdtrk'),
             'icon' => 'dashicons-welcome-view-site',
             'sections' => array(
                 array(
@@ -771,6 +771,39 @@ class Wp_Sdtrk_Admin
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
                             'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_mtc_b();</script>') . '</code></p>'
+                        )
+                    )
+                )
+            )
+        );
+        
+        $fields[] = array(
+            'name' => 'datasources',
+            'title' => __('Data Sources', 'wp-sdtrk'),
+            'icon' => 'dashicons-networking',
+            'sections' => array(
+                array(
+                    'name' => 'digistore',
+                    'title' => __('Digistore24', 'wp-sdtrk'),
+                    'icon' => 'dashicons-database',
+                    'fields' => array(
+                        array(
+                            'id' => 'ds24_encrypt_data',
+                            'type' => 'switcher',
+                            'title' => __('Activate decryption', 'wp-sdtrk'),
+                            'description' => __('Check to decrypt GET-Parameter before handling', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id' => 'ds24_encrypt_data_key',
+                            'type' => 'text',
+                            'dependency' => array(
+                                'ds24_encrypt_data',
+                                '==',
+                                'true'
+                            ),
+                            'title' => __('ThankYou-Key', 'wp-sdtrk'),
+                            'description' => __('Please enter the ThankYou-Key which you have set in Digistore24', 'wp-sdtrk')
                         )
                     )
                 )

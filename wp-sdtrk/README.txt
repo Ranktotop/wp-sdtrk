@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.2.9 =
+* Added support for digistore24 GET-encryption
+
 = 1.2.8 =
 * Added advanced matching parameters to tiktok
 

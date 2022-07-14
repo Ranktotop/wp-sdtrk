@@ -1,11 +1,24 @@
 let wp_sdtrk_event = new Wp_Sdtrk_Event();
 let wp_sdtrk_buttons = [];
+let wp_sdtrk_decrypter = new Wp_Sdtrk_Decrypter();
+wp_sdtrk_decrypter.initialize();
+
 //Backup for IE8
 if (!Date.now) {
 	Date.now = function() { return new Date().getTime(); }
 }
-wp_sdtrk_collectEventObject();
-wp_sdtrk_collectTrackerButtons();
+
+//Start tracking after decrypter has finished loading
+function wp_sdtrk_startTracker() {
+	wp_sdtrk_collectEventObject();
+	wp_sdtrk_collectTrackerButtons();
+	wp_sdtrk_runFB();
+	wp_sdtrk_runGA();
+	wp_sdtrk_runTT();
+	wp_sdtrk_runFL();
+	wp_sdtrk_runMTC();
+}
+
 
 /**
 * Collects all available data for wp_sdtrk_event-Object
@@ -33,9 +46,9 @@ function wp_sdtrk_collectEventObject() {
 	wp_sdtrk_event.setEventSourceAdress(wp_sdtrk.addr);
 	wp_sdtrk_event.setEventSourceAgent(wp_sdtrk.agent);
 	wp_sdtrk_event.setEventSourceReferer(wp_sdtrk.referer);
-	wp_sdtrk_event.setUserFirstName(wp_sdtrk_collectParams(['buyer_first_name']));
-	wp_sdtrk_event.setUserLastName(wp_sdtrk_collectParams(['buyer_last_name']));
-	wp_sdtrk_event.setUserEmail(wp_sdtrk_collectParams(['buyer_email']));
+	wp_sdtrk_event.setUserFirstName(wp_sdtrk_collectParams(['buyer_first_name', 'first_name', 'firstname', 'vorname','license_data_first_name']));
+	wp_sdtrk_event.setUserLastName(wp_sdtrk_collectParams(['buyer_last_name', 'last_name', 'lastname', 'nachname','license_data_last_name']));
+	wp_sdtrk_event.setUserEmail(wp_sdtrk_collectParams(['buyer_email', 'email','license_data_email']));
 
 	//Additional
 	//TimeTrigger
@@ -51,7 +64,7 @@ function wp_sdtrk_collectEventObject() {
 	if (wp_sdtrk.clickTrigger) {
 		wp_sdtrk_event.setClickTrigger(wp_sdtrk.clickTrigger);
 	}
-	
+
 	//Remove sensible queries from url
 	window.history.replaceState({}, document.title, wp_sdtrk_getPrivacyUrl());
 }
@@ -129,16 +142,14 @@ function wp_sdtrk_collectCookies(data, firstparty = true) {
 
 //Gets a GET
 function wp_sdtrk_getParam(parameterName) {
-	var result = null,
-		tmp = [];
-	location.search
-		.substr(1)
-		.split("&")
-		.forEach(function(item) {
-			tmp = item.split("=");
-			if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
-		});
-	return result;
+	let data = wp_sdtrk_decrypter.getDecryptedData();
+
+	for (const key in data) {
+		if (data.hasOwnProperty(key) && key === parameterName) {
+			return data[key];
+		}
+	}
+	return null;
 }
 
 //Gets a Cookie
@@ -229,21 +240,37 @@ function wp_sdtrk_getDateTime() {
 }
 
 //Get privacy valid url
-function wp_sdtrk_getPrivacyUrl(){
-	var privacyParams = ["buyer_first_name","buyer_last_name","buyer_email","license_data_username"];	
-	var baseUrl =  window.location.protocol +  "//" +  window.location.host +  window.location.pathname;
-	var urlParams = new URLSearchParams(window.location.search);
-	var hash = (window.location.hash) ? "#"+window.location.hash.substring(1) :"";
+function wp_sdtrk_getPrivacyUrl() {
+	var privacyParams = [];	
+	var firstNameParams = wp_sdtrk_event.getUserFirstName_all();
+	var lastNameParams = wp_sdtrk_event.getUserLastName_all();
+	var emailParams = wp_sdtrk_event.getUserEmail_all();
 	
+	for (const key in firstNameParams) {
+			privacyParams.push(key);
+	}
+	
+	for (const key in lastNameParams) {
+			privacyParams.push(key);
+	}
+	
+	for (const key in emailParams) {
+			privacyParams.push(key);
+	}
+	
+	var baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+	var urlParams = new URLSearchParams(window.location.search);
+	var hash = (window.location.hash) ? "#" + window.location.hash.substring(1) : "";
+
 	//Delete sensitive params
-	privacyParams.forEach(function (param) {
-  		if(urlParams.has(param)){
+	privacyParams.forEach(function(param) {
+		if (urlParams.has(param)) {
 			urlParams.delete(param);
 		}
-	});	
+	});
 	var params = urlParams.toString();
-	if(params !=""){
-		return baseUrl + "?"+params+hash;
+	if (params != "") {
+		return baseUrl + "?" + params + hash;
 	}
-	return baseUrl+hash
+	return baseUrl + hash
 }

@@ -138,12 +138,14 @@ class Wp_Sdtrk_Public
          * between the defined hooks and the functions defined in this
          * class.
          */
-        $this->localize_eventData();
+        
+        $this->localize_decrypter();        
         $this->localize_fbData();
         $this->localize_ttData();
         $this->localize_gaData();
         $this->localize_flData();
         $this->localize_mtcData();
+        $this->localize_eventData();
     }
 
     public function licensecheck()
@@ -151,6 +153,35 @@ class Wp_Sdtrk_Public
         $licenseKey = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", ''), "licensekey_" . WP_SDTRK_LICENSE_TYPE_PRO);
         Wp_Sdtrk_License::wp_sdtrk_license_call($licenseKey, WP_SDTRK_LICENSE_TYPE_PRO, 'check');
     }
+    
+    /**
+     * Setup Decrypter-Data
+     */
+    private function localize_decrypter()
+    {
+        // Init
+        // Register Script for Facebook-Tracking
+        wp_register_script("wp_sdtrk-decrypter", plugins_url("js/wp-sdtrk-decrypter.js", __FILE__), array(
+            'jquery'
+        ), "1.0", false);
+        
+        $localizedData = array();
+        $services = array();
+        
+        // Digistore24
+        $ds24_decrypt = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ds24_encrypt_data"), "yes") == 0) ? true : false;        
+        $ds24_decryptKey = ($ds24_decrypt) ? Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ds24_encrypt_data_key") : false;
+        $ds24_decryptKey = (!empty($ds24_decryptKey) && $ds24_decryptKey) ? $ds24_decryptKey : false;
+        
+        //If valid add to services
+        if($ds24_decryptKey){
+            array_push($services,"ds24");
+        }        
+        
+        $localizedData['services'] = $services;
+        wp_localize_script("wp_sdtrk-decrypter", 'wp_sdtrk_decrypter_config', $localizedData);
+        wp_enqueue_script('wp_sdtrk-decrypter');
+    }    
 
     /**
      * Collect all Event-Data and pass them to JS
@@ -598,6 +629,40 @@ class Wp_Sdtrk_Public
         }
         return array(
             'state' => false
+        );
+    }
+    
+    /**
+     * Decrypt Data for given services
+     *
+     * @param array $data
+     * @param array $meta
+     * @return array
+     */
+    public function decryptData($data, $meta)
+    {                
+        $services = $meta;
+        $decryptedData = $data;        
+        if(empty($data) || empty($meta)){
+            return array(
+                'state' => true,
+                'data' => $decryptedData
+            );
+        }        
+        foreach($services as $service){
+            //If service exists and a secret key has been saved
+            $className = 'Wp_Sdtrk_Decrypter_'.$service;
+            $key = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), $service."_encrypt_data_key");
+            
+            //Create the decrypter and decrypt data
+            if (class_exists($className) && ($key !== false && !empty($key))) {
+                $decrypter = new $className($key,$decryptedData);
+                $decryptedData = $decrypter->getDecryptedData();
+            }
+        }        
+        return array(
+            'state' => true,
+            'data' => $decryptedData
         );
     }
 }

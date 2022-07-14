@@ -52,6 +52,11 @@ class Wp_Sdtrk_Event {
 		return this.grabFirstValue(this.userFirstName);
 	}
 	
+	//Gets the User-FirstName as array
+	getUserFirstName_all(){
+		return this.userFirstName;
+	}
+	
 	//Sets the User-LastName
 	setUserLastName(value) {
 		this.userLastName = value;
@@ -62,14 +67,24 @@ class Wp_Sdtrk_Event {
 		return this.grabFirstValue(this.userLastName);
 	}
 	
+	//Gets the User-LastName as array
+	getUserLastName_all(){
+		return this.userLastName;
+	}
+	
 	//Sets the User-Email
 	setUserEmail(value) {
 		this.userEmail = value;
 	}
 
-	//Gets the User-LastName
+	//Gets the User-Email
 	getUserEmail() {
 		return this.grabFirstValue(this.userEmail);;
+	}
+	
+	//Gets the User-Email as array
+	getUserEmail_all(){
+		return this.userEmail;
 	}
 
 	//Grabs the first entry in Product-Name and fallback to 'custom'

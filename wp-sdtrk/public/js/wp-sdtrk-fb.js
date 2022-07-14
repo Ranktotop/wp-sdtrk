@@ -5,13 +5,14 @@ var fbScrollTracked_b = false;
 var fbScrollTracked_s = false;
 var fbClickedButtons_b = [];
 var fbClickedButtons_s = [];
-wp_sdtrk_collectFBData();
 
-// Load Listener
-jQuery(document).ready(function() {
-	wp_sdtrk_track_fb();
-	fbEventData_finishedLoading = true;
-});
+function wp_sdtrk_runFB() {
+	jQuery(document).ready(function() {
+		wp_sdtrk_collectFBData();
+		wp_sdtrk_track_fb();
+		fbEventData_finishedLoading = true;
+	});
+}
 
 /**
 * Collects all available data for FB
@@ -235,7 +236,7 @@ function wp_sdtrk_track_fb_b() {
 			s.parentNode.insertBefore(t, s)
 		}(window, document, 'script',
 			'https://connect.facebook.net/en_US/fbevents.js');
-		fbq('init', pixelId,fbEventData.userData);
+		fbq('init', pixelId, fbEventData.userData);
 		fbq('track', 'PageView', cusD, { eventID: eventId });
 
 		//Event Pixel
