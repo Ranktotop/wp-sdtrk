@@ -208,7 +208,10 @@ class Wp_Sdtrk_Public
         $postId = ($post && $post->ID) ? $post->ID : false;
         $prodId = get_post_meta($postId, 'productid', true);
         $prodId = (! $prodId) ? "" : $prodId;
-
+        
+        $trkOverwrite = get_post_meta($postId, 'trkoverwrite', true);
+        $trkOverwrite = (! $trkOverwrite || $trkOverwrite ==="no") ? false : true;
+        
         // Get the brandName from Settings
         $brandName = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "brandname");
         $brandName = ($brandName && ! empty(trim($brandName))) ? $brandName : get_bloginfo('name');
@@ -250,6 +253,7 @@ class Wp_Sdtrk_Public
         $title = $postId ? get_the_title($post) : "";
 
         $localizedData['prodId'] = $prodId;
+        $localizedData['trkow'] = $trkOverwrite;
         $localizedData['pageId'] = $postId;
         $localizedData['pageTitle'] = $title;
         $localizedData['rootDomain'] = Wp_Sdtrk_Helper::wp_sdtrk_getRootDomain();

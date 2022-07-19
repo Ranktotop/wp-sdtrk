@@ -1,6 +1,21 @@
 class Wp_Sdtrk_Event {
 	constructor() {
 	}
+	
+	//Activate force mode
+	enableForce(){
+		this.force = true;
+	}
+	
+	//Disable force mode
+	disableForce(){
+		this.force = false;
+	}
+	
+	//Get force state
+	getForce(){
+		return this.force;
+	}
 
 	//Sets the UTM-Parameters
 	setUtm(value) {

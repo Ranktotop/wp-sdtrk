@@ -206,7 +206,7 @@ class Wp_Sdtrk_Admin
         // General
         $fields[] = array(
             'name' => 'general',
-            'title' => __('Product Meta', 'wp-sdtrk'),
+            'title' => __('Tracking-Settings', 'wp-sdtrk'),
             'icon' => 'dashicons-admin-generic',
             'fields' => array(
 
@@ -215,9 +215,16 @@ class Wp_Sdtrk_Admin
                     'type' => 'text',
                     'title' => __('Product ID', 'wp-sdtrk'),
                     'attributes' => array(
-                        'placeholder' => __('Please enter a product id', 'wp-sdtrk')
+                        'placeholder' => __('Please enter a product id in order to track the ViewContent-Event', 'wp-sdtrk')
                     )
-                )
+                ),
+                array(
+                    'id' => 'trkoverwrite',
+                    'type' => 'switcher',
+                    'title' => __('Overwrite Tracking-Consent', 'wp-sdtrk'),
+                    'description' => __('Check to track all visitors of this page regardless of their cookie consent', 'wp-sdtrk'),
+                    'default' => 'no'
+                ),
             )
         );
         return $fields;

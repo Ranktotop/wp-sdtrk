@@ -29,6 +29,14 @@ function wp_sdtrk_collectEventObject() {
 	wp_sdtrk_persistData(wp_sdtrk_event.getUtm());
 	wp_sdtrk_event.setUtm(wp_sdtrk_collectCookies(wp_sdtrk_event.getUtm()));
 
+	//Settings
+	if(wp_sdtrk.trkow !== ""){
+		wp_sdtrk_event.enableForce();		
+	}
+	else{
+		wp_sdtrk_event.disableForce();
+	}	
+	
 	//Event
 	wp_sdtrk_event.setProdId(wp_sdtrk_collectParams(['prodid', 'product_id']));
 	wp_sdtrk_event.addProdId('postProdId', wp_sdtrk.prodId);
@@ -98,6 +106,10 @@ function wp_sdtrk_collectTrackerButtons() {
 * @return  {Boolean|Number} The consent-state or -1 in error case
  */
 function wp_sdtrk_checkServiceConsent(id, service) {
+	if(wp_sdtrk_event.getForce()){
+		return -1;
+	}
+	
 	switch (service) {
 		case 'borlabs':
 			if (typeof window.BorlabsCookie != "undefined") {
