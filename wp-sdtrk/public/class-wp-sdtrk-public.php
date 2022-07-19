@@ -139,13 +139,17 @@ class Wp_Sdtrk_Public
          * class.
          */
         
-        $this->localize_decrypter();        
-        $this->localize_fbData();
-        $this->localize_ttData();
-        $this->localize_gaData();
-        $this->localize_flData();
-        $this->localize_mtcData();
-        $this->localize_eventData();
+        //Load minifed JS Versions
+        $loadMinified = true;        
+        $minifySwitch = ($loadMinified) ? ".min" :"";   
+        
+        $this->localize_decrypter($minifySwitch);        
+        $this->localize_fbData($minifySwitch);
+        $this->localize_ttData($minifySwitch);
+        $this->localize_gaData($minifySwitch);
+        $this->localize_flData($minifySwitch);
+        $this->localize_mtcData($minifySwitch);
+        $this->localize_eventData($minifySwitch);
     }
 
     public function licensecheck()
@@ -157,11 +161,11 @@ class Wp_Sdtrk_Public
     /**
      * Setup Decrypter-Data
      */
-    private function localize_decrypter()
+    private function localize_decrypter($loadMinified = "")
     {
-        // Init
+        // Init        
         // Register Script for Facebook-Tracking
-        wp_register_script("wp_sdtrk-decrypter", plugins_url("js/wp-sdtrk-decrypter.js", __FILE__), array(
+        wp_register_script("wp_sdtrk-decrypter", plugins_url("js/wp-sdtrk-decrypter".$loadMinified.".js", __FILE__), array(
             'jquery'
         ), "1.0", false);
         
@@ -186,17 +190,17 @@ class Wp_Sdtrk_Public
     /**
      * Collect all Event-Data and pass them to JS
      */
-    private function localize_eventData()
-    {
+    private function localize_eventData($loadMinified = "")
+    {        
         // Init
         // Register Script for JS Event-Data-Class
-        wp_register_script("wp_sdtrk_event", plugins_url("js/wp-sdtrk-event.js", __FILE__), array(
+        wp_register_script("wp_sdtrk_event", plugins_url("js/wp-sdtrk-event".$loadMinified.".js", __FILE__), array(
             'jquery'
         ), "1.0", false);
         wp_enqueue_script('wp_sdtrk_event');
 
         // Register Script for collecting Event-Data in Browser
-        wp_enqueue_script($this->wp_sdtrk, plugin_dir_url(__FILE__) . 'js/wp-sdtrk-public.js', array(
+        wp_enqueue_script($this->wp_sdtrk, plugin_dir_url(__FILE__) . 'js/wp-sdtrk-public.min.js', array(
             'jquery'
         ), $this->version, false);
 
@@ -270,11 +274,11 @@ class Wp_Sdtrk_Public
     /**
      * Collect all FB-Data and pass them to JS
      */
-    private function localize_fbData()
-    {
+    private function localize_fbData($loadMinified = "")
+    {        
         // Init
         // Register Script for Facebook-Tracking
-        wp_register_script("wp_sdtrk-fb", plugins_url("js/wp-sdtrk-fb.js", __FILE__), array(
+        wp_register_script("wp_sdtrk-fb", plugins_url("js/wp-sdtrk-fb".$loadMinified.".js", __FILE__), array(
             'jquery'
         ), "1.0", false);
 
@@ -321,11 +325,11 @@ class Wp_Sdtrk_Public
     /**
      * Collect all TT-Data and pass them to JS
      */
-    private function localize_ttData()
-    {
+    private function localize_ttData($loadMinified = "")
+    {        
         // Init
         // Register Script for Facebook-Tracking
-        wp_register_script("wp_sdtrk-tt", plugins_url("js/wp-sdtrk-tt.js", __FILE__), array(
+        wp_register_script("wp_sdtrk-tt", plugins_url("js/wp-sdtrk-tt".$loadMinified.".js", __FILE__), array(
             'jquery'
         ), "1.0", false);
         
@@ -372,11 +376,11 @@ class Wp_Sdtrk_Public
     /**
      * Collect all GA-Data and pass them to JS
      */
-    private function localize_gaData()
-    {
+    private function localize_gaData($loadMinified = "")
+    {        
         // Init
         // Register Script for Google-Tracking
-        wp_register_script("wp_sdtrk-ga", plugins_url("js/wp-sdtrk-ga.js", __FILE__), array(
+        wp_register_script("wp_sdtrk-ga", plugins_url("js/wp-sdtrk-ga".$loadMinified.".js", __FILE__), array(
             'jquery'
         ), "1.0", false);
         $localizedData = array();
@@ -412,11 +416,11 @@ class Wp_Sdtrk_Public
     /**
      * Collect all FL-Data and pass them to JS
      */
-    private function localize_flData()
-    {
+    private function localize_flData($loadMinified = "")
+    {        
         // Init
         // Register Script for Google-Tracking
-        wp_register_script("wp_sdtrk-fl", plugins_url("js/wp-sdtrk-fl.js", __FILE__), array(
+        wp_register_script("wp_sdtrk-fl", plugins_url("js/wp-sdtrk-fl".$loadMinified.".js", __FILE__), array(
             'jquery'
         ), "1.0", false);
         $localizedData = array();
@@ -448,11 +452,11 @@ class Wp_Sdtrk_Public
     /**
      * Collect all MTC-Data and pass them to JS
      */
-    private function localize_mtcData()
-    {
+    private function localize_mtcData($loadMinified = "")
+    {        
         // Init
         // Register Script for Google-Tracking
-        wp_register_script("wp_sdtrk-mtc", plugins_url("js/wp-sdtrk-mtc.js", __FILE__), array(
+        wp_register_script("wp_sdtrk-mtc", plugins_url("js/wp-sdtrk-mtc".$loadMinified.".js", __FILE__), array(
             'jquery'
         ), "1.0", false);
         $localizedData = array();
