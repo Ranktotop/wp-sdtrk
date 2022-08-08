@@ -106,7 +106,7 @@ class Wp_Sdtrk_Tracker_Event
         }
         return "";
     }
-    
+
     /**
      * Return the page-name
      *
@@ -354,6 +354,78 @@ class Wp_Sdtrk_Tracker_Event
             return $this->eventData['eventSourceReferer'];
         }
         return Wp_Sdtrk_Helper::wp_sdtrk_getCurrentReferer();
+    }
+
+    /**
+     * Returns the path of event-url with query
+     * @return string
+     */
+    public function getEventPath()
+    {
+        if (isset($this->eventData['eventPath']) && ! empty($this->eventData['eventPath'])) {
+            return $this->eventData['eventPath'];
+        }
+        return $_SERVER['REQUEST_URI'];
+    }
+
+    /**
+     * Returns the domain of event
+     * @return string
+     */
+    public function getEventDomain()
+    {
+        if (isset($this->eventData['eventDomain']) && ! empty($this->eventData['eventDomain'])) {
+            return $this->eventData['eventDomain'];
+        }
+        return rtrim(get_site_url() ,"/").'/';
+    }
+
+    /**
+     * Returns the full url of event with query
+     * @return string
+     */
+    public function getEventUrl()
+    {
+        if (isset($this->eventData['eventUrl']) && ! empty($this->eventData['eventUrl'])) {
+            return $this->eventData['eventUrl'];
+        }
+        return Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL();
+    }
+    
+    /**
+     * Returns the hour of event-time
+     * @return string
+     */
+    public function getEventTimeHour()
+    {
+        if (isset($this->eventData['eventTimeHour']) && ! empty($this->eventData['eventTimeHour'])) {
+            return $this->eventData['eventTimeHour'];
+        }
+        return "";
+    }
+    
+    /**
+     * Returns the day of event-time
+     * @return string
+     */
+    public function getEventTimeDay()
+    {
+        if (isset($this->eventData['eventTimeDay']) && ! empty($this->eventData['eventTimeDay'])) {
+            return $this->eventData['eventTimeDay'];
+        }
+        return "";
+    }
+    
+    /**
+     * Returns the month of event-time
+     * @return string
+     */
+    public function getEventTimeMonth()
+    {
+        if (isset($this->eventData['eventTimeMonth']) && ! empty($this->eventData['eventTimeMonth'])) {
+            return $this->eventData['eventTimeMonth'];
+        }
+        return "";
     }
 
     /**

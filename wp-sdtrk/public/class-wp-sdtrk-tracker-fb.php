@@ -176,7 +176,7 @@ class Wp_Sdtrk_Tracker_Fb
         $responses = array();
         array_push($responses,$this->payLoadServerRequest($requestData));
 
-        // The Event
+        // The Conversion-Events
         if ($this->readEventName($event) !== false && $this->readEventName($event) !== 'PageView' && $isTimeTrigger === false && $isScrollTrigger === false) {
             if ($event->getEventValue() > 0 || $this->readEventName($event) === 'Purchase') {
                 $customData['currency'] = "EUR";

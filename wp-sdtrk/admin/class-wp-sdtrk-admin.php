@@ -224,7 +224,7 @@ class Wp_Sdtrk_Admin
                     'title' => __('Overwrite Tracking-Consent', 'wp-sdtrk'),
                     'description' => __('Check to track all visitors of this page regardless of their cookie consent', 'wp-sdtrk'),
                     'default' => 'no'
-                ),
+                )
             )
         );
         return $fields;
@@ -336,7 +336,7 @@ class Wp_Sdtrk_Admin
                     'title' => __('Fire signal-event on button-clicks', 'wp-sdtrk'),
                     'description' => __('Check to fire a signal event after an element has been clicked', 'wp-sdtrk'),
                     'default' => 'no',
-                    'after' => __('Attention: In order for clicks to be tracked, the element to be tracked must contain the class trkbtn-TAGNAME-trkbtn. The TAGNAME placeholder can be replaced by any word and will be passed as a parameter', 'wp-sdtrk').'<br><b>'.__('Example:', 'wp-sdtrk').'</b>'.htmlentities('<a href="https://example.com" class="trkbtn-mybutton-trkbtn">MyButton</a>')
+                    'after' => __('Attention: In order for clicks to be tracked, the element to be tracked must contain the class trkbtn-TAGNAME-trkbtn. The TAGNAME placeholder can be replaced by any word and will be passed as a parameter', 'wp-sdtrk') . '<br><b>' . __('Example:', 'wp-sdtrk') . '</b>' . htmlentities('<a href="https://example.com" class="trkbtn-mybutton-trkbtn">MyButton</a>')
                 )
             )
         );
@@ -359,14 +359,24 @@ class Wp_Sdtrk_Admin
                         array(
                             'type' => 'content',
                             'title' => '<h3>' . __('Browser based Tracking', 'wp-sdtrk') . '</h3>',
-                            'content' => ''
+                            'content' => '',
+                            'dependency' => array(
+                                'fb_pixelid',
+                                '!=',
+                                ''
+                            )
                         ),
                         array(
                             'id' => 'fb_trk_browser',
                             'type' => 'switcher',
                             'title' => __('Activate browser based tracking', 'wp-sdtrk'),
                             'description' => __('Check to fire facebook browser pixel', 'wp-sdtrk'),
-                            'default' => 'no'
+                            'default' => 'no',
+                            'dependency' => array(
+                                'fb_pixelid',
+                                '!=',
+                                ''
+                            )
                         ),
                         array(
                             'id' => 'fb_trk_browser_cookie_service',
@@ -396,14 +406,24 @@ class Wp_Sdtrk_Admin
                         array(
                             'type' => 'content',
                             'title' => '<h3>' . __('Server based Tracking', 'wp-sdtrk') . '</h3>',
-                            'content' => ''
+                            'content' => '',
+                            'dependency' => array(
+                                'fb_pixelid',
+                                '!=',
+                                ''
+                            )
                         ),
                         array(
                             'id' => 'fb_trk_server',
                             'type' => 'switcher',
                             'title' => __('Activate server based tracking', 'wp-sdtrk'),
                             'description' => __('Check to fire Facebook Conversion API', 'wp-sdtrk'),
-                            'default' => 'no'
+                            'default' => 'no',
+                            'dependency' => array(
+                                'fb_pixelid',
+                                '!=',
+                                ''
+                            )
                         ),
                         array(
                             'id' => 'fb_trk_server_token',
@@ -475,12 +495,36 @@ class Wp_Sdtrk_Admin
                             'id' => 'ga_measurement_id',
                             'type' => 'text',
                             'title' => __('Google Analytics ID', 'wp-sdtrk'),
-                            'description' => __('Insert your own Measurement-ID / Universal Analytics ID', 'wp-sdtrk')
+                            'description' => __('Insert your own Measurement-ID', 'wp-sdtrk')
+                        ),
+                        array(
+                            'id' => 'ga_trk_debug',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'ga_measurement_id',
+                                '!=',
+                                ''
+                            ),
+                            'title' => __('Activate Debugging', 'wp-sdtrk'),
+                            'description' => __('Check to activate GA debugging', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id' => 'ga_trk_debug_live',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'ga_measurement_id|ga_trk_debug',
+                                '!=|==',
+                                '|true'
+                            ),
+                            'title' => __('Debug in live-view', 'wp-sdtrk'),
+                            'description' => __('Check to show debug-hits in google analytics realtime', 'wp-sdtrk'),
+                            'default' => 'no'
                         ),
                         array(
                             'type' => 'content',
                             'dependency' => array(
-                                'fb_pixelid',
+                                'ga_measurement_id',
                                 '!=',
                                 ''
                             ),
@@ -525,16 +569,62 @@ class Wp_Sdtrk_Admin
                             'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_ga_b();</script>') . '</code></p>'
                         ),
                         array(
-                            'id' => 'ga_trk_debug',
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Server based Tracking', 'wp-sdtrk') . '</h3>',
+                            'content' => '',
+                            'dependency' => array(
+                                'ga_measurement_id',
+                                '!=',
+                                ''
+                            )
+                        ),
+                        array(
+                            'id' => 'ga_trk_server',
                             'type' => 'switcher',
                             'dependency' => array(
-                                'ga_trk_browser',
+                                'ga_measurement_id',
+                                '!=',
+                                ''
+                            ),
+                            'title' => __('Activate server based tracking', 'wp-sdtrk'),
+                            'description' => __('Check to fire Google Measurement Protocol', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id' => 'ga_trk_server_token',
+                            'type' => 'text',
+                            'dependency' => array(
+                                'ga_trk_server',
                                 '==',
                                 'true'
                             ),
-                            'title' => __('Activate Debugging', 'wp-sdtrk'),
-                            'description' => __('Check to activate GA debugging', 'wp-sdtrk'),
-                            'default' => 'no'
+                            'title' => __('Measurement-API Token', 'wp-sdtrk'),
+                            'description' => __('You can get the token within the google datastream-settings', 'wp-sdtrk')
+                        ),
+                        array(
+                            'id' => 'ga_trk_server_cookie_service',
+                            'type' => 'radio',
+                            'dependency' => array(
+                                'ga_trk_server',
+                                '!=',
+                                'false'
+                            ),
+                            'title' => __('Choose cookie consent behavior', 'wp-sdtrk'),
+                            'options' => $cookieOptions,
+                            'default' => 'none', // optional
+                            'style' => 'fancy' // optional
+                        ),
+                        array(
+                            'id' => 'ga_trk_server_cookie_id',
+                            'type' => 'text',
+                            'dependency' => array(
+                                'ga_trk_server_cookie_service_borlabs|ga_trk_server',
+                                '==|!=',
+                                'true|false'
+                            ),
+                            'title' => __('Cookie ID', 'wp-sdtrk'),
+                            'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
+                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_ga_s();</script>') . '</code></p>'
                         )
                     )
                 ),
@@ -552,14 +642,24 @@ class Wp_Sdtrk_Admin
                         array(
                             'type' => 'content',
                             'title' => '<h3>' . __('Browser based Tracking', 'wp-sdtrk') . '</h3>',
-                            'content' => ''
+                            'content' => '',
+                            'dependency' => array(
+                                'tt_pixelid',
+                                '!=',
+                                ''
+                            )
                         ),
                         array(
                             'id' => 'tt_trk_browser',
                             'type' => 'switcher',
                             'title' => __('Activate browser based tracking', 'wp-sdtrk'),
                             'description' => __('Check to fire TikTok browser pixel', 'wp-sdtrk'),
-                            'default' => 'no'
+                            'default' => 'no',
+                            'dependency' => array(
+                                'tt_pixelid',
+                                '!=',
+                                ''
+                            )
                         ),
                         array(
                             'id' => 'tt_trk_browser_cookie_service',
@@ -589,14 +689,24 @@ class Wp_Sdtrk_Admin
                         array(
                             'type' => 'content',
                             'title' => '<h3>' . __('Server based Tracking', 'wp-sdtrk') . '</h3>',
-                            'content' => ''
+                            'content' => '',
+                            'dependency' => array(
+                                'tt_pixelid',
+                                '!=',
+                                ''
+                            )
                         ),
                         array(
                             'id' => 'tt_trk_server',
                             'type' => 'switcher',
                             'title' => __('Activate server based tracking', 'wp-sdtrk'),
                             'description' => __('Check to fire TikTok Event-API', 'wp-sdtrk'),
-                            'default' => 'no'
+                            'default' => 'no',
+                            'dependency' => array(
+                                'tt_pixelid',
+                                '!=',
+                                ''
+                            )
                         ),
                         array(
                             'id' => 'tt_trk_server_token',
@@ -669,7 +779,7 @@ class Wp_Sdtrk_Admin
                             'type' => 'text',
                             'title' => __('Funnelytics Tracking-ID', 'wp-sdtrk'),
                             'description' => __('Insert your own funnelytics tracking id', 'wp-sdtrk'),
-                            'after' => '<a href="https://funnelytics.io/">'.__('What is funnelytics?', 'wp-sdtrk').'</a>'
+                            'after' => '<a href="https://funnelytics.io/">' . __('What is funnelytics?', 'wp-sdtrk') . '</a>'
                         ),
                         array(
                             'type' => 'content',
@@ -730,7 +840,7 @@ class Wp_Sdtrk_Admin
                             'type' => 'text',
                             'title' => __('Mautic Base URL', 'wp-sdtrk'),
                             'description' => __('Insert the base-url of your mautic installation', 'wp-sdtrk'),
-                            'after' => '<a href="https://www.mautic.org/">'.__('What is mautic?', 'wp-sdtrk').'</a>'
+                            'after' => '<a href="https://www.mautic.org/">' . __('What is mautic?', 'wp-sdtrk') . '</a>'
                         ),
                         array(
                             'type' => 'content',
@@ -783,7 +893,7 @@ class Wp_Sdtrk_Admin
                 )
             )
         );
-        
+
         $fields[] = array(
             'name' => 'datasources',
             'title' => __('Data Sources', 'wp-sdtrk'),
@@ -889,7 +999,6 @@ class Wp_Sdtrk_Admin
 <?php
         }
     }
-
 
     /**
      * ******************************************

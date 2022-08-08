@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.3.1 =
+* Added google measurement protocol
+
 = 1.3.0 =
 * Added Tracking overwrite for specific Pages
 

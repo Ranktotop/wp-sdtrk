@@ -49,11 +49,17 @@ function wp_sdtrk_collectEventObject() {
 	wp_sdtrk_event.setEventName(wp_sdtrk_collectParams(['type']));
 	wp_sdtrk_event.setBrandName(wp_sdtrk.brandName);
 	wp_sdtrk_event.setLandingPage(wp_sdtrk.currentDomain);
-	wp_sdtrk_event.setEventTime(Date.now() / 1000 | 0);
-	wp_sdtrk_event.setEventSource(wp_sdtrk.source);
-	wp_sdtrk_event.setEventSourceAdress(wp_sdtrk.addr);
+	wp_sdtrk_event.setEventTime(Date.now() / 1000 | 0);	
+	wp_sdtrk_event.setEventTimeHour(wp_sdtrk_getDateTime()[0]);
+	wp_sdtrk_event.setEventTimeDay(wp_sdtrk_getDateTime()[1]);
+	wp_sdtrk_event.setEventTimeMonth(wp_sdtrk_getDateTime()[2]);	
+	wp_sdtrk_event.setEventSource(wp_sdtrk.source); //the url of page without query
+	wp_sdtrk_event.setEventSourceAdress(wp_sdtrk.addr); //the ip
 	wp_sdtrk_event.setEventSourceAgent(wp_sdtrk.agent);
-	wp_sdtrk_event.setEventSourceReferer(wp_sdtrk.referer);
+	wp_sdtrk_event.setEventSourceReferer(wp_sdtrk.referer); //the referrer	
+	wp_sdtrk_event.setEventPath(document.location.pathname + document.location.search); //the referrer
+	wp_sdtrk_event.setEventDomain(window.location.host); //the referrer
+	wp_sdtrk_event.setEventUrl(window.location.href); //the referrer	
 	wp_sdtrk_event.setUserFirstName(wp_sdtrk_collectParams(['buyer_first_name', 'first_name', 'firstname', 'vorname','license_data_first_name']));
 	wp_sdtrk_event.setUserLastName(wp_sdtrk_collectParams(['buyer_last_name', 'last_name', 'lastname', 'nachname','license_data_last_name']));
 	wp_sdtrk_event.setUserEmail(wp_sdtrk_collectParams(['buyer_email', 'email','license_data_email']));

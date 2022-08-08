@@ -140,7 +140,7 @@ class Wp_Sdtrk_Public
          */
         
         //Load minifed JS Versions
-        $loadMinified = true;        
+        $loadMinified = false;        
         $minifySwitch = ($loadMinified) ? ".min" :"";   
         
         $this->localize_decrypter($minifySwitch);        
@@ -200,7 +200,7 @@ class Wp_Sdtrk_Public
         wp_enqueue_script('wp_sdtrk_event');
 
         // Register Script for collecting Event-Data in Browser
-        wp_enqueue_script($this->wp_sdtrk, plugin_dir_url(__FILE__) . 'js/wp-sdtrk-public.min.js', array(
+        wp_enqueue_script($this->wp_sdtrk, plugin_dir_url(__FILE__) . "js/wp-sdtrk-public".$loadMinified.".js", array(
             'jquery'
         ), $this->version, false);
 
@@ -402,13 +402,27 @@ class Wp_Sdtrk_Public
         // Google: Track Browser Cookie ID
         $trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_browser_cookie_id");
         $trkBrowserCookieId = ($trkBrowserCookieId && ! empty(trim($trkBrowserCookieId))) ? $trkBrowserCookieId : false;
-
+        
+        // Track Server Enabled
+        $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_server"), "yes") == 0) ? true : false;
+        
+        // Google: Track Server Cookie Service
+        $ga_trkServerCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_server_cookie_service");
+        $ga_trkServerCookieService = ($ga_trkServerCookieService && ! empty(trim($ga_trkServerCookieService))) ? $ga_trkServerCookieService : false;
+        
+        // Google: Track Server Cookie ID
+        $ga_trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_server_cookie_id");
+        $ga_trkServerCookieId = ($ga_trkServerCookieId && ! empty(trim($ga_trkServerCookieId))) ? $ga_trkServerCookieId : false;
+        
         $localizedData['ga_id'] = $messId;
         $localizedData['ga_debug'] = $debug;
         $localizedData['ga_b_e'] = $trkBrowser;
         $localizedData['c_ga_b_i'] = $trkBrowserCookieId;
         $localizedData['c_ga_b_s'] = $trkBrowserCookieService;
-
+        $localizedData['ga_s_e'] = $trkServer;
+        $localizedData['c_ga_s_i'] = $ga_trkServerCookieId;
+        $localizedData['c_ga_s_s'] = $ga_trkServerCookieService;
+        
         wp_localize_script("wp_sdtrk-ga", 'wp_sdtrk_ga', $localizedData);
         wp_enqueue_script('wp_sdtrk-ga');
     }
@@ -579,6 +593,51 @@ class Wp_Sdtrk_Public
                     $event->setClickTriggerData($clickEventName, $clickEventId,$clickEventTag);
                     $fbTracker = new Wp_Sdtrk_Tracker_Fb();
                     $fbTracker->fireTracking_Server($event, $fbp, $fbc);
+                    return array(
+                        'state' => true
+                    );
+                    break;
+                case 'ga':
+                    $cid = (isset($meta['cid'])) ? $meta['cid'] : "";
+                    $gaTracker = new Wp_Sdtrk_Tracker_Ga();
+                    $gaTracker->fireTracking_Server($event, $cid);
+                    return array(
+                        'state' => true
+                    );
+                    break;
+                    // Google CAPI Time-Events
+                case 'ga-tt':
+                    $cid = (isset($meta['cid'])) ? $meta['cid'] : "";
+                    $timeEventId = (isset($meta['timeEventId'])) ? $meta['timeEventId'] : "";
+                    $timeEventName = (isset($meta['timeEventName'])) ? $meta['timeEventName'] : "";
+                    $event->setTimeTriggerData($timeEventName, $timeEventId);
+                    $gaTracker = new Wp_Sdtrk_Tracker_Ga();
+                    $gaTracker->fireTracking_Server($event, $cid);
+                    return array(
+                        'state' => true
+                    );
+                    break;
+                    // Google CAPI Scroll-Events
+                case 'ga-sd':
+                    $cid = (isset($meta['cid'])) ? $meta['cid'] : "";
+                    $scrollEventId = (isset($meta['scrollEventId'])) ? $meta['scrollEventId'] : "";
+                    $scrollEventName = (isset($meta['scrollEventName'])) ? $meta['scrollEventName'] : "";
+                    $event->setScrollTriggerData($scrollEventName, $scrollEventId);
+                    $gaTracker = new Wp_Sdtrk_Tracker_Ga();
+                    $gaTracker->fireTracking_Server($event, $cid);
+                    return array(
+                        'state' => true
+                    );
+                    break;
+                    // Google CAPI Button-Events
+                case 'ga-bc':
+                    $cid = (isset($meta['cid'])) ? $meta['cid'] : "";
+                    $clickEventId = (isset($meta['clickEventId'])) ? $meta['clickEventId'] : "";
+                    $clickEventName = (isset($meta['clickEventName'])) ? $meta['clickEventName'] : "";
+                    $clickEventTag = (isset($meta['clickEventTag'])) ? $meta['clickEventTag'] : "";
+                    $event->setClickTriggerData($clickEventName, $clickEventId,$clickEventTag);
+                    $gaTracker = new Wp_Sdtrk_Tracker_Ga();
+                    $gaTracker->fireTracking_Server($event, $cid);
                     return array(
                         'state' => true
                     );

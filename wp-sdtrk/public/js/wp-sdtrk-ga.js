@@ -1,7 +1,9 @@
 var gaEventData = false;
 var gaEventData_finishedLoading = false;
 var gaScrollTracked_b = false;
+var gaScrollTracked_s = false;
 var gaClickedButtons_b = [];
+var gaClickedButtons_s = [];
 var gaLoaded = false;
 var gaInitialized = false;
 
@@ -28,7 +30,7 @@ function wp_sdtrk_collectGAData() {
 	//var post_type = "page"; //product was sent only if value or purchase was sent, else page was sent. Testing this combination
 
 	//Value
-	if (value > 0 || eventName == 'purchase') {		
+	if (value > 0 || eventName == 'purchase') {
 		//Transaction id was here and value/currency was ever sent before and ga4 worked. Testing this combination
 		eventData['value'] = value;
 		eventData['currency'] = "EUR";
@@ -46,7 +48,7 @@ function wp_sdtrk_collectGAData() {
 		}]
 	}
 	//Meta-Data
-	eventData['transaction_id'] = wp_sdtrk_event.grabOrderId();	
+	eventData['transaction_id'] = wp_sdtrk_event.grabOrderId();
 	eventData['non_interaction'] = true;
 	eventData['page_title'] = wp_sdtrk_event.getPageName();
 	eventData['post_type'] = "product";
@@ -61,9 +63,9 @@ function wp_sdtrk_collectGAData() {
 			eventData[k] = wp_sdtrk_event.getUtm()[k];
 		}
 	}
-	eventData['event_time'] = wp_sdtrk_getDateTime()[0];
-	eventData['event_day'] = wp_sdtrk_getDateTime()[1];
-	eventData['event_month'] = wp_sdtrk_getDateTime()[2];
+	eventData['event_time'] = wp_sdtrk_event.getEventTimeHour();
+	eventData['event_day'] = wp_sdtrk_event.getEventTimeDay();
+	eventData['event_month'] = wp_sdtrk_event.getEventTimeMonth();
 	eventData['landing_page'] = wp_sdtrk_event.getLandingPage();
 
 	eventData['send_to'] = wp_sdtrk_ga.ga_id;
@@ -83,11 +85,118 @@ function wp_sdtrk_track_ga() {
 		return;
 	}
 	gaEventData.bc = wp_sdtrk_checkServiceConsent(wp_sdtrk_ga.c_ga_b_i, wp_sdtrk_ga.c_ga_b_s);
+	gaEventData.sc = wp_sdtrk_checkServiceConsent(wp_sdtrk_ga.c_ga_s_i, wp_sdtrk_ga.c_ga_s_s);
 	//console.log(gaEventData);
 
 	//Browser: If consent is given
-	if (gaEventData.bc !== false && wp_sdtrk_ga.ga_b_e !== "") {		
+	if (gaEventData.bc !== false && wp_sdtrk_ga.ga_b_e !== "") {
 		wp_sdtrk_track_ga_b();
+	}
+	//Server: If consent is given
+	if (gaEventData.sc !== false && wp_sdtrk_ga.ga_s_e !== "") {
+		wp_sdtrk_track_ga_s();
+	}
+}
+
+//Fire Google on Server
+function wp_sdtrk_track_ga_s() {
+	var metaData = { cid: wp_sdtrk_getCid(), event: wp_sdtrk_event, type: 'ga' };
+	wp_sdtrk_sendAjax(metaData);
+
+	//Time Trigger
+	if (gaEventData.timeTrigger.length > 0) {
+		wp_sdtrk_track_ga_s_timeTracker();
+	}
+
+	//Scroll-Trigger
+	if (gaEventData.scrollTrigger !== false) {
+		wp_sdtrk_track_ga_s_scrollTracker();
+	}
+
+	//Click-Trigger
+	if (gaEventData.clickTrigger !== false) {
+		wp_sdtrk_track_ga_s_clickTracker();
+	}
+}
+
+//Activate time-tracker for Server
+function wp_sdtrk_track_ga_s_timeTracker() {
+	if (gaEventData.timeTrigger.length < 1) {
+		return;
+	}
+	var metaData = { cid: wp_sdtrk_getCid(), event: wp_sdtrk_event, type: 'ga-tt' };
+	var eventId = (gaEventData.eventData['transaction_id']) ? gaEventData.eventData['transaction_id'] : false;
+	if (eventId !== false) {
+		gaEventData.timeTrigger.forEach((triggerTime) => {
+			var time = parseInt(triggerTime);
+			if (!isNaN(time)) {
+				time = time * 1000;
+				jQuery(document).ready(function() {
+					setTimeout(function() {
+						var timeEventId = eventId + "-t" + triggerTime;
+						var timeEventName = 'Watchtime_' + triggerTime.toString() + '_Seconds';
+						metaData.timeEventId = timeEventId;
+						metaData.timeEventName = timeEventName;
+						wp_sdtrk_sendAjax(metaData);
+					}, time);
+				});
+			}
+
+		});
+	}
+}
+
+//Activate scroll-tracker for Server
+function wp_sdtrk_track_ga_s_scrollTracker() {
+	if (gaEventData.scrollTrigger === false || gaScrollTracked_s === true) {
+		return;
+	}
+	var metaData = { cid: wp_sdtrk_getCid(), event: wp_sdtrk_event, type: 'ga-sd' };
+	var eventId = (gaEventData.eventData['transaction_id']) ? gaEventData.eventData['transaction_id'] : false;
+	if (eventId !== false) {
+		window.addEventListener('scroll', function() {
+			if (gaScrollTracked_s === true) {
+				return;
+			}
+			var st = jQuery(this).scrollTop();
+			var wh = jQuery(document).height() - jQuery(window).height();
+			var target = gaEventData.scrollTrigger;
+			var perc = Math.ceil((st * 100) / wh)
+
+			if (perc >= target) {
+				gaScrollTracked_s = true;
+				var scrollEventId = eventId + "-s" + gaEventData.scrollTrigger;
+				var scrollEventName = 'Scrolldepth_' + gaEventData.scrollTrigger + '_Percent';
+				metaData.scrollEventId = scrollEventId;
+				metaData.scrollEventName = scrollEventName;
+				wp_sdtrk_sendAjax(metaData);
+			}
+		});
+	}
+}
+
+//Activate click-tracker for Server
+function wp_sdtrk_track_ga_s_clickTracker() {
+	if (gaEventData.clickTrigger === false || wp_sdtrk_buttons.length < 1) {
+		return;
+	}
+	var metaData = { cid: wp_sdtrk_getCid(), event: wp_sdtrk_event, type: 'ga-bc' };
+	var eventId = (gaEventData.eventData['transaction_id']) ? gaEventData.eventData['transaction_id'] : false;
+	if (eventId !== false) {
+		wp_sdtrk_buttons.forEach((el) => {
+			jQuery(el[0]).on('click', function() {
+				if (!gaClickedButtons_s.includes(el[1])) {
+					gaClickedButtons_s.push(el[1]);
+					var clickEventId = eventId + "-b" + el[1];
+					var clickEventName = 'ButtonClick';
+					metaData.clickEventId = clickEventId;
+					metaData.clickEventName = clickEventName;
+					metaData.clickEventTag = el[1];
+					wp_sdtrk_sendAjax(metaData);
+				}
+			});
+
+		});
 	}
 }
 
@@ -143,20 +252,20 @@ function wp_sdtrk_initialize_ga() {
 			'link_attribution': false,
 			'anonymize_ip': true,
 			'custom_map': cd,
-			'debug_mode': wp_sdtrk_ga.ga_debug === "1"			
+			'debug_mode': wp_sdtrk_ga.ga_debug === "1"
 		};
 		var campaignData = wp_sdtrk_getStoredCampaignData(); // try to restore lost campaign-data		
 		if (campaignData) {
 			if (typeof campaignData.referrer !== 'undefined') {
-			  config['page_referrer'] = campaignData.referrer
+				config['page_referrer'] = campaignData.referrer
 			}
 			if (typeof campaignData.location !== 'undefined') {
-			  config['page_location'] = campaignData.location
+				config['page_location'] = campaignData.location
 			}
 			if (typeof campaignData.page !== 'undefined') {
-			  config['page_path'] = campaignData.page
+				config['page_path'] = campaignData.page
 			}
-				
+
 		}
 
 		gtag('config', wp_sdtrk_ga.ga_id, config);
@@ -204,7 +313,7 @@ function wp_sdtrk_track_ga_b_timeTracker() {
 			time = time * 1000;
 			jQuery(document).ready(function() {
 				setTimeout(function() {
-					var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
+					var timeEventName = 'Watchtime_' + triggerTime.toString() + '_Seconds';
 					gtag("event", timeEventName, gaEventData.eventData);
 				}, time);
 			});
@@ -229,7 +338,7 @@ function wp_sdtrk_track_ga_b_scrollTracker() {
 
 		if (perc >= target) {
 			gaScrollTracked_b = true;
-			var scrollEventName = 'Scrolldepth-' + gaEventData.scrollTrigger + '-Percent';
+			var scrollEventName = 'Scrolldepth_' + gaEventData.scrollTrigger + '_Percent';
 			gtag("event", scrollEventName, gaEventData.eventData);
 		}
 	});
@@ -254,6 +363,17 @@ function wp_sdtrk_track_ga_b_clickTracker() {
 	});
 }
 
+//Backload Analytics on Server
+function wp_sdtrk_backload_ga_s() {
+	//Dont fire if the consent was already given or the backload is called to 
+	if (gaEventData === false || gaEventData.sc !== false || wp_sdtrk_ga.ga_s_e === "" || !gaEventData_finishedLoading) {
+		return;
+	}
+	//Save the given consent
+	gaEventData.sc = true
+	wp_sdtrk_track_ga_s();
+}
+
 //Backload Analytics in Browser
 function wp_sdtrk_backload_ga_b() {
 	//Dont fire if the consent was already given or the backload is called to 
@@ -268,6 +388,35 @@ function wp_sdtrk_backload_ga_b() {
 //For testing only
 function randomInteger(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+//Get cid or calculate new cid
+function wp_sdtrk_getCid() {
+	var validDays = 90;
+	var value = wp_sdtrk_getCookie('_ga', false);
+	if (value) {
+		//return saved client id
+		var value = wp_sdtrk_getCookie('_ga', false);
+		const regex = /[0-9]+\.[0-9]+$/gm;
+		var userid = value.match(regex);
+		if(Array.isArray(userid)){
+			userid = userid[0];
+		}
+		wp_sdtrk_setCookie('_ga', value, validDays, false);
+		return userid;
+	}
+	else {
+		//generate new client id
+		var version = 'GA1';
+		var subdomainIndex = '1';
+		var creationTime = + new Date();
+		var randomNo = parseInt(Math.random() * 10000000000);
+		var cValue = version + '.' + subdomainIndex + '.' + creationTime + '.' + randomNo;		
+		//var identifier = randomInteger(100000000, 999999999).toString() +'.'+ randomInteger(1000000000, 9999999999).toString()
+		//var userid = 'GA1.1.' + identifier;
+		wp_sdtrk_setCookie('_ga', cValue, validDays, false);
+		return creationTime + '.' + randomNo;
+	}
 }
 
 //Get gclid from param or cookies
@@ -301,7 +450,7 @@ function wp_sdtrk_getStoredCampaignData() {
 		if (cd) {
 			campaignData['location'] = cd;
 		}
-		campaignData['page'] = document.location.pathname + document.location.search;
+		campaignData['page'] = wp_sdtrk_event.getEventPath();
 		return campaignData;
 	}
 	return false;
@@ -313,13 +462,13 @@ function wp_sdtrk_save_ga_CampaignData() {
 	for (var param of paramsToFind) {
 		var value = wp_sdtrk_getParam(param);
 		if (value) {
-			wp_sdtrk_setCookie('_cd', window.location.href, 14, true);
+			wp_sdtrk_setCookie('_cd', wp_sdtrk_event.getEventUrl(), 14, true);
 		}
 		break;
 	}
 	// Save referrer if it does not contain current hostname
 	var referrerHost = wp_sdtrk.referer;
-	if (referrerHost.indexOf(window.location.host) === -1 && referrerHost !== '') {
+	if (referrerHost.indexOf(wp_sdtrk_event.getEventDomain()) === -1 && referrerHost !== '') {
 		wp_sdtrk_setCookie('_rd', wp_sdtrk.referer, 14, true);
 	}
 }

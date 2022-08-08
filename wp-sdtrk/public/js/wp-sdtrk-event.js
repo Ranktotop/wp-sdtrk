@@ -1,19 +1,19 @@
 class Wp_Sdtrk_Event {
 	constructor() {
 	}
-	
+
 	//Activate force mode
-	enableForce(){
+	enableForce() {
 		this.force = true;
 	}
-	
+
 	//Disable force mode
-	disableForce(){
+	disableForce() {
 		this.force = false;
 	}
-	
+
 	//Get force state
-	getForce(){
+	getForce() {
 		return this.force;
 	}
 
@@ -56,7 +56,7 @@ class Wp_Sdtrk_Event {
 	getProdName() {
 		return this.prodName;
 	}
-	
+
 	//Sets the User-FirstName
 	setUserFirstName(value) {
 		this.userFirstName = value;
@@ -66,12 +66,12 @@ class Wp_Sdtrk_Event {
 	getUserFirstName() {
 		return this.grabFirstValue(this.userFirstName);
 	}
-	
+
 	//Gets the User-FirstName as array
-	getUserFirstName_all(){
+	getUserFirstName_all() {
 		return this.userFirstName;
 	}
-	
+
 	//Sets the User-LastName
 	setUserLastName(value) {
 		this.userLastName = value;
@@ -81,12 +81,12 @@ class Wp_Sdtrk_Event {
 	getUserLastName() {
 		return this.grabFirstValue(this.userLastName);
 	}
-	
+
 	//Gets the User-LastName as array
-	getUserLastName_all(){
+	getUserLastName_all() {
 		return this.userLastName;
 	}
-	
+
 	//Sets the User-Email
 	setUserEmail(value) {
 		this.userEmail = value;
@@ -96,9 +96,9 @@ class Wp_Sdtrk_Event {
 	getUserEmail() {
 		return this.grabFirstValue(this.userEmail);;
 	}
-	
+
 	//Gets the User-Email as array
-	getUserEmail_all(){
+	getUserEmail_all() {
 		return this.userEmail;
 	}
 
@@ -165,13 +165,43 @@ class Wp_Sdtrk_Event {
 		var name = this.grabFirstValue(this.eventName);
 		return this.parseEventName(name);
 	}
+	
+	//Gets the Event-Hour
+	getEventTimeHour() {
+		return this.eventTimeHour;
+	}
+	
+	//Sets the Event-Hour
+	setEventTimeHour(value) {
+		this.eventTimeHour = value;
+	}
+	
+	//Gets the Event-Day
+	getEventTimeDay() {
+		return this.eventTimeDay;
+	}
+	
+	//Sets the Event-Day
+	setEventTimeDay(value) {
+		this.eventTimeDay = value;
+	}
+	
+	//Gets the Event-Month
+	getEventTimeMonth() {
+		return this.eventTimeMonth;
+	}
+	
+	//Sets the Event-Month
+	setEventTimeMonth(value) {
+		this.eventTimeMonth = value;
+	}	
 
 	//Sets the Landingpage-URL
 	setLandingPage(value) {
 		this.landingPage = value;
 	}
 
-	//Gets the Brand-Name
+	//Gets the Landingpage-URL
 	getLandingPage() {
 		return this.landingPage;
 	}
@@ -185,7 +215,7 @@ class Wp_Sdtrk_Event {
 	getBrandName() {
 		return this.brandName;
 	}
-	
+
 	//Sets the Page-Name
 	setPageName(value) {
 		this.pageName = value;
@@ -195,7 +225,7 @@ class Wp_Sdtrk_Event {
 	getPageName() {
 		return this.pageName;
 	}
-	
+
 	//Sets the Page-ID
 	setPageId(value) {
 		this.pageId = value;
@@ -216,14 +246,44 @@ class Wp_Sdtrk_Event {
 		return this.eventTime;
 	}
 
-	//Sets the Event-Source
+	//Sets the Event-Source e.g the url of page without query
 	setEventSource(value) {
 		this.eventSource = value;
 	}
 
-	//Gets the Event-Source
+	//Gets the Event-Source e.g the url of page without query
 	getEventSource() {
 		return this.eventSource;
+	}
+
+	//Gets the full url of page with query
+	getEventUrl() {
+		return this.eventUrl;
+	}
+	
+	//Sets the full url of page with query
+	setEventUrl(value) {
+		this.eventUrl = value;
+	}
+
+	//Gets the path of page with subpages and query
+	getEventPath() {
+		return this.eventPath;
+	}
+	
+	//Sets the path of page with subpages and query
+	setEventPath(value) {
+		this.eventPath = value;
+	}
+
+	//Gets the domain (without protocol)
+	getEventDomain() {
+		return this.eventDomain;
+	}
+	
+	//Sets the domain (without protocol)
+	setEventDomain(value) {
+		this.eventDomain = value;
 	}
 
 	//Sets the Event-SourceAgent
@@ -235,7 +295,7 @@ class Wp_Sdtrk_Event {
 	getEventSourceAgent() {
 		return this.eventSourceAgent;
 	}
-	
+
 	//Sets the Event-SourceReferer
 	setEventSourceReferer(value) {
 		this.eventSourceReferer = value;
@@ -246,50 +306,50 @@ class Wp_Sdtrk_Event {
 		return this.eventSourceReferer;
 	}
 
-	//Sets the Event-SourceAdress
+	//Sets the Event-SourceAdress e.g ip
 	setEventSourceAdress(value) {
 		this.eventSourceAdress = value;
 	}
 
-	//Gets the Event-SourceAdress
+	//Gets the Event-SourceAdress e.g ip
 	getEventSourceAdress() {
 		return this.eventSourceAdress;
 	}
-	
+
 	//Sets the Time-Triggers
 	setTimeTrigger(value) {
 		this.timeTrigger = value;
 	}
-	
+
 	//Gets the Time-Triggers
 	getTimeTrigger() {
-		if(this.timeTrigger){
+		if (this.timeTrigger) {
 			return this.timeTrigger;
 		}
 		return [];
 	}
-	
+
 	//Sets the Scroll-Trigger
 	setScrollTrigger(value) {
 		this.scrollTrigger = value;
 	}
-	
+
 	//Gets the Scroll-Trigger
 	getScrollTrigger() {
-		if(this.scrollTrigger){
+		if (this.scrollTrigger) {
 			return this.scrollTrigger;
 		}
 		return false;
 	}
-	
+
 	//Sets the Click-Trigger
 	setClickTrigger(value) {
 		this.clickTrigger = value;
 	}
-	
+
 	//Gets the Click-Trigger
 	getClickTrigger() {
-		if(this.clickTrigger === '1'){
+		if (this.clickTrigger === '1') {
 			return true;
 		}
 		return false;
@@ -313,7 +373,7 @@ class Wp_Sdtrk_Event {
 		}
 		if (name === "" && this.grabProdId() !== "") {
 			return 'view_item';
-		}		
+		}
 		switch (name) {
 			case 'pageview':
 				return 'page_view';

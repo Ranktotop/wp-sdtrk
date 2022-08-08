@@ -294,7 +294,9 @@ class Wp_Sdtrk_Helper
                 'state' => false,
                 'code' => $errno,
                 'msg' => $error_message,
-                'payload' => json_decode($payload)
+                'payload_encoded' => $payload,
+                'payload_decoded' => json_decode($payload),
+                'destination' => $url
             ];
             self::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
             self::wp_sdtrk_vardump_log($response);
@@ -310,7 +312,9 @@ class Wp_Sdtrk_Helper
                 'state' => false,
                 'code' => 'json_decode failed',
                 'msg' => $response,
-                'payload' => json_decode($payload)
+                'payload_encoded' => $payload,
+                'payload_decoded' => json_decode($payload),
+                'destination' => $url
             ];
             self::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
             self::wp_sdtrk_vardump_log($response);
@@ -325,15 +329,13 @@ class Wp_Sdtrk_Helper
                 'state' => false,
                 'code' => $msg->error,
                 'msg' => $msg,
-                'payload' => json_decode($payload)
+                'payload_encoded' => $payload,
+                'payload_decoded' => json_decode($payload),
+                'destination' => $url
             ];
             self::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
-            self::wp_sdtrk_vardump_log($msg);
+            self::wp_sdtrk_vardump_log($response);
             self::wp_sdtrk_write_log('------ END CURL Error-Response: -----');
-            self::wp_sdtrk_write_log('------ START Payload: -----');
-            self::wp_sdtrk_vardump_log($payload);
-            self::wp_sdtrk_write_log('Payload was sent to: ' . $url);
-            self::wp_sdtrk_write_log('------ END Payload: -----');
             curl_close($curl);
             return $response;
         }
@@ -343,7 +345,9 @@ class Wp_Sdtrk_Helper
             'state' => true,
             'code' => '1',
             'msg' => $msg,
-            'payload' => json_decode($payload)
+            'payload_encoded' => $payload,
+            'payload_decoded' => json_decode($payload),
+            'destination' => $url
         ];
         curl_close($curl);
         return $response;
