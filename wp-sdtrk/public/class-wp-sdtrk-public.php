@@ -140,12 +140,13 @@ class Wp_Sdtrk_Public
          */
         
         //Load minifed JS Versions
-        $loadMinified = false;        
+        $loadMinified = true;        
         $minifySwitch = ($loadMinified) ? ".min" :"";   
         
         $this->localize_decrypter($minifySwitch);        
         $this->localize_fbData($minifySwitch);
         $this->localize_ttData($minifySwitch);
+        $this->localize_linData($minifySwitch);
         $this->localize_gaData($minifySwitch);
         $this->localize_flData($minifySwitch);
         $this->localize_mtcData($minifySwitch);
@@ -328,7 +329,7 @@ class Wp_Sdtrk_Public
     private function localize_ttData($loadMinified = "")
     {        
         // Init
-        // Register Script for Facebook-Tracking
+        // Register Script for TikTok-Tracking
         wp_register_script("wp_sdtrk-tt", plugins_url("js/wp-sdtrk-tt".$loadMinified.".js", __FILE__), array(
             'jquery'
         ), "1.0", false);
@@ -353,7 +354,7 @@ class Wp_Sdtrk_Public
         // Track Server Enabled
         $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server"), "yes") == 0) ? true : false;
         
-        // Facebook: Track Server Cookie Service
+        // Tik Tok: Track Server Cookie Service
         $tt_trkServerCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server_cookie_service");
         $tt_trkServerCookieService = ($tt_trkServerCookieService && ! empty(trim($tt_trkServerCookieService))) ? $tt_trkServerCookieService : false;
         
@@ -371,6 +372,75 @@ class Wp_Sdtrk_Public
         
         wp_localize_script("wp_sdtrk-tt", 'wp_sdtrk_tt', $localizedData);
         wp_enqueue_script('wp_sdtrk-tt');
+    }
+    
+    /**
+     * Collect all lIn-Data and pass them to JS
+     */
+    private function localize_linData($loadMinified = "")
+    {
+        // Init
+        // Register Script for LinkedIn-Tracking
+        wp_register_script("wp_sdtrk-lin", plugins_url("js/wp-sdtrk-lin".$loadMinified.".js", __FILE__), array(
+            'jquery'
+        ), "1.0", false);
+        
+        $localizedData = array();
+        
+        // Pixel ID
+        $lin_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_pixelid");
+        $lin_pixelId = ($lin_pixelId && ! empty(trim($lin_pixelId))) ? $lin_pixelId : false;
+        
+        // Track Browser Enabled
+        $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_browser"), "yes") == 0) ? true : false;
+        
+        // LinkedIn: Track Browser Cookie Service
+        $lin_trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_browser_cookie_service");
+        $lin_trkBrowserCookieService = ($lin_trkBrowserCookieService && ! empty(trim($lin_trkBrowserCookieService))) ? $lin_trkBrowserCookieService : false;
+        
+        // LinkedIn: Track Browser Cookie ID
+        $lin_trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_browser_cookie_id");
+        $lin_trkBrowserCookieId = ($lin_trkBrowserCookieId && ! empty(trim($lin_trkBrowserCookieId))) ? $lin_trkBrowserCookieId : false;
+        
+        // LinkedIn Mappings
+        $linMappingData = wp_sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_map");
+        $linMappings = array();
+        if($linMappingData){
+            foreach($linMappingData as $dataSet){
+                $eventName = $dataSet['lin_trk_map_event'];
+                $convId = $dataSet['lin_trk_map_event_lin_convid'];
+                $rules = array();
+                if($dataSet['lin_trk_map_event_rules'] && !empty($dataSet['lin_trk_map_event_rules'])){
+                    foreach($dataSet['lin_trk_map_event_rules'] as $ruleSet){
+                        $ruleParam = $ruleSet["lin_trk_map_event_rules_param"];
+                        $ruleValue = $ruleSet["lin_trk_map_event_rules_value"];
+                        if($ruleParam && $ruleValue){
+                            $rules[$ruleParam] = $ruleValue;
+                        }
+                    }
+                }
+                array_push($linMappings,array('eventName'=>$eventName,'convId'=>$convId,'rules'=>$rules));
+            }
+        }        
+        // LinkedIn Button-Mappings
+        $linMappingData = wp_sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_btnmap");
+        $linBtnMappings = array();
+        if($linMappingData){
+            foreach($linMappingData as $dataSet){
+                $btnTag = $dataSet['lin_trk_map_btnevent_lin_btnTag'];
+                $convId = $dataSet['lin_trk_map_btnevent_lin_convid'];                
+                array_push($linBtnMappings,array('btnTag'=>$btnTag,'convId'=>$convId));
+            }
+        }                
+        $localizedData['lin_map'] = $linMappings;        
+        $localizedData['lin_btnmap'] = $linBtnMappings;        
+        $localizedData['lin_id'] = $lin_pixelId;
+        $localizedData['lin_b_e'] = $trkBrowser;
+        $localizedData['c_lin_b_i'] = $lin_trkBrowserCookieId;
+        $localizedData['c_lin_b_s'] = $lin_trkBrowserCookieService;
+        
+        wp_localize_script("wp_sdtrk-lin", 'wp_sdtrk_lin', $localizedData);
+        wp_enqueue_script('wp_sdtrk-lin');
     }
 
     /**

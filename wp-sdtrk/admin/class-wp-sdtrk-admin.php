@@ -242,7 +242,40 @@ class Wp_Sdtrk_Admin
         if (is_plugin_active('borlabs-cookie/borlabs-cookie.php')) {
             $cookieOptions['borlabs'] = __('Borlabs Cookie', 'wp-sdtrk');
         }
-
+        
+        //Collect Eventlist
+        $eventList = array(
+            'page_view'=>__('Page View', 'wp-sdtrk'),
+            'add_to_cart'=>__('Add to Cart', 'wp-sdtrk'),
+            'purchase'=>__('Purchase', 'wp-sdtrk'),
+            'sign_up'=>__('Complete registration', 'wp-sdtrk'),
+            'generate_lead'=>__('Lead', 'wp-sdtrk'),
+            'begin_checkout'=>__('Initiate checkout', 'wp-sdtrk'),
+            'view_item'=>__('View Content', 'wp-sdtrk'));
+        
+        //Collect TimeTracker-Data
+        $timeTrackingEnabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_time"), "yes") == 0) ? true : false;
+        if ($timeTrackingEnabled) {
+            $timeTrackingData = wp_sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_time_group");
+            // Create array from Data
+            foreach ($timeTrackingData as $timeTrackingSet) {
+                $eventList['timetracker-'.$timeTrackingSet['trk_time_group_seconds']] = __('Time-Tracker', 'wp-sdtrk').' '.$timeTrackingSet['trk_time_group_seconds'].' '.__('Seconds', 'wp-sdtrk');
+            }
+        }
+        
+        //Collect ScrollTracker-Data
+        $scrollTrackingEnabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_scrolling"), "yes") == 0) ? true : false;
+        if ($scrollTrackingEnabled) {
+            $scrollTrackingData = intval(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", array()), "trk_scrolling_depth"));
+            if($scrollTrackingData>0){
+                $eventList['scrolltracker-'.strval($scrollTrackingData)] = __('Scroll-Tracker', 'wp-sdtrk').' '.strval($scrollTrackingData).' '.__('Percent', 'wp-sdtrk');
+            }
+        }   
+        
+        //Collect ButtonTracker-Data
+        $buttonTrackingEnabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_buttons"), "yes") == 0) ? true : false;
+        $buttonTrackingMsg = ($buttonTrackingEnabled) ? "" :'<strong>'.__('Note: Button-Click-Tracking is currently disabled in general settings! So this sttings will be ignored', 'wp-sdtrk').'</strong>';
+        
         $fields[] = array(
             'name' => 'basic',
             'title' => __('General', 'wp-sdtrk'),
@@ -767,6 +800,168 @@ class Wp_Sdtrk_Admin
                             'title' => __('Test-Code', 'wp-sdtrk'),
                             'description' => __('You can get the Test-Code within the TikTok events-manager', 'wp-sdtrk')
                         )
+                    )
+                ),
+                array(
+                    'name' => 'linkedin',
+                    'title' => __('LinkedIn', 'wp-sdtrk'),
+                    'icon' => 'dashicons-linkedin',
+                    'fields' => array(
+                        array(
+                            'id' => 'lin_pixelid',
+                            'type' => 'text',
+                            'title' => __('LinkedIn Partner-ID', 'wp-sdtrk'),
+                            'description' => __('Insert your own LinkedIn Partner ID', 'wp-sdtrk')
+                        ),
+                        array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Browser based Tracking', 'wp-sdtrk') . '</h3>',
+                            'content' => '',
+                            'dependency' => array(
+                                'lin_pixelid',
+                                '!=',
+                                ''
+                            )
+                        ),
+                        array(
+                            'id' => 'lin_trk_browser',
+                            'type' => 'switcher',
+                            'title' => __('Activate browser based tracking', 'wp-sdtrk'),
+                            'description' => __('Check to fire linkedIn browser pixel', 'wp-sdtrk'),
+                            'default' => 'no',
+                            'dependency' => array(
+                                'lin_pixelid',
+                                '!=',
+                                ''
+                            )
+                        ),
+                        array(
+                            'id' => 'lin_trk_browser_cookie_service',
+                            'type' => 'radio',
+                            'dependency' => array(
+                                'lin_trk_browser',
+                                '!=',
+                                'false'
+                            ),
+                            'title' => __('Choose cookie consent behavior', 'wp-sdtrk'),
+                            'options' => $cookieOptions,
+                            'default' => 'none', // optional
+                            'style' => 'fancy' // optional
+                        ),
+                        array(
+                            'id' => 'lin_trk_browser_cookie_id',
+                            'type' => 'text',
+                            'dependency' => array(
+                                'lin_trk_browser_cookie_service_borlabs|lin_trk_browser',
+                                '==|!=',
+                                'true|false'
+                            ),
+                            'title' => __('Cookie ID', 'wp-sdtrk'),
+                            'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
+                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_lin_b();</script>') . '</code></p>'
+                        ),
+                        array(
+                            'type' => 'custom_userinputgroup',
+                            'id' => 'lin_trk_map',
+                            'dependency' => array(
+                                'lin_pixelid|lin_trk_browser',
+                                '!=|!=',
+                                '|false'
+                            ),
+                            'title' => __('Conversion-Mapping', 'wp-sdtrk'),
+                            'description' => __('Map linkedIn custom conversions', 'wp-sdtrk'),
+                            'options' => array(
+                                'repeater' => true,
+                                'accordion' => false,
+                                'button_title' => __('Map new', 'wp-sdtrk'),
+                                'group_title' => __('Conversion-Mappings', 'wp-sdtrk'),
+                                'limit' => 100,
+                                'cloneable' => false,
+                                'mode' => 'compact', // only repeater
+                            ),
+                            'fields' => array(                                
+                                array(
+                                    'id' => 'lin_trk_map_event',
+                                    'type' => 'select',
+                                    'title' => __('Event', 'wp-sdtrk'),
+                                    'options'        => $eventList,
+                                    'default_option' => __('Select event to be mapped', 'wp-sdtrk'),     // optional
+                                ),
+                                array(
+                                    'id' => 'lin_trk_map_event_lin_convid',
+                                    'type' => 'text',
+                                    'title' => __('LinkedIn Conversion-ID', 'wp-sdtrk'),
+                                ),  
+                                array(
+                                    'type' => 'custom_userinputgroup',
+                                    'id' => 'lin_trk_map_event_rules',
+                                    'title' => __('Mapping rules', 'wp-sdtrk'),
+                                    'description' => __('Combine several parameters that must ALL exist for this event to be triggered', 'wp-sdtrk'),
+                                    'options' => array(
+                                        'repeater' => true,
+                                        'accordion' => false,
+                                        'button_title' => __('Add rule', 'wp-sdtrk'),
+                                        'group_title' => __('Rules', 'wp-sdtrk'),
+                                        'limit' => 100,
+                                        'cloneable' => false,
+                                        'mode' => 'compact', // only repeater
+                                    ),
+                                    'fields' => array(
+                                        array(
+                                                'id' => 'lin_trk_map_event_rules_param',
+                                                'type' => 'select',
+                                                'title' => __('Attribute', 'wp-sdtrk'),
+                                                'options'        => array(
+                                                    'prodid' => __('Product-ID', 'wp-sdtrk'),
+                                                    'prodname' => __('Product-Name', 'wp-sdtrk')                                                    
+                                                ),
+                                                'default_option' => __('Please select an attribute...', 'wp-sdtrk'),     // optional                                        
+                                        ),
+                                        
+                                        array(
+                                            'id' => 'lin_trk_map_event_rules_value',
+                                            'type' => 'text',
+                                            'title' => __('Value', 'wp-sdtrk'),
+                                            'attributes' => array(
+                                                'placeholder' => __('Leave blank for all', 'wp-sdtrk')
+                                            ),                                            
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        array(
+                            'type' => 'custom_userinputgroup',
+                            'id' => 'lin_trk_btnmap',
+                            'dependency' => array(
+                                'lin_pixelid|lin_trk_browser',
+                                '!=|!=',
+                                '|false'
+                            ),
+                            'title' => __('Conversion-Button-Mapping', 'wp-sdtrk'),
+                            'description' => __('Map linkedIn custom conversions to button-clicks', 'wp-sdtrk').'<br>'.$buttonTrackingMsg,
+                            'options' => array(
+                                'repeater' => true,
+                                'accordion' => false,
+                                'button_title' => __('Map new', 'wp-sdtrk'),
+                                'group_title' => __('Conversion-Button-Mappings', 'wp-sdtrk'),
+                                'limit' => 100,
+                                'cloneable' => false,
+                                'mode' => 'compact', // only repeater
+                            ),
+                            'fields' => array(
+                                array(
+                                    'id' => 'lin_trk_map_btnevent_lin_btnTag',
+                                    'type' => 'text',
+                                    'title' => __('Button-Tag', 'wp-sdtrk'),
+                                ),
+                                array(
+                                    'id' => 'lin_trk_map_btnevent_lin_convid',
+                                    'type' => 'text',
+                                    'title' => __('LinkedIn Conversion-ID', 'wp-sdtrk'),
+                                ),
+                            )
+                        ),
                     )
                 ),
                 array(

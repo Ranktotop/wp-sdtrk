@@ -15,6 +15,7 @@ function wp_sdtrk_startTracker() {
 	wp_sdtrk_runFB();
 	wp_sdtrk_runGA();
 	wp_sdtrk_runTT();
+	wp_sdtrk_runLIN();
 	wp_sdtrk_runFL();
 	wp_sdtrk_runMTC();
 }
