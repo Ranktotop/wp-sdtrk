@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.4.0 =
+* Added Local Event-Tracking
+
 = 1.3.2 =
 * Added LinkedIn Browser-Tracking
 

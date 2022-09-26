@@ -358,6 +358,7 @@ class Wp_Sdtrk_Tracker_Event
 
     /**
      * Returns the path of event-url with query
+     *
      * @return string
      */
     public function getEventPath()
@@ -370,6 +371,7 @@ class Wp_Sdtrk_Tracker_Event
 
     /**
      * Returns the domain of event
+     *
      * @return string
      */
     public function getEventDomain()
@@ -377,11 +379,12 @@ class Wp_Sdtrk_Tracker_Event
         if (isset($this->eventData['eventDomain']) && ! empty($this->eventData['eventDomain'])) {
             return $this->eventData['eventDomain'];
         }
-        return rtrim(get_site_url() ,"/").'/';
+        return rtrim(get_site_url(), "/") . '/';
     }
 
     /**
      * Returns the full url of event with query
+     *
      * @return string
      */
     public function getEventUrl()
@@ -391,9 +394,10 @@ class Wp_Sdtrk_Tracker_Event
         }
         return Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL();
     }
-    
+
     /**
      * Returns the hour of event-time
+     *
      * @return string
      */
     public function getEventTimeHour()
@@ -403,9 +407,10 @@ class Wp_Sdtrk_Tracker_Event
         }
         return "";
     }
-    
+
     /**
      * Returns the day of event-time
+     *
      * @return string
      */
     public function getEventTimeDay()
@@ -415,9 +420,10 @@ class Wp_Sdtrk_Tracker_Event
         }
         return "";
     }
-    
+
     /**
      * Returns the month of event-time
+     *
      * @return string
      */
     public function getEventTimeMonth()
@@ -426,6 +432,19 @@ class Wp_Sdtrk_Tracker_Event
             return $this->eventData['eventTimeMonth'];
         }
         return "";
+    }
+
+    /**
+     * Returns the timestamp of event
+     *
+     * @return string
+     */
+    public function getEventTime()
+    {
+        if (isset($this->eventData['eventTime']) && ! empty($this->eventData['eventTime'])) {
+            return $this->eventData['eventTime'];
+        }
+        return time();
     }
 
     /**
@@ -456,5 +475,27 @@ class Wp_Sdtrk_Tracker_Event
             }
         }
         return "";
+    }
+
+    /**
+     * Get a simplified version of this event for local database
+     *
+     * @return array();
+     */
+    public function getLocalizedEventData()
+    {
+        $data = array();
+        $data['product'] = array(
+            'id' => $this->getProductId(),
+            'name' => $this->getProductName(),
+            'value' => $this->getEventValue()
+        );
+        $data['page'] = array(
+            'id' => $this->getPageId(),
+            'name' => $this->getPageName(),
+            'source' => $this->getEventSource()
+        );
+        $data['utm'] = $this->getUtmData();
+        return $data;
     }
 }

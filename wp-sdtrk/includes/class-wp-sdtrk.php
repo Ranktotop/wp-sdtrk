@@ -165,9 +165,10 @@ class Wp_Sdtrk {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-public.php';
 		
 		/**
-		 * The Helper-Class
+		 * The Helper-Classes
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-sdtrk-helper.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-sdtrk-dbhelper.php';
 		
 		/**
 		 * The License-Class
@@ -183,6 +184,11 @@ class Wp_Sdtrk {
          * Tracker Event
          */
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-event.php';
+        
+        /**
+         * Tracker Local
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-local.php';
         
         /**
          * Tracker Facebook

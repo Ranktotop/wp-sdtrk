@@ -220,8 +220,6 @@ class Wp_Sdtrk_Tracker_Ga
             "client_id" => $cid,
             "events" => $eventsToFire
         );
-        
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($eventsToFire);
 
         $responses = array();
         array_push($responses, $this->payLoadServerRequest($requestData));

@@ -12,6 +12,7 @@ if (!Date.now) {
 function wp_sdtrk_startTracker() {
 	wp_sdtrk_collectEventObject();
 	wp_sdtrk_collectTrackerButtons();
+	wp_sdtrk_runLocal();
 	wp_sdtrk_runFB();
 	wp_sdtrk_runGA();
 	wp_sdtrk_runTT();

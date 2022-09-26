@@ -379,6 +379,37 @@ class Wp_Sdtrk_Admin
             'icon' => 'dashicons-welcome-view-site',
             'sections' => array(
                 array(
+                    'name' => 'local',
+                    'title' => __('Local', 'wp-sdtrk'),
+                    'icon' => 'dashicons-database',
+                    'fields' => array(
+                        array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Server based Tracking', 'wp-sdtrk') . '</h3>',
+                            'content' => '',
+                        ),
+                        array(
+                            'id' => 'local_trk_server',
+                            'type' => 'switcher',
+                            'title' => __('Activate server based tracking', 'wp-sdtrk'),
+                            'description' => __('Check to save hits into the local database', 'wp-sdtrk'),
+                            'default' => 'no',
+                        ),
+                        array(
+                            'id' => 'local_trk_server_debug',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'local_trk_server',
+                                '==',
+                                'true'
+                            ),
+                            'title' => __('Activate Debugging', 'wp-sdtrk'),
+                            'description' => __('Check to debug into the wordpress system', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                    )
+                ),
+                array(
                     'name' => 'facebook',
                     'title' => __('Facebook', 'wp-sdtrk'),
                     'icon' => 'dashicons-facebook',
@@ -627,9 +658,9 @@ class Wp_Sdtrk_Admin
                             'id' => 'ga_trk_server_token',
                             'type' => 'text',
                             'dependency' => array(
-                                'ga_trk_server',
-                                '==',
-                                'true'
+                                'ga_measurement_id|ga_trk_server',
+                                '!=|==',
+                                '|true'
                             ),
                             'title' => __('Measurement-API Token', 'wp-sdtrk'),
                             'description' => __('You can get the token within the google datastream-settings', 'wp-sdtrk')
@@ -638,9 +669,9 @@ class Wp_Sdtrk_Admin
                             'id' => 'ga_trk_server_cookie_service',
                             'type' => 'radio',
                             'dependency' => array(
-                                'ga_trk_server',
-                                '!=',
-                                'false'
+                                'ga_measurement_id|ga_trk_server',
+                                '!=|!=',
+                                '|false'
                             ),
                             'title' => __('Choose cookie consent behavior', 'wp-sdtrk'),
                             'options' => $cookieOptions,
