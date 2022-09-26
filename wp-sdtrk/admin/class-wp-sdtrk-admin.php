@@ -232,6 +232,11 @@ class Wp_Sdtrk_Admin
 
     private function getGeneralSettingFields()
     {
+        //Local Gsheet Sync Data
+        $localGauth_authenticated = (get_option('wp-sdtrk-gauth-token')===false) ? false : true;
+        $gauth_state = ($localGauth_authenticated) ? '<span style="color:green">'.__('authenticated', 'wp-sdtrk').'</span>' : '<span style="color:red">'.__('not authenticated', 'wp-sdtrk').'</span>';
+        $gauth_btnLabel = ($localGauth_authenticated) ? __('Re-authenticate', 'wp-sdtrk') : __('Authenticate', 'wp-sdtrk');
+        
 
         // Check for activated Cookie-Plugins
         $cookieOptions = array(
@@ -406,6 +411,73 @@ class Wp_Sdtrk_Admin
                             'title' => __('Activate Debugging', 'wp-sdtrk'),
                             'description' => __('Check to debug into the wordpress system', 'wp-sdtrk'),
                             'default' => 'no'
+                        ),
+                        array(
+                            'id' => 'local_trk_server_gsync',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'local_trk_server',
+                                '==',
+                                'true'
+                            ),
+                            'title' => __('Activate Google Sheets Sync', 'wp-sdtrk'),
+                            'description' => __('Check to activate sync to google sheets', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id'          => 'local_trk_server_gsync_cred',
+                            'type'        => 'textarea',
+                            'title'       => __('O-Auth2 Credentials', 'wp-sdtrk'),
+                            'attributes'    => array(
+                                'placeholder' => __('Insert your credentials-content here', 'wp-sdtrk'),
+                            ),
+                            'dependency' => array(
+                                'local_trk_server|local_trk_server_gsync',
+                                '==|==',
+                                'true|true'
+                            ),
+                            'description' => __('You can get this data from Google Developer Console', 'wp-sdtrk'),
+                            'after' => '<strong>'.__('Your authorized javascript-origin:', 'wp-sdtrk').'</strong> <i>"'.'https://' . $_SERVER['HTTP_HOST'].'"</i>'.'<br><strong>'.__('Your authorized redirect-url:', 'wp-sdtrk').'</strong> <i>"'.'https://' . $_SERVER['HTTP_HOST'] . '/index.php'."?wp-sdtrk=gauth".'"</i>',
+                        ),
+                        array(
+                            'id'      => 'local_trk_server_gsync_authenticate',
+                            'type'    => 'button',
+                            'title'   => __('Authentication', 'wp-sdtrk'),
+                            'options' => array(
+                                'href'      => 'https://' . $_SERVER['HTTP_HOST'] . '/index.php?wp-sdtrk=gauth&reauthenticate=1',
+                                'target'    => '_self',
+                                'value'     => $gauth_btnLabel,
+                                'btn-class' => 'exopite-sof-btn',
+                            ),
+                            'description' => __('Click on the button after you have entered your credentials', 'wp-sdtrk'),
+                            'after' => __('You are currently', 'wp-sdtrk').' <span style="color:green">'.$gauth_state.'</span>',
+                            'dependency' => array(
+                                'local_trk_server|local_trk_server_gsync|local_trk_server_gsync_cred',
+                                '==|==|!=',
+                                'true|true|'
+                            ),
+                        ),
+                        array(
+                            'id' => 'local_trk_server_gsync_sheetId',
+                            'type' => 'text',
+                            'title' => __('Google Sheet-ID', 'wp-sdtrk'),
+                            'description' => __('Insert the target sheet-id from google sheets', 'wp-sdtrk'),
+                            'dependency' => array(
+                                'local_trk_server|local_trk_server_gsync',
+                                '==|==',
+                                'true|true'
+                            ),
+                        ),
+                        array(
+                            'id' => 'local_trk_server_gsync_tableName',
+                            'type' => 'text',
+                            'title' => __('Table-Name', 'wp-sdtrk'),
+                            'description' => __('Insert the target table-name from your google sheet', 'wp-sdtrk'),
+                            'dependency' => array(
+                                'local_trk_server|local_trk_server_gsync',
+                                '==|==',
+                                'true|true'
+                            ),
                         ),
                     )
                 ),

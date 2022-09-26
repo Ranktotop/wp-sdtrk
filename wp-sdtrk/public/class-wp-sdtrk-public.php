@@ -839,4 +839,35 @@ class Wp_Sdtrk_Public
             'data' => $decryptedData
         );
     }
+    
+    /////////////////////////////////////////////////////
+    // ADD TO FILE -> public/class-plugin-name-public.php
+    
+    // add blackout to the whitelist of variables it wordpress knows and allows
+    // in this case it is the plugin name
+    public function whitelist_query_variable( $query_vars ) {
+        
+        $query_vars[] = $this->wp_sdtrk;
+        return $query_vars;
+        
+    }
+    
+    // If this is done, we can access it later
+    // This example checks very early in the process:
+    // if the variable is set, we include our page and stop execution after it
+    public function redirect_to_file( &$wp ){
+        
+        if ( array_key_exists( $this->wp_sdtrk, $wp->query_vars ) ) {
+            
+            switch ( $wp->query_vars[$this->wp_sdtrk] ) {
+                
+                case 'gauth':
+                    include( WP_PLUGIN_DIR . '/' . $this->wp_sdtrk . '/api/gauth.php' );
+                    break;                    
+            }
+            
+            exit();
+            
+        }
+    }
 }
