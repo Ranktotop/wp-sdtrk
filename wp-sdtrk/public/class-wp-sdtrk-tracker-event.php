@@ -495,7 +495,13 @@ class Wp_Sdtrk_Tracker_Event
             'name' => $this->getPageName(),
             'source' => $this->getEventSource()
         );
-        $data['utm'] = $this->getUtmData();
+        
+        //UTM
+        $utmData = array();
+        foreach ($this->getUtmData() as $key => $value){
+            $utmData[str_replace("utm_", "", $key)] = $value;
+        }
+        $data['utm'] = $utmData;
         return $data;
     }
 }

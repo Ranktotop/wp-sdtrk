@@ -38,6 +38,16 @@ class Wp_Sdtrk_Activator {
 	    
 	    //create database for local tracking
 	    self::create_localTrackingDb();
+	    
+	    
+	    $time = intval(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync_crontime"));
+	    $timezone = 'Europe/Berlin';
+	    $timestamp = strtotime($time.':00'.' '.$timezone);
+	    
+	    // schedule gsync cron job
+	    if ( ! wp_next_scheduled( 'wp_sdtrk_gsync_cron' ) ) {
+	        wp_schedule_event($timestamp, 'daily', 'wp_sdtrk_gsync_cron' );
+	    }	
 	}
 	
 	/**
@@ -59,6 +69,7 @@ class Wp_Sdtrk_Activator {
             date bigint(10) NOT NULL,
             eventName tinytext NOT NULL,            
             eventParams text,
+            gsync BOOLEAN NOT NULL,
             PRIMARY KEY  (id)
         ) $charset_collate;";
 	        

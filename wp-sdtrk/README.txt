@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.4.2 =
+* Added Google Sheet sync cronjob for auto-sync
+
 = 1.4.1 =
 * Added Google Sheet sync for local tracking
 

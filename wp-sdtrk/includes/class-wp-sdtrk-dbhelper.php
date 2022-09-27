@@ -8,32 +8,106 @@
  *
  */
 class Wp_Sdtrk_DbHelper
-{    
+{
+
     /**
      * Saves a hit to database
+     *
      * @param string $eventName
      * @param Wp_Sdtrk_Tracker_Event $event
      * @return boolean
      */
-    public function saveHit($eventName,$eventTime,$eventData){
-        if($eventName === false){
+    public function saveHit($eventName, $eventTime, $eventData)
+    {
+        if ($eventName === false) {
             return false;
         }
-        $tableName = "wp_wpsdtrk_hits";        
+        $tableName = "wp_wpsdtrk_hits";
         $dataset = array(
             "date" => $eventTime,
             "eventName" => $eventName,
-            "eventParams" => serialize($eventData)
+            "eventParams" => serialize($eventData),
+            "gsync" => false
         );
         $typeset = array(
             "%s",
             "%s",
-            "%s"
-        );        
-        return $this->insertData(array(),$tableName, $dataset, $typeset);
+            "%s",
+            "%d"
+        );
+        return $this->insertData(array(), $tableName, $dataset, $typeset);
     }
-    
-    
+
+    /**
+     * Mark the given id-element as synced
+     * @param string $id
+     * @return boolean
+     */
+    public function markGSync($id)
+    {
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($id);
+        if ($id === false || empty($id)) {
+            return false;
+        }
+        global $wpdb;
+        $dataset = array(
+            "gsync" => true
+        );
+        $typeset = array(
+            "%d"
+        );
+        $primaryKey = array(
+            "id" => $id
+        );
+        $primaryKeyType = array(
+            "%d"
+        );
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($id);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($dataset);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($primaryKey);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($typeset);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($primaryKeyType);
+        $wpdb->update("wp_wpsdtrk_hits", $dataset, $primaryKey, $typeset, $primaryKeyType);
+        return true;
+    }
+
+    /**
+     * Clear the whole local db-table
+     */
+    public function clearDB()
+    {
+        $this->deleteAllData("wp_wpsdtrk_hits");
+    }
+
+    /**
+     * Clear the whole sync state in db-table
+     */
+    public function clearGSync()
+    {
+        global $wpdb;
+        $query = "UPDATE wp_wpsdtrk_hits SET gsync=0";
+        return $wpdb->get_results($query);
+    }
+
+    /**
+     * Get all rows for sync with google sheets
+     *
+     * @return array
+     */
+    public function getRowsForGsync()
+    {
+        global $wpdb;
+        $table = "wp_wpsdtrk_hits";
+        $whereColumn = "gsync";
+        $whereVal = "0";
+        $oderColumn = "date";
+        $query = $wpdb->prepare("SELECT * FROM {$table} WHERE {$whereColumn} = %s ORDER BY {$oderColumn}", array(
+            $whereVal
+        ));
+        // Create Query
+        return $wpdb->get_results($query);
+    }
+
     /**
      * Get Single Field from DB
      *
@@ -53,7 +127,7 @@ class Wp_Sdtrk_DbHelper
         }
         return "";
     }
-    
+
     /**
      * Get Single Row from DB
      *
@@ -68,17 +142,18 @@ class Wp_Sdtrk_DbHelper
         $foundRow = array();
         if (! empty($table) && ! empty($wherename) && ! empty($wherevalue)) {
             global $wpdb;
-            $query = $wpdb->prepare("SELECT * FROM {$table} WHERE {$wherename} = %s", array($wherevalue));
+            $query = $wpdb->prepare("SELECT * FROM {$table} WHERE {$wherename} = %s", array(
+                $wherevalue
+            ));
             // Create Query
             $data = $wpdb->get_results($query);
-            if(sizeof($data)>0){
+            if (sizeof($data) > 0) {
                 $foundRow = $data[0];
             }
-            
         }
         return $foundRow;
     }
-    
+
     /**
      * Get all rows for table
      *
@@ -99,9 +174,10 @@ class Wp_Sdtrk_DbHelper
         }
         return array();
     }
-    
+
     /**
      * Returns all rows where two columns are not equal
+     *
      * @param string $table
      * @param string $orderby
      * @param string $order
@@ -109,45 +185,21 @@ class Wp_Sdtrk_DbHelper
      * @param string $columnB
      * @return array
      */
-    private function getAllRowsNotEqual($table, $orderby = "", $order = "ASC",$columnA, $columnB){
+    private function getAllRowsNotEqual($table, $orderby = "", $order = "ASC", $columnA, $columnB)
+    {
         if (! empty($table) && ! empty($columnA) && ! empty($columnB)) {
             global $wpdb;
             if (! empty($orderby)) {
                 $query = "SELECT * FROM {$table} WHERE NOT {$columnA} <=> {$columnB} ORDER BY {$orderby} {$order}";
-            }
-            else{
+            } else {
                 $query = "SELECT * FROM {$table} WHERE NOT {$columnA} <=> {$columnB}";
             }
-            
+
             return $wpdb->get_results($query);
         }
         return array();
     }
-    
-    /**
-     * Push Data to DB
-     *
-     * @param string $tablename
-     * @param integer $id
-     * @param array $dataset
-     * @param array $typeset
-     * @param string $query
-     */
-    private function pushData($tablename, $id, $dataset, $typeset, $query)
-    {
-        $state = false;
-        
-        global $wpdb;
-        $knownData = $wpdb->get_results($query);
-        if (! empty($id)) {
-            $state = $this->updateData($knownData, $id, $tablename, $dataset, $typeset);
-        } else {
-            $state = $this->insertData($knownData, $tablename, $dataset, $typeset);
-        }
-        
-        return $state;
-    }
-    
+
     /**
      * Save new Data to DB
      *
@@ -160,15 +212,15 @@ class Wp_Sdtrk_DbHelper
     private function insertData($knownData, $tablename, $dataset, $typeset)
     {
         global $wpdb;
-        
+
         if (sizeof($knownData) == 0) {
             $wpdb->insert($tablename, $dataset, $typeset);
             return true;
         }
-        
+
         return false;
     }
-    
+
     /**
      * Update Data in the DB
      *
@@ -183,7 +235,7 @@ class Wp_Sdtrk_DbHelper
     {
         global $wpdb;
         $updateSafe = false;
-        
+
         if (sizeof($knownData) > 0) {
             if ($knownData[0]->id == $id) {
                 $updateSafe = true;
@@ -191,7 +243,7 @@ class Wp_Sdtrk_DbHelper
         } else {
             $updateSafe = true;
         }
-        
+
         if ($updateSafe) {
             $primaryKey = array(
                 "id" => $id
@@ -202,12 +254,10 @@ class Wp_Sdtrk_DbHelper
             $wpdb->update($tablename, $dataset, $primaryKey, $typeset, $primaryKeyType);
             return true;
         }
-        
+
         return false;
     }
-    
-    
-    
+
     /**
      * Delete Data from DB
      *
@@ -221,9 +271,21 @@ class Wp_Sdtrk_DbHelper
             'id' => $id
         ));
     }
-    
+
+    /**
+     * Deletes all records from given table
+     *
+     * @param string $tablename
+     */
+    private function deleteAllData($tablename)
+    {
+        global $wpdb;
+        $wpdb->query("TRUNCATE TABLE $tablename");
+    }
+
     /**
      * Get data by a joined request
+     *
      * @param string $baseTable
      * @param string $additionalTable
      * @param string $sharedBaseIndex
@@ -233,17 +295,18 @@ class Wp_Sdtrk_DbHelper
      * @param string $orderColumnFromAdditional
      * @return array
      */
-    private function joinedRequest($baseTable,$additionalTable,$sharedBaseIndex,$sharedAdditionalIndex,$whereColumnFromBase,$whereValue,$orderColumnFromAdditional){
+    private function joinedRequest($baseTable, $additionalTable, $sharedBaseIndex, $sharedAdditionalIndex, $whereColumnFromBase, $whereValue, $orderColumnFromAdditional)
+    {
         global $wpdb;
         $whereString = "";
-        $orderString ="";
-        if(!empty(trim($whereColumnFromBase)) && !empty(trim($whereValue))){
-            $whereString = "WHERE ".$whereColumnFromBase." = '".$whereValue."'";
+        $orderString = "";
+        if (! empty(trim($whereColumnFromBase)) && ! empty(trim($whereValue))) {
+            $whereString = "WHERE " . $whereColumnFromBase . " = '" . $whereValue . "'";
         }
-        
-        if(!empty(trim($orderColumnFromAdditional))){
-            $orderString = "ORDER BY $additionalTable.".$orderColumnFromAdditional."";
+
+        if (! empty(trim($orderColumnFromAdditional))) {
+            $orderString = "ORDER BY $additionalTable." . $orderColumnFromAdditional . "";
         }
-        return $wpdb->get_results("SELECT * FROM $baseTable LEFT JOIN $additionalTable ON $baseTable.$sharedBaseIndex = $additionalTable.$sharedAdditionalIndex ".$whereString." ".$orderString."");
+        return $wpdb->get_results("SELECT * FROM $baseTable LEFT JOIN $additionalTable ON $baseTable.$sharedBaseIndex = $additionalTable.$sharedAdditionalIndex " . $whereString . " " . $orderString . "");
     }
 }

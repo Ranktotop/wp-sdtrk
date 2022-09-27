@@ -32,6 +32,7 @@ class Wp_Sdtrk_Deactivator {
 	public static function deactivate() {
 
 	    wp_clear_scheduled_hook('wp_sdtrk_licensecheck_cron');
+	    wp_clear_scheduled_hook('wp_sdtrk_gsync_cron');
         /**
          * This only required if custom post type has rewrite!
          */

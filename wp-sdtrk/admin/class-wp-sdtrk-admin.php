@@ -147,6 +147,65 @@ class Wp_Sdtrk_Admin
     {
         return sanitize_text_field($val);
     }
+    
+    /**
+     * Simply change value yes to no
+     * @param string $val
+     * @return string
+     */
+    public function negateCallback($val){
+        return ($val ==="yes") ? "no" : $val;
+    }
+    
+    /**
+     * Clears the local database if called
+     * @param string $val
+     * @return string
+     */
+    public function clearDbCallback($val)
+    {
+        if($val==="yes"){
+            $val = "no";
+            $dbHelper = new Wp_Sdtrk_DbHelper();
+            $dbHelper->clearDB();
+            // Setup Message
+            Wp_Sdtrk_Helper::wp_sdtrk_sheduleNotice(__('Local hits database has been cleared', 'wp-sdtrk'),"success");
+        }
+        return $val;
+    }
+    
+    /**
+     * Clears the sync state for gsync
+     * @param string $val
+     * @return string
+     */
+    public function clearGsyncCallback($val)
+    {
+        if($val==="yes"){
+            $val = "no";
+            $dbHelper = new Wp_Sdtrk_DbHelper();
+            $dbHelper->clearGSync();
+            // Setup Message
+            Wp_Sdtrk_Helper::wp_sdtrk_sheduleNotice(__('Sync state has been reseted', 'wp-sdtrk'),"success");
+        }
+        return $val;
+    }
+    
+    /**
+     * Re-shedules the gsync-cronjob
+     * @param string $time
+     */
+    public function resetGsyncCron($time){
+        $timezone = 'Europe/Berlin';
+        $timestamp = strtotime($time.':00'.' '.$timezone);
+        
+        // delete and re-schedule gsync cron job
+        if (wp_next_scheduled( 'wp_sdtrk_gsync_cron' ) ) {
+            wp_clear_scheduled_hook('wp_sdtrk_gsync_cron');
+            
+        }	
+        wp_schedule_event($timestamp, 'daily', 'wp_sdtrk_gsync_cron' );
+    }
 
     public function create_menu()
     {
@@ -231,7 +290,7 @@ class Wp_Sdtrk_Admin
     }
 
     private function getGeneralSettingFields()
-    {
+    {        
         //Local Gsheet Sync Data
         $localGauth_authenticated = (get_option('wp-sdtrk-gauth-token')===false) ? false : true;
         $gauth_state = ($localGauth_authenticated) ? '<span style="color:green">'.__('authenticated', 'wp-sdtrk').'</span>' : '<span style="color:red">'.__('not authenticated', 'wp-sdtrk').'</span>';
@@ -425,6 +484,24 @@ class Wp_Sdtrk_Admin
                             'default' => 'no'
                         ),
                         array(
+                            'id'      => 'local_trk_server_gsync_crontime',
+                            'type'    => 'range',
+                            'dependency' => array(
+                                'local_trk_server_gsync',
+                                '==',
+                                'true'
+                            ),
+                            'sanitize' => array(
+                                $this,
+                                'resetGsyncCron'
+                            ),
+                            'title'   => __('At what hour should the synchronization take place', 'wp-sdtrk'),
+                            'default' => '01',  
+                            'min'     => '0',                                      // optional
+                            'max'     => '23',                                     // optional
+                            'step'    => '1',                                      // optional
+                        ),
+                        array(
                             'id'          => 'local_trk_server_gsync_cred',
                             'type'        => 'textarea',
                             'title'       => __('O-Auth2 Credentials', 'wp-sdtrk'),
@@ -479,6 +556,66 @@ class Wp_Sdtrk_Admin
                                 'true|true'
                             ),
                         ),
+                        array(
+                            'type'    => 'notice',
+                            'class'   => 'danger',
+                            'content' => '<h3 style="color:red">' . __('Danger-Zone', 'wp-sdtrk') . '</h3><p><strong>'.__('Be careful with these functions!', 'wp-sdtrk').'</strong></p>',
+                        ),
+                        array(
+                            'id' => 'local_dng_clear_db',
+                            'type' => 'switcher',
+                            'title' => __('Clear Database', 'wp-sdtrk'),
+                            'description' => __('Check to delete all entries in local database', 'wp-sdtrk'),
+                            'default' => 'no',
+                            'sanitize' => array(
+                                $this,
+                                'negateCallback'
+                            )
+                        ),
+                        array(
+                            'id' => 'local_dng_clear_db_sure',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'local_dng_clear_db',
+                                '==',
+                                'true'
+                            ),
+                            'title' => '<span style="padding-left:20px;color:red">'.__('Are you sure?', 'wp-sdtrk').'</span>',
+                            'description' => '<span style="padding-left:20px">'.__('This cannot be undone!', 'wp-sdtrk').'</span>',
+                            'default' => 'no',
+                            'sanitize' => array(
+                                $this,
+                                'clearDbCallback'
+                            )
+                        ),
+                        array(
+                            'id' => 'local_dng_clear_sync',
+                            'type' => 'switcher',
+                            'title' => __('Reset google-sheet sync', 'wp-sdtrk'),
+                            'description' => __('Check to re-sync all data to google-sheets', 'wp-sdtrk'),
+                            'default' => 'no',
+                            'sanitize' => array(
+                                $this,
+                                'negateCallback'
+                            )
+                        ),
+                        array(
+                            'id' => 'local_dng_clear_sync_sure',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'local_dng_clear_sync',
+                                '==',
+                                'true'
+                            ),
+                            'title' => '<span style="padding-left:20px;color:red">'.__('Are you sure?', 'wp-sdtrk').'</span>',
+                            'description' => '<span style="padding-left:20px">'.__('This cannot be undone!', 'wp-sdtrk').'</span>',
+                            'default' => 'no',
+                            'sanitize' => array(
+                                $this,
+                                'clearGsyncCallback'
+                            )
+                        ),
+                        
                     )
                 ),
                 array(
@@ -1322,30 +1459,18 @@ class Wp_Sdtrk_Admin
             foreach ($options['plugins'] as $plugin) {
                 if ($plugin == WP_SDTRK_BASE_NAME) {
 
-                    // Set a transient to record that our plugin has just been updated
-                    set_transient('exopite_sof_updated', 1);
-                    set_transient('exopite_sof_updated_message', esc_html__('Thanks for updating', 'exopite_sof'));
+                    // Shedule update message
+                    Wp_Sdtrk_Helper::wp_sdtrk_sheduleNotice(__('Thanks for updating', 'wp-sdtrk'),"success");
                 }
             }
         }
     }
-
+    
     /**
-     * Show a notice to anyone who has just updated this plugin
-     * This notice shouldn't display to anyone who has just installed the plugin for the first time
+     * Show sheduled Messages
      */
-    public function display_update_notice()
-    {
-        // Check the transient to see if we've just activated the plugin
-        if (get_transient('exopite_sof_updated')) {
-
-            // @link https://digwp.com/2016/05/wordpress-admin-notices/
-            echo '<div class="notice notice-success is-dismissible"><p><strong>' . get_transient('exopite_sof_updated_message') . '</strong></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
-
-            // Delete the transient so we don't keep displaying the activation message
-            delete_transient('exopite_sof_updated');
-            delete_transient('exopite_sof_updated_message');
-        }
+    public function wpsdtrk_displayNotices(){
+        Wp_Sdtrk_Helper::wp_sdtrk_showNotice();
     }
 
     // RUN CODE ON PLUGIN UPGRADE AND ADMIN NOTICE
@@ -1374,6 +1499,8 @@ class Wp_Sdtrk_Admin
         }
         // Random Numbers
         $replacedData = Wp_Sdtrk_Helper::wp_sdtrk_replace_arrayeElement($data, "-randomid-", 'wp_sdtrk_getRandomNumberAsInt', "value");
+                
         return $replacedData;
     }
+    
 }

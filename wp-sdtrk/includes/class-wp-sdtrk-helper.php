@@ -59,6 +59,7 @@ class Wp_Sdtrk_Helper
 
     /**
      * Checks if a string starts with another string
+     *
      * @param string $string
      * @param string $substring
      * @return boolean
@@ -474,5 +475,73 @@ class Wp_Sdtrk_Helper
             }
         }
         return $value;
+    }
+
+    /**
+     * Shedules a message for showing as wp-notice
+     *
+     * @param string $msg
+     * @param string $type
+     */
+    public static function wp_sdtrk_sheduleNotice($msg, $type = "info")
+    {
+        $messages = (! get_transient('wpsdtrk_notices')) ? array() : get_transient('wpsdtrk_notices');
+        array_push($messages, array(
+            "msg" => $msg,
+            "type" => $type
+        ));
+        set_transient('wpsdtrk_notices', $messages);
+        set_transient('wpsdtrk_notices_amount', 2);
+    }
+
+    /**
+     * Shows a sheduled wp-notice
+     *
+     * @param string $identifier
+     */
+    public static function wp_sdtrk_showNotice()
+    {
+        $sheduledNotices = get_transient('wpsdtrk_notices');
+        // Check if transient exists
+        if (! $sheduledNotices) {
+            return;
+        }
+        foreach ($sheduledNotices as $notice) {
+            $msg = $notice["msg"];
+            $type = $notice["type"];
+            // Set the type
+            switch ($type) {
+                case 'error':
+                    $type = 'notice-error';
+                    break;
+                case 'warning':
+                    $type = 'notice-warning';
+                    break;
+                case 'success':
+                    $type = 'notice-success';
+                    break;
+                case 'info':
+                    $type = 'notice-info';
+                    break;
+                default:
+                    $type = 'notice-info';
+                    break;
+            }
+            echo '<div class="notice ' . $type . ' is-dismissible"><p><strong>' . $msg . '</strong></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+        }
+        // Delete the transient so we don't keep displaying the activation message
+        $amountLeft = get_transient('wpsdtrk_notices_amount');
+
+        // Check if the message still have to show up
+        if ($amountLeft && $amountLeft > 0) {
+            $amountLeft --;
+            set_transient('wpsdtrk_notices_amount', $amountLeft);
+        }
+
+        // Show message
+        if (! $amountLeft || $amountLeft <= 0) {
+            delete_transient('wpsdtrk_notices');
+            delete_transient('wpsdtrk_notices_amount');
+        }
     }
 }

@@ -307,13 +307,9 @@ class Wp_Sdtrk {
 		* @param $options Array
 		*/
 		$this->loader->add_action( 'upgrader_process_complete', $this->admin, 'upgrader_process_complete', 10, 2 );
-
-		/**
-		* Show a notice to anyone who has just updated this plugin
-		* This notice shouldn't display to anyone who has just installed the plugin for the first time
-		*/
-		$this->loader->add_action( 'admin_notices', $this->admin, 'display_update_notice' );
-		// RUN CODE ON PLUGIN UPGRADE AND ADMIN NOTICE
+		
+		//Display sheduled notices
+		$this->loader->add_action( 'admin_notices', $this->admin, 'wpsdtrk_displayNotices' );
 
 		$this->loader->add_action( 'admin_head', $this->admin, 'add_style_to_admin_head' );	
 		
@@ -363,6 +359,12 @@ class Wp_Sdtrk {
 		 *
 		 */		
 		$this->loader->add_action( 'wp_sdtrk_licensecheck_cron', $this->public, 'licensecheck' );
+		
+		/*************************************************************
+		 * Local GSync Cron
+		 *
+		 */
+		$this->loader->add_action( 'wp_sdtrk_gsync_cron', $this->public, 'local_gsync' );
 		
 		/*************************************************************
 		 * The wp_ajax_ is telling wordpress to use ajax and the prefix_ajax_first is the hook name to use in JavaScript or in URL.

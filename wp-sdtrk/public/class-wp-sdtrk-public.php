@@ -159,6 +159,49 @@ class Wp_Sdtrk_Public
         $licenseKey = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", ''), "licensekey_" . WP_SDTRK_LICENSE_TYPE_PRO);
         Wp_Sdtrk_License::wp_sdtrk_license_call($licenseKey, WP_SDTRK_LICENSE_TYPE_PRO, 'check');
     }
+    
+    /**
+     * Gsync
+     */
+    public function local_gsync()
+    {
+        $result = true;
+        
+        //Get Data
+        $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server"), "yes") == 0) ? true : false;
+        $syncGsheet = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync"), "yes") == 0) ? true : false;
+        $cred = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync_cred");
+        $localGauth_authenticated = (get_option('wp-sdtrk-gauth-token')===false) ? false : true;
+        $sheetId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync_sheetId");
+        $tableName = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync_tableName");
+        $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_debug"), "yes") == 0) ? true : false;
+        
+        //If data are set
+        if($trkServer && $syncGsheet && !empty($cred) && $localGauth_authenticated && !empty($sheetId) && !empty($tableName)){
+            $options = array(
+                "cred" => $cred,
+                "sheetId"=>$sheetId,
+                "tableName"=>$tableName,
+                "startColumn" => "A",
+                "endColumn" => "Z",
+                "startRow" => "1",
+                "debug" => $debug
+            );
+            
+            $dbHelper = new Wp_Sdtrk_DbHelper();
+            $dataToSync = $dbHelper->getRowsForGsync();
+            if(sizeof($dataToSync)>0){
+                require_once plugin_dir_path( dirname( __FILE__ ) ) . 'api/google/gConnector.php';
+                $gConnector = new gConnector($options);
+                if($gConnector->isConnected()){
+                    $result = $gConnector->pushLocalData($dataToSync);
+                }else{
+                    $result = false;
+                }
+            }
+        }
+        return $result;
+    }
 
     /**
      * Setup Decrypter-Data
