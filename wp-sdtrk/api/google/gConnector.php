@@ -167,8 +167,9 @@ class gConnector
                     if ($client->isAccessTokenExpired()) {
                         unset($_SESSION['upload_token']);
                     }
-                } else {
+                } else {                    
                     $authUrl = $client->createAuthUrl();
+                    $this->debugLog('---Redirect to G-Auth-Login-Page "'.filter_var($authUrl, FILTER_SANITIZE_URL).'"...---\n');
                     header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
                 }
             }

@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.4.4 =
+* Fixed bug with headers are already sent on gauth
+
 = 1.4.3 =
 * Updated minified versions of js
 

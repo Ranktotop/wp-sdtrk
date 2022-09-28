@@ -5,29 +5,6 @@ if ( !is_user_logged_in() || !current_user_can( 'manage_options' )) {
     wp_redirect( home_url('login') );
     exit;
 }
-?>
-
-<style>
-a.btn{
-margin: 0;
-    background: #80a9d4;
-    border: 1px solid #80a9d4;
-    border-radius: 0;
-    height: 31px;
-    line-height: 29px;
-    box-shadow: none;
-    text-shadow: none;
-    vertical-align: baseline;
-    padding: 0 10px;
-    color: #fff;
-    text-decoration: none;
-    display: inline-block;
-    white-space: nowrap;
-    box-sizing: border-box;
-}
-</style>
-
-<?php
 class Wp_Sdtrk_GAuthenticator
 {
     // Constructor
@@ -52,6 +29,7 @@ class Wp_Sdtrk_GAuthenticator
             
             $gConnector = new gConnector($options);
             if($gConnector->isConnected()){
+                echo $this->getHeaders();
                 echo '<h2>'.__('Authentication was successfull!', 'wp-sdtrk').'</h2>';
                 echo '<a class="btn" href="'.'https://' . $_SERVER['HTTP_HOST'] . '/wp-admin/options-general.php?page=wp-sdtrk'.'">'.__('Go back to settings', 'wp-sdtrk').'</a>';
             }
@@ -88,6 +66,31 @@ class Wp_Sdtrk_GAuthenticator
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Prints the header styles
+     */
+    private function getHeaders(){
+        return '<html><head><meta charset="utf-8"><style>
+        a.btn{
+            margin: 0;
+            background: #80a9d4;
+            border: 1px solid #80a9d4;
+            border-radius: 0;
+            height: 31px;
+            line-height: 29px;
+            box-shadow: none;
+            text-shadow: none;
+            vertical-align: baseline;
+            padding: 0 10px;
+            color: #fff;
+            text-decoration: none;
+            display: inline-block;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+        </style></head>';
     }
 }
 
