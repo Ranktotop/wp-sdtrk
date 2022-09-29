@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.4.5 =
+* Fixed bug with gsheet row-limits
+
 = 1.4.4 =
 * Fixed bug with headers are already sent on gauth
 

@@ -25,6 +25,8 @@ class gConnector
 
     private $connected;
 
+    private $currentMaxRows;
+
     // Constructor
     public function __construct($options)
     {
@@ -38,17 +40,8 @@ class gConnector
         $this->sheetRange = $this->tableName . '!' . $this->startColumn . $this->startRow . ':' . $this->endColumn;
         $this->sheetData = [];
         $this->connected = false;
+        $this->currentMaxRows = 0;
         $this->init();
-    }
-
-    /**
-     * Prints into the wordpress debug file if debugging is enabled
-     */
-    private function debugLog($msg)
-    {
-        if ($this->debug) {
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log($msg);
-        }
     }
 
     /**
@@ -87,8 +80,8 @@ class gConnector
         try {
             $this->service = new Google_Service_Sheets($this->getClient());
         } catch (Exception $e) {
-            $this->debugLog($e->getMessage() . "\n");
-            $this->debugLog("---Error authenticate client. Abort...---\n");
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log($e->getMessage() . "\n",$this->debug);
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Error authenticate client. Abort...---\n",$this->debug);
             delete_option('wp-sdtrk-gauth-token');
             die("Authentication error!");
         }
@@ -120,27 +113,27 @@ class gConnector
         // Check if there is a token file and read it
         $tokenContent = $this->getToken();
         if ($tokenContent !== false) {
-            $this->debugLog("---Google Access-Token found...---\n");
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Google Access-Token found...---\n",$this->debug);
             $accessToken = json_decode($tokenContent, true);
             $client->setAccessToken($accessToken);
         }
         // If there is no previous token or it's expired.
         if ($client->isAccessTokenExpired()) {
-            $this->debugLog("---Google Access-Token expired -> try refreshing...---\n");
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Google Access-Token expired -> try refreshing...---\n",$this->debug);
             // Refresh the token if possible, else fetch a new one.
             if ($client->getRefreshToken()) {
-                $this->debugLog("---Refresh Token found -> refreshing...---\n");
+                Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Refresh Token found -> refreshing...---\n",$this->debug);
                 try {
                     $result = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-                    $this->debugLog("---Refresh-Result: " . json_encode($result) . " ---\n");
+                    Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Refresh-Result: " . json_encode($result) . " ---\n",$this->debug);
                     $this->saveToken(json_encode($client->getAccessToken()));
                     $this->connected = true;
                 } catch (Exception $e) {
-                    $this->debugLog("---Exception while refreshing! Maybe your Client was deleted in Google Developer Console! -> Die()---\n");
+                    Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Exception while refreshing! Maybe your Client was deleted in Google Developer Console! -> Die()---\n",$this->debug);
                     die();
                 }
             } else {
-                $this->debugLog("---Refresh Token not found! Init o-Auth procedure...---\n");
+                Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Refresh Token not found! Init o-Auth procedure...---\n",$this->debug);
                 if (isset($_GET['code'])) {
                     $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
                     $client->setAccessToken($token);
@@ -151,15 +144,15 @@ class gConnector
 
                     // Check to see if there was an error.
                     if (array_key_exists('error', $accessToken)) {
-                        $this->debugLog("---Error refreshing Token: " . $accessToken . " ---\n");
+                        Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Error refreshing Token: " . $accessToken . " ---\n",$this->debug);
                         throw new Exception(join(', ', $accessToken));
                     } else {
                         // Save the token to options.
                         $this->saveToken(json_encode($client->getAccessToken()));
-                        $this->debugLog("---Wrote Token to options! ---\n");
+                        Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Wrote Token to options! ---\n",$this->debug);
                     }
                 } else {
-                    $this->debugLog('---GET-Parameter "code" is missing...---\n');
+                    Wp_Sdtrk_Helper::wp_sdtrk_write_log('---GET-Parameter "code" is missing...---\n',$this->debug);
                 }
                 // set the access token as part of the client
                 if (! empty($_SESSION['upload_token'])) {
@@ -167,14 +160,14 @@ class gConnector
                     if ($client->isAccessTokenExpired()) {
                         unset($_SESSION['upload_token']);
                     }
-                } else {                    
+                } else {
                     $authUrl = $client->createAuthUrl();
-                    $this->debugLog('---Redirect to G-Auth-Login-Page "'.filter_var($authUrl, FILTER_SANITIZE_URL).'"...---\n');
+                    Wp_Sdtrk_Helper::wp_sdtrk_write_log('---Redirect to G-Auth-Login-Page "' . filter_var($authUrl, FILTER_SANITIZE_URL) . '"...---\n',$this->debug);
                     header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
                 }
             }
         } else {
-            $this->debugLog("---Google Access-Token valid -> Continue!---\n");
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Google Access-Token valid -> Continue!---\n",$this->debug);
             $this->connected = true;
         }
         return $client;
@@ -222,8 +215,8 @@ class gConnector
             // write table-header
             $startIndex = 1;
             $updateRange = $this->tableName . '!' . 'A' . $startIndex . ':' . 'ZZ' . $startIndex;
-            $this->debugLog("---Adding following Data to Sheet from Index " . $startIndex . " (Range: " . $updateRange . ") ---\n");
-            $this->debugLog(json_encode($tableHeader) . "\n");
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Adding following Data to Sheet from Index " . $startIndex . " (Range: " . $updateRange . ") ---\n",$this->debug);
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log(json_encode($tableHeader) . "\n",$this->debug);
 
             $updateBody = new \Google_Service_Sheets_ValueRange([
                 'range' => $updateRange,
@@ -255,9 +248,16 @@ class gConnector
 
             foreach ($stacks as $stack) {
                 $endIndex = $startIndex + sizeof($stack);
+                // Expand Sheet if needed
+                if ($endIndex > $this->currentMaxRows) {
+                    $expandingSucess = $this->updateSheetSize($endIndex);
+                    if ($expandingSucess === false) {
+                        return false;
+                    }
+                }
                 $updateRange = $this->tableName . '!' . 'A' . $startIndex . ':' . 'ZZ' . $endIndex;
-                $this->debugLog("---Adding following Data to Sheet from Index " . $startIndex . " (Range: " . $updateRange . "), Stack-Size is ".sizeof($stack)."---\n");
-                $this->debugLog(json_encode($stack) . "\n");
+                Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Adding following Data to Sheet from Index " . $startIndex . " (Range: " . $updateRange . "), Stack-Size is " . sizeof($stack) . "---\n",$this->debug);
+                Wp_Sdtrk_Helper::wp_sdtrk_write_log(json_encode($stack) . "\n",$this->debug);
 
                 $updateBody = new \Google_Service_Sheets_ValueRange([
                     'range' => $updateRange,
@@ -272,6 +272,39 @@ class gConnector
             }
             return true;
         } catch (Exception $e) {
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log($e->getMessage(),$this->debug);
+            return false;
+        }
+    }
+
+    /**
+     * Expands the size of the sheet to the given range
+     * @param integer $newSize
+     * @return boolean
+     */
+    private function updateSheetSize($newSize)
+    {
+        Wp_Sdtrk_Helper::wp_sdtrk_write_log("Sheet size " . $this->currentMaxRows . " is too small! Expand to " . $newSize . "...",$this->debug);
+        try {
+            $updateRange = $this->tableName . '!' . 'A' . $this->currentMaxRows . ':' . 'ZZ' . $newSize;
+            $valueRange = new Google_Service_Sheets_ValueRange();
+            $valueRange->setValues([
+                "values" => [
+                    ""
+                ]
+            ]);
+            $conf = [
+                "valueInputOption" => "RAW"
+            ];
+            $ins = [
+                "insertDataOption" => "INSERT_ROWS"
+            ];
+            $this->service->spreadsheets_values->append($this->sheetId, $updateRange, $valueRange, $conf, $ins);
+            $this->currentMaxRows = $newSize;
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log("Sheet size successfully expanded!",$this->debug);
+            return true;
+        } catch (Exception $e) {
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log($e->getMessage(),$this->debug);
             return false;
         }
     }
@@ -335,30 +368,27 @@ class gConnector
             $stacks = $this->convertStacksToRows($container->getHits($stackSize), $container->getFieldNames());
 
             if (sizeof($stacks) > 0) {
-                $this->debugLog("Clearing google sheet");
+                Wp_Sdtrk_Helper::wp_sdtrk_write_log("Clearing google sheet",$this->debug);
                 $result = $this->clearSheet();
                 if ($result) {
-                    $this->debugLog("Uploading table-header to google sheet");
+                    Wp_Sdtrk_Helper::wp_sdtrk_write_log("Uploading table-header to google sheet",$this->debug);
                     $result = $this->uploadTableHeader($container->getFieldNames());
-                }
-                else{
-                    $this->debugLog("Error while clearing google sheet");
+                } else {
+                    Wp_Sdtrk_Helper::wp_sdtrk_write_log("Error while clearing google sheet",$this->debug);
                 }
                 if ($result) {
-                    $this->debugLog("Uploading entries to google sheet");
+                    Wp_Sdtrk_Helper::wp_sdtrk_write_log("Uploading entries to google sheet",$this->debug);
                     $result = $this->uploadEntries($stacks);
-                }
-                else{
-                    $this->debugLog("Error while uploading table-header");
+                } else {
+                    Wp_Sdtrk_Helper::wp_sdtrk_write_log("Error while uploading table-header",$this->debug);
                 }
                 if ($result) {
-                    $this->debugLog("Updating local gsync state");
+                    Wp_Sdtrk_Helper::wp_sdtrk_write_log("Updating local gsync state",$this->debug);
                     return $container->updateLocalStates();
+                } else {
+                    Wp_Sdtrk_Helper::wp_sdtrk_write_log("Error while uploading entries",$this->debug);
                 }
-                else{
-                    $this->debugLog("Error while uploading entries");
-                }
-                
+
                 return false;
             }
         }
@@ -372,18 +402,19 @@ class gConnector
      */
     public function readEntries()
     {
-        $this->debugLog("---Start readEntries() in gConnector---\n");
+        Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Start readEntries() in gConnector---\n",$this->debug);
         $formattedData = array();
         try {
             $rows = $this->service->spreadsheets_values->get($this->sheetId, $this->sheetRange, [
                 'majorDimension' => 'ROWS'
             ]);
         } catch (Exception $e) {
-            $this->debugLog("---Token valid, but Permission denied! Is your Sheets API enabled? Visit: https://console.developers.google.com/apis/api/sheets.googleapis.com/ ---\n");
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Token valid, but Permission denied! Is your Sheets API enabled? Visit: https://console.developers.google.com/apis/api/sheets.googleapis.com/ ---\n",$this->debug);
         }
 
         if (isset($rows['values'])) {
-            $this->debugLog("---Found " . sizeof($rows['values']) . " Rows in Sheet---\n");
+            $this->currentMaxRows = sizeof($rows['values']);
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Found " . $this->currentMaxRows . " Rows in Sheet---\n",$this->debug);
 
             // save for later use
             $this->sheetData = $rows['values'];
@@ -412,7 +443,7 @@ class gConnector
                 }
             }
         } else {
-            $this->debugLog("---rows[values] not found in Sheet -> The sheet seems to be empty!---\n");
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---rows[values] not found in Sheet -> The sheet seems to be empty!---\n",$this->debug);
         }
         return $formattedData;
     }

@@ -236,9 +236,7 @@ class Wp_Sdtrk_Tracker_Ga
     private function payLoadServerRequest($requestData)
     {
         $payload = json_encode($requestData);
-        $res = Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload);
-
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($res);
+        $res = Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload,array(),$this->debugMode);
         // Send Request
         return $res;
     }

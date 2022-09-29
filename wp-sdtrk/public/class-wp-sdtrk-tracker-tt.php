@@ -230,7 +230,7 @@ class Wp_Sdtrk_Tracker_Tt
         array_push($headers, "Access-Token:" . $this->apiToken);
 
         // Send Request
-        return Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload, $headers);
+        return Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload, $headers,$this->debugMode);
     }
 
     /**

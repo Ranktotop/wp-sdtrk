@@ -36,12 +36,14 @@ class Wp_Sdtrk_Helper
      *
      * @param string $log
      */
-    public static function wp_sdtrk_write_log($log)
+    public static function wp_sdtrk_write_log($log, $enabled = true)
     {
-        if (is_array($log) || is_object($log)) {
-            error_log(print_r($log, true));
-        } else {
-            error_log($log);
+        if ($enabled) {
+            if (is_array($log) || is_object($log)) {
+                error_log(print_r($log, true));
+            } else {
+                error_log($log);
+            }
         }
     }
 
@@ -50,11 +52,13 @@ class Wp_Sdtrk_Helper
      *
      * @param string $log
      */
-    public static function wp_sdtrk_vardump_log($var)
+    public static function wp_sdtrk_vardump_log($var, $enabled = true)
     {
-        ob_start();
-        var_dump($var);
-        return self::wp_sdtrk_write_log(ob_get_clean());
+        if ($enabled) {
+            ob_start();
+            var_dump($var);
+            return self::wp_sdtrk_write_log(ob_get_clean(), $enabled);
+        }
     }
 
     /**
@@ -271,7 +275,7 @@ class Wp_Sdtrk_Helper
      * @param array $fields
      * @return mixed
      */
-    public static function wp_sdtrk_httpPost($url, $payload, $headers = array())
+    public static function wp_sdtrk_httpPost($url, $payload, $headers = array(),$debug = true)
     {
         $curlHeaders = array(
             'Content-Type:application/json'
@@ -299,9 +303,11 @@ class Wp_Sdtrk_Helper
                 'payload_decoded' => json_decode($payload),
                 'destination' => $url
             ];
-            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
-            self::wp_sdtrk_vardump_log($response);
-            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----');
+            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----',$debug);
+            self::wp_sdtrk_vardump_log($response,$debug);
+            self::wp_sdtrk_write_log('--> CURL Error-Info:',$debug);
+            self::wp_sdtrk_write_log(curl_getinfo($curl),$debug);
+            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----',$debug);
             curl_close($curl);
             return $response;
         }
@@ -309,17 +315,34 @@ class Wp_Sdtrk_Helper
         // If response is no JSON
         $msg = json_decode($response);
         if (is_null($msg)) {
+            // check if curl was successfull but didnt sent content back
+            if (isset(curl_getinfo($curl)['http_code']) && substr(curl_getinfo($curl)['http_code'], 0, 1) === "2") {
+                // If all is fine
+                $response = [
+                    'state' => true,
+                    'code' => '1',
+                    'msg' => curl_getinfo($curl)['http_code'],
+                    'payload_encoded' => $payload,
+                    'payload_decoded' => json_decode($payload),
+                    'destination' => $url
+                ];
+                curl_close($curl);
+                return $response;
+            }
+
             $response = [
                 'state' => false,
-                'code' => 'json_decode failed',
+                'code' => 'json_decode of response failed, error (see msg below for raw response)',
                 'msg' => $response,
                 'payload_encoded' => $payload,
                 'payload_decoded' => json_decode($payload),
                 'destination' => $url
             ];
-            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
-            self::wp_sdtrk_vardump_log($response);
-            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----');
+            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----',$debug);
+            self::wp_sdtrk_vardump_log($response,$debug);
+            self::wp_sdtrk_write_log('--> CURL Error-Info:',$debug);
+            self::wp_sdtrk_write_log(curl_getinfo($curl),$debug);
+            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----',$debug);
             curl_close($curl);
             return $response;
         }
@@ -334,9 +357,11 @@ class Wp_Sdtrk_Helper
                 'payload_decoded' => json_decode($payload),
                 'destination' => $url
             ];
-            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----');
-            self::wp_sdtrk_vardump_log($response);
-            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----');
+            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----',$debug);
+            self::wp_sdtrk_vardump_log($response,$debug);
+            self::wp_sdtrk_write_log('--> CURL Error-Info:',$debug);
+            self::wp_sdtrk_write_log(curl_getinfo($curl),$debug);
+            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----',$debug);
             curl_close($curl);
             return $response;
         }

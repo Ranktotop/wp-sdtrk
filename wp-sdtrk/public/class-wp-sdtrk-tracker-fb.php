@@ -210,7 +210,7 @@ class Wp_Sdtrk_Tracker_Fb
         $payload = json_encode($fields);
 
         // Send Request
-        return Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload);
+        return Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload,array(),$this->debugMode);
     }
 
     /**

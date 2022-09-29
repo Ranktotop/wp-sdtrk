@@ -197,7 +197,7 @@ class Wp_Sdtrk_Admin
      */
     public function resetGsyncCron($time){
         $timezone = 'Europe/Berlin';
-        $timestamp = strtotime($time.':00'.' '.$timezone);
+        $timestamp = strtotime($time.':00'.' '.$timezone. " +1 days");
         
         // delete and re-schedule gsync cron job
         if (wp_next_scheduled( 'wp_sdtrk_gsync_cron' ) ) {
@@ -205,6 +205,21 @@ class Wp_Sdtrk_Admin
             
         }	
         wp_schedule_event($timestamp, 'daily', 'wp_sdtrk_gsync_cron' );
+    }
+    
+    /**
+     * Sync now callback
+     * @param string $val
+     * @return string
+     */
+    public function syncGsyncNowCallback($val)
+    {
+        if($val==="yes"){
+            $val = "no";
+            $public = new Wp_Sdtrk_Public($this->wp_sdtrk, $this->version, $this->main );
+            $public->local_gsync();
+        }
+        return $val;
     }
 
     public function create_menu()
@@ -487,9 +502,9 @@ class Wp_Sdtrk_Admin
                             'id'      => 'local_trk_server_gsync_crontime',
                             'type'    => 'range',
                             'dependency' => array(
-                                'local_trk_server_gsync',
-                                '==',
-                                'true'
+                                'local_trk_server_gsync|local_trk_server',
+                                '==|==',
+                                'true|true'
                             ),
                             'sanitize' => array(
                                 $this,
@@ -500,6 +515,22 @@ class Wp_Sdtrk_Admin
                             'min'     => '0',                                      // optional
                             'max'     => '23',                                     // optional
                             'step'    => '1',                                      // optional
+                        ),
+                        array(
+                            'id' => 'local_trk_server_gsync_crontime_force',
+                            'type' => 'switcher',
+                            'title' => __('Sync now', 'wp-sdtrk'),
+                            'description' => __('Check to sync data directly after saving settings', 'wp-sdtrk'),
+                            'default' => 'no',
+                            'dependency' => array(
+                                'local_trk_server_gsync|local_trk_server',
+                                '==|==',
+                                'true|true'
+                            ),
+                            'sanitize' => array(
+                                $this,
+                                'syncGsyncNowCallback'
+                            )
                         ),
                         array(
                             'id'          => 'local_trk_server_gsync_cred',

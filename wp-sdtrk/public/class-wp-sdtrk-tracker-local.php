@@ -44,15 +44,6 @@ class Wp_Sdtrk_Tracker_Local
     {
         return ($this->trackingEnabled_Server() && $this->debugMode);
     }
-    
-    /**
-     * Write message to wordpress-log if debug is activated
-     */
-    private function writeLog($msg){
-        if($this->debugEnabled_Server()){
-            Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($msg);
-        }
-    }
 
     /**
      * Fires the Server-based Tracking
@@ -89,15 +80,13 @@ class Wp_Sdtrk_Tracker_Local
         }        
         
         //Print some debug info
-        if($this->debugEnabled_Server()){
-            $this->writeLog("-----Start Local Event-Data-----:");
-            $this->writeLog("Event-Name: ".$eventName);
-            $this->writeLog("Source-Event:");
-            $this->writeLog($event);
-            $this->writeLog("Converted-Event:");
-            $this->writeLog($event->getLocalizedEventData());
-            $this->writeLog("-----End Local Event-Data-----:");
-        }        
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("-----Start Local Event-Data-----:",$this->debugMode);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("Event-Name: ".$eventName,$this->debugMode);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("Source-Event:",$this->debugMode);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($event,$this->debugMode);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("Converted-Event:",$this->debugMode);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($event->getLocalizedEventData(),$this->debugMode);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("-----End Local Event-Data-----:",$this->debugMode);
         
         $dbHelper = new Wp_Sdtrk_DbHelper();
         return $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData());

@@ -45,7 +45,6 @@ class Wp_Sdtrk_DbHelper
      */
     public function markGSync($id)
     {
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($id);
         if ($id === false || empty($id)) {
             return false;
         }
@@ -62,11 +61,6 @@ class Wp_Sdtrk_DbHelper
         $primaryKeyType = array(
             "%d"
         );
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($id);
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($dataset);
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($primaryKey);
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($typeset);
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($primaryKeyType);
         $wpdb->update("wp_wpsdtrk_hits", $dataset, $primaryKey, $typeset, $primaryKeyType);
         return true;
     }
