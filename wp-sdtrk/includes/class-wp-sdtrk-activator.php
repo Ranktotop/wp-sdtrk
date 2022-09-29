@@ -39,15 +39,21 @@ class Wp_Sdtrk_Activator {
 	    //create database for local tracking
 	    self::create_localTrackingDb();
 	    
-	    
-	    $time = intval(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync_crontime"));
 	    $timezone = 'Europe/Berlin';
-	    $timestamp = strtotime($time.':00'.' '.$timezone);
+	    $gsynctime = intval(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync_crontime"));
+	    $gsynctimestamp = strtotime($gsynctime.':00'.' '.$timezone);
+	    $csvsynctime = intval(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_csv_crontime"));
+	    $csvsynctimestamp = strtotime($csvsynctime.':00'.' '.$timezone);
 	    
 	    // schedule gsync cron job
 	    if ( ! wp_next_scheduled( 'wp_sdtrk_gsync_cron' ) ) {
-	        wp_schedule_event($timestamp, 'daily', 'wp_sdtrk_gsync_cron' );
-	    }	
+	        wp_schedule_event($gsynctimestamp, 'daily', 'wp_sdtrk_gsync_cron' );
+	    }
+	    
+	    // schedule gsync cron job
+	    if ( ! wp_next_scheduled( 'wp_sdtrk_csvsync_cron' ) ) {
+	        wp_schedule_event($csvsynctimestamp, 'daily', 'wp_sdtrk_csvsync_cron' );
+	    }
 	}
 	
 	/**

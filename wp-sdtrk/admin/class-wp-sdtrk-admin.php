@@ -205,10 +205,11 @@ class Wp_Sdtrk_Admin
             
         }	
         wp_schedule_event($timestamp, 'daily', 'wp_sdtrk_gsync_cron' );
+        return $time;
     }
     
     /**
-     * Sync now callback
+     * Sync now callback for gsheet
      * @param string $val
      * @return string
      */
@@ -218,6 +219,38 @@ class Wp_Sdtrk_Admin
             $val = "no";
             $public = new Wp_Sdtrk_Public($this->wp_sdtrk, $this->version, $this->main );
             $public->local_gsync();
+        }
+        return $val;
+    }
+    
+    /**
+     * Re-shedules the CSVsync-cronjob
+     * @param string $time
+     */
+    public function resetCSVsyncCron($time){
+        $timezone = 'Europe/Berlin';
+        $timestamp = strtotime($time.':00'.' '.$timezone. " +1 days");
+        
+        // delete and re-schedule gsync cron job
+        if (wp_next_scheduled( 'wp_sdtrk_csvsync_cron' ) ) {
+            wp_clear_scheduled_hook('wp_sdtrk_csvsync_cron');
+            
+        }
+        wp_schedule_event($timestamp, 'daily', 'wp_sdtrk_csvsync_cron' );
+        return $time;
+    }
+    
+    /**
+     * Sync now callback for csv
+     * @param string $val
+     * @return string
+     */
+    public function syncCSVsyncNowCallback($val)
+    {
+        if($val==="yes"){
+            $val = "no";
+            $public = new Wp_Sdtrk_Public($this->wp_sdtrk, $this->version, $this->main );
+            $public->local_csv_feed();
         }
         return $val;
     }
@@ -487,6 +520,53 @@ class Wp_Sdtrk_Admin
                             'default' => 'no'
                         ),
                         array(
+                            'id' => 'local_trk_server_csv',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'local_trk_server',
+                                '==',
+                                'true'
+                            ),
+                            'title' => __('Activate local CSV Sync', 'wp-sdtrk'),
+                            'description' => __('Check to activate sync to csv-file', 'wp-sdtrk'),
+                            'after' => __('CSV-file will be stored here:', 'wp-sdtrk').' <i>'.plugin_dir_url(plugin_dir_path(dirname(__FILE__)) . 'api/localHits.csv').'localHits.csv</i>',
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id'      => 'local_trk_server_csv_crontime',
+                            'type'    => 'range',
+                            'dependency' => array(
+                                'local_trk_server_csv|local_trk_server',
+                                '==|==',
+                                'true|true'
+                            ),
+                            'sanitize' => array(
+                                $this,
+                                'resetCSVsyncCron'
+                            ),
+                            'title'   => __('At what hour should the synchronization take place', 'wp-sdtrk'),
+                            'default' => '0',
+                            'min'     => '0',                                      // optional
+                            'max'     => '23',                                     // optional
+                            'step'    => '1',                                      // optional
+                        ),
+                        array(
+                            'id' => 'local_trk_server_csv_crontime_force',
+                            'type' => 'switcher',
+                            'title' => __('Sync now', 'wp-sdtrk'),
+                            'description' => __('Check to sync data directly after saving settings', 'wp-sdtrk'),
+                            'default' => 'no',
+                            'dependency' => array(
+                                'local_trk_server_csv|local_trk_server',
+                                '==|==',
+                                'true|true'
+                            ),
+                            'sanitize' => array(
+                                $this,
+                                'syncCSVsyncNowCallback'
+                            )
+                        ),
+                        array(
                             'id' => 'local_trk_server_gsync',
                             'type' => 'switcher',
                             'dependency' => array(
@@ -511,7 +591,7 @@ class Wp_Sdtrk_Admin
                                 'resetGsyncCron'
                             ),
                             'title'   => __('At what hour should the synchronization take place', 'wp-sdtrk'),
-                            'default' => '01',  
+                            'default' => '0',  
                             'min'     => '0',                                      // optional
                             'max'     => '23',                                     // optional
                             'step'    => '1',                                      // optional

@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.4.6 =
+* Added CSV-File sync
+
 = 1.4.5 =
 * Fixed bug with gsheet row-limits
 

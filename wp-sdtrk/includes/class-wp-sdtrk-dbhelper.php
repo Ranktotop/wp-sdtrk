@@ -101,6 +101,14 @@ class Wp_Sdtrk_DbHelper
         // Create Query
         return $wpdb->get_results($query);
     }
+    
+    /**
+     * Returns all data from local database
+     * @return array
+     */
+    public function getAllHits(){
+        return $this->getAllRows("wp_wpsdtrk_hits","date");
+    }
 
     /**
      * Get Single Field from DB

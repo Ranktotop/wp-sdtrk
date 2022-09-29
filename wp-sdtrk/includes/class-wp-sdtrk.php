@@ -215,6 +215,11 @@ class Wp_Sdtrk {
          */
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-decryptor-ds24.php';
         
+        /**
+         * Hit Manager
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-hitContainer.php';
+        
 
 		/**************************************
 		 * EXOPITE SIMPLE OPTIONS FRAMEWORK
@@ -365,7 +370,7 @@ class Wp_Sdtrk {
 		 *
 		 */
 		$this->loader->add_action( 'wp_sdtrk_gsync_cron', $this->public, 'local_gsync' );
-		$this->loader->add_action( 'wp_sdtrk_gsync_now_cron', $this->public, 'local_gsync' );
+		$this->loader->add_action( 'wp_sdtrk_csvsync_cron', $this->public, 'local_csv_feed' );
 		
 		/*************************************************************
 		 * The wp_ajax_ is telling wordpress to use ajax and the prefix_ajax_first is the hook name to use in JavaScript or in URL.

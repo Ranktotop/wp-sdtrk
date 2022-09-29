@@ -159,45 +159,68 @@ class Wp_Sdtrk_Public
         $licenseKey = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", ''), "licensekey_" . WP_SDTRK_LICENSE_TYPE_PRO);
         Wp_Sdtrk_License::wp_sdtrk_license_call($licenseKey, WP_SDTRK_LICENSE_TYPE_PRO, 'check');
     }
-    
+
+    /**
+     * Write Hits down to csv
+     */
+    public function local_csv_feed()
+    {
+        $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_debug"), "yes") == 0) ? true : false;
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("----Write CSV File-----", $debug);
+        $hitContainer = new Wp_Sdtrk_hitContainer($debug);
+        $hits = $hitContainer->getHitsForCSV();
+        $filePath = plugin_dir_path(dirname(__FILE__)) . 'api/localHits.csv';
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("Write " . sizeof($hits) . " lines to " . $filePath, $debug);
+        try {
+            $fp = fopen($filePath, 'w');
+            // Write the header
+            fputcsv($fp, array_keys($hits[0]));
+            // Write fields
+            foreach ($hits as $hit) {
+                fputcsv($fp, $hit);
+            }
+            fclose($fp);
+            Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("Successfully wrote CSV-File!", $debug);
+        } catch (Exception $e) {
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log($e->getMessage(), $debug);
+            return false;
+        }
+    }
+
     /**
      * Gsync
      */
     public function local_gsync()
     {
         $result = true;
-        
-        //Get Data
+
+        // Get Data
         $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server"), "yes") == 0) ? true : false;
         $syncGsheet = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync"), "yes") == 0) ? true : false;
         $cred = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync_cred");
-        $localGauth_authenticated = (get_option('wp-sdtrk-gauth-token')===false) ? false : true;
+        $localGauth_authenticated = (get_option('wp-sdtrk-gauth-token') === false) ? false : true;
         $sheetId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync_sheetId");
         $tableName = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync_tableName");
         $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_debug"), "yes") == 0) ? true : false;
-        
-        //If data are set
-        if($trkServer && $syncGsheet && !empty($cred) && $localGauth_authenticated && !empty($sheetId) && !empty($tableName)){
+
+        // If data are set
+        if ($trkServer && $syncGsheet && ! empty($cred) && $localGauth_authenticated && ! empty($sheetId) && ! empty($tableName)) {
             $options = array(
                 "cred" => $cred,
-                "sheetId"=>$sheetId,
-                "tableName"=>$tableName,
+                "sheetId" => $sheetId,
+                "tableName" => $tableName,
                 "startColumn" => "A",
                 "endColumn" => "Z",
                 "startRow" => "1",
                 "debug" => $debug
             );
-            
-            $dbHelper = new Wp_Sdtrk_DbHelper();
-            $dataToSync = $dbHelper->getRowsForGsync();
-            if(sizeof($dataToSync)>0){
-                require_once plugin_dir_path( dirname( __FILE__ ) ) . 'api/google/gConnector.php';
-                $gConnector = new gConnector($options);
-                if($gConnector->isConnected()){
-                    $result = $gConnector->pushLocalData($dataToSync);
-                }else{
-                    $result = false;
-                }
+
+            require_once plugin_dir_path(dirname(__FILE__)) . 'api/google/gConnector.php';
+            $gConnector = new gConnector($options);
+            if ($gConnector->isConnected()) {
+                $result = $gConnector->sync();
+            } else {
+                $result = false;
             }
         }
         return $result;
@@ -882,35 +905,33 @@ class Wp_Sdtrk_Public
             'data' => $decryptedData
         );
     }
-    
-    /////////////////////////////////////////////////////
+
+    // ///////////////////////////////////////////////////
     // ADD TO FILE -> public/class-plugin-name-public.php
-    
+
     // add blackout to the whitelist of variables it wordpress knows and allows
     // in this case it is the plugin name
-    public function whitelist_query_variable( $query_vars ) {
-        
+    public function whitelist_query_variable($query_vars)
+    {
         $query_vars[] = $this->wp_sdtrk;
         return $query_vars;
-        
     }
-    
+
     // If this is done, we can access it later
     // This example checks very early in the process:
     // if the variable is set, we include our page and stop execution after it
-    public function redirect_to_file( &$wp ){
-        
-        if ( array_key_exists( $this->wp_sdtrk, $wp->query_vars ) ) {
-            
-            switch ( $wp->query_vars[$this->wp_sdtrk] ) {
-                
+    public function redirect_to_file(&$wp)
+    {
+        if (array_key_exists($this->wp_sdtrk, $wp->query_vars)) {
+
+            switch ($wp->query_vars[$this->wp_sdtrk]) {
+
                 case 'gauth':
-                    include( WP_PLUGIN_DIR . '/' . $this->wp_sdtrk . '/api/gauth.php' );
-                    break;                    
+                    include (WP_PLUGIN_DIR . '/' . $this->wp_sdtrk . '/api/gauth.php');
+                    break;
             }
-            
+
             exit();
-            
         }
     }
 }
