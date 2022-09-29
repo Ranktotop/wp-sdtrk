@@ -339,6 +339,8 @@ class Wp_Sdtrk_Admin
 
     private function getGeneralSettingFields()
     {        
+        $csvFileUrl = plugin_dir_url(plugin_dir_path(dirname(__FILE__)) . 'api/localHits.csv').'localHits.csv';
+        
         //Local Gsheet Sync Data
         $localGauth_authenticated = (get_option('wp-sdtrk-gauth-token')===false) ? false : true;
         $gauth_state = ($localGauth_authenticated) ? '<span style="color:green">'.__('authenticated', 'wp-sdtrk').'</span>' : '<span style="color:red">'.__('not authenticated', 'wp-sdtrk').'</span>';
@@ -529,8 +531,17 @@ class Wp_Sdtrk_Admin
                             ),
                             'title' => __('Activate local CSV Sync', 'wp-sdtrk'),
                             'description' => __('Check to activate sync to csv-file', 'wp-sdtrk'),
-                            'after' => __('CSV-file will be stored here:', 'wp-sdtrk').' <i>'.plugin_dir_url(plugin_dir_path(dirname(__FILE__)) . 'api/localHits.csv').'localHits.csv</i>',
                             'default' => 'no'
+                        ),
+                        array(
+                            'type' => 'content',
+                            'title' => __('CSV-Sync notes', 'wp-sdtrk'),
+                            'content' => __('CSV-file will be stored here:', 'wp-sdtrk').' <i><a href="'.$csvFileUrl.'">'.$csvFileUrl.'</a></i><br>'.__('You can connect GoogleDataStudio with this Connector:', 'wp-sdtrk').' <a target="blank" href="https://github.com/googledatastudio/community-connectors/tree/master/fetch-csv">Fetch-CSV</a>',
+                            'dependency' => array(
+                                'local_trk_server|local_trk_server_csv',
+                                '==|==',
+                                'true|true'
+                            ),                            
                         ),
                         array(
                             'id'      => 'local_trk_server_csv_crontime',
@@ -544,7 +555,7 @@ class Wp_Sdtrk_Admin
                                 $this,
                                 'resetCSVsyncCron'
                             ),
-                            'title'   => __('At what hour should the synchronization take place', 'wp-sdtrk'),
+                            'title'   => '<span style="padding-left:20px">'.__('At what hour should the synchronization take place', 'wp-sdtrk').'</span>',
                             'default' => '0',
                             'min'     => '0',                                      // optional
                             'max'     => '23',                                     // optional
@@ -553,8 +564,8 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'local_trk_server_csv_crontime_force',
                             'type' => 'switcher',
-                            'title' => __('Sync now', 'wp-sdtrk'),
-                            'description' => __('Check to sync data directly after saving settings', 'wp-sdtrk'),
+                            'title' => '<span style="padding-left:20px">'.__('Sync now', 'wp-sdtrk').'</span>',
+                            'description' => '<span style="padding-left:20px">'.__('Check to sync data directly after saving settings', 'wp-sdtrk').'</span>',
                             'default' => 'no',
                             'dependency' => array(
                                 'local_trk_server_csv|local_trk_server',
