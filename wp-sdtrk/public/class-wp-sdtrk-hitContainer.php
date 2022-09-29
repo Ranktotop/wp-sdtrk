@@ -388,7 +388,6 @@ class Wp_Sdtrk_hitContainer
     public function getHitsForCSV()
     {
         $skipFields = array(
-            "id",
             "gsync"
         );
         $csvHits = array();
