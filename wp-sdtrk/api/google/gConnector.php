@@ -284,10 +284,19 @@ class gConnector
      * @return boolean
      */
     private function updateSheetSize($newSize)
-    {
+    {        
         Wp_Sdtrk_Helper::wp_sdtrk_write_log("Sheet size " . $this->currentMaxRows . " is too small! Expand to " . $newSize . "...", $this->debug);
         try {
-            $updateRange = $this->tableName . '!' . 'A' . $this->currentMaxRows . ':' . 'ZZ' . $newSize;
+            //index starts by 1 in gsheet!
+            $startRows = $this->currentMaxRows;
+            if($startRows < 1){
+                $startRows = 1;
+            }
+            if($newSize <1){
+                $newSize = 1;
+            }
+            
+            $updateRange = $this->tableName . '!' . 'A' . $startRows . ':' . 'ZZ' . $newSize;
             $valueRange = new Google_Service_Sheets_ValueRange();
             $valueRange->setValues([
                 "values" => [
