@@ -163,7 +163,7 @@ class Wp_Sdtrk_Public
     /**
      * Write Hits down to csv
      */
-    public function local_csv_feed()
+    public function local_csv_feed($enclose = "auto")
     {
         $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_debug"), "yes") == 0) ? true : false;
         Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("----Write CSV File-----", $debug);
@@ -174,10 +174,48 @@ class Wp_Sdtrk_Public
         try {
             $fp = fopen($filePath, 'w');
             // Write the header
-            fputcsv($fp, array_keys($hits[0]));
+            switch ($enclose) {
+                case "auto":
+                    fputcsv($fp, array_keys($hits[0]));
+                    break;
+                case "off":
+                    fputs($fp, implode(",", array_map(function ($item) {
+                        return $item;
+                    }, array_keys($hits[0]))) . "\r\n");
+                    break;
+                case "on":
+                    fputs($fp, implode(",", array_map(function ($item) {
+                        return '"' . $item . '"';
+                    }, array_keys($hits[0]))) . "\r\n");
+                    break;
+                default:
+                    fputcsv($fp, array_keys($hits[0]));
+                    break;
+            }
             // Write fields
-            foreach ($hits as $hit) {
-                fputcsv($fp, $hit);
+            switch ($enclose) {
+                case "auto":
+                    foreach ($hits as $hit) {
+                        fputcsv($fp, $hit);
+                    }
+                    break;
+                case "off":
+                    foreach ($hits as $hit) {
+                        fputs($fp, implode(",", array_map(function ($item) {
+                            return $item;
+                        }, $hit)) . "\r\n");
+                    }
+                    break;
+                case "on":
+                    foreach ($hits as $hit) {
+                        fputs($fp, implode(",", array_map(function ($item) {
+                            return '"' . $item . '"';
+                        }, $hit)) . "\r\n");
+                    }
+                    break;
+                default:
+                    fputcsv($fp, array_keys($hits[0]));
+                    break;
             }
             fclose($fp);
             Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("Successfully wrote CSV-File!", $debug);

@@ -134,8 +134,11 @@ class Wp_Sdtrk_hitContainer
         // Add if id is existing
         if (isset($hit["id"]) && ! empty($hit["id"])) {
             // Shedule resync
-            $this->markForResyc($hit["id"]);
-            array_push($this->hits, $hit);
+            $updateSuccess = $this->markForResyc($hit["id"]);  
+            //If update was not successful, the hit is a foreign gsheet entry and will be kept
+            if(!$updateSuccess){
+                array_push($this->hits, $hit);
+            }
         }
     }
 
@@ -147,9 +150,11 @@ class Wp_Sdtrk_hitContainer
     public function addGSheetHits($sheetData)
     {
         if (sizeof($sheetData) > 1) {
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log("Found ".sizeof($sheetData)." entries in gSheet, will be parsed to the local ".sizeof($this->hits)." hits", $this->debug);
             foreach ($sheetData as $data) {
                 $this->addGSheetHit($data);
             }
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log("Finished! Total amount of hits is now ".sizeof($this->hits), $this->debug);
         }
     }
 
@@ -343,7 +348,9 @@ class Wp_Sdtrk_hitContainer
             }
         }
         if ($stack) {
-            return array_chunk($gsyncHits, $this->stackSize, false);
+            $stacks = array_chunk($gsyncHits, $this->stackSize, false);
+            Wp_Sdtrk_Helper::wp_sdtrk_write_log("Created ".sizeof($stacks)." gSheet-stacks with total number of ".sizeof($gsyncHits)." items (Stacksize: ".$this->stackSize." items)", $this->debug);
+            return $stacks;
         }
         return $gsyncHits;
     }

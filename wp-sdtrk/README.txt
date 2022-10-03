@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.4.8 =
+* Fixed Bug with gSheet-sync
+
 = 1.4.7 =
 * Fixed Bug with gSheet-Index
 
