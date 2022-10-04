@@ -327,9 +327,9 @@ class gConnector
     public function sync()
     {
         $hitContainer = new Wp_Sdtrk_hitContainer($this->debug);
-        $hitContainer->addGSheetHits($this->readEntries());        
-        $stacks = $hitContainer->getHitsForGsync(true);
+        $hitContainer->addGSheetHits($this->readEntries());             
         Wp_Sdtrk_Helper::wp_sdtrk_write_log("Collect Stacks before clearing google sheet", $this->debug);
+        $stacks = $hitContainer->getHitsForGsync(true);        
         
         if (sizeof($stacks) > 0) {
             Wp_Sdtrk_Helper::wp_sdtrk_write_log("Clearing google sheet", $this->debug);

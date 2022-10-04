@@ -121,7 +121,6 @@ class Wp_Sdtrk_hitContainer
                 if ($key === "date") {
                     $value = strtotime($value);
                 }
-
                 $hit[$key] = $value;
             }
         }
@@ -133,11 +132,15 @@ class Wp_Sdtrk_hitContainer
         }
         // Add if id is existing
         if (isset($hit["id"]) && ! empty($hit["id"])) {
-            // Shedule resync
+            // Shedule resync            
             $updateSuccess = $this->markForResyc($hit["id"]);  
             //If update was not successful, the hit is a foreign gsheet entry and will be kept
-            if(!$updateSuccess){
-                array_push($this->hits, $hit);
+            if(!$updateSuccess){              
+                Wp_Sdtrk_Helper::wp_sdtrk_write_log("Unknown ID ".$hit["id"]." found! Foreign entry will be re-synced to gSheet", $this->debug);
+                array_push($this->hits, $hit);                
+            }
+            else{
+                Wp_Sdtrk_Helper::wp_sdtrk_write_log("Marked hit with ID ".$hit["id"]." for re-sync", $this->debug);
             }
         }
     }
@@ -343,9 +346,12 @@ class Wp_Sdtrk_hitContainer
         );
 
         foreach ($this->hits as $hit) {
-            if ($hit["gsync"] === "0") {
-                array_push($gsyncHits, $this->convertToRow($hit, $skipFields, $this->getFieldNames()));
-            }
+            //Currently all hits have to be wrote back to sheet
+            array_push($gsyncHits, $this->convertToRow($hit, $skipFields, $this->getFieldNames()));
+            
+            //if ($hit["gsync"] === "0") {
+                //array_push($gsyncHits, $this->convertToRow($hit, $skipFields, $this->getFieldNames()));
+            //}
         }
         if ($stack) {
             $stacks = array_chunk($gsyncHits, $this->stackSize, false);
