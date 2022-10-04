@@ -16,7 +16,7 @@ class Wp_Sdtrk_hitContainer
     // Constructor
     public function __construct($debug = false)
     {
-        $this->stackSize = 500;
+        $this->stackSize = 750;
         $this->hits = array();
         $this->fieldNames = array(
             "id",
