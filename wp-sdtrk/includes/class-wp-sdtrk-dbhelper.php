@@ -9,6 +9,15 @@
  */
 class Wp_Sdtrk_DbHelper
 {
+    
+    private $tableName_hits;
+    
+    
+    public function __construct()
+    {
+        global $wpdb;
+        $this->tableName_hits = $wpdb->prefix . "wpsdtrk_hits";
+    }
 
     /**
      * Saves a hit to database
@@ -22,7 +31,6 @@ class Wp_Sdtrk_DbHelper
         if ($eventName === false) {
             return false;
         }
-        $tableName = "wp_wpsdtrk_hits";
         $dataset = array(
             "date" => $eventTime,
             "eventName" => $eventName,
@@ -35,7 +43,7 @@ class Wp_Sdtrk_DbHelper
             "%s",
             "%d"
         );
-        return $this->insertData(array(), $tableName, $dataset, $typeset);
+        return $this->insertData(array(), $this->tableName_hits, $dataset, $typeset);
     }
 
     /**
@@ -61,7 +69,7 @@ class Wp_Sdtrk_DbHelper
         $primaryKeyType = array(
             "%d"
         );
-        $wpdb->update("wp_wpsdtrk_hits", $dataset, $primaryKey, $typeset, $primaryKeyType);
+        $wpdb->update($this->tableName_hits, $dataset, $primaryKey, $typeset, $primaryKeyType);
         return true;
     }
 
@@ -70,7 +78,7 @@ class Wp_Sdtrk_DbHelper
      */
     public function clearDB()
     {
-        $this->deleteAllData("wp_wpsdtrk_hits");
+        $this->deleteAllData($this->tableName_hits);
     }
 
     /**
@@ -79,7 +87,7 @@ class Wp_Sdtrk_DbHelper
     public function clearGSync()
     {
         global $wpdb;
-        $query = "UPDATE wp_wpsdtrk_hits SET gsync=0";
+        $query = "UPDATE ".$this->tableName_hits." SET gsync=0";
         return $wpdb->get_results($query);
     }
 
@@ -91,11 +99,10 @@ class Wp_Sdtrk_DbHelper
     public function getRowsForGsync()
     {
         global $wpdb;
-        $table = "wp_wpsdtrk_hits";
         $whereColumn = "gsync";
         $whereVal = "0";
         $oderColumn = "date";
-        $query = $wpdb->prepare("SELECT * FROM {$table} WHERE {$whereColumn} = %s ORDER BY {$oderColumn}", array(
+        $query = $wpdb->prepare("SELECT * FROM {$this->tableName_hits} WHERE {$whereColumn} = %s ORDER BY {$oderColumn}", array(
             $whereVal
         ));
         // Create Query
@@ -107,7 +114,7 @@ class Wp_Sdtrk_DbHelper
      * @return array
      */
     public function getAllHits(){
-        return $this->getAllRows("wp_wpsdtrk_hits","date");
+        return $this->getAllRows($this->tableName_hits,"date");
     }
 
     /**

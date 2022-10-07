@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.4.9 =
+* Fixed Bug with custom table-prefix
+
 = 1.4.8 =
 * Fixed Bug with gSheet-sync
 
