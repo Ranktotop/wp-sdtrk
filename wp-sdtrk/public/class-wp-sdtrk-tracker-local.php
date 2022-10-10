@@ -75,7 +75,7 @@ class Wp_Sdtrk_Tracker_Local
                 $btnTag = (isset($meta['clickEventTag'])) ? $meta['clickEventTag'] : false;
                 $eventName = (isset($meta['clickEventName'])) ? $meta['clickEventName'] : false;
                 $eventName = ($btnTag!==false) ? $eventName.'_'.$btnTag : $eventName;
-                $event->setClickTriggerData($eventName, "0", $btnTag);
+                $event->setClickTriggerData($eventName, strval(rand(10000,99999)), $btnTag);
                 break;                
         }        
         

@@ -457,7 +457,7 @@ class Wp_Sdtrk_Tracker_Event
         if (isset($this->eventData['eventTime']) && ! empty($this->eventData['eventTime'])) {
             return $this->eventData['eventTime'];
         }
-        return date_create()->getTimestamp();
+        return Wp_Sdtrk_Helper::wp_sdtrk_DateToTimestamp(false);
     }
 
     /**

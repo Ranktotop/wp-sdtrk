@@ -275,7 +275,7 @@ class Wp_Sdtrk_Helper
      * @param array $fields
      * @return mixed
      */
-    public static function wp_sdtrk_httpPost($url, $payload, $headers = array(),$debug = true)
+    public static function wp_sdtrk_httpPost($url, $payload, $headers = array(), $debug = true)
     {
         $curlHeaders = array(
             'Content-Type:application/json'
@@ -303,11 +303,11 @@ class Wp_Sdtrk_Helper
                 'payload_decoded' => json_decode($payload),
                 'destination' => $url
             ];
-            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----',$debug);
-            self::wp_sdtrk_vardump_log($response,$debug);
-            self::wp_sdtrk_write_log('--> CURL Error-Info:',$debug);
-            self::wp_sdtrk_write_log(curl_getinfo($curl),$debug);
-            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----',$debug);
+            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----', $debug);
+            self::wp_sdtrk_vardump_log($response, $debug);
+            self::wp_sdtrk_write_log('--> CURL Error-Info:', $debug);
+            self::wp_sdtrk_write_log(curl_getinfo($curl), $debug);
+            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----', $debug);
             curl_close($curl);
             return $response;
         }
@@ -338,11 +338,11 @@ class Wp_Sdtrk_Helper
                 'payload_decoded' => json_decode($payload),
                 'destination' => $url
             ];
-            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----',$debug);
-            self::wp_sdtrk_vardump_log($response,$debug);
-            self::wp_sdtrk_write_log('--> CURL Error-Info:',$debug);
-            self::wp_sdtrk_write_log(curl_getinfo($curl),$debug);
-            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----',$debug);
+            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----', $debug);
+            self::wp_sdtrk_vardump_log($response, $debug);
+            self::wp_sdtrk_write_log('--> CURL Error-Info:', $debug);
+            self::wp_sdtrk_write_log(curl_getinfo($curl), $debug);
+            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----', $debug);
             curl_close($curl);
             return $response;
         }
@@ -357,11 +357,11 @@ class Wp_Sdtrk_Helper
                 'payload_decoded' => json_decode($payload),
                 'destination' => $url
             ];
-            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----',$debug);
-            self::wp_sdtrk_vardump_log($response,$debug);
-            self::wp_sdtrk_write_log('--> CURL Error-Info:',$debug);
-            self::wp_sdtrk_write_log(curl_getinfo($curl),$debug);
-            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----',$debug);
+            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----', $debug);
+            self::wp_sdtrk_vardump_log($response, $debug);
+            self::wp_sdtrk_write_log('--> CURL Error-Info:', $debug);
+            self::wp_sdtrk_write_log(curl_getinfo($curl), $debug);
+            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----', $debug);
             curl_close($curl);
             return $response;
         }
@@ -567,6 +567,56 @@ class Wp_Sdtrk_Helper
         if (! $amountLeft || $amountLeft <= 0) {
             delete_transient('wpsdtrk_notices');
             delete_transient('wpsdtrk_notices_amount');
+        }
+    }
+
+    /**
+     * Converts a timestamp to readable Date-String
+     *
+     * @param string $format
+     * @param int $value
+     * @param string $timezone
+     * @return string
+     */
+    public static function wp_sdtrk_TimestampToDate($format = 'd.m.Y H:i:s', $value = false, $timezone = 'Europe/Berlin')
+    {
+        // If value is false, use current-time
+        if (! $value) {
+            $value = time();
+        }
+        try {
+            $dt = new DateTime();
+            $dt->setTimezone(new DateTimeZone($timezone));
+            $dt->setTimestamp($value);
+            return $dt->format($format);
+        } catch (Exception $e) {
+            self::wp_sdtrk_write_log($e->getMessage() . "\n", true);
+            self::wp_sdtrk_write_log("---Error converting the following value to date-format " . $format . " in timezone " . $timezone . "...---\n", true);
+            self::wp_sdtrk_vardump_log($value, true);
+            return $value;
+        }
+    }
+
+    /**
+     * Converts a readable Date-String to timestamp
+     *
+     * @param boolean $value
+     * @return number
+     */
+    public static function wp_sdtrk_DateToTimestamp($value = false)
+    {
+        // If value is false, use current-time
+        if (! $value) {
+            return time();
+        }
+        try {
+            $value = strtotime($value);
+            return $value;
+        } catch (Exception $e) {
+            self::wp_sdtrk_write_log($e->getMessage() . "\n", true);
+            self::wp_sdtrk_write_log("---Error converting the following value to timestamp...---\n", true);
+            self::wp_sdtrk_vardump_log($value, true);
+            return $value;
         }
     }
 }

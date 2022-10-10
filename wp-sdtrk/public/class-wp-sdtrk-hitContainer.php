@@ -119,7 +119,7 @@ class Wp_Sdtrk_hitContainer
 
                 // convert date
                 if ($key === "date") {
-                    $value = strtotime($value);
+                    $value = Wp_Sdtrk_Helper::wp_sdtrk_DateToTimestamp($value);
                 }
                 $hit[$key] = $value;
             }
@@ -218,7 +218,7 @@ class Wp_Sdtrk_hitContainer
                 $value = $hit[$fieldNames[$i]];
                 // convert time
                 if ($fieldNames[$i] === "date") {
-                    $value = date("d.m.Y H:i:s", $value);
+                    $value = Wp_Sdtrk_Helper::wp_sdtrk_TimestampToDate('d.m.Y H:i:s',$value,'Europe/Berlin');
                 }
                 array_push($row, $value);
             } else {
@@ -411,7 +411,7 @@ class Wp_Sdtrk_hitContainer
             foreach ($hit as $key => $value) {
                 // convert time
                 if ($key === "date") {
-                    $value = date("d.m.Y H:i:s", $value);
+                    $value = Wp_Sdtrk_Helper::wp_sdtrk_TimestampToDate('d.m.Y H:i:s',$value,'Europe/Berlin');
                 }                
                 //if key is not skipped add field
                 if (! in_array($key, $skipFields)) {
