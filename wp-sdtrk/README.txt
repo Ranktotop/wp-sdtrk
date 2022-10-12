@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.5.1 =
+* Added option for CSV sync on hourly base
+
 = 1.4.9 =
 * Fixed Bug with non tracked local ButtonClicks
 

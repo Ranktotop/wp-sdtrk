@@ -221,22 +221,33 @@ class Wp_Sdtrk_Admin
             $public->local_gsync();
         }
         return $val;
-    }
+    }       
     
     /**
      * Re-shedules the CSVsync-cronjob
      * @param string $time
      */
-    public function resetCSVsyncCron($time){
-        $timezone = 'Europe/Berlin';
-        $timestamp = strtotime($time.':00'.' '.$timezone. " +1 days");
+    public function resetCSVsyncCron($time){  
+        $timezone = 'Europe/Berlin';        
+        $syncCsvHourly = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_csv_crontime_frequency"), "yes") == 0) ? true : false;
+        
+        //If hourly sync is activated
+        if($syncCsvHourly){
+            $csvFrequency = 'hourly';
+            $timestamp = time()+ $time*60*60;   
+            Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($timestamp);
+        }
+        else{
+            $csvFrequency = 'daily';
+            $timestamp = strtotime($time.':00'.' '.$timezone. " +1 days");
+        }	
         
         // delete and re-schedule gsync cron job
         if (wp_next_scheduled( 'wp_sdtrk_csvsync_cron' ) ) {
             wp_clear_scheduled_hook('wp_sdtrk_csvsync_cron');
             
         }
-        wp_schedule_event($timestamp, 'daily', 'wp_sdtrk_csvsync_cron' );
+        wp_schedule_event($timestamp, $csvFrequency, 'wp_sdtrk_csvsync_cron' );
         return $time;
     }
     
@@ -544,6 +555,18 @@ class Wp_Sdtrk_Admin
                             ),                            
                         ),
                         array(
+                            'id' => 'local_trk_server_csv_crontime_frequency',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'local_trk_server_csv|local_trk_server',
+                                '==|==',
+                                'true|true'
+                            ),
+                            'title' => __('Sync hourly', 'wp-sdtrk'),
+                            'description' => __('Check to sync per hour instead of the daily base', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
                             'id'      => 'local_trk_server_csv_crontime',
                             'type'    => 'range',
                             'dependency' => array(
@@ -560,6 +583,8 @@ class Wp_Sdtrk_Admin
                             'min'     => '0',                                      // optional
                             'max'     => '23',                                     // optional
                             'step'    => '1',                                      // optional
+                            'description' => '<span style="padding-left:20px">'.__('Next sync is currently sheduled at ', 'wp-sdtrk').Wp_Sdtrk_Helper::wp_sdtrk_TimestampToDate('d.m.Y H:i:s',wp_next_scheduled( 'wp_sdtrk_csvsync_cron' ),'Europe/Berlin').'</span>',
+                            
                         ),
                         array(
                             'id' => 'local_trk_server_csv_crontime_force',

@@ -33,6 +33,7 @@ class Wp_Sdtrk_Deactivator {
 
 	    wp_clear_scheduled_hook('wp_sdtrk_licensecheck_cron');
 	    wp_clear_scheduled_hook('wp_sdtrk_gsync_cron');
+	    wp_clear_scheduled_hook('wp_sdtrk_csvsync_cron');
         /**
          * This only required if custom post type has rewrite!
          */
