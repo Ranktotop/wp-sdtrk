@@ -583,7 +583,7 @@ class Wp_Sdtrk_Admin
                             'min'     => '0',                                      // optional
                             'max'     => '23',                                     // optional
                             'step'    => '1',                                      // optional
-                            'description' => '<span style="padding-left:20px">'.__('Next sync is currently sheduled at ', 'wp-sdtrk').Wp_Sdtrk_Helper::wp_sdtrk_TimestampToDate('d.m.Y H:i:s',wp_next_scheduled( 'wp_sdtrk_csvsync_cron' ),'Europe/Berlin').'</span>',
+                            'description' => '<span style="padding-left:20px">'.__('Next sync is currently sheduled at', 'wp-sdtrk').' '.Wp_Sdtrk_Helper::wp_sdtrk_TimestampToDate('d.m.Y H:i:s',wp_next_scheduled( 'wp_sdtrk_csvsync_cron' ),'Europe/Berlin').'</span>',
                             
                         ),
                         array(
