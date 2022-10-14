@@ -140,18 +140,20 @@ class Wp_Sdtrk_Public
          */
 
         // Load minifed JS Versions
-        $loadMinified = true;
+        $loadMinified = false;
         $minifySwitch = ($loadMinified) ? ".min" : "";
 
-        $this->localize_decrypter($minifySwitch);
-        $this->localize_localData($minifySwitch);
-        $this->localize_fbData($minifySwitch);
+        $this->registerScript_localTracker($minifySwitch);
+        $this->registerScript_fbTracker($minifySwitch);
+        
+        $this->registerScript_decrypter($minifySwitch);
+        $this->registerScript_engine($minifySwitch);
+        
         $this->localize_ttData($minifySwitch);
         $this->localize_linData($minifySwitch);
         $this->localize_gaData($minifySwitch);
         $this->localize_flData($minifySwitch);
         $this->localize_mtcData($minifySwitch);
-        $this->localize_eventData($minifySwitch);
     }
 
     public function licensecheck()
@@ -265,51 +267,133 @@ class Wp_Sdtrk_Public
     }
 
     /**
-     * Setup Decrypter-Data
+     * Generates a specific handler context name
+     *
+     * @param string $type
+     * @param string $name
+     * @return string
      */
-    private function localize_decrypter($loadMinified = "")
+    private function get_jsHandler($type, $name)
+    {
+        switch ($type) {
+            case 'name':
+                return str_replace('-', '_', $this->wp_sdtrk) . '-' . $name;
+                break;
+            case 'file':
+                return str_replace('_', '-', $this->wp_sdtrk . '-' . $name);
+                break;
+            case 'var':
+                return str_replace('-', '_', $this->wp_sdtrk . '-' . $name);
+                break;
+        }
+    }
+
+    
+    
+    /**
+     * Register and localize local tracker
+     * @param string $loadMinified
+     */
+    private function registerScript_localTracker($loadMinified = "")
     {
         // Init
-        // Register Script for Facebook-Tracking
-        wp_register_script("wp_sdtrk-decrypter", plugins_url("js/wp-sdtrk-decrypter" . $loadMinified . ".js", __FILE__), array(
-            'jquery'
-        ), "1.0", false);
-
+        $localizedData = array();
+        
+        // Enabled-Switch
+        $enabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server"), "yes") == 0) ? true : false;
+        
+        //Merge to array
+        $localizedData['enabled'] = $enabled;
+        
+        // Register scripts
+        wp_register_script($this->get_jsHandler('name', 'local'), plugins_url("js/" . $this->get_jsHandler('file', 'local') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+        wp_localize_script($this->get_jsHandler('name', 'local'), $this->get_jsHandler('var', 'local'), $localizedData);
+    }
+    
+    /**
+     * Register and localize facebook tracker
+     * @param string $loadMinified
+     */
+    private function registerScript_fbTracker($loadMinified = "")
+    {
+        // Init        
+        $localizedData = array();
+        
+        // Pixel ID
+        $fb_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_pixelid");
+        $fb_pixelId = ($fb_pixelId && ! empty(trim($fb_pixelId))) ? $fb_pixelId : false;
+        
+        // Track Browser Enabled
+        $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser"), "yes") == 0) ? true : false;
+        
+        // Facebook: Track Browser Cookie Service
+        $fb_trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser_cookie_service");
+        $fb_trkBrowserCookieService = ($fb_trkBrowserCookieService && ! empty(trim($fb_trkBrowserCookieService))) ? $fb_trkBrowserCookieService : false;
+        
+        // Facebook: Track Browser Cookie ID
+        $fb_trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser_cookie_id");
+        $fb_trkBrowserCookieId = ($fb_trkBrowserCookieId && ! empty(trim($fb_trkBrowserCookieId))) ? $fb_trkBrowserCookieId : false;
+        
+        // Track Server Enabled
+        $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server"), "yes") == 0) ? true : false;
+        
+        // Facebook: Track Server Cookie Service
+        $fb_trkServerCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_cookie_service");
+        $fb_trkServerCookieService = ($fb_trkServerCookieService && ! empty(trim($fb_trkServerCookieService))) ? $fb_trkServerCookieService : false;
+        
+        // Facebook: Track Server Cookie ID
+        $fb_trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_cookie_id");
+        $fb_trkServerCookieId = ($fb_trkServerCookieId && ! empty(trim($fb_trkServerCookieId))) ? $fb_trkServerCookieId : false;
+        
+        //Merge to array
+        $localizedData['fb_id'] = $fb_pixelId;
+        $localizedData['fb_b_e'] = $trkBrowser;
+        $localizedData['c_fb_b_i'] = $fb_trkBrowserCookieId;
+        $localizedData['c_fb_b_s'] = $fb_trkBrowserCookieService;
+        $localizedData['fb_s_e'] = $trkServer;
+        $localizedData['c_fb_s_i'] = $fb_trkServerCookieId;
+        $localizedData['c_fb_s_s'] = $fb_trkServerCookieService;
+        
+        // Register scripts
+        wp_register_script($this->get_jsHandler('name', 'fb'), plugins_url("js/".$this->get_jsHandler('file', 'fb') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+        wp_localize_script($this->get_jsHandler('name', 'fb'), $this->get_jsHandler('var', 'fb'), $localizedData);        
+    }
+    
+    /**
+     * Register and localize decrypter
+     * @param string $loadMinified
+     */
+    private function registerScript_decrypter($loadMinified = "")
+    {
+        // Init
         $localizedData = array();
         $services = array();
-
+        
         // Digistore24
         $ds24_decrypt = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ds24_encrypt_data"), "yes") == 0) ? true : false;
         $ds24_decryptKey = ($ds24_decrypt) ? Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ds24_encrypt_data_key") : false;
         $ds24_decryptKey = (! empty($ds24_decryptKey) && $ds24_decryptKey) ? $ds24_decryptKey : false;
-
+        
         // If valid add to services
         if ($ds24_decryptKey) {
             array_push($services, "ds24");
         }
-
+        
+        //Merge to array
         $localizedData['services'] = $services;
-        wp_localize_script("wp_sdtrk-decrypter", 'wp_sdtrk_decrypter_config', $localizedData);
-        wp_enqueue_script('wp_sdtrk-decrypter');
+        
+        // Register scripts
+        wp_register_script($this->get_jsHandler('name', 'decrypter'), plugins_url("js/" . $this->get_jsHandler('file', 'decrypter') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+        wp_localize_script($this->get_jsHandler('name', 'decrypter'), $this->get_jsHandler('var', 'decrypter'), $localizedData);
     }
 
     /**
-     * Collect all Event-Data and pass them to JS
+     * Register and localize engine
+     * @param string $loadMinified
      */
-    private function localize_eventData($loadMinified = "")
+    private function registerScript_engine($loadMinified = "")
     {
-        // Init
-        // Register Script for JS Event-Data-Class
-        wp_register_script("wp_sdtrk_event", plugins_url("js/wp-sdtrk-event" . $loadMinified . ".js", __FILE__), array(
-            'jquery'
-        ), "1.0", false);
-        wp_enqueue_script('wp_sdtrk_event');
-
-        // Register Script for collecting Event-Data in Browser
-        wp_enqueue_script($this->wp_sdtrk, plugin_dir_url(__FILE__) . "js/wp-sdtrk-public" . $loadMinified . ".js", array(
-            'jquery'
-        ), $this->version, false);
-
+        // Init    
         $localizedData = array();
         $localizedData['ajax_url'] = admin_url('admin-ajax.php');
         $localizedData['_nonce'] = wp_create_nonce('security_wp-sdtrk');
@@ -343,18 +427,31 @@ class Wp_Sdtrk_Public
         }
 
         // Get Scroll-Data from Settings
-        $scrollTracking = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_scrolling"), "yes") == 0) ? true : false;
+        $scrollTracking = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_scroll"), "yes") == 0) ? true : false;
         if ($scrollTracking) {
-            $scrollData = intval(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", array()), "trk_scrolling_depth"));
-            if ($scrollData > 0) {
-                $localizedData['scrollTrigger'] = $scrollData;
+            $scrollData = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", array()), "trk_scroll_group");
+            $scrollData = (! is_array($scrollData)) ? array() : $scrollData;
+            if (sizeof($scrollData) > 0) {
+                $cleanScrollData = array();
+                foreach ($scrollData as $depth) {
+                    if (isset($depth["trk_scroll_group_percent"]) && ! empty($depth["trk_scroll_group_percent"])) {
+                        array_push($cleanScrollData, floatval($depth["trk_scroll_group_percent"]));
+                    }
+                }
+                $localizedData['scrollTrigger'] = $cleanScrollData;
             }
         }
 
-        // Get Klick-Data from Settings
+        // Get Click-Data from Settings
         $clickTracking = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_buttons"), "yes") == 0) ? true : false;
         if ($clickTracking) {
             $localizedData['clickTrigger'] = $clickTracking;
+        }
+
+        // Get Visibility-Data from Settings
+        $visibilityTracking = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_visibility"), "yes") == 0) ? true : false;
+        if ($visibilityTracking) {
+            $localizedData['visibilityTrigger'] = $visibilityTracking;
         }
 
         // Content-ID
@@ -362,6 +459,7 @@ class Wp_Sdtrk_Public
         $postId = ($post && $post->ID) ? $post->ID : false;
         $title = $postId ? get_the_title($post) : "";
 
+        //Merge to array
         $localizedData['prodId'] = $prodId;
         $localizedData['trkow'] = $trkOverwrite;
         $localizedData['pageId'] = $postId;
@@ -374,79 +472,28 @@ class Wp_Sdtrk_Public
         $localizedData['source'] = Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL(true);
         $localizedData['referer'] = Wp_Sdtrk_Helper::wp_sdtrk_getCurrentReferer(true);
 
-        wp_localize_script($this->wp_sdtrk, 'wp_sdtrk', $localizedData);
+        // Register additional scripts
+        wp_register_script($this->get_jsHandler('name', 'event'), plugins_url("js/" . $this->get_jsHandler('file', 'event') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+        wp_register_script($this->get_jsHandler('name', 'helper'), plugins_url("js/" . $this->get_jsHandler('file', 'helper') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+
+        // Dependencies for engine
+        $deps = array(
+            'jquery',
+            $this->get_jsHandler('name', 'decrypter'),
+            $this->get_jsHandler('name', 'event'),
+            $this->get_jsHandler('name', 'helper'),
+            $this->get_jsHandler('name', 'local'),
+            $this->get_jsHandler('name', 'fb')
+        );
+
+        // Register scripts
+        wp_enqueue_script($this->get_jsHandler('name', 'engine'), plugin_dir_url(__FILE__) . "js/" . $this->get_jsHandler('file', 'engine') . $loadMinified . ".js", $deps, $this->version, false);
+        wp_localize_script($this->get_jsHandler('name', 'engine'), $this->get_jsHandler('var', 'engine'), $localizedData);
     }
 
-    /**
-     * Collect all Local-Data and pass them to JS
-     */
-    private function localize_localData($loadMinified = "")
-    {
-        // Init
-        // Register Script for Local-Tracking
-        wp_register_script("wp_sdtrk-local", plugins_url("js/wp-sdtrk-local" . $loadMinified . ".js", __FILE__), array(
-            'jquery'
-        ), "1.0", false);
+    
 
-        $localizedData = array();
-        // Enabled-Switch
-        $enabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server"), "yes") == 0) ? true : false;
-
-        $localizedData['enabled'] = $enabled;
-        wp_localize_script("wp_sdtrk-local", 'wp_sdtrk_local', $localizedData);
-        wp_enqueue_script('wp_sdtrk-local');
-    }
-
-    /**
-     * Collect all FB-Data and pass them to JS
-     */
-    private function localize_fbData($loadMinified = "")
-    {
-        // Init
-        // Register Script for Facebook-Tracking
-        wp_register_script("wp_sdtrk-fb", plugins_url("js/wp-sdtrk-fb" . $loadMinified . ".js", __FILE__), array(
-            'jquery'
-        ), "1.0", false);
-
-        $localizedData = array();
-
-        // Pixel ID
-        $fb_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_pixelid");
-        $fb_pixelId = ($fb_pixelId && ! empty(trim($fb_pixelId))) ? $fb_pixelId : false;
-
-        // Track Browser Enabled
-        $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser"), "yes") == 0) ? true : false;
-
-        // Facebook: Track Browser Cookie Service
-        $fb_trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser_cookie_service");
-        $fb_trkBrowserCookieService = ($fb_trkBrowserCookieService && ! empty(trim($fb_trkBrowserCookieService))) ? $fb_trkBrowserCookieService : false;
-
-        // Facebook: Track Browser Cookie ID
-        $fb_trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser_cookie_id");
-        $fb_trkBrowserCookieId = ($fb_trkBrowserCookieId && ! empty(trim($fb_trkBrowserCookieId))) ? $fb_trkBrowserCookieId : false;
-
-        // Track Server Enabled
-        $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server"), "yes") == 0) ? true : false;
-
-        // Facebook: Track Server Cookie Service
-        $fb_trkServerCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_cookie_service");
-        $fb_trkServerCookieService = ($fb_trkServerCookieService && ! empty(trim($fb_trkServerCookieService))) ? $fb_trkServerCookieService : false;
-
-        // Facebook: Track Server Cookie ID
-        $fb_trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_cookie_id");
-        $fb_trkServerCookieId = ($fb_trkServerCookieId && ! empty(trim($fb_trkServerCookieId))) ? $fb_trkServerCookieId : false;
-
-        $localizedData['fb_id'] = $fb_pixelId;
-        $localizedData['fb_b_e'] = $trkBrowser;
-        $localizedData['c_fb_b_i'] = $fb_trkBrowserCookieId;
-        $localizedData['c_fb_b_s'] = $fb_trkBrowserCookieService;
-        $localizedData['fb_s_e'] = $trkServer;
-        $localizedData['c_fb_s_i'] = $fb_trkServerCookieId;
-        $localizedData['c_fb_s_s'] = $fb_trkServerCookieService;
-
-        wp_localize_script("wp_sdtrk-fb", 'wp_sdtrk_fb', $localizedData);
-        wp_enqueue_script('wp_sdtrk-fb');
-    }
+    
 
     /**
      * Collect all TT-Data and pass them to JS
@@ -730,10 +777,9 @@ class Wp_Sdtrk_Public
         }
 
         $_POST['data'] = (isset($_POST['data'])) ? $_POST['data'] : array();
-        $_POST['meta'] = (isset($_POST['meta'])) ? $_POST['meta'] : array();
 
         // Call function and send back result
-        $result = $this->$functionName($_POST['data'], $_POST['meta']);
+        $result = $this->$functionName($_POST['data']);
         die(json_encode($result));
     }
 
@@ -744,166 +790,184 @@ class Wp_Sdtrk_Public
      * @param array $meta
      * @return array
      */
-    public function validateTracker($data, $meta)
+    public function validateTracker($data)
     {
-        if (isset($meta['event']) && isset($meta['type'])) {
-            $event = new Wp_Sdtrk_Tracker_Event($meta['event']);
-            switch ($meta['type']) {
-                // Local tracking
-                case 'local':
-                    $localTracker = new Wp_Sdtrk_Tracker_Local();
-                    $localTracker->fireTracking_Server($event, $meta);
-                    return array(
-                        'state' => true
-                    );
-                    break;
+        // Base-Checks
+        if (! isset($data['event']) || ! isset($data['type']) || ! isset($data['handler']) || ! isset($data['data'])) {
+            return array(
+                'state' => false
+            );
+        }
+        $event = new Wp_Sdtrk_Tracker_Event($data['event']);
 
-                // Facebook CAPI
-                case 'fb':
-                    $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
-                    $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
-                    $fbTracker = new Wp_Sdtrk_Tracker_Fb();
-                    $fbTracker->fireTracking_Server($event, $fbp, $fbc);
-                    return array(
-                        'state' => true
-                    );
-                    break;
-                // Facebook CAPI Time-Events
-                case 'fb-tt':
-                    $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
-                    $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
-                    $timeEventId = (isset($meta['timeEventId'])) ? $meta['timeEventId'] : "";
-                    $timeEventName = (isset($meta['timeEventName'])) ? $meta['timeEventName'] : "";
-                    $event->setTimeTriggerData($timeEventName, $timeEventId);
-                    $fbTracker = new Wp_Sdtrk_Tracker_Fb();
-                    $fbTracker->fireTracking_Server($event, $fbp, $fbc);
-                    return array(
-                        'state' => true
-                    );
-                    break;
-                // Facebook CAPI Scroll-Events
-                case 'fb-sd':
-                    $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
-                    $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
-                    $scrollEventId = (isset($meta['scrollEventId'])) ? $meta['scrollEventId'] : "";
-                    $scrollEventName = (isset($meta['scrollEventName'])) ? $meta['scrollEventName'] : "";
-                    $event->setScrollTriggerData($scrollEventName, $scrollEventId);
-                    $fbTracker = new Wp_Sdtrk_Tracker_Fb();
-                    $fbTracker->fireTracking_Server($event, $fbp, $fbc);
-                    return array(
-                        'state' => true
-                    );
-                    break;
-                // Facebook CAPI Button-Events
-                case 'fb-bc':
-                    $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
-                    $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
-                    $clickEventId = (isset($meta['clickEventId'])) ? $meta['clickEventId'] : "";
-                    $clickEventName = (isset($meta['clickEventName'])) ? $meta['clickEventName'] : "";
-                    $clickEventTag = (isset($meta['clickEventTag'])) ? $meta['clickEventTag'] : "";
-                    $event->setClickTriggerData($clickEventName, $clickEventId, $clickEventTag);
-                    $fbTracker = new Wp_Sdtrk_Tracker_Fb();
-                    $fbTracker->fireTracking_Server($event, $fbp, $fbc);
-                    return array(
-                        'state' => true
-                    );
-                    break;
-                case 'ga':
-                    $cid = (isset($meta['cid'])) ? $meta['cid'] : "";
-                    $gaTracker = new Wp_Sdtrk_Tracker_Ga();
-                    $gaTracker->fireTracking_Server($event, $cid);
-                    return array(
-                        'state' => true
-                    );
-                    break;
-                // Google CAPI Time-Events
-                case 'ga-tt':
-                    $cid = (isset($meta['cid'])) ? $meta['cid'] : "";
-                    $timeEventId = (isset($meta['timeEventId'])) ? $meta['timeEventId'] : "";
-                    $timeEventName = (isset($meta['timeEventName'])) ? $meta['timeEventName'] : "";
-                    $event->setTimeTriggerData($timeEventName, $timeEventId);
-                    $gaTracker = new Wp_Sdtrk_Tracker_Ga();
-                    $gaTracker->fireTracking_Server($event, $cid);
-                    return array(
-                        'state' => true
-                    );
-                    break;
-                // Google CAPI Scroll-Events
-                case 'ga-sd':
-                    $cid = (isset($meta['cid'])) ? $meta['cid'] : "";
-                    $scrollEventId = (isset($meta['scrollEventId'])) ? $meta['scrollEventId'] : "";
-                    $scrollEventName = (isset($meta['scrollEventName'])) ? $meta['scrollEventName'] : "";
-                    $event->setScrollTriggerData($scrollEventName, $scrollEventId);
-                    $gaTracker = new Wp_Sdtrk_Tracker_Ga();
-                    $gaTracker->fireTracking_Server($event, $cid);
-                    return array(
-                        'state' => true
-                    );
-                    break;
-                // Google CAPI Button-Events
-                case 'ga-bc':
-                    $cid = (isset($meta['cid'])) ? $meta['cid'] : "";
-                    $clickEventId = (isset($meta['clickEventId'])) ? $meta['clickEventId'] : "";
-                    $clickEventName = (isset($meta['clickEventName'])) ? $meta['clickEventName'] : "";
-                    $clickEventTag = (isset($meta['clickEventTag'])) ? $meta['clickEventTag'] : "";
-                    $event->setClickTriggerData($clickEventName, $clickEventId, $clickEventTag);
-                    $gaTracker = new Wp_Sdtrk_Tracker_Ga();
-                    $gaTracker->fireTracking_Server($event, $cid);
-                    return array(
-                        'state' => true
-                    );
-                    break;
-                // Tik Tok CAPI
-                case 'tt':
-                    $hashId = (isset($meta['hashId'])) ? $meta['hashId'] : "";
-                    $ttc = (isset($meta['ttc'])) ? $meta['ttc'] : "";
-                    $ttTracker = new Wp_Sdtrk_Tracker_Tt();
-                    $ttTracker->fireTracking_Server($event, $hashId, $ttc);
-                    return array(
-                        'state' => true
-                    );
-                    break;
-                // Tik Tok CAPI Time-Events
-                case 'tt-tt':
-                    $hashId = (isset($meta['hashId'])) ? $meta['hashId'] : "";
-                    $ttc = (isset($meta['ttc'])) ? $meta['ttc'] : "";
-                    $timeEventId = (isset($meta['timeEventId'])) ? $meta['timeEventId'] : "";
-                    $timeEventName = (isset($meta['timeEventName'])) ? $meta['timeEventName'] : "";
-                    $event->setTimeTriggerData($timeEventName, $timeEventId);
-                    $ttTracker = new Wp_Sdtrk_Tracker_Tt();
-                    $ttTracker->fireTracking_Server($event, $hashId, $ttc);
-                    return array(
-                        'state' => true
-                    );
-                    break;
-                // Tik Tok CAPI Scroll-Events
-                case 'tt-sd':
-                    $hashId = (isset($meta['hashId'])) ? $meta['hashId'] : "";
-                    $ttc = (isset($meta['ttc'])) ? $meta['ttc'] : "";
-                    $scrollEventId = (isset($meta['scrollEventId'])) ? $meta['scrollEventId'] : "";
-                    $scrollEventName = (isset($meta['scrollEventName'])) ? $meta['scrollEventName'] : "";
-                    $event->setScrollTriggerData($scrollEventName, $scrollEventId);
-                    $ttTracker = new Wp_Sdtrk_Tracker_Tt();
-                    $ttTracker->fireTracking_Server($event, $hashId, $ttc);
-                    return array(
-                        'state' => true
-                    );
-                    break;
-                // Tik Tok CAPI Button-Events
-                case 'tt-bc':
-                    $hashId = (isset($meta['hashId'])) ? $meta['hashId'] : "";
-                    $ttc = (isset($meta['ttc'])) ? $meta['ttc'] : "";
-                    $clickEventId = (isset($meta['clickEventId'])) ? $meta['clickEventId'] : "";
-                    $clickEventName = (isset($meta['clickEventName'])) ? $meta['clickEventName'] : "";
-                    $clickEventTag = (isset($meta['clickEventTag'])) ? $meta['clickEventTag'] : "";
-                    $event->setClickTriggerData($clickEventName, $clickEventId, $clickEventTag);
-                    $ttTracker = new Wp_Sdtrk_Tracker_Tt();
-                    $ttTracker->fireTracking_Server($event, $hashId, $ttc);
-                    return array(
-                        'state' => true
-                    );
-                    break;
-            }
+        switch ($data['type']) {
+            case 'local':
+                $localTracker = new Wp_Sdtrk_Tracker_Local();
+                return array(
+                    'state' => $localTracker->fireTracking_Server($event, $data['handler'], $data['data'])
+                );
+            case 'fb':
+                $fbTracker = new Wp_Sdtrk_Tracker_Fb();
+                return array(
+                    'state' => $fbTracker->fireTracking_Server($event, $data['handler'], $data['data'])
+                );
+        }
+
+        switch ($meta['type']) {
+            // Local tracking
+            case 'local':
+                $localTracker = new Wp_Sdtrk_Tracker_Local();
+                $localTracker->fireTracking_Server($event, $meta);
+                return array(
+                    'state' => true
+                );
+                break;
+
+            // Facebook CAPI
+            case 'fb':
+                $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
+                $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
+                $fbTracker = new Wp_Sdtrk_Tracker_Fb();
+                $fbTracker->fireTracking_Server($event, $fbp, $fbc);
+                return array(
+                    'state' => true
+                );
+                break;
+            // Facebook CAPI Time-Events
+            case 'fb-tt':
+                $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
+                $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
+                $timeEventId = (isset($meta['timeEventId'])) ? $meta['timeEventId'] : "";
+                $timeEventName = (isset($meta['timeEventName'])) ? $meta['timeEventName'] : "";
+                $event->setTimeTriggerData($timeEventName, $timeEventId);
+                $fbTracker = new Wp_Sdtrk_Tracker_Fb();
+                $fbTracker->fireTracking_Server($event, $fbp, $fbc);
+                return array(
+                    'state' => true
+                );
+                break;
+            // Facebook CAPI Scroll-Events
+            case 'fb-sd':
+                $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
+                $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
+                $scrollEventId = (isset($meta['scrollEventId'])) ? $meta['scrollEventId'] : "";
+                $scrollEventName = (isset($meta['scrollEventName'])) ? $meta['scrollEventName'] : "";
+                $event->setScrollTriggerData($scrollEventName, $scrollEventId);
+                $fbTracker = new Wp_Sdtrk_Tracker_Fb();
+                $fbTracker->fireTracking_Server($event, $fbp, $fbc);
+                return array(
+                    'state' => true
+                );
+                break;
+            // Facebook CAPI Button-Events
+            case 'fb-bc':
+                $fbp = (isset($meta['fbp'])) ? $meta['fbp'] : "";
+                $fbc = (isset($meta['fbc'])) ? $meta['fbc'] : "";
+                $clickEventId = (isset($meta['clickEventId'])) ? $meta['clickEventId'] : "";
+                $clickEventName = (isset($meta['clickEventName'])) ? $meta['clickEventName'] : "";
+                $clickEventTag = (isset($meta['clickEventTag'])) ? $meta['clickEventTag'] : "";
+                $event->setClickTriggerData($clickEventName, $clickEventId, $clickEventTag);
+                $fbTracker = new Wp_Sdtrk_Tracker_Fb();
+                $fbTracker->fireTracking_Server($event, $fbp, $fbc);
+                return array(
+                    'state' => true
+                );
+                break;
+            case 'ga':
+                $cid = (isset($meta['cid'])) ? $meta['cid'] : "";
+                $gaTracker = new Wp_Sdtrk_Tracker_Ga();
+                $gaTracker->fireTracking_Server($event, $cid);
+                return array(
+                    'state' => true
+                );
+                break;
+            // Google CAPI Time-Events
+            case 'ga-tt':
+                $cid = (isset($meta['cid'])) ? $meta['cid'] : "";
+                $timeEventId = (isset($meta['timeEventId'])) ? $meta['timeEventId'] : "";
+                $timeEventName = (isset($meta['timeEventName'])) ? $meta['timeEventName'] : "";
+                $event->setTimeTriggerData($timeEventName, $timeEventId);
+                $gaTracker = new Wp_Sdtrk_Tracker_Ga();
+                $gaTracker->fireTracking_Server($event, $cid);
+                return array(
+                    'state' => true
+                );
+                break;
+            // Google CAPI Scroll-Events
+            case 'ga-sd':
+                $cid = (isset($meta['cid'])) ? $meta['cid'] : "";
+                $scrollEventId = (isset($meta['scrollEventId'])) ? $meta['scrollEventId'] : "";
+                $scrollEventName = (isset($meta['scrollEventName'])) ? $meta['scrollEventName'] : "";
+                $event->setScrollTriggerData($scrollEventName, $scrollEventId);
+                $gaTracker = new Wp_Sdtrk_Tracker_Ga();
+                $gaTracker->fireTracking_Server($event, $cid);
+                return array(
+                    'state' => true
+                );
+                break;
+            // Google CAPI Button-Events
+            case 'ga-bc':
+                $cid = (isset($meta['cid'])) ? $meta['cid'] : "";
+                $clickEventId = (isset($meta['clickEventId'])) ? $meta['clickEventId'] : "";
+                $clickEventName = (isset($meta['clickEventName'])) ? $meta['clickEventName'] : "";
+                $clickEventTag = (isset($meta['clickEventTag'])) ? $meta['clickEventTag'] : "";
+                $event->setClickTriggerData($clickEventName, $clickEventId, $clickEventTag);
+                $gaTracker = new Wp_Sdtrk_Tracker_Ga();
+                $gaTracker->fireTracking_Server($event, $cid);
+                return array(
+                    'state' => true
+                );
+                break;
+            // Tik Tok CAPI
+            case 'tt':
+                $hashId = (isset($meta['hashId'])) ? $meta['hashId'] : "";
+                $ttc = (isset($meta['ttc'])) ? $meta['ttc'] : "";
+                $ttTracker = new Wp_Sdtrk_Tracker_Tt();
+                $ttTracker->fireTracking_Server($event, $hashId, $ttc);
+                return array(
+                    'state' => true
+                );
+                break;
+            // Tik Tok CAPI Time-Events
+            case 'tt-tt':
+                $hashId = (isset($meta['hashId'])) ? $meta['hashId'] : "";
+                $ttc = (isset($meta['ttc'])) ? $meta['ttc'] : "";
+                $timeEventId = (isset($meta['timeEventId'])) ? $meta['timeEventId'] : "";
+                $timeEventName = (isset($meta['timeEventName'])) ? $meta['timeEventName'] : "";
+                $event->setTimeTriggerData($timeEventName, $timeEventId);
+                $ttTracker = new Wp_Sdtrk_Tracker_Tt();
+                $ttTracker->fireTracking_Server($event, $hashId, $ttc);
+                return array(
+                    'state' => true
+                );
+                break;
+            // Tik Tok CAPI Scroll-Events
+            case 'tt-sd':
+                $hashId = (isset($meta['hashId'])) ? $meta['hashId'] : "";
+                $ttc = (isset($meta['ttc'])) ? $meta['ttc'] : "";
+                $scrollEventId = (isset($meta['scrollEventId'])) ? $meta['scrollEventId'] : "";
+                $scrollEventName = (isset($meta['scrollEventName'])) ? $meta['scrollEventName'] : "";
+                $event->setScrollTriggerData($scrollEventName, $scrollEventId);
+                $ttTracker = new Wp_Sdtrk_Tracker_Tt();
+                $ttTracker->fireTracking_Server($event, $hashId, $ttc);
+                return array(
+                    'state' => true
+                );
+                break;
+            // Tik Tok CAPI Button-Events
+            case 'tt-bc':
+                $hashId = (isset($meta['hashId'])) ? $meta['hashId'] : "";
+                $ttc = (isset($meta['ttc'])) ? $meta['ttc'] : "";
+                $clickEventId = (isset($meta['clickEventId'])) ? $meta['clickEventId'] : "";
+                $clickEventName = (isset($meta['clickEventName'])) ? $meta['clickEventName'] : "";
+                $clickEventTag = (isset($meta['clickEventTag'])) ? $meta['clickEventTag'] : "";
+                $event->setClickTriggerData($clickEventName, $clickEventId, $clickEventTag);
+                $ttTracker = new Wp_Sdtrk_Tracker_Tt();
+                $ttTracker->fireTracking_Server($event, $hashId, $ttc);
+                return array(
+                    'state' => true
+                );
+                break;
         }
         return array(
             'state' => false
@@ -914,19 +978,27 @@ class Wp_Sdtrk_Public
      * Decrypt Data for given services
      *
      * @param array $data
-     * @param array $meta
      * @return array
      */
-    public function decryptData($data, $meta)
+    public function decryptData($data)
     {
-        $services = $meta;
-        $decryptedData = $data;
-        if (empty($data) || empty($meta)) {
+        if (! isset($data['data']) || ! isset($data['meta'])) {
             return array(
-                'state' => true,
-                'data' => $decryptedData
+                'state' => false,
+                'data' => false
             );
         }
+
+        $services = $data['meta'];
+        $encryptedData = $data['data'];
+
+        if (empty($encryptedData) || empty($services)) {
+            return array(
+                'state' => true,
+                'data' => $encryptedData
+            );
+        }
+
         foreach ($services as $service) {
             // If service exists and a secret key has been saved
             $className = 'Wp_Sdtrk_Decrypter_' . $service;
@@ -934,7 +1006,7 @@ class Wp_Sdtrk_Public
 
             // Create the decrypter and decrypt data
             if (class_exists($className) && ($key !== false && ! empty($key))) {
-                $decrypter = new $className($key, $decryptedData);
+                $decrypter = new $className($key, $encryptedData);
                 $decryptedData = $decrypter->getDecryptedData();
             }
         }

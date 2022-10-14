@@ -106,7 +106,7 @@ class Wp_Sdtrk {
 	public function __construct() {
 
 		$this->wp_sdtrk = 'wp-sdtrk';
-		$this->version = '1.0.0';
+		$this->version = '1.5.1';
 
 		/*************************************************************
 		 * ACCESS PLUGIN ADMIN PUBLIC METHODES FROM INSIDE

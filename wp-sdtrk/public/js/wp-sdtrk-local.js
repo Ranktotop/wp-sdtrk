@@ -1,92 +1,72 @@
-var localScrollTracked = false;
-var localClickedButtons = [];
+class Wp_Sdtrk_Catcher_Local {
 
-function wp_sdtrk_runLocal() {
-	jQuery(document).ready(function() {
-		if (wp_sdtrk_local.enabled === "" || !wp_sdtrk_event) {
-			return;
+	/**
+	* Constructor
+	* @param {Wp_Sdtrk_Event} event The event
+	* @param {Wp_Sdtrk_Helper} helper The helper
+	*/
+	constructor(event, helper) {
+		this.localizedData = wp_sdtrk_local;
+		this.event = event;
+		this.helper = helper;
+		this.enabled = (this.localizedData.enabled === "" || !this.event) ? false : true;
+	}
+
+	/**
+	* Check if local is enabled
+	* @return  {Boolean} If enabled
+	 */
+	isEnabled() {
+		return this.enabled;
+	}
+
+	/**
+	* Catch page hit
+	 */
+	catchPageHit() {
+		this.sendData('Page', { state: true });
+	}
+
+	/**
+	* Catch scroll hit
+	* @param {String} percent The % of the hit
+	 */
+	catchScrollHit(percent) {
+		this.sendData('Scroll', { percent: percent });
+	}
+
+	/**
+	* Catch time hit
+	* @param {String} time The time of the hit
+	 */
+	catchTimeHit(time) {
+		this.sendData('Time', { time: time });
+	}
+
+	/**
+	* Catch click hit
+	* @param {String} tag The tag of the hit
+	 */
+	catchClickHit(tag) {
+		this.sendData('Click', { tag: tag });
+	}
+
+	/**
+	* Catch visibility hit
+	* @param {String} tag The tag of the hit
+	 */
+	catchVisibilityHit(tag) {
+		this.sendData('Visibility', { tag: tag });
+	}
+
+	/**
+	* Send data to server
+	* @param {String} handler The handler of event
+	* @param {Object} data The data to send
+	 */
+	sendData(handler, data) {
+		if (this.isEnabled()) {
+			this.helper.send_ajax({ event: this.event, type: 'local', handler: handler, data: data });
 		}
-		wp_sdtrk_track_local();
-	});
-}
-
-//Fire on Server
-function wp_sdtrk_track_local() {
-	var metaData = {event: wp_sdtrk_event, type: 'local', subtype: 'init'};
-	wp_sdtrk_sendAjax(metaData);
-
-	//Time Trigger
-	if (wp_sdtrk_event.getTimeTrigger().length > 0) {
-		wp_sdtrk_track_local_timeTracker();
 	}
-
-	//Scroll-Trigger
-	if (wp_sdtrk_event.getScrollTrigger() !== false) {
-		wp_sdtrk_track_local_scrollTracker();
-	}
-
-	//Click-Trigger
-	if (wp_sdtrk_event.getClickTrigger() !== false) {
-		wp_sdtrk_track_local_clickTracker();
-	}
-}
-
-//Activate time-tracker for Server
-function wp_sdtrk_track_local_timeTracker() {
-	var metaData = {event: wp_sdtrk_event, type: 'local', subtype: 'tt'};
-		wp_sdtrk_event.getTimeTrigger().forEach((triggerTime) => {
-			var time = parseInt(triggerTime);
-			if (!isNaN(time)) {
-				time = time * 1000;
-				jQuery(document).ready(function() {
-					setTimeout(function() {
-						metaData.timeEventName = 'Watchtime_' + triggerTime.toString() + '_Seconds';
-						wp_sdtrk_sendAjax(metaData);
-					}, time);
-				});
-			}
-
-		});
-}
-
-//Activate scroll-tracker for Server
-function wp_sdtrk_track_local_scrollTracker() {
-	if (localScrollTracked === true) {
-		return;
-	}
-	var metaData = {event: wp_sdtrk_event, type: 'local', subtype: 'sd'};
-		window.addEventListener('scroll', function() {
-			if (localScrollTracked === true) {
-				return;
-			}
-			var st = jQuery(this).scrollTop();
-			var wh = jQuery(document).height() - jQuery(window).height();
-			var target = wp_sdtrk_event.getScrollTrigger();
-			var perc = Math.ceil((st * 100) / wh)
-
-			if (perc >= target) {
-				localScrollTracked = true;
-				metaData.scrollEventName = 'Scrolldepth_' + wp_sdtrk_event.getScrollTrigger() + '_Percent';
-				wp_sdtrk_sendAjax(metaData);
-			}
-		});
-}
-
-//Activate click-tracker for Server
-function wp_sdtrk_track_local_clickTracker() {
-	if (wp_sdtrk_buttons.length < 1) {
-		return;
-	}
-	var metaData = {event: wp_sdtrk_event, type: 'local', subtype: 'bc'};
-		wp_sdtrk_buttons.forEach((el) => {
-			jQuery(el[0]).on('click', function() {
-				if (!localClickedButtons.includes(el[1])) {
-					localClickedButtons.push(el[1]);
-					metaData.clickEventName = 'ButtonClick';
-					metaData.clickEventTag = el[1];
-					wp_sdtrk_sendAjax(metaData);
-				}
-			});
-
-		});
 }

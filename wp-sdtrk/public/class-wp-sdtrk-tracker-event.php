@@ -11,12 +11,15 @@ class Wp_Sdtrk_Tracker_Event
 
     private $clickTriggerData;
 
+    private $visibilityTriggerData;
+
     public function __construct($eventData)
     {
         $this->eventData = $eventData;
         $this->timeTriggerData = false;
         $this->scrollTriggerData = false;
         $this->clickTriggerData = false;
+        $this->visibilityTriggerData = false;
     }
 
     /**
@@ -137,6 +140,11 @@ class Wp_Sdtrk_Tracker_Event
         ];
     }
 
+    /**
+     * Returns the Time-Trigger-Data
+     *
+     * @return boolean|String[]
+     */
     public function getTimeTriggerData()
     {
         return $this->timeTriggerData;
@@ -159,6 +167,11 @@ class Wp_Sdtrk_Tracker_Event
         ];
     }
 
+    /**
+     * Returns the Scroll-Trigger-Data
+     *
+     * @return boolean|String[]
+     */
     public function getScrollTriggerData()
     {
         return $this->scrollTriggerData;
@@ -182,9 +195,42 @@ class Wp_Sdtrk_Tracker_Event
         ];
     }
 
+    /**
+     * Sets the Visibility Data for Scroll-Events
+     *
+     * @param String $eventName
+     * @param String $eventId
+     */
+    public function setVisibilityTriggerData($eventName, $eventId, $tag)
+    {
+        if (empty($eventName) || empty($eventId) || $tag) {
+            $this->visibilityTriggerData = false;
+        }
+        $this->visibilityTriggerData = [
+            'name' => $eventName,
+            'id' => $eventId,
+            'tag' => $tag
+        ];
+    }
+
+    /**
+     * Returns the Click-Trigger-Data
+     *
+     * @return boolean|String[]
+     */
     public function getClickTriggerData()
     {
         return $this->clickTriggerData;
+    }
+
+    /**
+     * Returns the Visibility-Trigger-Data
+     *
+     * @return boolean|String[]
+     */
+    public function getVisibilityTriggerData()
+    {
+        return $this->visibilityTriggerData;
     }
 
     /**
@@ -495,10 +541,10 @@ class Wp_Sdtrk_Tracker_Event
             'name' => $this->getPageName(),
             'source' => $this->getEventSource()
         );
-        
-        //UTM
+
+        // UTM
         $utmData = array();
-        foreach ($this->getUtmData() as $key => $value){
+        foreach ($this->getUtmData() as $key => $value) {
             $utmData[str_replace("utm_", "", $key)] = $value;
         }
         $data['utm'] = $utmData;

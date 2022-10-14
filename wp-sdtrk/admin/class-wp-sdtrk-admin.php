@@ -387,13 +387,13 @@ class Wp_Sdtrk_Admin
                 $eventList['timetracker-'.$timeTrackingSet['trk_time_group_seconds']] = __('Time-Tracker', 'wp-sdtrk').' '.$timeTrackingSet['trk_time_group_seconds'].' '.__('Seconds', 'wp-sdtrk');
             }
         }
-        
         //Collect ScrollTracker-Data
-        $scrollTrackingEnabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_scrolling"), "yes") == 0) ? true : false;
+        $scrollTrackingEnabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_scroll"), "yes") == 0) ? true : false;
         if ($scrollTrackingEnabled) {
-            $scrollTrackingData = intval(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", array()), "trk_scrolling_depth"));
-            if($scrollTrackingData>0){
-                $eventList['scrolltracker-'.strval($scrollTrackingData)] = __('Scroll-Tracker', 'wp-sdtrk').' '.strval($scrollTrackingData).' '.__('Percent', 'wp-sdtrk');
+            $scrollTrackingData = wp_sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_scroll_group");
+            // Create array from Data
+            foreach ($scrollTrackingData as $scrollTrackingSet) {
+                $eventList['scrolltracker-'.$scrollTrackingSet['trk_scroll_group_percent']] = __('Scroll-Tracker', 'wp-sdtrk').' '.$scrollTrackingSet['trk_scroll_group_percent'].' '.__('Percent', 'wp-sdtrk');
             }
         }   
         
@@ -466,27 +466,50 @@ class Wp_Sdtrk_Admin
                         )
                     )
                 ),
+                
                 array(
-                    'id' => 'trk_scrolling',
+                    'id' => 'trk_scroll',
                     'type' => 'switcher',
                     'title' => __('Fire signal-event on scroll-depth', 'wp-sdtrk'),
                     'description' => __('Check to fire a signal event after scroll-depth has been reached', 'wp-sdtrk'),
                     'default' => 'no'
                 ),
                 array(
-                    'id' => 'trk_scrolling_depth',
-                    'type' => 'number',
+                    'type' => 'group',
+                    'id' => 'trk_scroll_group',
+                    'title' => __('Scroll-Settings', 'wp-sdtrk'),
+                    'description' => __('Fire signal-event if the user has scrolled to x percent of the page', 'wp-sdtrk'),
+                    'after' => __('Attention: Every event must be processed! Make sure that the frequency is therefore not too high and not several events are triggered at the same depth!', 'wp-sdtrk'),
                     'dependency' => array(
-                        'trk_scrolling',
+                        'trk_scroll',
                         '!=',
                         'false'
                     ),
-                    'min' => '1',
-                    'max' => '100',
-                    'step' => '1',
-                    'default' => '30',
-                    'title' => __('Scroll-Depth', 'wp-sdtrk'),
-                    'description' => __('Fire a signal-event on X percent', 'wp-sdtrk')
+                    'options' => array(
+                        'repeater' => true,
+                        'accordion' => true,
+                        'button_title' => __('Add new', 'wp-sdtrk'),
+                        'group_title' => __('Scroll-Settings', 'wp-sdtrk'),
+                        'limit' => 5,
+                        'sortable' => true,
+                        'mode' => 'compact'
+                    ),
+                    'fields' => array(
+                        
+                        array(
+                            'id' => 'trk_scroll_group_percent',
+                            'type' => 'number',
+                            'min' => '1',
+                            'step' => '1',
+                            'default' => '30',
+                            'max' => '100',
+                            'attributes' => array(
+                                // mark this field az title, on type this will change group item title
+                                'data-title' => 'title',
+                                'placeholder' => __('Percent to reach', 'wp-sdtrk')
+                            )
+                        )
+                    )
                 ),
                 array(
                     'id' => 'trk_buttons',
@@ -495,6 +518,14 @@ class Wp_Sdtrk_Admin
                     'description' => __('Check to fire a signal event after an element has been clicked', 'wp-sdtrk'),
                     'default' => 'no',
                     'after' => __('Attention: In order for clicks to be tracked, the element to be tracked must contain the class trkbtn-TAGNAME-trkbtn. The TAGNAME placeholder can be replaced by any word and will be passed as a parameter', 'wp-sdtrk') . '<br><b>' . __('Example:', 'wp-sdtrk') . '</b>' . htmlentities('<a href="https://example.com" class="trkbtn-mybutton-trkbtn">MyButton</a>')
+                ),
+                array(
+                    'id' => 'trk_visibility',
+                    'type' => 'switcher',
+                    'title' => __('Fire signal-event on visibility of items', 'wp-sdtrk'),
+                    'description' => __('Check to fire a signal event after an element gets visible', 'wp-sdtrk'),
+                    'default' => 'no',
+                    'after' => __('Attention: In order for tracking to work, the element to be tracked must contain the class watchitm-TAGNAME-watchitm. The TAGNAME placeholder can be replaced by any word and will be passed as a parameter', 'wp-sdtrk') . '<br><b>' . __('Example:', 'wp-sdtrk') . '</b>' . htmlentities('<h2 class="watchitm-mybutton-watchitm">My Headline</h2>')
                 )
             )
         );

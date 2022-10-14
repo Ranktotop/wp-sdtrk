@@ -354,6 +354,19 @@ class Wp_Sdtrk_Event {
 		}
 		return false;
 	}
+	
+	//Sets the Visibility-Trigger
+	setVisibilityTrigger(value) {
+		this.visibilityTrigger = value;
+	}
+	
+	//Gets the Visibility-Trigger
+	getVisibilityTrigger() {
+		if (this.visibilityTrigger === '1') {
+			return true;
+		}
+		return false;
+	}
 
 	//Grab first Value of object
 	grabFirstValue(customObj) {

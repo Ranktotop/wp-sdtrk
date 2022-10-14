@@ -1,414 +1,434 @@
-var fbEventData = false;
-var fbEventData_finishedLoading = false;
-var fbCustomEvent = false;
-var fbScrollTracked_b = false;
-var fbScrollTracked_s = false;
-var fbClickedButtons_b = [];
-var fbClickedButtons_s = [];
+class Wp_Sdtrk_Catcher_Fb {
 
-function wp_sdtrk_runFB() {
-	jQuery(document).ready(function() {
-		wp_sdtrk_collectFBData();
-		wp_sdtrk_track_fb();
-		fbEventData_finishedLoading = true;
-	});
-}
-
-/**
-* Collects all available data for FB
- */
-function wp_sdtrk_collectFBData() {
-	if (wp_sdtrk_fb.fb_id === "" || !wp_sdtrk_event) {
-		return;
-	}
-	//Initialize	
-	var prodName = wp_sdtrk_event.grabProdName();
-	var prodId = wp_sdtrk_event.grabProdId();
-	var eventId = wp_sdtrk_event.grabOrderId();
-	var eventName = wp_sdtrk_convertEventNameToFb(wp_sdtrk_event.grabEventName());
-	var value = wp_sdtrk_event.grabValue();
-	var timeTrigger = wp_sdtrk_event.getTimeTrigger();
-	var scrollTrigger = wp_sdtrk_event.getScrollTrigger();
-	var clickTrigger = wp_sdtrk_event.getClickTrigger();
-	var firstName = wp_sdtrk_event.getUserFirstName();
-	var lastName = wp_sdtrk_event.getUserLastName();
-	var email = wp_sdtrk_event.getUserEmail();
-
-	// Collect the Base-Data
-	var baseData = {
-		'pixelId': wp_sdtrk_fb.fb_id,
-		'eventId': eventId,
-		'eventName': eventName
-	};
-
-	//Collect the Custom-Data
-	var customData = {};
-
-	//Value
-	if (value > 0 || eventName === 'Purchase') {
-		customData.currency = "EUR";
-		customData.value = value;
+	/**
+	* Constructor
+	* @param {Wp_Sdtrk_Event} event The event
+	* @param {Wp_Sdtrk_Helper} helper The helper
+	*/
+	constructor(event, helper) {
+		this.localizedData = wp_sdtrk_fb;
+		this.event = event;
+		this.helper = helper;
+		this.s_enabled = false;
+		this.b_enabled = false;
+		this.pixelLoaded = false;
+		this.fbc = false;
+		this.fbp = false;
+		this.validate();
 	}
 
-	//Product
-	if (prodId !== "") {
-		customData.content_ids = '["' + prodId + '"]';
-		customData.content_type = "product";
-		customData.content_name = prodName;
-		customData.contents = '[{"id":"' + prodId + '","quantity":' + 1 + '}]';
-	}
-
-	//UTM
-	for (var k in wp_sdtrk_event.getUtm()) {
-		if (wp_sdtrk_event.getUtm()[k] !== "") {
-			customData[k] = wp_sdtrk_event.getUtm()[k];
-		}
-	}
-
-	//User-Data
-	var userData = {};
-	if (firstName !== "") {
-		userData.fn = firstName;
-	}
-	if (lastName !== "") {
-		userData.ln = lastName;
-	}
-	if (email !== "") {
-		userData.em = email;
-	}
-
-	//Save to global
-	fbEventData = {};
-	fbEventData.baseData = baseData;
-	fbEventData.customData = customData;
-	fbEventData.fbc = wp_sdtrk_getFbc();
-	fbEventData.fbp = wp_sdtrk_getFbp();
-	fbEventData.timeTrigger = timeTrigger;
-	fbEventData.scrollTrigger = scrollTrigger;
-	fbEventData.clickTrigger = clickTrigger;
-	fbEventData.userData = userData;
-}
-
-//Inits the tracker
-function wp_sdtrk_track_fb() {
-	if (fbEventData === false) {
-		return;
-	}
-	fbEventData.bc = wp_sdtrk_checkServiceConsent(wp_sdtrk_fb.c_fb_b_i, wp_sdtrk_fb.c_fb_b_s);
-	fbEventData.sc = wp_sdtrk_checkServiceConsent(wp_sdtrk_fb.c_fb_s_i, wp_sdtrk_fb.c_fb_s_s);
-
-	//Browser: If consent is given
-	if (fbEventData.bc !== false && wp_sdtrk_fb.fb_b_e !== "") {
-		wp_sdtrk_track_fb_b();
-	}
-	//Server: If consent is given
-	if (fbEventData.sc !== false && wp_sdtrk_fb.fb_s_e !== "") {
-		wp_sdtrk_track_fb_s();
-	}
-}
-
-//Fire FB Pixel on Server
-function wp_sdtrk_track_fb_s() {
-	var metaData = { fbp: fbEventData.fbp, fbc: fbEventData.fbc, event: wp_sdtrk_event, type: 'fb' };
-	wp_sdtrk_sendAjax(metaData);
-
-	//Time Trigger
-	if (fbEventData.timeTrigger.length > 0) {
-		wp_sdtrk_track_fb_s_timeTracker();
-	}
-
-	//Scroll-Trigger
-	if (fbEventData.scrollTrigger !== false) {
-		wp_sdtrk_track_fb_s_scrollTracker();
-	}
-
-	//Click-Trigger
-	if (fbEventData.clickTrigger !== false) {
-		wp_sdtrk_track_fb_s_clickTracker();
-	}
-}
-
-//Activate time-tracker for Server
-function wp_sdtrk_track_fb_s_timeTracker() {
-	if (fbEventData.timeTrigger.length < 1) {
-		return;
-	}
-	var metaData = { fbp: fbEventData.fbp, fbc: fbEventData.fbc, event: wp_sdtrk_event, type: 'fb-tt' };
-	var eventId = (fbEventData.baseData['eventId']) ? fbEventData.baseData['eventId'] : false;
-	if (eventId !== false) {
-		fbEventData.timeTrigger.forEach((triggerTime) => {
-			var time = parseInt(triggerTime);
-			if (!isNaN(time)) {
-				time = time * 1000;
-				jQuery(document).ready(function() {
-					setTimeout(function() {
-						var timeEventId = eventId + "-t" + triggerTime;
-						var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
-						metaData.timeEventId = timeEventId;
-						metaData.timeEventName = timeEventName;
-						wp_sdtrk_sendAjax(metaData);
-					}, time);
-				});
-			}
-
-		});
-	}
-}
-
-//Activate scroll-tracker for Server
-function wp_sdtrk_track_fb_s_scrollTracker() {
-	if (fbEventData.scrollTrigger === false || fbScrollTracked_s === true) {
-		return;
-	}
-	var metaData = { fbp: fbEventData.fbp, fbc: fbEventData.fbc, event: wp_sdtrk_event, type: 'fb-sd' };
-	var eventId = (fbEventData.baseData['eventId']) ? fbEventData.baseData['eventId'] : false;
-	if (eventId !== false) {
-		window.addEventListener('scroll', function() {
-			if (fbScrollTracked_s === true) {
-				return;
-			}
-			var st = jQuery(this).scrollTop();
-			var wh = jQuery(document).height() - jQuery(window).height();
-			var target = fbEventData.scrollTrigger;
-			var perc = Math.ceil((st * 100) / wh)
-
-			if (perc >= target) {
-				fbScrollTracked_s = true;
-				var scrollEventId = eventId + "-s" + fbEventData.scrollTrigger;
-				var scrollEventName = 'Scrolldepth-' + fbEventData.scrollTrigger + '-Percent';
-				metaData.scrollEventId = scrollEventId;
-				metaData.scrollEventName = scrollEventName;
-				wp_sdtrk_sendAjax(metaData);
-			}
-		});
-	}
-}
-
-//Activate click-tracker for Server
-function wp_sdtrk_track_fb_s_clickTracker() {
-	if (fbEventData.clickTrigger === false || wp_sdtrk_buttons.length < 1) {
-		return;
-	}
-	var metaData = { fbp: fbEventData.fbp, fbc: fbEventData.fbc, event: wp_sdtrk_event, type: 'fb-bc' };
-	var eventId = (fbEventData.baseData['eventId']) ? fbEventData.baseData['eventId'] : false;
-	if (eventId !== false) {
-		wp_sdtrk_buttons.forEach((el) => {
-			jQuery(el[0]).on('click', function() {
-				if (!fbClickedButtons_s.includes(el[1])) {
-					fbClickedButtons_s.push(el[1]);
-					var clickEventId = eventId + "-b" + el[1];
-					var clickEventName = 'ButtonClick';
-					metaData.clickEventId = clickEventId;
-					metaData.clickEventName = clickEventName;
-					metaData.clickEventTag = el[1];
-					wp_sdtrk_sendAjax(metaData);
-				}
-			});
-
-		});
-	}
-}
-
-//Fire FB Pixel in Browser
-function wp_sdtrk_track_fb_b() {
-	var baseData = fbEventData.baseData;
-	var customData = fbEventData.customData;
-	var cusD = wp_sdtrk_clone(customData);
-	var pixelId = (baseData['pixelId']) ? baseData['pixelId'] : false;
-	var eventId = (baseData['eventId']) ? baseData['eventId'] : false;
-	var eventName = (baseData['eventName']) ? baseData['eventName'] : false;
-
-	if (cusD.hasOwnProperty('value')) {
-		delete cusD['value'];
-		delete cusD['currency'];
-	}
-
-	if (pixelId !== false && eventId !== false) {
-		//Base Pixel
-		!function(f, b, e, v, n, t, s) {
-			if (f.fbq) return; n = f.fbq = function() {
-				n.callMethod ?
-					n.callMethod.apply(n, arguments) : n.queue.push(arguments)
-			};
-			if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
-			n.queue = []; t = b.createElement(e); t.async = !0;
-			t.src = v; s = b.getElementsByTagName(e)[0];
-			s.parentNode.insertBefore(t, s)
-		}(window, document, 'script',
-			'https://connect.facebook.net/en_US/fbevents.js');
-		fbq('init', pixelId, fbEventData.userData);
-		fbq('track', 'PageView', cusD, { eventID: eventId });
-
-		//Event Pixel
-		if (eventName !== false && eventName !== 'PageView') {
-			if (fbCustomEvent) {
-				fbq('trackCustom', eventName, customData, { eventID: eventId });
-			}
-			else {
-				fbq('trackSingle', pixelId, eventName, customData, { eventID: eventId });
-			}
-		}
-
-		//Time Trigger
-		if (fbEventData.timeTrigger.length > 0) {
-			wp_sdtrk_track_fb_b_timeTracker(pixelId, eventId, cusD);
-		}
-
-		//Scroll-Trigger
-		if (fbEventData.scrollTrigger !== false) {
-			wp_sdtrk_track_fb_b_scrollTracker(pixelId, eventId, cusD);
-		}
-
-		//Click-Trigger
-		if (fbEventData.clickTrigger !== false) {
-			wp_sdtrk_track_fb_b_clickTracker(pixelId, eventId, cusD);
-		}
-	}
-}
-
-//Activate time-tracker for Browser
-function wp_sdtrk_track_fb_b_timeTracker(pixelId, eventId, customData) {
-	if (pixelId === false || eventId === false || fbEventData.timeTrigger.length < 1 || !fbq) {
-		return;
-	}
-	fbEventData.timeTrigger.forEach((triggerTime) => {
-		var time = parseInt(triggerTime);
-		if (!isNaN(time)) {
-			time = time * 1000;
-			jQuery(document).ready(function() {
-				setTimeout(function() {
-					var timeEventId = eventId + "-t" + triggerTime;
-					var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
-					fbq('trackCustom', timeEventName, customData, { eventID: timeEventId });
-				}, time);
-			});
-		}
-
-	});
-}
-
-//Activate scroll-tracker for Browser
-function wp_sdtrk_track_fb_b_scrollTracker(pixelId, eventId, customData) {
-	if (pixelId === false || eventId === false || fbEventData.scrollTrigger === false || !fbq || fbScrollTracked_b === true) {
-		return;
-	}
-	window.addEventListener('scroll', function() {
-		if (fbScrollTracked_b === true) {
+	/**
+	* Validate if fb is enabled 0 = browser, 1 = server, 2 = both
+	 */
+	validate(target = 2) {
+		if (this.localizedData.fb_id === "" || !this.event) {
 			return;
 		}
-		var st = jQuery(this).scrollTop();
-		var wh = jQuery(document).height() - jQuery(window).height();
-		var target = fbEventData.scrollTrigger;
-		var perc = Math.ceil((st * 100) / wh)
-
-		if (perc >= target) {
-			fbScrollTracked_b = true;
-			var scrollEventId = eventId + "-s" + fbEventData.scrollTrigger;
-			var scrollEventName = 'Scrolldepth-' + fbEventData.scrollTrigger + '-Percent';
-			fbq('trackCustom', scrollEventName, customData, { eventID: scrollEventId });
+		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.c_fb_b_i, this.localizedData.c_fb_b_s, this.event) !== false && this.localizedData.fb_b_e !== "") {
+			this.b_enabled = true;
+			//load the base pixel
+			this.loadPixel();
 		}
-	});
-}
-
-//Activate click-tracker for Browser
-function wp_sdtrk_track_fb_b_clickTracker(pixelId, eventId, customData) {
-	if (pixelId === false || eventId === false || fbEventData.clickTrigger === false || !fbq || wp_sdtrk_buttons.length < 1) {
-		return;
+		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.c_fb_s_i, this.localizedData.c_fb_s_s, this.event) !== false && this.localizedData.fb_s_e !== "") {
+			this.s_enabled = true;
+		}
+		if (this.get_fbc()) {
+			this.fbc = this.get_fbc();
+		}
+		if (this.get_fbp()) {
+			this.fbp = this.get_fbp();
+		}
 	}
-	wp_sdtrk_buttons.forEach((el) => {
-		jQuery(el[0]).on('click', function() {
-			if (!fbClickedButtons_b.includes(el[1])) {
-				fbClickedButtons_b.push(el[1]);
-				var btnCustomData = wp_sdtrk_clone(customData);
-				var clickEventId = eventId + "-b" + el[1];
-				var clickEventName = 'ButtonClick';
-				btnCustomData.buttonTag = el[1];
-				fbq('trackCustom', clickEventName, btnCustomData, { eventID: clickEventId });
+
+	/**
+	* This method checks if the backload shall be done for given type
+	* @param {String} type The type which shall be checked
+	 */
+	isOngoingBackload(type) {
+		//init
+		var oldState = true;
+		var newState = false;
+
+		if (type === 'b') {
+			oldState = this.isPixelLoaded();
+			if (!oldState) {
+				this.validate(0);
+				newState = this.isPixelLoaded();
 			}
-		});
-
-	});
-}
-
-//Backload FB Pixel on Server
-function wp_sdtrk_backload_fb_s() {
-	//Dont fire if the consent was already given or the backload is called to 
-	if (fbEventData === false || fbEventData.sc !== false || wp_sdtrk_fb.fb_s_e === "" || !fbEventData_finishedLoading) {
-		return;
+		}
+		if (type === 's') {
+			oldState = this.isEnabled('s');
+			if (!oldState) {
+				this.validate(1);
+				newState = this.isEnabled('s');
+			}
+		}
+		return (oldState === false && newState === true);
 	}
-	//Save the given consent
-	fbEventData.sc = true
-	wp_sdtrk_track_fb_s();
-}
 
-//Backload FB Pixel in Browser
-function wp_sdtrk_backload_fb_b() {
-	//Dont fire if the consent was already given or the backload is called to 
-	if (fbEventData === false || fbEventData.bc !== false || wp_sdtrk_fb.fb_b_e === "" || !fbEventData_finishedLoading) {
-		return;
+	/**
+	* Check if enabled
+	* @param {String} type The type which shall be checked
+	* @return  {Boolean} If the given type is enabled
+	 */
+	isEnabled(type) {
+		switch (type) {
+			case 'b':
+				return this.b_enabled;
+			case 's':
+				return this.s_enabled;
+		}
+		return false;
 	}
-	//Save the given consent
-	fbEventData.bc = true
-	wp_sdtrk_track_fb_b();
-}
 
-//Converts an EventName to FB-EventName
-function wp_sdtrk_convertEventNameToFb(name) {
-	name = (!name || name === "") ? name : name.toLowerCase();
-	switch (name) {
-		case 'page_view':
-			return 'PageView';
-		case 'add_to_cart':
-			return 'AddToCart';
-		case 'purchase':
-			return 'Purchase';
-		case 'sign_up':
-			return 'CompleteRegistration';
-		case 'generate_lead':
-			return 'Lead';
-		case 'begin_checkout':
-			return 'InitiateCheckout';
-		case 'view_item':
-			return 'ViewContent';
-		default:
-			fbCustomEvent = true;
-			return name;
+	/**
+	* Check if pixel was loaded
+	* @return  {Boolean} If the base pixel was loaded
+	 */
+	isPixelLoaded() {
+		return this.pixelLoaded;
 	}
-}
 
-//Get fbp or calculate new fbp
-function wp_sdtrk_getFbp() {
-	var validDays = 90;
-	if (wp_sdtrk_getCookie('_fbp', false)) {
-		var value = wp_sdtrk_getCookie('_fbp', false);
-		wp_sdtrk_setCookie('_fbp', value, validDays, false);
-		return value;
+	/**
+	* Catch page hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchPageHit(target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Page', { state: true });
+			this.fireData('Event', { state: true });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Page', { state: true });
+			this.sendData('Event', { state: true });
+		}
 	}
-	var version = 'fb';
-	var subdomainIndex = '1';
-	var creationTime = + new Date();
-	var randomNo = parseInt(Math.random() * 10000000000);
-	var cValue = version + '.' + subdomainIndex + '.' + creationTime + '.' + randomNo;
-	wp_sdtrk_setCookie('_fbp', cValue, validDays, false);
-	return cValue;
-}
 
-//Get fbc or calculate new fbc
-function wp_sdtrk_getFbc() {
-	var validDays = 90;
-	if (wp_sdtrk_getParam("fbclid")) {
+	/**
+	* Catch scroll hit
+	* @param {String} percent The % of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchScrollHit(percent, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Scroll', { percent: percent });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Scroll', { percent: percent });
+		}
+	}
+
+	/**
+	* Catch time hit
+	* @param {String} time The time of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchTimeHit(time, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Time', { time: time });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Time', { time: time });
+		}
+	}
+
+	/**
+	* Catch click hit
+	* @param {String} tag The tag of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchClickHit(tag, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Click', { tag: tag });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Click', { tag: tag });
+		}
+	}
+
+	/**
+	* Catch visibility hit
+	* @param {String} tag The tag of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchVisibilityHit(tag, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Visibility', { tag: tag });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Visibility', { tag: tag });
+		}
+	}
+
+	/**
+	* Load the base pixel
+	 */
+	loadPixel() {
+		if (this.isEnabled('b') && !this.pixelLoaded) {
+			//Base Pixel
+			!function(f, b, e, v, n, t, s) {
+				if (f.fbq) return; n = f.fbq = function() {
+					n.callMethod ?
+						n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+				};
+				if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+				n.queue = []; t = b.createElement(e); t.async = !0;
+				t.src = v; s = b.getElementsByTagName(e)[0];
+				s.parentNode.insertBefore(t, s)
+			}(window, document, 'script',
+				'https://connect.facebook.net/en_US/fbevents.js');
+			fbq('init', this.localizedData.fb_id, this.get_data_user());
+			this.pixelLoaded = true;
+		}
+	}
+
+	/**
+	* Fire data in browser
+	* @param {String} handler The handler of event
+	* @param {Object} data Additional data to send
+	 */
+	fireData(handler, data) {
+		if (this.isEnabled('b') && this.pixelLoaded) {
+			//Fire the desired event
+			switch (handler) {
+				case 'Page':
+					fbq('track', 'PageView', this.get_data_custom(['value', 'currency']), { eventID: this.event.grabOrderId() });
+					break;
+				case 'Event':
+					if (this.convert_eventname(this.event.grabEventName()) !== 'PageView' && this.event.grabEventName() !== false) {
+						if (this.convert_eventname(this.event.grabEventName()) === false) {
+							fbq('trackCustom', this.event.grabEventName(), this.get_data_custom(), { eventID: this.event.grabOrderId() });
+						}
+						else {
+							fbq('trackSingle', this.localizedData.fb_id, this.convert_eventname(this.event.grabEventName()), this.get_data_custom(), { eventID: this.event.grabOrderId() });
+						}
+					}
+					break;
+				case 'Time':
+					fbq('trackCustom', 'Watchtime-' + data.time + '-Seconds', this.get_data_custom(), { eventID: this.event.grabOrderId() + "-t" + data.time });
+					break;
+				case 'Scroll':
+					fbq('trackCustom', 'Scrolldepth-' + data.percent + '-Percent', this.get_data_custom(), { eventID: this.event.grabOrderId() + "-s" + data.percent });
+					break;
+				case 'Click':
+					fbq('trackCustom', 'ButtonClick', this.get_data_custom([], { buttonTag: data.tag }), { eventID: this.event.grabOrderId() + "-b" + data.tag });
+					break;
+				case 'Visibility':
+					fbq('trackCustom', 'ItemVisit', this.get_data_custom([], { itemTag: data.tag }), { eventID: this.event.grabOrderId() + "-v" + data.tag });
+					break;
+			}
+		}
+	}
+
+	/**
+	* Send data to server
+	* @param {String} handler The handler of event
+	* @param {Object} data The data to send
+	 */
+	sendData(handler, data) {
+		if (this.isEnabled('s')) {
+			//add fbc and fbp
+			if (this.fbc !== false) {
+				data.fbc = this.fbc;
+			}
+			if (this.fbp !== false) {
+				data.fbp = this.fbp;
+			}
+			this.helper.send_ajax({ event: this.event, type: 'fb', handler: handler, data: data });
+		}
+	}
+
+	/**
+	* Get custom data
+	* @return  {Array} The custom object
+	 */
+	get_data_custom(fieldsToKill = [], fieldsToAppend = {}) {
+		//Collect the Custom-Data
+		var customData = {};
+		//Value
+		if (this.event.grabValue() > 0 || this.convert_eventname(this.event.grabEventName()) === 'Purchase') {
+			customData.currency = "EUR";
+			customData.value = this.event.grabValue();
+		}
+		//Product
+		if (this.event.grabProdId() !== "") {
+			customData.content_ids = '["' + this.event.grabProdId() + '"]';
+			customData.content_type = "product";
+			customData.content_name = this.event.grabProdName();
+			customData.contents = '[{"id":"' + this.event.grabProdId() + '","quantity":' + 1 + '}]';
+		}
+		//UTM
+		for (var k in this.event.getUtm()) {
+			var value = this.event.getUtm()[k];
+			if (value !== "") {
+				customData[k] = value;
+			}
+		}
+
+		//if given, remove unwanted fields
+		for (var i = 0; i < fieldsToKill.length; i++) {
+			var fieldName = fieldsToKill[i];
+			if (customData.hasOwnProperty(fieldName)) {
+				delete customData[fieldName];
+			}
+		}
+
+		//if given, add some fields
+		for (const [key, value] of Object.entries(fieldsToAppend)) {
+			customData[key] = value;
+		}
+
+		return customData;
+	}
+
+	/**
+	* Get user data
+	* @return  {Array} The user object
+	 */
+	get_data_user() {
+		var userData = {};
+		if (this.event.getUserFirstName() !== "") {
+			userData.fn = this.event.getUserFirstName();
+		}
+		if (this.event.getUserLastName() !== "") {
+			userData.ln = this.event.getUserLastName();
+		}
+		if (this.event.getUserEmail() !== "") {
+			userData.em = this.event.getUserEmail();
+		}
+		return userData;
+	}
+
+	/**
+	* Converts an EventName to FB-EventName
+	* @param {String} name The given event-name
+	 */
+	convert_eventname(name) {
+		name = (!name || name === "") ? name : name.toLowerCase();
+		switch (name) {
+			case 'page_view':
+				return 'PageView';
+			case 'add_to_cart':
+				return 'AddToCart';
+			case 'purchase':
+				return 'Purchase';
+			case 'sign_up':
+				return 'CompleteRegistration';
+			case 'generate_lead':
+				return 'Lead';
+			case 'begin_checkout':
+				return 'InitiateCheckout';
+			case 'view_item':
+				return 'ViewContent';
+			default:
+				return false;
+		}
+	}
+
+	/**
+	* Get fbp or calculate new fbp
+	* @return  {String} The fbp value
+	 */
+	get_fbp() {
+		var validDays = 90;
+		if (this.helper.get_Cookie('_fbp', false)) {
+			var value = this.helper.get_Cookie('_fbp', false);
+			this.helper.save_cookie('_fbp', value, validDays, false);
+			return value;
+		}
 		var version = 'fb';
 		var subdomainIndex = '1';
 		var creationTime = + new Date();
-		var clid = wp_sdtrk_getParam("fbclid");
-		var cValue = version + '.' + subdomainIndex + '.' + creationTime + '.' + clid;
-		wp_sdtrk_setCookie('_fbc', cValue, validDays, false);
+		var randomNo = parseInt(Math.random() * 10000000000);
+		var cValue = version + '.' + subdomainIndex + '.' + creationTime + '.' + randomNo;
+		this.helper.save_cookie('_fbp', cValue, validDays, false);
 		return cValue;
 	}
-	else if (wp_sdtrk_getCookie('_fbc', false)) {
-		var value = wp_sdtrk_getCookie('_fbc', false);
-		wp_sdtrk_setCookie('_fbc', value, validDays, false);
-		return value;
+
+	/**
+	* Get fbc or calculate new fbc
+	* @return  {String} The fbc value
+	 */
+	get_fbc() {
+		var validDays = 90;
+		if (this.helper.get_Param("fbclid")) {
+			var version = 'fb';
+			var subdomainIndex = '1';
+			var creationTime = + new Date();
+			var clid = this.helper.get_Param("fbclid");
+			var cValue = version + '.' + subdomainIndex + '.' + creationTime + '.' + clid;
+			this.helper.save_cookie('_fbc', cValue, validDays, false);
+			return cValue;
+		}
+		else if (this.helper.get_Cookie('_fbc', false)) {
+			var value = this.helper.get_Cookie('_fbc', false);
+			this.helper.save_cookie('_fbc', value, validDays, false);
+			return value;
+		}
+		return ""
 	}
-	return ""
+}
+
+/**
+* Backload the Browser
+**/
+function wp_sdtrk_backload_fb_b() {
+	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
+		var catcher_fb = window.wp_sdtrk_engine_class.get_catcher_fb();
+		if (catcher_fb.isOngoingBackload('b')) {
+			console.log("browser");
+			for (const h of window.wp_sdtrk_history) {
+				data = h.split("_");
+				switch (data[0]) {
+					case 'Page':
+						catcher_fb.catchPageHit(0);
+						break;
+					case 'Time':
+						catcher_fb.catchTimeHit(data[1], 0);
+						break;
+					case 'Scroll':
+						catcher_fb.catchScrollHit(data[1], 0);
+						break;
+					case 'Click':
+						catcher_fb.catchClickHit(data[1], 0);
+						break;
+					case 'Visited':
+						catcher_fb.catchVisibilityHit(data[1], 0);
+						break;
+				}
+			}
+		}
+	}
+}
+
+/**
+* Backload the Server
+**/
+function wp_sdtrk_backload_fb_s() {
+	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
+		var catcher_fb = window.wp_sdtrk_engine_class.get_catcher_fb();
+		if (catcher_fb.isOngoingBackload('s')) {
+			console.log("server");
+			for (const h of window.wp_sdtrk_history) {
+				data = h.split("_");
+				switch (data[0]) {
+					case 'Page':
+						catcher_fb.catchPageHit(1);
+						break;
+					case 'Time':
+						catcher_fb.catchTimeHit(data[1], 1);
+						break;
+					case 'Scroll':
+						catcher_fb.catchScrollHit(data[1], 1);
+						break;
+					case 'Click':
+						catcher_fb.catchClickHit(data[1], 1);
+						break;
+					case 'Visited':
+						catcher_fb.catchVisibilityHit(data[1], 1);
+						break;
+				}
+			}
+		}
+	}
 }
