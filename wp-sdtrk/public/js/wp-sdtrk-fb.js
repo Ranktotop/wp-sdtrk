@@ -376,7 +376,6 @@ function wp_sdtrk_backload_fb_b() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_fb = window.wp_sdtrk_engine_class.get_catcher_fb();
 		if (catcher_fb.isOngoingBackload('b')) {
-			console.log("browser");
 			for (const h of window.wp_sdtrk_history) {
 				data = h.split("_");
 				switch (data[0]) {
@@ -408,7 +407,6 @@ function wp_sdtrk_backload_fb_s() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_fb = window.wp_sdtrk_engine_class.get_catcher_fb();
 		if (catcher_fb.isOngoingBackload('s')) {
-			console.log("server");
 			for (const h of window.wp_sdtrk_history) {
 				data = h.split("_");
 				switch (data[0]) {

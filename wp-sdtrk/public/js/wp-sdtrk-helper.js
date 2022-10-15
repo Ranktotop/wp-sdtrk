@@ -3,9 +3,11 @@ class Wp_Sdtrk_Helper {
 	/**
 	* Constructor
 	* @param {Array} localizedData The localized engine data
+	* @param {Array} data The decrypted GET-Data
 	*/
-	constructor(localizedData) {
+	constructor(localizedData,data) {
 		this.localizedData = localizedData;
+		this.data = data;
 	}
 
 	/**

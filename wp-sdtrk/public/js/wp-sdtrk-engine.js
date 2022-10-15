@@ -13,7 +13,7 @@ class Wp_Sdtrk_Engine {
 		this.data = decryptedData;
 		this.event = new Wp_Sdtrk_Event();
 		this.localizedData = wp_sdtrk_engine; //comes from wp
-		this.helper = new Wp_Sdtrk_Helper(this.localizedData);
+		this.helper = new Wp_Sdtrk_Helper(this.localizedData,this.data);
 		this.clickBtns = [];
 
 		//this has to be global
@@ -38,6 +38,7 @@ class Wp_Sdtrk_Engine {
 		//intantiate catcher
 		this.catcher_local = new Wp_Sdtrk_Catcher_Local(this.event, this.helper);
 		this.catcher_fb = new Wp_Sdtrk_Catcher_Fb(this.event, this.helper);
+		this.catcher_ga = new Wp_Sdtrk_Catcher_Ga(this.event, this.helper);
 
 		//this has to be global
 		window.wp_sdtrk_scrollDepths = this.event.getScrollTrigger()
@@ -65,6 +66,14 @@ class Wp_Sdtrk_Engine {
 	 */
 	get_catcher_fb() {
 		return this.catcher_fb;
+	}
+	
+	/**
+	* Get the ga catcher
+	* @return  {Wp_Sdtrk_Catcher_Ga} The catcher-object
+	 */
+	get_catcher_ga() {
+		return this.catcher_ga;
 	}
 
 	/**
@@ -132,9 +141,9 @@ class Wp_Sdtrk_Engine {
 		this.event.setEventSourceAdress(this.localizedData.addr); //the ip
 		this.event.setEventSourceAgent(this.localizedData.agent);
 		this.event.setEventSourceReferer(this.localizedData.referer); //the referrer	
-		this.event.setEventPath(document.location.pathname + document.location.search); //the referrer
-		this.event.setEventDomain(window.location.host); //the referrer
-		this.event.setEventUrl(window.location.href); //the referrer	
+		this.event.setEventPath(document.location.pathname + document.location.search); //the page path
+		this.event.setEventDomain(window.location.host); //the domain
+		this.event.setEventUrl(window.location.href); //the url	
 		this.event.setUserFirstName(this.helper.get_Params(['buyer_first_name', 'first_name', 'firstname', 'vorname', 'license_data_first_name']));
 		this.event.setUserLastName(this.helper.get_Params(['buyer_last_name', 'last_name', 'lastname', 'nachname', 'license_data_last_name']));
 		this.event.setUserEmail(this.helper.get_Params(['buyer_email', 'email', 'license_data_email']));
@@ -172,10 +181,12 @@ class Wp_Sdtrk_Engine {
 		//init
 		var catcher_local = new Wp_Sdtrk_Catcher_Local(this.event, this.helper);
 		var catcher_fb = this.catcher_fb;
+		var catcher_ga = this.catcher_ga;
 
 		//catchPageHit()
 		catcher_local.catchPageHit();
 		catcher_fb.catchPageHit(2);
+		catcher_ga.catchPageHit(2);
 		window.wp_sdtrk_history.push('Page_0');
 
 		//catchTimeHit(time)
@@ -188,6 +199,7 @@ class Wp_Sdtrk_Engine {
 						setTimeout(function() {
 							catcher_local.catchTimeHit(triggerTime);
 							catcher_fb.catchTimeHit(triggerTime, 2);
+							catcher_ga.catchTimeHit(triggerTime, 2);
 							window.wp_sdtrk_history.push('Time_' + triggerTime.toString());
 						}, time);
 					});
@@ -204,6 +216,7 @@ class Wp_Sdtrk_Engine {
 						window.wp_sdtrk_clickedBtns.push(el[1]);
 						catcher_local.catchClickHit(el[1]);
 						catcher_fb.catchClickHit(el[1], 2);
+						catcher_ga.catchClickHit(el[1], 2);
 						window.wp_sdtrk_history.push('Click_' + el[1]);
 					}
 				});
@@ -223,6 +236,7 @@ class Wp_Sdtrk_Engine {
 								window.wp_sdtrk_catchedScrolls.push(depth);
 								catcher_local.catchScrollHit(depth);
 								catcher_fb.catchScrollHit(depth, 2);
+								catcher_ga.catchScrollHit(depth, 2);
 								window.wp_sdtrk_history.push('Scroll_' + depth.toString());
 							}
 						}
@@ -243,6 +257,7 @@ class Wp_Sdtrk_Engine {
 						window.wp_sdtrk_visitedItems.push(el[1]);
 						catcher_local.catchVisibilityHit(el[1]);
 						catcher_fb.catchVisibilityHit(el[1], 2);
+						catcher_ga.catchVisibilityHit(el[1], 2);
 						window.wp_sdtrk_history.push('Visited_' + el[1]);
 					}
 				});

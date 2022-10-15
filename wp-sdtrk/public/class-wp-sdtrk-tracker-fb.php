@@ -226,7 +226,7 @@ class Wp_Sdtrk_Tracker_Fb
         $requestData['event_name'] = $event->getVisibilityTriggerData()['name'];
         $requestData["user_data"] = $this->getData_user($event, $data);
         $requestData['custom_data'] = $this->getData_custom($event);
-        $requestData['custom_data']['itemTag'] = $data['tag'];
+        $requestData['custom_data']['itemTag'] = $event->getVisibilityTriggerData()['tag'];
         $response = $this->payLoadServerRequest($requestData);
     }    
 

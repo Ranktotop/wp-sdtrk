@@ -1,216 +1,182 @@
-var gaEventData = false;
-var gaEventData_finishedLoading = false;
-var gaScrollTracked_b = false;
-var gaScrollTracked_s = false;
-var gaClickedButtons_b = [];
-var gaClickedButtons_s = [];
-var gaLoaded = false;
-var gaInitialized = false;
+class Wp_Sdtrk_Catcher_Ga {
 
-function wp_sdtrk_runGA() {
-	jQuery(document).ready(function() {
-		wp_sdtrk_collectGAData();
-		wp_sdtrk_track_ga();
-		gaEventData_finishedLoading = true;
-	});
-}
-
-/**
-* Collects all available data for GA
- */
-function wp_sdtrk_collectGAData() {
-	if (wp_sdtrk_ga.ga_id === "" || !wp_sdtrk_event) {
-		return;
-	}
-	//Initialize	
-	var prodId = wp_sdtrk_event.grabProdId();
-	var eventName = wp_sdtrk_event.grabEventName();
-	var value = wp_sdtrk_event.grabValue();
-	var eventData = {};
-	//var post_type = "page"; //product was sent only if value or purchase was sent, else page was sent. Testing this combination
-
-	//Value
-	if (value > 0 || eventName == 'purchase') {
-		//Transaction id was here and value/currency was ever sent before and ga4 worked. Testing this combination
-		eventData['value'] = value;
-		eventData['currency'] = "EUR";
+	/**
+	* Constructor
+	* @param {Wp_Sdtrk_Event} event The event
+	* @param {Wp_Sdtrk_Helper} helper The helper
+	*/
+	constructor(event, helper) {
+		this.localizedData = wp_sdtrk_ga;
+		this.event = event;
+		this.helper = helper;
+		this.s_enabled = false;
+		this.b_enabled = false;
+		this.pixelLoaded = false;
+		this.cid = false;
+		this.gclid = false;
+		this.validate();
 	}
 
-	//Items
-	if (prodId !== "") {
-		eventData['items'] = [{
-			'id': prodId,
-			'name': wp_sdtrk_event.grabProdName(),
-			//'category': "SomeCategory",			
-			'quantity': 1,
-			'price': value,
-			'brand': wp_sdtrk_event.getBrandName(),
-		}]
-	}
-	//Meta-Data
-	eventData['transaction_id'] = wp_sdtrk_event.grabOrderId();
-	eventData['non_interaction'] = true;
-	eventData['page_title'] = wp_sdtrk_event.getPageName();
-	eventData['post_type'] = "product";
-	eventData['post_id'] = wp_sdtrk_event.getPageId();
-	eventData['plugin'] = "Wp-Sdtrk";
-	eventData['event_url'] = wp_sdtrk_event.getEventSource();
-	eventData['user_role'] = "guest";
+	/**
+	* Validate if fb is enabled 0 = browser, 1 = server, 2 = both
+	 */
+	validate(target = 2) {
+		if (this.localizedData.ga_id === "" || !this.event) {
+			return;
+		}
+		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.c_ga_b_i, this.localizedData.c_ga_b_s, this.event) !== false && this.localizedData.ga_b_e !== "") {
+			this.b_enabled = true;
+			//load the base pixel
+			this.loadPixel();
+		}
+		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.c_ga_s_i, this.localizedData.c_ga_s_s, this.event) !== false && this.localizedData.ga_s_e !== "") {
+			this.s_enabled = true;
+		}
 
-	//UTM
-	for (var k in wp_sdtrk_event.getUtm()) {
-		if (wp_sdtrk_event.getUtm()[k] !== "") {
-			eventData[k] = wp_sdtrk_event.getUtm()[k];
+		if (this.get_Cid()) {
+			this.cid = this.get_Cid();
+		}
+		if (this.get_Gclid()) {
+			this.gclid = this.get_Gclid();
 		}
 	}
-	eventData['event_time'] = wp_sdtrk_event.getEventTimeHour();
-	eventData['event_day'] = wp_sdtrk_event.getEventTimeDay();
-	eventData['event_month'] = wp_sdtrk_event.getEventTimeMonth();
-	eventData['landing_page'] = wp_sdtrk_event.getLandingPage();
 
-	eventData['send_to'] = wp_sdtrk_ga.ga_id;
+	/**
+	* This method checks if the backload shall be done for given type
+	* @param {String} type The type which shall be checked
+	 */
+	isOngoingBackload(type) {
+		//init
+		var oldState = true;
+		var newState = false;
 
-	//Save to global
-	gaEventData = {};
-	gaEventData.eventData = eventData;
-	gaEventData.eventName = eventName;
-	gaEventData.timeTrigger = wp_sdtrk_event.getTimeTrigger();
-	gaEventData.scrollTrigger = wp_sdtrk_event.getScrollTrigger();
-	gaEventData.clickTrigger = wp_sdtrk_event.getClickTrigger();
-}
-
-//Inits the tracker
-function wp_sdtrk_track_ga() {
-	if (gaEventData === false) {
-		return;
-	}
-	gaEventData.bc = wp_sdtrk_checkServiceConsent(wp_sdtrk_ga.c_ga_b_i, wp_sdtrk_ga.c_ga_b_s);
-	gaEventData.sc = wp_sdtrk_checkServiceConsent(wp_sdtrk_ga.c_ga_s_i, wp_sdtrk_ga.c_ga_s_s);
-	//console.log(gaEventData);
-
-	//Browser: If consent is given
-	if (gaEventData.bc !== false && wp_sdtrk_ga.ga_b_e !== "") {
-		wp_sdtrk_track_ga_b();
-	}
-	//Server: If consent is given
-	if (gaEventData.sc !== false && wp_sdtrk_ga.ga_s_e !== "") {
-		wp_sdtrk_track_ga_s();
-	}
-}
-
-//Fire Google on Server
-function wp_sdtrk_track_ga_s() {
-	var metaData = { cid: wp_sdtrk_getCid(), event: wp_sdtrk_event, type: 'ga' };
-	wp_sdtrk_sendAjax(metaData);
-
-	//Time Trigger
-	if (gaEventData.timeTrigger.length > 0) {
-		wp_sdtrk_track_ga_s_timeTracker();
-	}
-
-	//Scroll-Trigger
-	if (gaEventData.scrollTrigger !== false) {
-		wp_sdtrk_track_ga_s_scrollTracker();
-	}
-
-	//Click-Trigger
-	if (gaEventData.clickTrigger !== false) {
-		wp_sdtrk_track_ga_s_clickTracker();
-	}
-}
-
-//Activate time-tracker for Server
-function wp_sdtrk_track_ga_s_timeTracker() {
-	if (gaEventData.timeTrigger.length < 1) {
-		return;
-	}
-	var metaData = { cid: wp_sdtrk_getCid(), event: wp_sdtrk_event, type: 'ga-tt' };
-	var eventId = (gaEventData.eventData['transaction_id']) ? gaEventData.eventData['transaction_id'] : false;
-	if (eventId !== false) {
-		gaEventData.timeTrigger.forEach((triggerTime) => {
-			var time = parseInt(triggerTime);
-			if (!isNaN(time)) {
-				time = time * 1000;
-				jQuery(document).ready(function() {
-					setTimeout(function() {
-						var timeEventId = eventId + "-t" + triggerTime;
-						var timeEventName = 'Watchtime_' + triggerTime.toString() + '_Seconds';
-						metaData.timeEventId = timeEventId;
-						metaData.timeEventName = timeEventName;
-						wp_sdtrk_sendAjax(metaData);
-					}, time);
-				});
+		if (type === 'b') {
+			oldState = this.isPixelLoaded();
+			if (!oldState) {
+				this.validate(0);
+				newState = this.isPixelLoaded();
 			}
-
-		});
-	}
-}
-
-//Activate scroll-tracker for Server
-function wp_sdtrk_track_ga_s_scrollTracker() {
-	if (gaEventData.scrollTrigger === false || gaScrollTracked_s === true) {
-		return;
-	}
-	var metaData = { cid: wp_sdtrk_getCid(), event: wp_sdtrk_event, type: 'ga-sd' };
-	var eventId = (gaEventData.eventData['transaction_id']) ? gaEventData.eventData['transaction_id'] : false;
-	if (eventId !== false) {
-		window.addEventListener('scroll', function() {
-			if (gaScrollTracked_s === true) {
-				return;
+		}
+		if (type === 's') {
+			oldState = this.isEnabled('s');
+			if (!oldState) {
+				this.validate(1);
+				newState = this.isEnabled('s');
 			}
-			var st = jQuery(this).scrollTop();
-			var wh = jQuery(document).height() - jQuery(window).height();
-			var target = gaEventData.scrollTrigger;
-			var perc = Math.ceil((st * 100) / wh)
-
-			if (perc >= target) {
-				gaScrollTracked_s = true;
-				var scrollEventId = eventId + "-s" + gaEventData.scrollTrigger;
-				var scrollEventName = 'Scrolldepth_' + gaEventData.scrollTrigger + '_Percent';
-				metaData.scrollEventId = scrollEventId;
-				metaData.scrollEventName = scrollEventName;
-				wp_sdtrk_sendAjax(metaData);
-			}
-		});
+		}
+		return (oldState === false && newState === true);
 	}
-}
 
-//Activate click-tracker for Server
-function wp_sdtrk_track_ga_s_clickTracker() {
-	if (gaEventData.clickTrigger === false || wp_sdtrk_buttons.length < 1) {
-		return;
+	/**
+	* Check if enabled
+	* @param {String} type The type which shall be checked
+	* @return  {Boolean} If the given type is enabled
+	 */
+	isEnabled(type) {
+		switch (type) {
+			case 'b':
+				return this.b_enabled;
+			case 's':
+				return this.s_enabled;
+		}
+		return false;
 	}
-	var metaData = { cid: wp_sdtrk_getCid(), event: wp_sdtrk_event, type: 'ga-bc' };
-	var eventId = (gaEventData.eventData['transaction_id']) ? gaEventData.eventData['transaction_id'] : false;
-	if (eventId !== false) {
-		wp_sdtrk_buttons.forEach((el) => {
-			jQuery(el[0]).on('click', function() {
-				if (!gaClickedButtons_s.includes(el[1])) {
-					gaClickedButtons_s.push(el[1]);
-					var clickEventId = eventId + "-b" + el[1];
-					var clickEventName = 'ButtonClick';
-					metaData.clickEventId = clickEventId;
-					metaData.clickEventName = clickEventName;
-					metaData.clickEventTag = el[1];
-					wp_sdtrk_sendAjax(metaData);
-				}
-			});
 
-		});
+	/**
+	* Check if pixel was loaded
+	* @return  {Boolean} If the base pixel was loaded
+	 */
+	isPixelLoaded() {
+		return this.pixelLoaded;
 	}
-}
 
-//Initialize Base-Tag
-function wp_sdtrk_initialize_ga() {
-	if (!gaInitialized) {
-		if (!gaLoaded) {
+	/**
+	* Catch page hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchPageHit(target = 2) {
+		if (target === 0 || target === 2) {
+			//Pageview is fired on pixel-init automatically
+			this.fireData('Event', { state: true });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Page', { state: true });
+			this.sendData('Event', { state: true });
+		}
+	}
+
+	/**
+	* Catch scroll hit
+	* @param {String} percent The % of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchScrollHit(percent, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Scroll', { percent: percent });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Scroll', { percent: percent });
+		}
+	}
+
+	/**
+	* Catch time hit
+	* @param {String} time The time of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchTimeHit(time, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Time', { time: time });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Time', { time: time });
+		}
+	}
+
+	/**
+	* Catch click hit
+	* @param {String} tag The tag of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchClickHit(tag, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Click', { tag: tag });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Click', { tag: tag });
+		}
+	}
+
+	/**
+	* Catch visibility hit
+	* @param {String} tag The tag of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchVisibilityHit(tag, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Visibility', { tag: tag });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Visibility', { tag: tag });
+		}
+	}
+
+	/**
+	* Load the base pixel - This fires a pageview hit automatically
+	 */
+	loadPixel() {
+		if (this.isEnabled('b') && !this.pixelLoaded) {
+			//Save campaign data
+			this.set_storedCampaign();
+
+			//Base Pixel
 			(function(window, document, src) {
 				var a = document.createElement('script'),
 					m = document.getElementsByTagName('script')[0];
 				a.async = 1;
 				a.src = src;
 				m.parentNode.insertBefore(a, m);
-			})(window, document, '//www.googletagmanager.com/gtag/js?id=' + wp_sdtrk_ga.ga_id);
+			})(window, document, '//www.googletagmanager.com/gtag/js?id=' + this.localizedData.ga_id);
 
 			window.dataLayer = window.dataLayer || [];
 			window.gtag = window.gtag || function gtag() {
@@ -218,24 +184,30 @@ function wp_sdtrk_initialize_ga() {
 			};
 
 			//The config object for campaigns
-			var campaignData = wp_sdtrk_getStoredCampaignData();
-			if (campaignData) {
-				//gtag('set', campaignData) Testing other way, see below
-			}
+			//var campaignData = this.get_storedCampaign();
+			//if (campaignData) {
+			//gtag('set', campaignData) Testing other way, see below
+			//}
 
 			//init
 			gtag('js', new Date());
-			gaLoaded = true;
+			gtag('config', this.localizedData.ga_id, this.get_config());
+			this.pixelLoaded = true;
 		}
+	}
 
+	/**
+	* Get custom dimensions for GA
+	* @return  {Object} The dimensions-object
+	*/
+	get_dimensions() {
+		var isEcom = false;
 		// configure custom dimensions
 		var cd = {
 			'dimension1': 'event_hour',
 			'dimension2': 'event_day',
 			'dimension3': 'event_month'
 		};
-
-		var isEcom = false;
 		// configure Dynamic Remarketing CDs
 		if (isEcom) {
 			cd.dimension4 = 'ecomm_prodid';
@@ -247,14 +219,21 @@ function wp_sdtrk_initialize_ga() {
 			cd.dimension5 = 'dynx_pagetype';
 			cd.dimension6 = 'dynx_totalvalue';
 		}
+		return cd;
+	}
 
+	/**
+	* Get config for gtag
+	* @return  {Object} The config-object
+	*/
+	get_config() {
 		var config = {
 			'link_attribution': false,
 			'anonymize_ip': true,
-			'custom_map': cd,
-			'debug_mode': wp_sdtrk_ga.ga_debug === "1"
+			'custom_map': this.get_dimensions(),
+			'debug_mode': this.localizedData.ga_debug === "1"
 		};
-		var campaignData = wp_sdtrk_getStoredCampaignData(); // try to restore lost campaign-data		
+		var campaignData = this.get_storedCampaign(); // try to restore lost campaign-data		
 		if (campaignData) {
 			if (typeof campaignData.referrer !== 'undefined') {
 				config['page_referrer'] = campaignData.referrer
@@ -265,210 +244,274 @@ function wp_sdtrk_initialize_ga() {
 			if (typeof campaignData.page !== 'undefined') {
 				config['page_path'] = campaignData.page
 			}
-
 		}
-
-		gtag('config', wp_sdtrk_ga.ga_id, config);
-
-		gaInitialized = true;
+		return config;
 	}
 
-}
-
-//Fire Analytics in Browser
-function wp_sdtrk_track_ga_b() {
-	//Load Google Analytics, if its not already loaded
-	wp_sdtrk_save_ga_CampaignData();
-	wp_sdtrk_initialize_ga();
-
-	var name = gaEventData.eventName;
-	if (name && name !== "" && name !== 'page_view') {
-		gtag("event", name, gaEventData.eventData);
-	}
-
-	//Time Trigger
-	if (gaEventData.timeTrigger.length > 0) {
-		wp_sdtrk_track_ga_b_timeTracker();
-	}
-
-	//Scroll-Trigger
-	if (gaEventData.scrollTrigger !== false) {
-		wp_sdtrk_track_ga_b_scrollTracker();
-	}
-
-	//Click-Trigger
-	if (gaEventData.clickTrigger !== false) {
-		wp_sdtrk_track_ga_b_clickTracker();
-	}
-}
-
-//Activate time-tracker for Browser
-function wp_sdtrk_track_ga_b_timeTracker() {
-	if (!gaInitialized || gaEventData.timeTrigger.length < 1) {
-		return;
-	}
-	gaEventData.timeTrigger.forEach((triggerTime) => {
-		var time = parseInt(triggerTime);
-		if (!isNaN(time)) {
-			time = time * 1000;
-			jQuery(document).ready(function() {
-				setTimeout(function() {
-					var timeEventName = 'Watchtime_' + triggerTime.toString() + '_Seconds';
-					gtag("event", timeEventName, gaEventData.eventData);
-				}, time);
-			});
-		}
-
-	});
-}
-
-//Activate scroll-tracker for Browser
-function wp_sdtrk_track_ga_b_scrollTracker() {
-	if (gaEventData.scrollTrigger === false || !gaInitialized || gaScrollTracked_b === true) {
-		return;
-	}
-	window.addEventListener('scroll', function() {
-		if (gaScrollTracked_b === true) {
-			return;
-		}
-		var st = jQuery(this).scrollTop();
-		var wh = jQuery(document).height() - jQuery(window).height();
-		var target = gaEventData.scrollTrigger;
-		var perc = Math.ceil((st * 100) / wh)
-
-		if (perc >= target) {
-			gaScrollTracked_b = true;
-			var scrollEventName = 'Scrolldepth_' + gaEventData.scrollTrigger + '_Percent';
-			gtag("event", scrollEventName, gaEventData.eventData);
-		}
-	});
-}
-
-//Activate click-tracker for Browser
-function wp_sdtrk_track_ga_b_clickTracker() {
-	if (gaEventData.clickTrigger === false || !gaInitialized || wp_sdtrk_buttons.length < 1) {
-		return;
-	}
-	wp_sdtrk_buttons.forEach((el) => {
-		jQuery(el[0]).on('click', function() {
-			if (!gaClickedButtons_b.includes(el[1])) {
-				gaClickedButtons_b.push(el[1]);
-				var btnCustomData = wp_sdtrk_clone(gaEventData.eventData);
-				var clickEventName = 'ButtonClick';
-				btnCustomData.buttonTag = el[1];
-				gtag("event", clickEventName, btnCustomData);
+	/**
+	* Fire data in browser
+	* @param {String} handler The handler of event
+	* @param {Object} data Additional data to send
+	 */
+	fireData(handler, data) {
+		if (this.isEnabled('b') && this.pixelLoaded) {
+			//Fire the desired event
+			switch (handler) {
+				case 'Event':
+					if (this.event.grabEventName() !== 'page_view' && this.event.grabEventName() !== false) {
+						gtag("event", this.event.grabEventName(), this.get_data_custom());
+					}
+					break;
+				case 'Time':
+					gtag("event", 'Watchtime-' + data.time + '-Seconds', this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-t" + data.time }));
+					break;
+				case 'Scroll':
+					gtag("event", 'Scrolldepth-' + data.percent + '-Percent', this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-s" + data.percent }));
+					break;
+				case 'Click':
+					gtag("event", 'ButtonClick', this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-b" + data.tag, buttonTag: data.tag }));
+					break;
+				case 'Visibility':
+					gtag("event", 'ItemVisit', this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-v" + data.tag, itemTag: data.tag }));
+					break;
 			}
-		});
-
-	});
-}
-
-//Backload Analytics on Server
-function wp_sdtrk_backload_ga_s() {
-	//Dont fire if the consent was already given or the backload is called to 
-	if (gaEventData === false || gaEventData.sc !== false || wp_sdtrk_ga.ga_s_e === "" || !gaEventData_finishedLoading) {
-		return;
-	}
-	//Save the given consent
-	gaEventData.sc = true
-	wp_sdtrk_track_ga_s();
-}
-
-//Backload Analytics in Browser
-function wp_sdtrk_backload_ga_b() {
-	//Dont fire if the consent was already given or the backload is called to 
-	if (gaEventData === false || gaEventData.bc !== false || wp_sdtrk_ga.ga_b_e === "" || !gaEventData_finishedLoading) {
-		return;
-	}
-	//Save the given consent
-	gaEventData.bc = true
-	wp_sdtrk_track_ga_b();
-}
-
-//For testing only
-function randomInteger(min, max) {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-//Get cid or calculate new cid
-function wp_sdtrk_getCid() {
-	var validDays = 90;
-	var value = wp_sdtrk_getCookie('_ga', false);
-	if (value) {
-		//return saved client id
-		var value = wp_sdtrk_getCookie('_ga', false);
-		const regex = /[0-9]+\.[0-9]+$/gm;
-		var userid = value.match(regex);
-		if(Array.isArray(userid)){
-			userid = userid[0];
 		}
-		wp_sdtrk_setCookie('_ga', value, validDays, false);
-		return userid;
 	}
-	else {
-		//generate new client id
-		var version = 'GA1';
-		var subdomainIndex = '1';
-		var creationTime = + new Date();
-		var randomNo = parseInt(Math.random() * 10000000000);
-		var cValue = version + '.' + subdomainIndex + '.' + creationTime + '.' + randomNo;		
-		//var identifier = randomInteger(100000000, 999999999).toString() +'.'+ randomInteger(1000000000, 9999999999).toString()
-		//var userid = 'GA1.1.' + identifier;
-		wp_sdtrk_setCookie('_ga', cValue, validDays, false);
-		return creationTime + '.' + randomNo;
-	}
-}
 
-//Get gclid from param or cookies
-function wp_sdtrk_getGclid() {
-	var validDays = 90;
-	if (wp_sdtrk_getParam("gclid")) {
-		var clid = wp_sdtrk_getParam("gclid");
-		wp_sdtrk_setCookie('_gc', clid, validDays, false);
-		return clid;
-	}
-	else if (wp_sdtrk_getCookie('_gc', false)) {
-		var value = wp_sdtrk_getCookie('_gc', false);
-		wp_sdtrk_setCookie('_gc', value, validDays, false);
-		return value;
-	}
-	return ""
-}
-
-//Check for stored campaign-data and load them
-function wp_sdtrk_getStoredCampaignData() {
-	var ref = wp_sdtrk_getCookie('_rd', true);
-	var cd = wp_sdtrk_getCookie('_cd', true);
-	if (ref || cd) {
-		//The config object for campaigns
-		var campaignData = {};
-		if (ref) {
-			campaignData['referrer'] = ref;
-			//Delete Referrer
-			wp_sdtrk_setCookie('_rd', '', 0, true);
+	/**
+	* Send data to server
+	* @param {String} handler The handler of event
+	* @param {Object} data The data to send
+	 */
+	sendData(handler, data) {
+		if (this.isEnabled('s')) {
+			//add client id and click id
+			if (this.cid !== false) {
+				data.cid = this.cid;
+			}
+			if (this.gclid !== false) {
+				data.gclid = this.gclid;
+			}
+			this.helper.send_ajax({ event: this.event, type: 'ga', handler: handler, data: data });
 		}
-		if (cd) {
-			campaignData['location'] = cd;
-		}
-		campaignData['page'] = wp_sdtrk_event.getEventPath();
-		return campaignData;
 	}
-	return false;
-}
 
-//Save campaign-data if one of the required params are given
-function wp_sdtrk_save_ga_CampaignData() {
-	var paramsToFind = ['gclid']; // 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id', 'gclid'
-	for (var param of paramsToFind) {
-		var value = wp_sdtrk_getParam(param);
+	/**
+	* Get custom data
+	* @return  {Array} The custom object
+	 */
+	get_data_custom(fieldsToKill = [], fieldsToAppend = {}) {
+		//Collect the Custom-Data
+		var customData = {};
+
+		//Value
+		if (this.event.grabValue() > 0 || this.event.grabEventName() === 'purchase') {
+			//Transaction id was here and value/currency was ever sent before and ga4 worked. Testing this combination
+			customData['value'] = this.event.grabValue();
+			customData['currency'] = "EUR";
+		}
+		//Product
+		if (this.event.grabProdId() !== "") {
+			customData['items'] = [{
+				'id': this.event.grabProdId(),
+				'name': this.event.grabProdName(),
+				//'category': "SomeCategory",			
+				'quantity': 1,
+				'price': this.event.grabValue(),
+				'brand': this.event.getBrandName(),
+			}]
+		}
+		//UTM
+		for (var k in this.event.getUtm()) {
+			var value = this.event.getUtm()[k];
+			if (value !== "") {
+				customData[k] = value;
+			}
+		}
+		//Transaction and source
+		customData['transaction_id'] = this.event.grabOrderId();
+		customData['non_interaction'] = true;
+		customData['page_title'] = this.event.getPageName();
+		customData['post_type'] = "product";
+		customData['post_id'] = this.event.getPageId();
+		customData['plugin'] = "Wp-Sdtrk";
+		customData['event_url'] = this.event.getEventSource();
+		customData['user_role'] = "guest";
+		customData['event_time'] = this.event.getEventTimeHour();
+		customData['event_day'] = this.event.getEventTimeDay();
+		customData['event_month'] = this.event.getEventTimeMonth();
+		customData['landing_page'] = this.event.getLandingPage();
+		customData['send_to'] = this.localizedData.ga_id;
+
+		//if given, remove unwanted fields
+		for (var i = 0; i < fieldsToKill.length; i++) {
+			var fieldName = fieldsToKill[i];
+			if (customData.hasOwnProperty(fieldName)) {
+				delete customData[fieldName];
+			}
+		}
+
+		//if given, add some fields
+		for (const [key, value] of Object.entries(fieldsToAppend)) {
+			customData[key] = value;
+		}
+
+		return customData;
+	}
+
+	/**
+	* Save campaign-data if one of the required params are given
+	 */
+	set_storedCampaign() {
+		var paramsToFind = ['gclid']; // 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id', 'gclid'
+		for (var param of paramsToFind) {
+			var value = this.helper.get_Param(param);
+			if (value) {
+				this.helper.save_cookie('_cd', this.event.getEventUrl(), 14, true);
+			}
+			break;
+		}
+		// Save referrer if it does not contain current hostname
+		var referrerHost = this.event.getEventSourceReferer();
+		if (referrerHost.indexOf(this.event.getEventDomain()) === -1 && referrerHost !== '') {
+			this.helper.save_cookie('_rd', referrerHost, 14, true);
+		}
+	}
+
+	/**
+	* Get campaign-data if available
+	* @return  {Array} The campaign-data
+	 */
+	get_storedCampaign() {
+		var ref = this.helper.get_Cookie('_rd', true);
+		var cd = this.helper.get_Cookie('_cd', true);
+		if (ref || cd) {
+			//The config object for campaigns
+			var campaignData = {};
+			if (ref) {
+				campaignData['referrer'] = ref;
+				//Delete Referrer
+				this.helper.save_cookie('_rd', '', 0, true);
+			}
+			if (cd) {
+				campaignData['location'] = cd;
+			}
+			campaignData['page'] = this.event.getEventPath();
+			return campaignData;
+		}
+		return false;
+	}
+
+	/**
+	* Get saved client-id or create a new one
+	* @return  {String} The client-user-id
+	 */
+	get_Cid() {
+		var validDays = 90;
+		var value = this.helper.get_Cookie('_ga', false);
 		if (value) {
-			wp_sdtrk_setCookie('_cd', wp_sdtrk_event.getEventUrl(), 14, true);
+			//return saved client id
+			var value = this.helper.get_Cookie('_ga', false);
+			const regex = /[0-9]+\.[0-9]+$/gm;
+			var userid = value.match(regex);
+			if (Array.isArray(userid)) {
+				userid = userid[0];
+			}
+			this.helper.save_cookie('_ga', value, validDays, false);
+			return userid;
 		}
-		break;
+		else {
+			//generate new client id
+			var version = 'GA1';
+			var subdomainIndex = '1';
+			var creationTime = + new Date();
+			var randomNo = parseInt(Math.random() * 10000000000);
+			var cValue = version + '.' + subdomainIndex + '.' + creationTime + '.' + randomNo;
+			//var identifier = randomInteger(100000000, 999999999).toString() +'.'+ randomInteger(1000000000, 9999999999).toString()
+			//var userid = 'GA1.1.' + identifier;
+			this.helper.save_cookie('_ga', cValue, validDays, false);
+			return creationTime + '.' + randomNo;
+		}
 	}
-	// Save referrer if it does not contain current hostname
-	var referrerHost = wp_sdtrk.referer;
-	if (referrerHost.indexOf(wp_sdtrk_event.getEventDomain()) === -1 && referrerHost !== '') {
-		wp_sdtrk_setCookie('_rd', wp_sdtrk.referer, 14, true);
+
+	/**
+	* Get saved click-id if available
+	* @return  {String} The click id (gclid)
+	 */
+	get_Gclid() {
+		var validDays = 90;
+		if (this.helper.get_Param("gclid")) {
+			var clid = this.helper.get_Param("gclid");
+			this.helper.save_cookie('_gc', clid, validDays, false);
+			return clid;
+		}
+		else if (this.helper.get_Cookie('_gc', false)) {
+			var value = this.helper.get_Cookie('_gc', false);
+			this.helper.save_cookie('_gc', value, validDays, false);
+			return value;
+		}
+		return ""
+	}
+}
+
+/**
+* Backload the Browser
+**/
+function wp_sdtrk_backload_ga_b() {
+	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
+		var catcher_ga = window.wp_sdtrk_engine_class.get_catcher_ga();
+		if (catcher_ga.isOngoingBackload('b')) {
+			for (const h of window.wp_sdtrk_history) {
+				data = h.split("_");
+				switch (data[0]) {
+					case 'Page':
+						catcher_ga.catchPageHit(0);
+						break;
+					case 'Time':
+						catcher_ga.catchTimeHit(data[1], 0);
+						break;
+					case 'Scroll':
+						catcher_ga.catchScrollHit(data[1], 0);
+						break;
+					case 'Click':
+						catcher_ga.catchClickHit(data[1], 0);
+						break;
+					case 'Visited':
+						catcher_ga.catchVisibilityHit(data[1], 0);
+						break;
+				}
+			}
+		}
+	}
+}
+
+/**
+* Backload the Server
+**/
+function wp_sdtrk_backload_ga_s() {
+	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
+		var catcher_ga = window.wp_sdtrk_engine_class.get_catcher_ga();
+		if (catcher_ga.isOngoingBackload('s')) {
+			for (const h of window.wp_sdtrk_history) {
+				data = h.split("_");
+				switch (data[0]) {
+					case 'Page':
+						catcher_ga.catchPageHit(1);
+						break;
+					case 'Time':
+						catcher_ga.catchTimeHit(data[1], 1);
+						break;
+					case 'Scroll':
+						catcher_ga.catchScrollHit(data[1], 1);
+						break;
+					case 'Click':
+						catcher_ga.catchClickHit(data[1], 1);
+						break;
+					case 'Visited':
+						catcher_ga.catchVisibilityHit(data[1], 1);
+						break;
+				}
+			}
+		}
 	}
 }
