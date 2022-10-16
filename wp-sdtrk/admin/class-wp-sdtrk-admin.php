@@ -235,7 +235,6 @@ class Wp_Sdtrk_Admin
         if($syncCsvHourly){
             $csvFrequency = 'hourly';
             $timestamp = time()+ $time*60*60;   
-            Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($timestamp);
         }
         else{
             $csvFrequency = 'daily';
@@ -1116,9 +1115,9 @@ class Wp_Sdtrk_Admin
                             'id' => 'tt_trk_browser_cookie_service',
                             'type' => 'radio',
                             'dependency' => array(
-                                'tt_trk_browser',
-                                '!=',
-                                'false'
+                                'tt_trk_browser|tt_pixelid',
+                                '!=|!=',
+                                'false|'
                             ),
                             'title' => __('Choose cookie consent behavior', 'wp-sdtrk'),
                             'options' => $cookieOptions,
@@ -1129,9 +1128,9 @@ class Wp_Sdtrk_Admin
                             'id' => 'tt_trk_browser_cookie_id',
                             'type' => 'text',
                             'dependency' => array(
-                                'tt_trk_browser_cookie_service_borlabs|tt_trk_browser',
-                                '==|!=',
-                                'true|false'
+                                'tt_trk_browser_cookie_service_borlabs|tt_trk_browser|tt_pixelid',
+                                '==|!=|!=',
+                                'true|false|'
                             ),
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
@@ -1163,9 +1162,9 @@ class Wp_Sdtrk_Admin
                             'id' => 'tt_trk_server_token',
                             'type' => 'text',
                             'dependency' => array(
-                                'tt_trk_server',
-                                '==',
-                                'true'
+                                'tt_trk_server|tt_pixelid',
+                                '==|!=',
+                                'true|'
                             ),
                             'title' => __('Conversion-API Token', 'wp-sdtrk'),
                             'description' => __('You can get the token within the TikTok events-manager', 'wp-sdtrk')
@@ -1174,9 +1173,9 @@ class Wp_Sdtrk_Admin
                             'id' => 'tt_trk_server_cookie_service',
                             'type' => 'radio',
                             'dependency' => array(
-                                'tt_trk_server',
-                                '!=',
-                                'false'
+                                'tt_trk_server|tt_pixelid',
+                                '!=|!=',
+                                'false|'
                             ),
                             'title' => __('Choose cookie consent behavior', 'wp-sdtrk'),
                             'options' => $cookieOptions,
@@ -1187,9 +1186,9 @@ class Wp_Sdtrk_Admin
                             'id' => 'tt_trk_server_cookie_id',
                             'type' => 'text',
                             'dependency' => array(
-                                'tt_trk_server_cookie_service_borlabs|tt_trk_server',
-                                '==|!=',
-                                'true|false'
+                                'tt_trk_server_cookie_service_borlabs|tt_trk_server|tt_pixelid',
+                                '==|!=|!=',
+                                'true|false|'
                             ),
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
@@ -1199,9 +1198,9 @@ class Wp_Sdtrk_Admin
                             'id' => 'tt_trk_server_debug',
                             'type' => 'switcher',
                             'dependency' => array(
-                                'tt_trk_server',
-                                '==',
-                                'true'
+                                'tt_trk_server|tt_pixelid',
+                                '==|!=',
+                                'true|'
                             ),
                             'title' => __('Activate Debugging', 'wp-sdtrk'),
                             'description' => __('Check to activate CAPI debugging', 'wp-sdtrk'),
@@ -1211,9 +1210,9 @@ class Wp_Sdtrk_Admin
                             'id' => 'tt_trk_server_debug_code',
                             'type' => 'text',
                             'dependency' => array(
-                                'tt_trk_server|tt_trk_server_debug',
-                                '==|==',
-                                'true|true'
+                                'tt_trk_server|tt_trk_server_debug|tt_pixelid',
+                                '==|==|!=',
+                                'true|true|'
                             ),
                             'title' => __('Test-Code', 'wp-sdtrk'),
                             'description' => __('You can get the Test-Code within the TikTok events-manager', 'wp-sdtrk')

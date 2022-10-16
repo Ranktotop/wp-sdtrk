@@ -1,441 +1,462 @@
-var ttEventData = false;
-var ttEventData_finishedLoading = false;
-var ttCustomEvent = false;
-var ttScrollTracked_b = false;
-var ttScrollTracked_s = false;
-var ttClickedButtons_b = [];
-var ttClickedButtons_s = [];
+class Wp_Sdtrk_Catcher_Tt {
 
-function wp_sdtrk_runTT() {
-	jQuery(document).ready(function() {
-		wp_sdtrk_collectTTData();
-		wp_sdtrk_track_tt();
-		ttEventData_finishedLoading = true;
-	});
+	/**
+	* Constructor
+	* @param {Wp_Sdtrk_Event} event The event
+	* @param {Wp_Sdtrk_Helper} helper The helper
+	*/
+	constructor(event, helper) {
+		this.localizedData = wp_sdtrk_tt;
+		this.event = event;
+		this.helper = helper;
+		this.s_enabled = false;
+		this.b_enabled = false;
+		this.pixelLoaded = false;
+		this.ttc = false;
+		this.ttp = false;
+		this.validate();
+	}
+
+	/**
+	* Validate if tt is enabled 0 = browser, 1 = server, 2 = both
+	 */
+	validate(target = 2) {
+		if (this.localizedData.tt_id === "" || !this.event) {
+			return;
+		}
+		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.c_tt_b_i, this.localizedData.c_tt_b_s, this.event) !== false && this.localizedData.tt_b_e !== "") {
+			this.b_enabled = true;
+			//load the base pixel
+			this.loadPixel();
+		}
+		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.c_tt_s_i, this.localizedData.c_tt_s_s, this.event) !== false && this.localizedData.tt_s_e !== "") {
+			this.s_enabled = true;
+		}
+		if (this.get_Ttc()) {
+			this.ttc = this.get_Ttc();
+		}
+		if (this.get_Ttp()) {
+			this.ttp = this.get_Ttp();
+		}
+	}
+
+	/**
+	* This method checks if the backload shall be done for given type
+	* @param {String} type The type which shall be checked
+	 */
+	isOngoingBackload(type) {
+		//init
+		var oldState = true;
+		var newState = false;
+
+		if (type === 'b') {
+			oldState = this.isPixelLoaded();
+			if (!oldState) {
+				this.validate(0);
+				newState = this.isPixelLoaded();
+			}
+		}
+		if (type === 's') {
+			oldState = this.isEnabled('s');
+			if (!oldState) {
+				this.validate(1);
+				newState = this.isEnabled('s');
+			}
+		}
+		return (oldState === false && newState === true);
+	}
+
+	/**
+	* Check if enabled
+	* @param {String} type The type which shall be checked
+	* @return  {Boolean} If the given type is enabled
+	 */
+	isEnabled(type) {
+		switch (type) {
+			case 'b':
+				return this.b_enabled;
+			case 's':
+				return this.s_enabled;
+		}
+		return false;
+	}
+
+	/**
+	* Check if pixel was loaded
+	* @return  {Boolean} If the base pixel was loaded
+	 */
+	isPixelLoaded() {
+		return this.pixelLoaded;
+	}
+
+	/**
+	* Catch page hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchPageHit(target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Page', { state: true });
+			this.fireData('Event', { state: true });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Page', { state: true });
+			this.sendData('Event', { state: true });
+		}
+	}
+
+	/**
+	* Catch scroll hit
+	* @param {String} percent The % of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchScrollHit(percent, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Scroll', { percent: percent });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Scroll', { percent: percent });
+		}
+	}
+
+	/**
+	* Catch time hit
+	* @param {String} time The time of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchTimeHit(time, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Time', { time: time });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Time', { time: time });
+		}
+	}
+
+	/**
+	* Catch click hit
+	* @param {String} tag The tag of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchClickHit(tag, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Click', { tag: tag });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Click', { tag: tag });
+		}
+	}
+
+	/**
+	* Catch visibility hit
+	* @param {String} tag The tag of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchVisibilityHit(tag, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Visibility', { tag: tag });
+		}
+		if (target === 1 || target === 2) {
+			this.sendData('Visibility', { tag: tag });
+		}
+	}
+
+	/**
+	* Load the base pixel
+	 */
+	loadPixel() {
+		if (this.isEnabled('b') && !this.pixelLoaded) {
+			//Base Pixel
+			! function(w, d, t,pixelid) {
+				w.TiktokAnalyticsObject = t;
+				var ttq = w[t] = w[t] || [];
+				ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie"], ttq.setAndDefer = function(t, e) {
+					t[e] = function() {
+						t.push([e].concat(Array.prototype.slice.call(arguments, 0)))
+					}
+				};
+				for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
+				ttq.instance = function(t) {
+					for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++) ttq.setAndDefer(e, ttq.methods[n]);
+					return e
+				}, ttq.load = function(e, n) {
+					var i = "https://analytics.tiktok.com/i18n/pixel/events.js";
+					ttq._i = ttq._i || {}, ttq._i[e] = [], ttq._i[e]._u = i, ttq._t = ttq._t || {}, ttq._t[e] = +new Date, ttq._o = ttq._o || {}, ttq._o[e] = n || {};
+					var o = document.createElement("script");
+					o.type = "text/javascript", o.async = !0, o.src = i + "?sdkid=" + e + "&lib=" + t;
+					var a = document.getElementsByTagName("script")[0];
+					a.parentNode.insertBefore(o, a)
+				};
+
+				ttq.load(pixelid);
+			}(window, document, 'ttq',this.localizedData.tt_id);
+
+			//Identify
+			ttq.identify(this.get_data_user());
+			this.pixelLoaded = true;
+		}
+	}
+
+	/**
+	* Fire data in browser
+	* @param {String} handler The handler of event
+	* @param {Object} data Additional data to send
+	 */
+	fireData(handler, data) {
+		if (this.isEnabled('b') && this.pixelLoaded) {
+			//Fire the desired event
+			switch (handler) {
+				case 'Page':
+					//The Page View Note: This Event is neither shown in PixelHelper nor in Events Test Webkit
+					ttq.page();
+					break;
+				case 'Event':
+					if (this.convert_eventname(this.event.grabEventName()) !== 'PageView' && this.event.grabEventName() !== false) {
+						ttq.track(this.convert_eventname(this.event.grabEventName()), this.get_data_custom(), { event_id: this.event.grabOrderId() + "_" + this.get_hashId() });
+					}
+					break;
+				case 'Time':
+					ttq.track('Watchtime-' + data.time + '-Seconds', this.get_data_custom(['value', 'currency'], {}), { event_id: this.event.grabOrderId() + "-t" + data.time + "_" + this.get_hashId() })
+					break;
+				case 'Scroll':
+					ttq.track('Scrolldepth-' + data.percent + '-Percent', this.get_data_custom(['value', 'currency'], {}), { event_id: this.event.grabOrderId() + "-s" + data.percent + "_" + this.get_hashId() })
+					break;
+				case 'Click':
+					ttq.track('ButtonClick', this.get_data_custom(['value', 'currency'], { buttonTag: data.tag }), { event_id: this.event.grabOrderId() + "-b" + data.tag + "_" + this.get_hashId() })
+					break;
+				case 'Visibility':
+					ttq.track('ItemVisit', this.get_data_custom(['value', 'currency'], { itemTag: data.tag }), { event_id: this.event.grabOrderId() + "-v" + data.tag + "_" + this.get_hashId() })
+					break;
+			}
+		}
+	}
+
+	/**
+	* Send data to server
+	* @param {String} handler The handler of event
+	* @param {Object} data The data to send
+	 */
+	sendData(handler, data) {
+		if (this.isEnabled('s')) {
+			//add ttc and ttp
+			if (this.ttc !== false) {
+				data.ttc = this.ttc;
+			}
+			if (this.ttp !== false) {
+				data.ttp = this.ttp;
+			}
+			//add hash
+			data.hash = this.get_hashId();
+			this.helper.send_ajax({ event: this.event, type: 'tt', handler: handler, data: data });
+		}
+	}
+
+	/**
+	* Get custom data
+	* @return  {Array} The custom object
+	 */
+	get_data_custom(fieldsToKill = [], fieldsToAppend = {}) {
+		//Collect the Custom-Data
+		var customData = {};
+		//Value
+		if (this.event.grabValue() > 0 || this.convert_eventname(this.event.grabEventName()) === 'PlaceAnOrder') {
+			customData.currency = "EUR";
+			customData.value = this.event.grabValue();
+		}
+		//Product
+		if (this.event.grabProdId() !== "") {
+			customData.content_id = this.event.grabProdId();
+			customData.content_type = "product";
+			customData.content_name = this.event.grabProdName();
+			customData.quantity = 1;
+		}
+		//Needed for preventing pixel-helper errors with empty contents
+		else {
+			customData.content_id = this.event.getPageId();
+			customData.content_name = this.event.getPageName();
+			customData.content_type = "product";
+			customData.quantity = 1;
+		}
+
+		//if given, remove unwanted fields
+		for (var i = 0; i < fieldsToKill.length; i++) {
+			var fieldName = fieldsToKill[i];
+			if (customData.hasOwnProperty(fieldName)) {
+				delete customData[fieldName];
+			}
+		}
+
+		//if given, add some fields
+		for (const [key, value] of Object.entries(fieldsToAppend)) {
+			customData[key] = value;
+		}
+
+		return customData;
+	}
+
+	/**
+	* Get user data
+	* @return  {Array} The user object
+	 */
+	get_data_user() {
+		var userData = {};
+		if (this.get_hashId() !== "") {
+			userData.external_id = this.get_hashId();
+		}
+		if (this.event.getUserEmail() !== "") {
+			userData.email = email;
+		}
+		return userData;
+	}
+
+	/**
+	* Converts an EventName to TT-EventName
+	* @param {String} name The given event-name
+	 */
+	convert_eventname(name) {
+		name = (!name || name === "") ? name : name.toLowerCase();
+		switch (name) {
+			case 'page_view':
+				return 'ViewContent';
+			case 'add_to_cart':
+				return 'AddToCart';
+			case 'purchase':
+				return 'PlaceAnOrder';
+			case 'sign_up':
+				return 'CompleteRegistration';
+			case 'generate_lead':
+				return 'SubmitForm';
+			case 'begin_checkout':
+				return 'InitiateCheckout';
+			case 'view_item':
+				return 'ViewContent';
+			default:
+				return false;
+		}
+	}
+
+	/**
+	* Get hash from cookie or create a new one
+	* @return  {Boolean} If the given type is enabled
+	*/
+	get_hashId() {
+		var validDays = 90;
+		if (this.helper.get_Cookie('_tthash', false)) {
+			var value = this.helper.get_Cookie('_tthash', false);
+			this.helper.save_cookie('_tthash', value, validDays, false);
+			return value;
+		}
+		else {
+			var sag = this.event.getEventSourceAgent();
+			var sad = this.event.getEventSourceAdress();
+			var key = sag.toLowerCase() + sad.toLowerCase();
+			var regex = /[\W_]+/g;
+			key = key.replace(regex, "")
+			var hash = 0;
+			if (key.length == 0) return hash;
+			for (var i = 0; i < key.length; i++) {
+				var char = key.charCodeAt(i);
+				hash = ((hash << 5) - hash) + char;
+				hash = hash & hash; // Convert to 32bit integer
+			}
+			if (hash < 0) {
+				hash = hash * -1;
+			}
+			this.helper.save_cookie('_tthash', hash, validDays, false);
+			return hash;
+		}
+	}
+
+	/**
+	* Get Click-ID if available
+	* @return  {String} The Click-ID (ttclid)
+	*/
+	get_Ttc() {
+		var validDays = 7;
+		if (this.helper.get_Param("ttclid")) {
+			var clid = this.helper.get_Param("ttclid");
+			this.helper.save_cookie('_ttc', clid, validDays, false);
+			return clid;
+		}
+		else if (this.helper.get_Cookie('_ttc', false)) {
+			var value = this.helper.get_Cookie('_ttc', false);
+			this.helper.save_cookie('_ttc', value, validDays, false);
+			return value;
+		}
+		return ""
+	}
+
+	/**
+	* Get Client user id if available
+	* @return  {String} The Click-ID (ttp)
+	*/
+	get_Ttp() {
+		var validDays = 90;
+		if (this.helper.get_Cookie('_ttp', false)) {
+			var value = this.helper.get_Cookie('_ttp', false);
+			this.helper.save_cookie('_ttp', value, validDays, false);
+			return value;
+		}
+	}
 }
 
 /**
-* Collects all available data for FB
- */
-function wp_sdtrk_collectTTData() {
-	if (wp_sdtrk_tt.tt_id === "" || !wp_sdtrk_event) {
-		return;
-	}
-	//Initialize	
-	var prodId = wp_sdtrk_event.grabProdId();
-	var eventName = wp_sdtrk_convertEventNameToTt(wp_sdtrk_event.grabEventName());
-	var value = wp_sdtrk_event.grabValue();
-	var email = wp_sdtrk_event.getUserEmail();
-	var hash = wp_sdtrk_hashId();
-
-	// Collect the Base-Data
-	var baseData = {
-		pixelId: wp_sdtrk_tt.tt_id,
-		event: eventName,
-		event_id: wp_sdtrk_event.grabOrderId() + "_" + wp_sdtrk_hashId()
-	};
-
-	//Collect the Custom-Data
-	var customData = {
-	};
-
-	//Value
-	if (value > 0 || eventName === 'PlaceAnOrder') {
-		customData.currency = "EUR";
-		customData.value = value;
-		//customData.price = value;
-	}
-
-	//Product
-	if (prodId !== "") {
-		customData.content_id = prodId;
-		customData.content_name = wp_sdtrk_event.grabProdName();
-		customData.content_type = "product";
-		customData.quantity = 1;
-	}
-	//Needed for preventing pixel-helper errors with empty contents
-	else {
-		customData.content_id = wp_sdtrk_event.getPageId();
-		customData.content_name = wp_sdtrk_event.getPageName();
-		customData.content_type = "product";
-		customData.quantity = 1;
-	}
-
-	//User-Data
-	var userData = {};
-	if (email !== "") {
-		userData.email = email;
-	}
-	if (hash !== "") {
-		userData.external_id = hash;
-	}
-
-	//Save to global
-	ttEventData = {};
-	ttEventData.baseData = baseData;
-	ttEventData.customData = customData;
-	ttEventData.ttc = wp_sdtrk_getTtc();
-	ttEventData.timeTrigger = wp_sdtrk_event.getTimeTrigger();
-	ttEventData.scrollTrigger = wp_sdtrk_event.getScrollTrigger();
-	ttEventData.clickTrigger = wp_sdtrk_event.getClickTrigger();
-	ttEventData.userData = userData;
-	ttEventData.hash = hash;	
-}
-
-//Inits the tracker
-function wp_sdtrk_track_tt() {
-	if (ttEventData === false) {
-		return;
-	}
-	ttEventData.bc = wp_sdtrk_checkServiceConsent(wp_sdtrk_tt.c_tt_b_i, wp_sdtrk_tt.c_tt_b_s);
-	ttEventData.sc = wp_sdtrk_checkServiceConsent(wp_sdtrk_tt.c_tt_s_i, wp_sdtrk_tt.c_tt_s_s);
-	//console.log(ttEventData);
-
-	//Browser: If consent is given
-	if (ttEventData.bc !== false && wp_sdtrk_tt.tt_b_e !== "") {
-		wp_sdtrk_track_tt_b();
-	}
-	//Server: If consent is given
-	if (ttEventData.sc !== false && wp_sdtrk_tt.tt_s_e !== "") {
-		wp_sdtrk_track_tt_s();
-	}
-}
-
-//Fire FB Pixel on Server
-function wp_sdtrk_track_tt_s() {
-	var metaData = { hashId: ttEventData.hash, ttc: ttEventData.ttc, event: wp_sdtrk_event, type: 'tt' };
-	wp_sdtrk_sendAjax(metaData);
-
-	//Time Trigger
-	if (ttEventData.timeTrigger.length > 0) {
-		wp_sdtrk_track_tt_s_timeTracker();
-	}
-
-	//Scroll-Trigger
-	if (ttEventData.scrollTrigger !== false) {
-		wp_sdtrk_track_tt_s_scrollTracker();
-	}
-
-	//Click-Trigger
-	if (ttEventData.clickTrigger !== false) {
-		wp_sdtrk_track_tt_s_clickTracker();
-	}
-}
-
-//Activate time-tracker for Server
-function wp_sdtrk_track_tt_s_timeTracker() {
-	if (ttEventData.timeTrigger.length < 1) {
-		return;
-	}
-	var metaData = { hashId: ttEventData.hash, ttc: ttEventData.ttc, event: wp_sdtrk_event, type: 'tt-tt' };
-	var eventId = (ttEventData.baseData['event_id']) ? ttEventData.baseData['event_id'] : false;
-	if (eventId !== false) {
-		ttEventData.timeTrigger.forEach((triggerTime) => {
-			var time = parseInt(triggerTime);
-			if (!isNaN(time)) {
-				time = time * 1000;
-				jQuery(document).ready(function() {
-					setTimeout(function() {
-						cleanEventId = eventId.replace("_" + wp_sdtrk_hashId(), "");
-						var timeEventId = cleanEventId + "-t" + triggerTime + "_" + wp_sdtrk_hashId();
-						var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
-						metaData.timeEventId = timeEventId;
-						metaData.timeEventName = timeEventName;
-						wp_sdtrk_sendAjax(metaData);
-					}, time);
-				});
-			}
-
-		});
-	}
-}
-
-//Activate scroll-tracker for Server
-function wp_sdtrk_track_tt_s_scrollTracker() {
-	if (ttEventData.scrollTrigger === false || ttScrollTracked_s === true) {
-		return;
-	}
-	var metaData = { hashId: ttEventData.hash, ttc: ttEventData.ttc, event: wp_sdtrk_event, type: 'tt-sd' };
-	var eventId = (ttEventData.baseData['event_id']) ? ttEventData.baseData['event_id'] : false;
-	if (eventId !== false) {
-		window.addEventListener('scroll', function() {
-			if (ttScrollTracked_s === true) {
-				return;
-			}
-			var st = jQuery(this).scrollTop();
-			var wh = jQuery(document).height() - jQuery(window).height();
-			var target = ttEventData.scrollTrigger;
-			var perc = Math.ceil((st * 100) / wh)
-
-			if (perc >= target) {
-				ttScrollTracked_s = true;
-				cleanEventId = eventId.replace("_" + wp_sdtrk_hashId(), "");
-				var scrollEventId = cleanEventId + "-s" + ttEventData.scrollTrigger + "_" + wp_sdtrk_hashId();
-				var scrollEventName = 'Scrolldepth-' + ttEventData.scrollTrigger + '-Percent';
-				metaData.scrollEventId = scrollEventId;
-				metaData.scrollEventName = scrollEventName;
-				wp_sdtrk_sendAjax(metaData);
-			}
-		});
-	}
-}
-
-//Activate click-tracker for Server
-function wp_sdtrk_track_tt_s_clickTracker() {
-	if (ttEventData.clickTrigger === false || wp_sdtrk_buttons.length < 1) {
-		return;
-	}
-	var metaData = { hashId: ttEventData.hash, ttc: ttEventData.ttc, event: wp_sdtrk_event, type: 'tt-bc' };
-	var eventId = (ttEventData.baseData['event_id']) ? ttEventData.baseData['event_id'] : false;
-	if (eventId !== false) {
-		wp_sdtrk_buttons.forEach((el) => {
-			jQuery(el[0]).on('click', function() {
-				if (!ttClickedButtons_s.includes(el[1])) {
-					ttClickedButtons_s.push(el[1]);
-					cleanEventId = eventId.replace("_" + wp_sdtrk_hashId(), "");
-					var clickEventId = cleanEventId + "-b" + el[1] + "_" + wp_sdtrk_hashId();
-					var clickEventName = 'ButtonClick';
-					metaData.clickEventId = clickEventId;
-					metaData.clickEventName = clickEventName;
-					metaData.clickEventTag = el[1];
-					wp_sdtrk_sendAjax(metaData);
-				}
-			});
-
-		});
-	}
-}
-
-//Fire TT Pixel in Browser
-function wp_sdtrk_track_tt_b() {
-	var baseData = ttEventData.baseData;
-	var customData = ttEventData.customData;
-	var cusD = wp_sdtrk_clone(customData);
-	var pixelId = (baseData['pixelId']) ? baseData['pixelId'] : false;
-	var eventId = (baseData['event_id']) ? baseData['event_id'] : false;
-	var eventName = (baseData['event']) ? baseData['event'] : false;
-	if (cusD.hasOwnProperty('value')) {
-		delete cusD['value'];
-		delete cusD['currency'];
-	}
-	if (pixelId !== false && eventId !== false) {
-
-		//Base Pixel
-		! function(w, d, t) {
-			w.TiktokAnalyticsObject = t;
-			var ttq = w[t] = w[t] || [];
-			ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie"], ttq.setAndDefer = function(t, e) {
-				t[e] = function() {
-					t.push([e].concat(Array.prototype.slice.call(arguments, 0)))
-				}
-			};
-			for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
-			ttq.instance = function(t) {
-				for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++) ttq.setAndDefer(e, ttq.methods[n]);
-				return e
-			}, ttq.load = function(e, n) {
-				var i = "https://analytics.tiktok.com/i18n/pixel/events.js";
-				ttq._i = ttq._i || {}, ttq._i[e] = [], ttq._i[e]._u = i, ttq._t = ttq._t || {}, ttq._t[e] = +new Date, ttq._o = ttq._o || {}, ttq._o[e] = n || {};
-				var o = document.createElement("script");
-				o.type = "text/javascript", o.async = !0, o.src = i + "?sdkid=" + e + "&lib=" + t;
-				var a = document.getElementsByTagName("script")[0];
-				a.parentNode.insertBefore(o, a)
-			};
-
-			ttq.load(pixelId);
-			//The Page View Note: This Event is neither shown in PixelHelper nor in Events Test Webkit
-			ttq.page();
-		}(window, document, 'ttq');
-
-		//Identify
-		ttq.identify(ttEventData.userData);
-
-		//Event Pixel
-		if (eventName !== false && eventName !== 'PageView') {
-			ttq.track(eventName, customData, {event_id: eventId });
-		}
-
-		//Time Trigger
-		if (ttEventData.timeTrigger.length > 0) {
-			wp_sdtrk_track_tt_b_timeTracker(pixelId, eventId, cusD);
-		}
-
-		//Scroll-Trigger
-		if (ttEventData.scrollTrigger !== false) {
-			wp_sdtrk_track_tt_b_scrollTracker(pixelId, eventId, cusD);
-		}
-
-		//Click-Trigger
-		if (ttEventData.clickTrigger !== false) {
-			wp_sdtrk_track_tt_b_clickTracker(pixelId, eventId, cusD);
-		}
-	}
-}
-
-//Activate time-tracker for Browser
-function wp_sdtrk_track_tt_b_timeTracker(pixelId, eventId, customData) {
-	if (pixelId === false || eventId === false || ttEventData.timeTrigger.length < 1 || !ttq) {
-		return;
-	}
-	ttEventData.timeTrigger.forEach((triggerTime) => {
-		var time = parseInt(triggerTime);
-		if (!isNaN(time)) {
-			time = time * 1000;
-			jQuery(document).ready(function() {
-				setTimeout(function() {
-					cleanEventId = eventId.replace("_" + wp_sdtrk_hashId(), "");
-					var timeEventId = cleanEventId + "-t" + triggerTime + "_" + wp_sdtrk_hashId();
-					var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
-					ttq.track(timeEventName, customData, {event_id: timeEventId })
-				}, time);
-			});
-		}
-
-	});
-}
-
-//Activate scroll-tracker for Browser
-function wp_sdtrk_track_tt_b_scrollTracker(pixelId, eventId, customData) {
-	if (pixelId === false || eventId === false || ttEventData.scrollTrigger === false || !ttq || ttScrollTracked_b === true) {
-		return;
-	}
-	window.addEventListener('scroll', function() {
-		if (ttScrollTracked_b === true) {
-			return;
-		}
-		var st = jQuery(this).scrollTop();
-		var wh = jQuery(document).height() - jQuery(window).height();
-		var target = ttEventData.scrollTrigger;
-		var perc = Math.ceil((st * 100) / wh)
-
-		if (perc >= target) {
-			ttScrollTracked_b = true;
-			cleanEventId = eventId.replace("_" + wp_sdtrk_hashId(), "");
-			var scrollEventId = cleanEventId + "-s" + ttEventData.scrollTrigger + "_" + wp_sdtrk_hashId();;
-			var scrollEventName = 'Scrolldepth-' + ttEventData.scrollTrigger + '-Percent';
-			ttq.track(scrollEventName, customData, {event_id: scrollEventId })
-		}
-	});
-}
-
-//Activate click-tracker for Browser
-function wp_sdtrk_track_tt_b_clickTracker(pixelId, eventId, customData) {
-	if (pixelId === false || eventId === false || ttEventData.clickTrigger === false || !ttq || wp_sdtrk_buttons.length < 1) {
-		return;
-	}
-	wp_sdtrk_buttons.forEach((el) => {
-		jQuery(el[0]).on('click', function() {
-			if (!ttClickedButtons_b.includes(el[1])) {
-				ttClickedButtons_b.push(el[1]);
-				var btnCustomData = wp_sdtrk_clone(customData);
-				cleanEventId = eventId.replace("_" + wp_sdtrk_hashId(), "");
-				var clickEventId = cleanEventId + "-b" + el[1] + "_" + wp_sdtrk_hashId();
-				var clickEventName = 'ButtonClick';
-				btnCustomData.buttonTag = el[1];
-				ttq.track(clickEventName, customData, {event_id: clickEventId })
-			}
-		});
-
-	});
-}
-
-//Backload TT Pixel on Server
-function wp_sdtrk_backload_tt_s() {
-	//Dont fire if the consent was already given or the backload is called to 
-	if (ttEventData === false || ttEventData.sc !== false || wp_sdtrk_tt.tt_s_e === "" || !ttEventData_finishedLoading) {
-		return;
-	}
-	//Save the given consent
-	ttEventData.sc = true
-	wp_sdtrk_track_tt_s();
-}
-
-//Backload TT Pixel in Browser
+* Backload the Browser
+**/
 function wp_sdtrk_backload_tt_b() {
-	//Dont fire if the consent was already given or the backload is called to 
-	if (ttEventData === false || ttEventData.bc !== false || wp_sdtrk_tt.tt_b_e === "" || !ttEventData_finishedLoading) {
-		return;
-	}
-	//Save the given consent
-	ttEventData.bc = true
-	wp_sdtrk_track_tt_b();
-}
-
-//Converts an EventName to TT-EventName
-function wp_sdtrk_convertEventNameToTt(name) {
-	name = (!name || name === "") ? name : name.toLowerCase();
-	switch (name) {
-		case 'page_view':
-			return 'ViewContent';
-		case 'add_to_cart':
-			return 'AddToCart';
-		case 'purchase':
-			return 'PlaceAnOrder';
-		case 'sign_up':
-			return 'CompleteRegistration';
-		case 'generate_lead':
-			return 'SubmitForm';
-		case 'begin_checkout':
-			return 'InitiateCheckout';
-		case 'view_item':
-			return 'ViewContent';
-		default:
-			ttCustomEvent = true;
-			return name;
-	}
-}
-
-//Hash an external Id
-function wp_sdtrk_hashId() {
-	var validDays = 90;
-	if (wp_sdtrk_getCookie('_tthash', false)) {
-		var value = wp_sdtrk_getCookie('_tthash', false);
-		wp_sdtrk_setCookie('_tthash', value, validDays, false);
-		return value;
-	}
-	else {
-		sag = wp_sdtrk_event.getEventSourceAgent();
-		sad = wp_sdtrk_event.getEventSourceAdress();
-		key = sag.toLowerCase() + sad.toLowerCase();
-		regex = /[\W_]+/g;
-		key = key.replace(regex, "")
-		var hash = 0;
-		if (key.length == 0) return hash;
-		for (i = 0; i < key.length; i++) {
-			char = key.charCodeAt(i);
-			hash = ((hash << 5) - hash) + char;
-			hash = hash & hash; // Convert to 32bit integer
+	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
+		var catcher_tt = window.wp_sdtrk_engine_class.get_catcher_tt();
+		if (catcher_tt.isOngoingBackload('b')) {
+			for (const h of window.wp_sdtrk_history) {
+				data = h.split("_");
+				switch (data[0]) {
+					case 'Page':
+						catcher_tt.catchPageHit(0);
+						break;
+					case 'Time':
+						catcher_tt.catchTimeHit(data[1], 0);
+						break;
+					case 'Scroll':
+						catcher_tt.catchScrollHit(data[1], 0);
+						break;
+					case 'Click':
+						catcher_tt.catchClickHit(data[1], 0);
+						break;
+					case 'Visited':
+						catcher_tt.catchVisibilityHit(data[1], 0);
+						break;
+				}
+			}
 		}
-		if (hash < 0) {
-			hash = hash * -1;
+	}
+}
+
+/**
+* Backload the Server
+**/
+function wp_sdtrk_backload_tt_s() {
+	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
+		var catcher_tt = window.wp_sdtrk_engine_class.get_catcher_tt();
+		if (catcher_tt.isOngoingBackload('s')) {
+			for (const h of window.wp_sdtrk_history) {
+				data = h.split("_");
+				switch (data[0]) {
+					case 'Page':
+						catcher_tt.catchPageHit(1);
+						break;
+					case 'Time':
+						catcher_tt.catchTimeHit(data[1], 1);
+						break;
+					case 'Scroll':
+						catcher_tt.catchScrollHit(data[1], 1);
+						break;
+					case 'Click':
+						catcher_tt.catchClickHit(data[1], 1);
+						break;
+					case 'Visited':
+						catcher_tt.catchVisibilityHit(data[1], 1);
+						break;
+				}
+			}
 		}
-		wp_sdtrk_setCookie('_tthash', hash, validDays, false);
-		return hash;
-	}
-}
-
-//Get ttclid from param or cookies
-function wp_sdtrk_getTtc() {
-	var validDays = 7;
-	if (wp_sdtrk_getParam("ttclid")) {
-		var clid = wp_sdtrk_getParam("ttclid");
-		wp_sdtrk_setCookie('_ttc', clid, validDays, false);
-		return clid;
-	}
-	else if (wp_sdtrk_getCookie('_ttc', false)) {
-		var value = wp_sdtrk_getCookie('_ttc', false);
-		wp_sdtrk_setCookie('_ttc', value, validDays, false);
-		return value;
-	}
-	return ""
-}
-
-//Get ttp or calculate new ttp
-function wp_sdtrk_getTtp() {
-	var validDays = 90;
-	if (wp_sdtrk_getCookie('_ttp', false)) {
-		var value = wp_sdtrk_getCookie('_ttp', false);
-		wp_sdtrk_setCookie('_ttp', value, validDays, false);
-		return value;
 	}
 }

@@ -146,11 +146,11 @@ class Wp_Sdtrk_Public
         $this->registerScript_localTracker($minifySwitch);
         $this->registerScript_fbTracker($minifySwitch);
         $this->registerScript_gaTracker($minifySwitch);
+        $this->registerScript_ttTracker($minifySwitch);
         
         $this->registerScript_decrypter($minifySwitch);
         $this->registerScript_engine($minifySwitch);
         
-        $this->localize_ttData($minifySwitch);
         $this->localize_linData($minifySwitch);
         $this->localize_flData($minifySwitch);
         $this->localize_mtcData($minifySwitch);
@@ -412,6 +412,54 @@ class Wp_Sdtrk_Public
     }
     
     /**
+     * Collect all TT-Data and pass them to JS
+     */
+    private function registerScript_ttTracker($loadMinified = "")
+    {
+        // Init
+        $localizedData = array();        
+        
+        // Pixel ID
+        $tt_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_pixelid");
+        $tt_pixelId = ($tt_pixelId && ! empty(trim($tt_pixelId))) ? $tt_pixelId : false;
+        
+        // Track Browser Enabled
+        $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_browser"), "yes") == 0) ? true : false;
+        
+        // Tik Tok: Track Browser Cookie Service
+        $tt_trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_browser_cookie_service");
+        $tt_trkBrowserCookieService = ($tt_trkBrowserCookieService && ! empty(trim($tt_trkBrowserCookieService))) ? $tt_trkBrowserCookieService : false;
+        
+        // Tik Tok: Track Browser Cookie ID
+        $tt_trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_browser_cookie_id");
+        $tt_trkBrowserCookieId = ($tt_trkBrowserCookieId && ! empty(trim($tt_trkBrowserCookieId))) ? $tt_trkBrowserCookieId : false;
+        
+        // Track Server Enabled
+        $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server"), "yes") == 0) ? true : false;
+        
+        // Tik Tok: Track Server Cookie Service
+        $tt_trkServerCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server_cookie_service");
+        $tt_trkServerCookieService = ($tt_trkServerCookieService && ! empty(trim($tt_trkServerCookieService))) ? $tt_trkServerCookieService : false;
+        
+        // Tik Tok: Track Server Cookie ID
+        $tt_trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server_cookie_id");
+        $tt_trkServerCookieId = ($tt_trkServerCookieId && ! empty(trim($tt_trkServerCookieId))) ? $tt_trkServerCookieId : false;
+        
+        //Merge to array
+        $localizedData['tt_id'] = $tt_pixelId;
+        $localizedData['tt_b_e'] = $trkBrowser;
+        $localizedData['c_tt_b_i'] = $tt_trkBrowserCookieId;
+        $localizedData['c_tt_b_s'] = $tt_trkBrowserCookieService;
+        $localizedData['tt_s_e'] = $trkServer;
+        $localizedData['c_tt_s_i'] = $tt_trkServerCookieId;
+        $localizedData['c_tt_s_s'] = $tt_trkServerCookieService;
+        
+        // Register scripts
+        wp_register_script($this->get_jsHandler('name', 'tt'), plugins_url("js/".$this->get_jsHandler('file', 'tt') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+        wp_localize_script($this->get_jsHandler('name', 'tt'), $this->get_jsHandler('var', 'tt'), $localizedData);        
+    }
+    
+    /**
      * Register and localize decrypter
      * @param string $loadMinified
      */
@@ -536,67 +584,13 @@ class Wp_Sdtrk_Public
             $this->get_jsHandler('name', 'helper'),
             $this->get_jsHandler('name', 'local'),
             $this->get_jsHandler('name', 'fb'),
-            $this->get_jsHandler('name', 'ga')
+            $this->get_jsHandler('name', 'ga'),
+            $this->get_jsHandler('name', 'tt')
         );
 
         // Register scripts
         wp_enqueue_script($this->get_jsHandler('name', 'engine'), plugin_dir_url(__FILE__) . "js/" . $this->get_jsHandler('file', 'engine') . $loadMinified . ".js", $deps, $this->version, false);
         wp_localize_script($this->get_jsHandler('name', 'engine'), $this->get_jsHandler('var', 'engine'), $localizedData);
-    }
-
-    
-
-    
-
-    /**
-     * Collect all TT-Data and pass them to JS
-     */
-    private function localize_ttData($loadMinified = "")
-    {
-        // Init
-        // Register Script for TikTok-Tracking
-        wp_register_script("wp_sdtrk-tt", plugins_url("js/wp-sdtrk-tt" . $loadMinified . ".js", __FILE__), array(
-            'jquery'
-        ), "1.0", false);
-
-        $localizedData = array();
-
-        // Pixel ID
-        $tt_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_pixelid");
-        $tt_pixelId = ($tt_pixelId && ! empty(trim($tt_pixelId))) ? $tt_pixelId : false;
-
-        // Track Browser Enabled
-        $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_browser"), "yes") == 0) ? true : false;
-
-        // Tik Tok: Track Browser Cookie Service
-        $tt_trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_browser_cookie_service");
-        $tt_trkBrowserCookieService = ($tt_trkBrowserCookieService && ! empty(trim($tt_trkBrowserCookieService))) ? $tt_trkBrowserCookieService : false;
-
-        // Tik Tok: Track Browser Cookie ID
-        $tt_trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_browser_cookie_id");
-        $tt_trkBrowserCookieId = ($tt_trkBrowserCookieId && ! empty(trim($tt_trkBrowserCookieId))) ? $tt_trkBrowserCookieId : false;
-
-        // Track Server Enabled
-        $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server"), "yes") == 0) ? true : false;
-
-        // Tik Tok: Track Server Cookie Service
-        $tt_trkServerCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server_cookie_service");
-        $tt_trkServerCookieService = ($tt_trkServerCookieService && ! empty(trim($tt_trkServerCookieService))) ? $tt_trkServerCookieService : false;
-
-        // Tik Tok: Track Server Cookie ID
-        $tt_trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server_cookie_id");
-        $tt_trkServerCookieId = ($tt_trkServerCookieId && ! empty(trim($tt_trkServerCookieId))) ? $tt_trkServerCookieId : false;
-
-        $localizedData['tt_id'] = $tt_pixelId;
-        $localizedData['tt_b_e'] = $trkBrowser;
-        $localizedData['c_tt_b_i'] = $tt_trkBrowserCookieId;
-        $localizedData['c_tt_b_s'] = $tt_trkBrowserCookieService;
-        $localizedData['tt_s_e'] = $trkServer;
-        $localizedData['c_tt_s_i'] = $tt_trkServerCookieId;
-        $localizedData['c_tt_s_s'] = $tt_trkServerCookieService;
-
-        wp_localize_script("wp_sdtrk-tt", 'wp_sdtrk_tt', $localizedData);
-        wp_enqueue_script('wp_sdtrk-tt');
     }
 
     /**

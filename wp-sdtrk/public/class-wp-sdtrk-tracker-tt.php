@@ -84,130 +84,240 @@ class Wp_Sdtrk_Tracker_Tt
      * Fires the Server-based Tracking
      *
      * @param Wp_Sdtrk_Tracker_Event $event
+     * @param String $handler
+     * @param Array $data
+     * @return boolean
      */
-    public function fireTracking_Server($event, $externalId = "", $ttc = "")
+    public function fireTracking_Server($event, $handler, $data)
     {
         // Abort if tracking is disabled
         if (! $this->trackingEnabled_Server()) {
-            return 'Tracking disabled for server';
+            return true;
         }
+        // Check if given handler exists
+        $functionName = 'fireTracking_Server_' . $handler;
+        if (! method_exists($this, $functionName)) {
+            return false;
+        }
+        return $this->$functionName($event, $data);
+    }
 
-        // is TimeTracker-Event
-        $isTimeTrigger = ($event->getTimeTriggerData() !== false) ? true : false;
-        $isScrollTrigger = ($event->getScrollTriggerData() !== false) ? true : false;
-        $isClickTrigger = ($event->getClickTriggerData() !== false) ? true : false;
-
-        // ---Prepare Request
-        // Base-Data
-        $requestData = array(
-            "pixel_code" => $this->pixelId,
-            "event_id" => $event->getEventId() . "_" . $externalId,
-            "timestamp" => date('c', $event->getTime()),
-            //"timestamp" => strval(intval($event->getTime())*1000),
-            "context" => array(
-                "ad" => array(
-                    "callback" => $ttc // send only if ttc is set
-                ),
-                "page" => array(
-                    "url" => $event->getEventSource(),
-                    "referrer" => $event->getEventReferer()
-                ),
-                "ip" => $event->getEventIp(),
-                "user_agent" => $event->getEventAgent()
-            ),
-            "properties" => array(
-                "contents" => [],
-                //"description" => "ViewContent", // will be replaced later on events
-                //"query" => "" // you can pass a keyword from on-page-search here
-            )
-        );
-        
-        //User-Data
-        $userData = array();
-        if($event->getUserEmail()){
-            $userData["email"] = hash('sha256', $event->getUserEmail());
-        }
-        if($externalId){
-            $userData["external_id"] = $externalId;
-        }
-        if(!empty($userData)){
-            $requestData["context"]["user"] = $userData;   
-        }        
-
-        // Product
-        if (! empty($event->getProductId())) {
-            array_push($requestData["properties"]["contents"],array(
-                'content_id' => $event->getProductId(),
-                'content_name' => $event->getProductName(),
-                'content_type' =>"product",
-                'quantity' => 1
-                )
-            );
-        }
-        //Needed for preventing errors with empty contents
-        else{
-            array_push($requestData["properties"]["contents"],array(
-                'content_id' => $event->getPageId(),
-                'content_name' => $event->getPageName(),
-                'content_type' =>"product",
-                'quantity' => 1
-            )
-                );
-        }
-
-        // ---Send Request
-        // The PageView
+    /**
+     * Fires the Page-Hit-Tracking
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param Array $data
+     * @return boolean
+     */
+    private function fireTracking_Server_Page($event, $data)
+    {
+        $requestData = $this->getData_base($event, $data);
         $requestData['event'] = "PageView";
+        $response = $this->payLoadServerRequest($requestData);
+    }
 
-        // Check for time-trigger
-        if ($isTimeTrigger) {
-            $timeTriggerData = $event->getTimeTriggerData();
-            $timeTriggerEventName = $timeTriggerData['name'];
-            $timeTriggerEventId = $timeTriggerData['id'];
-            $requestData['event'] = $timeTriggerEventName;
-            $requestData['event_id'] = $timeTriggerEventId;
-            //$requestData["properties"]["description"] = $timeTriggerEventName;
-        }
+    /**
+     * Fires the Page-Hit-Event-Tracking
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param Array $data
+     * @return boolean
+     */
+    private function fireTracking_Server_Event($event, $data)
+    {
+        // The Conversion-Events
+        if ($this->readEventName($event) !== false && $this->readEventName($event) !== 'ViewContent') {
+            $requestData = $this->getData_base($event, $data);
+            $requestData['event'] = $this->readEventName($event);
+            $requestData["properties"]["description"] = $this->readEventName($event);
 
-        // Check for scroll-trigger
-        if ($isScrollTrigger) {
-            $scrollTriggerData = $event->getScrollTriggerData();
-            $scrollTriggerEventName = $scrollTriggerData['name'];
-            $scrollTriggerEventId = $scrollTriggerData['id'];
-            $requestData['event'] = $scrollTriggerEventName;
-            $requestData['event_id'] = $scrollTriggerEventId . "_" . $externalId;
-            //$requestData["properties"]["description"] = $scrollTriggerEventName;
-        }
-
-        // Check for click-trigger
-        if ($isClickTrigger) {
-            $clickTriggerData = $event->getClickTriggerData();
-            $clickTriggerEventName = $clickTriggerData['name'];
-            $clickTriggerEventId = $clickTriggerData['id'];
-            //$clickTriggerEventTag = $clickTriggerData['tag'];
-            $requestData['event'] = $clickTriggerEventName;
-            $requestData['event_id'] = $clickTriggerEventId . "_" . $externalId;
-            //$requestData["properties"]["description"] = $clickTriggerEventName."/".$clickTriggerEventTag;
-        }
-
-        $responses = array();
-        array_push($responses, $this->payLoadServerRequest($requestData));
-
-        // The Event
-        if ($this->readEventName($event) !== false && $this->readEventName($event) !== 'ViewContent' && $isTimeTrigger === false && $isScrollTrigger === false) {
-
+            // Add value if given
             if ($event->getEventValue() > 0 || $this->readEventName($event) === 'PlaceAnOrder') {
                 $requestData["properties"]["currency"] = "EUR";
                 $requestData["properties"]["value"] = $event->getEventValue();
-                // $requestData["properties"]["contents"][0]["price"] = $event->getEventValue();
             }
-            $requestData['event'] = $this->readEventName($event);
-            $requestData["properties"]["description"] = $this->readEventName($event);
-            array_push($responses, $this->payLoadServerRequest($requestData));
+            $response = $this->payLoadServerRequest($requestData);
         }
+    }
+    
+    /**
+     * Fires the Scroll-Hit-Tracking
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param Array $data
+     * @return boolean
+     */
+    private function fireTracking_Server_Scroll($event, $data)
+    {       
+        
+        // Update the event
+        $scrollEventId = $event->getEventId() . "-s" . $data['percent'].'_'.$data['hash'];
+        $scrollEventName = 'Scrolldepth-' . $data['percent'] . '-Percent';
+        $event->setScrollTriggerData($scrollEventName, $scrollEventId);    
+        
+        $requestData = $this->getData_base($event, $data);
+        $requestData['event'] = $event->getScrollTriggerData()['name'];
+        $requestData['event_id'] = $event->getScrollTriggerData()['id'];        
+        $response = $this->payLoadServerRequest($requestData);
+    }
+    
+    /**
+     * Fires the Time-Hit-Tracking
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param Array $data
+     * @return boolean
+     */
+    private function fireTracking_Server_Time($event, $data)
+    {
+        // Update the event
+        $timeEventId = $event->getEventId() . "-t" . $data['time'].'_'.$data['hash'];
+        $timeEventName = 'Watchtime-' . $data['time'] . '-Seconds';
+        $event->setTimeTriggerData($timeEventName, $timeEventId);
+        
+        $requestData = $this->getData_base($event, $data);
+        $requestData['event'] = $event->getTimeTriggerData()['name'];
+        $requestData['event_id'] = $event->getTimeTriggerData()['id'];
+        $response = $this->payLoadServerRequest($requestData);
+    }
+    
+    /**
+     * Fires the Click-Hit-Tracking
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param Array $data
+     * @return boolean
+     */
+    private function fireTracking_Server_Click($event, $data)
+    {
+        // Update the event
+        $clickEventId = $event->getEventId() . "-b" . $data['tag'].'_'.$data['hash'];
+        $event->setClickTriggerData('ButtonClick', $clickEventId, $data['tag']);
+        
+        $requestData = $this->getData_base($event, $data);
+        $requestData['event'] = $event->getClickTriggerData()['name'];
+        $requestData['event_id'] = $event->getClickTriggerData()['id'];
+        $requestData["properties"]["description"] = $event->getClickTriggerData()['name']."/".$data['tag'];
+        $response = $this->payLoadServerRequest($requestData);
+    }
+    
+    /**
+     * Fires the Scroll-Hit-Tracking
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param Array $data
+     * @return boolean
+     */
+    private function fireTracking_Server_Visibility($event, $data)
+    {
+        // Update the event
+        $visitEventId = $event->getEventId() . "-v" . $data['tag'].'_'.$data['hash'];
+        $event->setVisibilityTriggerData('ItemVisit', $visitEventId, $data['tag']);
+        
+        $requestData = $this->getData_base($event, $data);
+        $requestData['event'] = $event->getVisibilityTriggerData()['name'];
+        $requestData['event_id'] = $event->getVisibilityTriggerData()['id'];
+        $requestData["properties"]["description"] = $event->getVisibilityTriggerData()['name']."/".$data['tag'];
+        $response = $this->payLoadServerRequest($requestData);
+    }    
 
-        // Return
-        return $responses;
+    /**
+     * Return the base data of event
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @return array
+     */
+    private function getData_base($event, $data)
+    {
+        // Base-Data
+        $baseData = array(
+            "pixel_code" => $this->pixelId,
+            "event_id" => $event->getEventId() . "_" . $data['hash'],
+            "timestamp" => date('c', $event->getTime()),
+            // "timestamp" => strval(intval($event->getTime())*1000),
+            "context" => $this->getData_context($event, $data),
+            "properties" => array(
+                "contents" => $this->getData_contents($event)
+                // "description" => "ViewContent", // will be replaced later on events
+                // "query" => "" // you can pass a keyword from on-page-search here
+            )
+        );
+        return $baseData;
+    }
+
+    /**
+     * Return the user-data
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param array $data
+     * @return array
+     */
+    private function getData_user($event, $data)
+    {
+        // User-Data
+        $userData = array();
+        if ($event->getUserEmail()) {
+            $userData["email"] = hash('sha256', $event->getUserEmail());
+        }
+        if (isset($data['ttc'])) {
+            $userData["external_id"] = $data['ttc'];
+        }
+        return $userData;
+    }
+
+    /**
+     * Return the context data of event
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @return array
+     */
+    private function getData_context($event, $data)
+    {
+        $contextData = array(
+            "page" => array(
+                "url" => $event->getEventSource(),
+                "referrer" => $event->getEventReferer()
+            ),
+            "ip" => $event->getEventIp(),
+            "user_agent" => $event->getEventAgent()
+        );
+
+        // Add ttc if exists
+        if (isset($data['ttc'])) {
+            $contextData['ad'] = array(
+                "callback" => $data['ttc']
+            );
+        }
+        // Add user-data if exists
+        if (! empty($this->getData_user($event, $data))) {
+            $contextData["user"] = $this->getData_user($event, $data);
+        }
+        return $contextData;
+    }
+
+    /**
+     * Return the content data of event
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @return array
+     */
+    private function getData_contents($event)
+    {
+        // Product
+        $contentId = (! empty($event->getProductId())) ? $event->getProductId() : $event->getPageId();
+        $contentName = (! empty($event->getProductId())) ? $event->getProductName() : $event->getPageName();
+        $contents = array(
+            'content_id' => $contentId,
+            'content_name' => $contentName,
+            'content_type' => "product",
+            'quantity' => 1
+        );
+        
+        if ($event->getEventValue() > 0 || $this->readEventName($event) === 'PlaceAnOrder') {
+            $contents["price"] = $event->getEventValue();
+        }
+        
+        return $contents;
     }
 
     /**
@@ -223,14 +333,14 @@ class Wp_Sdtrk_Tracker_Tt
 
         // Create the Payload
         $fields = $requestData;
-        //Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($fields);
+        // Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($fields);
         $payload = json_encode($fields);
-        //Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($payload);
+        // Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($payload);
         $headers = array();
         array_push($headers, "Access-Token:" . $this->apiToken);
 
         // Send Request
-        return Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload, $headers,$this->debugMode);
+        return Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload, $headers, $this->debugMode);
     }
 
     /**
@@ -322,7 +432,7 @@ class Wp_Sdtrk_Tracker_Tt
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => json_encode($fields),
-            //CURLOPT_POSTFIELDS => '{"pixel_code":"'.$this->pixelId.'","event":"InitiateCheckout","event_id":"1616318632825_357","timestamp":"1645131187000","context":{"ad":{"callback":"123ATXSfe"},"page":{"url":"http://demo.mywebsite.com/purchase","referrer":"http://demo.mywebsite.com"},"user":{"external_id":"f0e388f53921a51f0bb0fc8a2944109ec188b59172935d8f23020b1614cc44bc","phone_number":"2f9d2b4df907e5c9a7b3434351b55700167b998a83dc479b825096486ffcf4ea","email":"dd6ff77f54e2106661089bae4d40cdb600979bf7edc9eb65c0942ba55c7c2d7f"},"user_agent":"Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion","ip":"13.57.97.131"},"properties":{"contents":[{"price":8,"quantity":2,"content_type":"product","content_id":"1077218"},{"price":30,"quantity":1,"content_type":"product","content_id":"1197218"}],"currency":"USD","value":46},"test_event_code":"'.$this->debugCode.'"}',
+            // CURLOPT_POSTFIELDS => '{"pixel_code":"'.$this->pixelId.'","event":"InitiateCheckout","event_id":"1616318632825_357","timestamp":"1645131187000","context":{"ad":{"callback":"123ATXSfe"},"page":{"url":"http://demo.mywebsite.com/purchase","referrer":"http://demo.mywebsite.com"},"user":{"external_id":"f0e388f53921a51f0bb0fc8a2944109ec188b59172935d8f23020b1614cc44bc","phone_number":"2f9d2b4df907e5c9a7b3434351b55700167b998a83dc479b825096486ffcf4ea","email":"dd6ff77f54e2106661089bae4d40cdb600979bf7edc9eb65c0942ba55c7c2d7f"},"user_agent":"Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion","ip":"13.57.97.131"},"properties":{"contents":[{"price":8,"quantity":2,"content_type":"product","content_id":"1077218"},{"price":30,"quantity":1,"content_type":"product","content_id":"1197218"}],"currency":"USD","value":46},"test_event_code":"'.$this->debugCode.'"}',
             CURLOPT_HTTPHEADER => array(
                 'Access-Token: ' . $this->apiToken,
                 'Content-Type: application/json'
