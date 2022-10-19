@@ -147,11 +147,11 @@ class Wp_Sdtrk_Public
         $this->registerScript_fbTracker($minifySwitch);
         $this->registerScript_gaTracker($minifySwitch);
         $this->registerScript_ttTracker($minifySwitch);
-        
+        $this->registerScript_linTracker($minifySwitch);
+
         $this->registerScript_decrypter($minifySwitch);
         $this->registerScript_engine($minifySwitch);
-        
-        $this->localize_linData($minifySwitch);
+
         $this->localize_flData($minifySwitch);
         $this->localize_mtcData($minifySwitch);
     }
@@ -288,64 +288,64 @@ class Wp_Sdtrk_Public
         }
     }
 
-    
-    
     /**
      * Register and localize local tracker
+     *
      * @param string $loadMinified
      */
     private function registerScript_localTracker($loadMinified = "")
     {
         // Init
         $localizedData = array();
-        
+
         // Enabled-Switch
         $enabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server"), "yes") == 0) ? true : false;
-        
-        //Merge to array
+
+        // Merge to array
         $localizedData['enabled'] = $enabled;
-        
+
         // Register scripts
         wp_register_script($this->get_jsHandler('name', 'local'), plugins_url("js/" . $this->get_jsHandler('file', 'local') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
         wp_localize_script($this->get_jsHandler('name', 'local'), $this->get_jsHandler('var', 'local'), $localizedData);
     }
-    
+
     /**
      * Register and localize facebook tracker
+     *
      * @param string $loadMinified
      */
     private function registerScript_fbTracker($loadMinified = "")
     {
-        // Init        
+        // Init
         $localizedData = array();
-        
+
         // Pixel ID
         $fb_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_pixelid");
         $fb_pixelId = ($fb_pixelId && ! empty(trim($fb_pixelId))) ? $fb_pixelId : false;
-        
+
         // Track Browser Enabled
         $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser"), "yes") == 0) ? true : false;
-        
+
         // Facebook: Track Browser Cookie Service
         $fb_trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser_cookie_service");
         $fb_trkBrowserCookieService = ($fb_trkBrowserCookieService && ! empty(trim($fb_trkBrowserCookieService))) ? $fb_trkBrowserCookieService : false;
-        
+
         // Facebook: Track Browser Cookie ID
         $fb_trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_browser_cookie_id");
         $fb_trkBrowserCookieId = ($fb_trkBrowserCookieId && ! empty(trim($fb_trkBrowserCookieId))) ? $fb_trkBrowserCookieId : false;
-        
+
         // Track Server Enabled
         $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server"), "yes") == 0) ? true : false;
-        
+
         // Facebook: Track Server Cookie Service
         $fb_trkServerCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_cookie_service");
         $fb_trkServerCookieService = ($fb_trkServerCookieService && ! empty(trim($fb_trkServerCookieService))) ? $fb_trkServerCookieService : false;
-        
+
         // Facebook: Track Server Cookie ID
         $fb_trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_cookie_id");
         $fb_trkServerCookieId = ($fb_trkServerCookieId && ! empty(trim($fb_trkServerCookieId))) ? $fb_trkServerCookieId : false;
-        
-        //Merge to array
+
+        // Merge to array
         $localizedData['fb_id'] = $fb_pixelId;
         $localizedData['fb_b_e'] = $trkBrowser;
         $localizedData['c_fb_b_i'] = $fb_trkBrowserCookieId;
@@ -353,12 +353,12 @@ class Wp_Sdtrk_Public
         $localizedData['fb_s_e'] = $trkServer;
         $localizedData['c_fb_s_i'] = $fb_trkServerCookieId;
         $localizedData['c_fb_s_s'] = $fb_trkServerCookieService;
-        
+
         // Register scripts
-        wp_register_script($this->get_jsHandler('name', 'fb'), plugins_url("js/".$this->get_jsHandler('file', 'fb') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
-        wp_localize_script($this->get_jsHandler('name', 'fb'), $this->get_jsHandler('var', 'fb'), $localizedData);        
+        wp_register_script($this->get_jsHandler('name', 'fb'), plugins_url("js/" . $this->get_jsHandler('file', 'fb') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+        wp_localize_script($this->get_jsHandler('name', 'fb'), $this->get_jsHandler('var', 'fb'), $localizedData);
     }
-    
+
     /**
      * Collect all GA-Data and pass them to JS
      */
@@ -366,37 +366,37 @@ class Wp_Sdtrk_Public
     {
         // Init
         $localizedData = array();
-        
+
         // Mess ID
         $messId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_measurement_id");
         $messId = ($messId && ! empty(trim($messId))) ? $messId : false;
-        
+
         // Track Browser Enabled
         $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_browser"), "yes") == 0) ? true : false;
-        
+
         // Debug Mode
         $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_debug"), "yes") == 0) ? true : false;
-        
+
         // Google: Track Browser Cookie Service
         $trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_browser_cookie_service");
         $trkBrowserCookieService = ($trkBrowserCookieService && ! empty(trim($trkBrowserCookieService))) ? $trkBrowserCookieService : false;
-        
+
         // Google: Track Browser Cookie ID
         $trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_browser_cookie_id");
         $trkBrowserCookieId = ($trkBrowserCookieId && ! empty(trim($trkBrowserCookieId))) ? $trkBrowserCookieId : false;
-        
+
         // Track Server Enabled
         $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_server"), "yes") == 0) ? true : false;
-        
+
         // Google: Track Server Cookie Service
         $ga_trkServerCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_server_cookie_service");
         $ga_trkServerCookieService = ($ga_trkServerCookieService && ! empty(trim($ga_trkServerCookieService))) ? $ga_trkServerCookieService : false;
-        
+
         // Google: Track Server Cookie ID
         $ga_trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_server_cookie_id");
         $ga_trkServerCookieId = ($ga_trkServerCookieId && ! empty(trim($ga_trkServerCookieId))) ? $ga_trkServerCookieId : false;
-        
-        //Merge to array
+
+        // Merge to array
         $localizedData['ga_id'] = $messId;
         $localizedData['ga_debug'] = $debug;
         $localizedData['ga_b_e'] = $trkBrowser;
@@ -405,47 +405,47 @@ class Wp_Sdtrk_Public
         $localizedData['ga_s_e'] = $trkServer;
         $localizedData['c_ga_s_i'] = $ga_trkServerCookieId;
         $localizedData['c_ga_s_s'] = $ga_trkServerCookieService;
-        
+
         // Register scripts
-        wp_register_script($this->get_jsHandler('name', 'ga'), plugins_url("js/".$this->get_jsHandler('file', 'ga') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
-        wp_localize_script($this->get_jsHandler('name', 'ga'), $this->get_jsHandler('var', 'ga'), $localizedData);        
+        wp_register_script($this->get_jsHandler('name', 'ga'), plugins_url("js/" . $this->get_jsHandler('file', 'ga') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+        wp_localize_script($this->get_jsHandler('name', 'ga'), $this->get_jsHandler('var', 'ga'), $localizedData);
     }
-    
+
     /**
      * Collect all TT-Data and pass them to JS
      */
     private function registerScript_ttTracker($loadMinified = "")
     {
         // Init
-        $localizedData = array();        
-        
+        $localizedData = array();
+
         // Pixel ID
         $tt_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_pixelid");
         $tt_pixelId = ($tt_pixelId && ! empty(trim($tt_pixelId))) ? $tt_pixelId : false;
-        
+
         // Track Browser Enabled
         $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_browser"), "yes") == 0) ? true : false;
-        
+
         // Tik Tok: Track Browser Cookie Service
         $tt_trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_browser_cookie_service");
         $tt_trkBrowserCookieService = ($tt_trkBrowserCookieService && ! empty(trim($tt_trkBrowserCookieService))) ? $tt_trkBrowserCookieService : false;
-        
+
         // Tik Tok: Track Browser Cookie ID
         $tt_trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_browser_cookie_id");
         $tt_trkBrowserCookieId = ($tt_trkBrowserCookieId && ! empty(trim($tt_trkBrowserCookieId))) ? $tt_trkBrowserCookieId : false;
-        
+
         // Track Server Enabled
         $trkServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server"), "yes") == 0) ? true : false;
-        
+
         // Tik Tok: Track Server Cookie Service
         $tt_trkServerCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server_cookie_service");
         $tt_trkServerCookieService = ($tt_trkServerCookieService && ! empty(trim($tt_trkServerCookieService))) ? $tt_trkServerCookieService : false;
-        
+
         // Tik Tok: Track Server Cookie ID
         $tt_trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server_cookie_id");
         $tt_trkServerCookieId = ($tt_trkServerCookieId && ! empty(trim($tt_trkServerCookieId))) ? $tt_trkServerCookieId : false;
-        
-        //Merge to array
+
+        // Merge to array
         $localizedData['tt_id'] = $tt_pixelId;
         $localizedData['tt_b_e'] = $trkBrowser;
         $localizedData['c_tt_b_i'] = $tt_trkBrowserCookieId;
@@ -453,14 +453,102 @@ class Wp_Sdtrk_Public
         $localizedData['tt_s_e'] = $trkServer;
         $localizedData['c_tt_s_i'] = $tt_trkServerCookieId;
         $localizedData['c_tt_s_s'] = $tt_trkServerCookieService;
-        
+
         // Register scripts
-        wp_register_script($this->get_jsHandler('name', 'tt'), plugins_url("js/".$this->get_jsHandler('file', 'tt') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
-        wp_localize_script($this->get_jsHandler('name', 'tt'), $this->get_jsHandler('var', 'tt'), $localizedData);        
+        wp_register_script($this->get_jsHandler('name', 'tt'), plugins_url("js/" . $this->get_jsHandler('file', 'tt') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+        wp_localize_script($this->get_jsHandler('name', 'tt'), $this->get_jsHandler('var', 'tt'), $localizedData);
     }
-    
+
+    /**
+     * Collect all lIn-Data and pass them to JS
+     */
+    private function registerScript_linTracker($loadMinified = "")
+    {
+        // Init
+        $localizedData = array();
+
+        // Pixel ID
+        $lin_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_pixelid");
+        $lin_pixelId = ($lin_pixelId && ! empty(trim($lin_pixelId))) ? $lin_pixelId : false;
+
+        // Track Browser Enabled
+        $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_browser"), "yes") == 0) ? true : false;
+
+        // LinkedIn: Track Browser Cookie Service
+        $lin_trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_browser_cookie_service");
+        $lin_trkBrowserCookieService = ($lin_trkBrowserCookieService && ! empty(trim($lin_trkBrowserCookieService))) ? $lin_trkBrowserCookieService : false;
+
+        // LinkedIn: Track Browser Cookie ID
+        $lin_trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_browser_cookie_id");
+        $lin_trkBrowserCookieId = ($lin_trkBrowserCookieId && ! empty(trim($lin_trkBrowserCookieId))) ? $lin_trkBrowserCookieId : false;
+
+        // LinkedIn Mappings
+        $linMappingData = wp_sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_map");
+        $linMappings = array();
+        if ($linMappingData) {
+            foreach ($linMappingData as $dataSet) {
+                $eventName = $dataSet['lin_trk_map_event'];
+                $convId = $dataSet['lin_trk_map_event_lin_convid'];
+                $rules = array();
+                if (isset($dataSet['lin_trk_map_event_rules']) && ! empty($dataSet['lin_trk_map_event_rules'])) {
+                    foreach ($dataSet['lin_trk_map_event_rules'] as $ruleSet) {
+                        $ruleParam = $ruleSet["lin_trk_map_event_rules_param"];
+                        $ruleValue = $ruleSet["lin_trk_map_event_rules_value"];
+                        if ($ruleParam && $ruleValue) {
+                            $rules[$ruleParam] = $ruleValue;
+                        }
+                    }
+                }
+                array_push($linMappings, array(
+                    'eventName' => $eventName,
+                    'convId' => $convId,
+                    'rules' => $rules
+                ));
+            }
+        }
+        // LinkedIn Button-Mappings
+        $linMappingData = wp_sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_btnmap");
+        $linBtnMappings = array();
+        if ($linMappingData) {
+            foreach ($linMappingData as $dataSet) {
+                $btnTag = $dataSet['lin_trk_map_btnevent_lin_btnTag'];
+                $convId = $dataSet['lin_trk_map_btnevent_lin_convid'];
+                array_push($linBtnMappings, array(
+                    'btnTag' => $btnTag,
+                    'convId' => $convId
+                ));
+            }
+        }
+        // LinkedIn Item-Visibility-Mappings
+        $linMappingData = wp_sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_ivmap");
+        $linIvMappings = array();
+        if ($linMappingData) {
+            foreach ($linMappingData as $dataSet) {
+                $ivTag = $dataSet['lin_trk_map_ivevent_lin_ivTag'];
+                $convId = $dataSet['lin_trk_map_ivevent_lin_convid'];
+                array_push($linIvMappings, array(
+                    'ivTag' => $ivTag,
+                    'convId' => $convId
+                ));
+            }
+        }
+        // Merge to array
+        $localizedData['lin_map'] = $linMappings;
+        $localizedData['lin_btnmap'] = $linBtnMappings;
+        $localizedData['lin_ivmap'] = $linIvMappings;
+        $localizedData['lin_id'] = $lin_pixelId;
+        $localizedData['lin_b_e'] = $trkBrowser;
+        $localizedData['c_lin_b_i'] = $lin_trkBrowserCookieId;
+        $localizedData['c_lin_b_s'] = $lin_trkBrowserCookieService;
+
+        // Register scripts
+        wp_register_script($this->get_jsHandler('name', 'lin'), plugins_url("js/" . $this->get_jsHandler('file', 'lin') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+        wp_localize_script($this->get_jsHandler('name', 'lin'), $this->get_jsHandler('var', 'lin'), $localizedData);
+    }
+
     /**
      * Register and localize decrypter
+     *
      * @param string $loadMinified
      */
     private function registerScript_decrypter($loadMinified = "")
@@ -468,20 +556,20 @@ class Wp_Sdtrk_Public
         // Init
         $localizedData = array();
         $services = array();
-        
+
         // Digistore24
         $ds24_decrypt = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ds24_encrypt_data"), "yes") == 0) ? true : false;
         $ds24_decryptKey = ($ds24_decrypt) ? Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ds24_encrypt_data_key") : false;
         $ds24_decryptKey = (! empty($ds24_decryptKey) && $ds24_decryptKey) ? $ds24_decryptKey : false;
-        
+
         // If valid add to services
         if ($ds24_decryptKey) {
             array_push($services, "ds24");
         }
-        
-        //Merge to array
+
+        // Merge to array
         $localizedData['services'] = $services;
-        
+
         // Register scripts
         wp_register_script($this->get_jsHandler('name', 'decrypter'), plugins_url("js/" . $this->get_jsHandler('file', 'decrypter') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
         wp_localize_script($this->get_jsHandler('name', 'decrypter'), $this->get_jsHandler('var', 'decrypter'), $localizedData);
@@ -489,11 +577,12 @@ class Wp_Sdtrk_Public
 
     /**
      * Register and localize engine
+     *
      * @param string $loadMinified
      */
     private function registerScript_engine($loadMinified = "")
     {
-        // Init    
+        // Init
         $localizedData = array();
         $localizedData['ajax_url'] = admin_url('admin-ajax.php');
         $localizedData['_nonce'] = wp_create_nonce('security_wp-sdtrk');
@@ -559,7 +648,7 @@ class Wp_Sdtrk_Public
         $postId = ($post && $post->ID) ? $post->ID : false;
         $title = $postId ? get_the_title($post) : "";
 
-        //Merge to array
+        // Merge to array
         $localizedData['prodId'] = $prodId;
         $localizedData['trkow'] = $trkOverwrite;
         $localizedData['pageId'] = $postId;
@@ -585,91 +674,14 @@ class Wp_Sdtrk_Public
             $this->get_jsHandler('name', 'local'),
             $this->get_jsHandler('name', 'fb'),
             $this->get_jsHandler('name', 'ga'),
-            $this->get_jsHandler('name', 'tt')
+            $this->get_jsHandler('name', 'tt'),
+            $this->get_jsHandler('name', 'lin')
         );
 
         // Register scripts
         wp_enqueue_script($this->get_jsHandler('name', 'engine'), plugin_dir_url(__FILE__) . "js/" . $this->get_jsHandler('file', 'engine') . $loadMinified . ".js", $deps, $this->version, false);
         wp_localize_script($this->get_jsHandler('name', 'engine'), $this->get_jsHandler('var', 'engine'), $localizedData);
     }
-
-    /**
-     * Collect all lIn-Data and pass them to JS
-     */
-    private function localize_linData($loadMinified = "")
-    {
-        // Init
-        // Register Script for LinkedIn-Tracking
-        wp_register_script("wp_sdtrk-lin", plugins_url("js/wp-sdtrk-lin" . $loadMinified . ".js", __FILE__), array(
-            'jquery'
-        ), "1.0", false);
-
-        $localizedData = array();
-
-        // Pixel ID
-        $lin_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_pixelid");
-        $lin_pixelId = ($lin_pixelId && ! empty(trim($lin_pixelId))) ? $lin_pixelId : false;
-
-        // Track Browser Enabled
-        $trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_browser"), "yes") == 0) ? true : false;
-
-        // LinkedIn: Track Browser Cookie Service
-        $lin_trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_browser_cookie_service");
-        $lin_trkBrowserCookieService = ($lin_trkBrowserCookieService && ! empty(trim($lin_trkBrowserCookieService))) ? $lin_trkBrowserCookieService : false;
-
-        // LinkedIn: Track Browser Cookie ID
-        $lin_trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_browser_cookie_id");
-        $lin_trkBrowserCookieId = ($lin_trkBrowserCookieId && ! empty(trim($lin_trkBrowserCookieId))) ? $lin_trkBrowserCookieId : false;
-
-        // LinkedIn Mappings
-        $linMappingData = wp_sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_map");
-        $linMappings = array();
-        if ($linMappingData) {
-            foreach ($linMappingData as $dataSet) {
-                $eventName = $dataSet['lin_trk_map_event'];
-                $convId = $dataSet['lin_trk_map_event_lin_convid'];
-                $rules = array();
-                if ($dataSet['lin_trk_map_event_rules'] && ! empty($dataSet['lin_trk_map_event_rules'])) {
-                    foreach ($dataSet['lin_trk_map_event_rules'] as $ruleSet) {
-                        $ruleParam = $ruleSet["lin_trk_map_event_rules_param"];
-                        $ruleValue = $ruleSet["lin_trk_map_event_rules_value"];
-                        if ($ruleParam && $ruleValue) {
-                            $rules[$ruleParam] = $ruleValue;
-                        }
-                    }
-                }
-                array_push($linMappings, array(
-                    'eventName' => $eventName,
-                    'convId' => $convId,
-                    'rules' => $rules
-                ));
-            }
-        }
-        // LinkedIn Button-Mappings
-        $linMappingData = wp_sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_btnmap");
-        $linBtnMappings = array();
-        if ($linMappingData) {
-            foreach ($linMappingData as $dataSet) {
-                $btnTag = $dataSet['lin_trk_map_btnevent_lin_btnTag'];
-                $convId = $dataSet['lin_trk_map_btnevent_lin_convid'];
-                array_push($linBtnMappings, array(
-                    'btnTag' => $btnTag,
-                    'convId' => $convId
-                ));
-            }
-        }
-        $localizedData['lin_map'] = $linMappings;
-        $localizedData['lin_btnmap'] = $linBtnMappings;
-        $localizedData['lin_id'] = $lin_pixelId;
-        $localizedData['lin_b_e'] = $trkBrowser;
-        $localizedData['c_lin_b_i'] = $lin_trkBrowserCookieId;
-        $localizedData['c_lin_b_s'] = $lin_trkBrowserCookieService;
-
-        wp_localize_script("wp_sdtrk-lin", 'wp_sdtrk_lin', $localizedData);
-        wp_enqueue_script('wp_sdtrk-lin');
-    }
-
-    
 
     /**
      * Collect all FL-Data and pass them to JS
@@ -793,12 +805,12 @@ class Wp_Sdtrk_Public
                 'state' => false
             );
         }
-        //Check for handler and run it
-        $event = new Wp_Sdtrk_Tracker_Event($data['event']);        
-        $className = 'Wp_Sdtrk_Tracker_'.ucfirst($data['type']);
-        if(class_exists($className)){
+        // Check for handler and run it
+        $event = new Wp_Sdtrk_Tracker_Event($data['event']);
+        $className = 'Wp_Sdtrk_Tracker_' . ucfirst($data['type']);
+        if (class_exists($className)) {
             $tracker = new $className();
-            if(method_exists($tracker, 'fireTracking_Server')){
+            if (method_exists($tracker, 'fireTracking_Server')) {
                 return array(
                     'state' => $tracker->fireTracking_Server($event, $data['handler'], $data['data'])
                 );

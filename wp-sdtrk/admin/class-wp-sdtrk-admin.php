@@ -400,6 +400,11 @@ class Wp_Sdtrk_Admin
         $buttonTrackingEnabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_buttons"), "yes") == 0) ? true : false;
         $buttonTrackingMsg = ($buttonTrackingEnabled) ? "" :'<strong>'.__('Note: Button-Click-Tracking is currently disabled in general settings! So this sttings will be ignored', 'wp-sdtrk').'</strong>';
         
+        //Collect ItemVisitTracker-Data
+        $visibilityTrackingEnabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_visibility"), "yes") == 0) ? true : false;
+        $visibilityTrackingMsg = ($visibilityTrackingEnabled) ? "" :'<strong>'.__('Note: Item-Visibility-Tracking is currently disabled in general settings! So this sttings will be ignored', 'wp-sdtrk').'</strong>';
+        
+        
         $fields[] = array(
             'name' => 'basic',
             'title' => __('General', 'wp-sdtrk'),
@@ -1374,6 +1379,38 @@ class Wp_Sdtrk_Admin
                                 ),
                                 array(
                                     'id' => 'lin_trk_map_btnevent_lin_convid',
+                                    'type' => 'text',
+                                    'title' => __('LinkedIn Conversion-ID', 'wp-sdtrk'),
+                                ),
+                            )
+                        ),
+                        array(
+                            'type' => 'custom_userinputgroup',
+                            'id' => 'lin_trk_ivmap',
+                            'dependency' => array(
+                                'lin_pixelid|lin_trk_browser',
+                                '!=|!=',
+                                '|false'
+                            ),
+                            'title' => __('Item-Visibility-Mapping', 'wp-sdtrk'),
+                            'description' => __('Map linkedIn custom conversions to item visibiliy', 'wp-sdtrk').'<br>'.$visibilityTrackingMsg,
+                            'options' => array(
+                                'repeater' => true,
+                                'accordion' => false,
+                                'button_title' => __('Map new', 'wp-sdtrk'),
+                                'group_title' => __('Item-Visibility-Mappings', 'wp-sdtrk'),
+                                'limit' => 100,
+                                'cloneable' => false,
+                                'mode' => 'compact', // only repeater
+                            ),
+                            'fields' => array(
+                                array(
+                                    'id' => 'lin_trk_map_ivevent_lin_ivTag',
+                                    'type' => 'text',
+                                    'title' => __('Item-Tag', 'wp-sdtrk'),
+                                ),
+                                array(
+                                    'id' => 'lin_trk_map_ivevent_lin_convid',
                                     'type' => 'text',
                                     'title' => __('LinkedIn Conversion-ID', 'wp-sdtrk'),
                                 ),

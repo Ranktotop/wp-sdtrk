@@ -40,6 +40,7 @@ class Wp_Sdtrk_Engine {
 		this.catcher_fb = new Wp_Sdtrk_Catcher_Fb(this.event, this.helper);
 		this.catcher_ga = new Wp_Sdtrk_Catcher_Ga(this.event, this.helper);
 		this.catcher_tt = new Wp_Sdtrk_Catcher_Tt(this.event, this.helper);
+		this.catcher_lin = new Wp_Sdtrk_Catcher_Lin(this.event, this.helper);
 
 		//this has to be global
 		window.wp_sdtrk_scrollDepths = this.event.getScrollTrigger()
@@ -82,6 +83,13 @@ class Wp_Sdtrk_Engine {
 	 */
 	get_catcher_tt() {
 		return this.catcher_tt;
+	}
+	/**
+	* Get the tt catcher
+	* @return  {Wp_Sdtrk_Catcher_Lin} The catcher-object
+	 */
+	get_catcher_lin() {
+		return this.catcher_lin;
 	}
 
 	/**
@@ -191,12 +199,14 @@ class Wp_Sdtrk_Engine {
 		var catcher_fb = this.catcher_fb;
 		var catcher_ga = this.catcher_ga;
 		var catcher_tt = this.catcher_tt;
+		var catcher_lin = this.catcher_lin;
 
 		//catchPageHit()
 		catcher_local.catchPageHit();
 		catcher_fb.catchPageHit(2);
 		catcher_ga.catchPageHit(2);
 		catcher_tt.catchPageHit(2);
+		catcher_lin.catchPageHit(2);
 		window.wp_sdtrk_history.push('Page_0');
 
 		//catchTimeHit(time)
@@ -211,6 +221,7 @@ class Wp_Sdtrk_Engine {
 							catcher_fb.catchTimeHit(triggerTime, 2);
 							catcher_ga.catchTimeHit(triggerTime, 2);
 							catcher_tt.catchTimeHit(triggerTime, 2);
+							catcher_lin.catchTimeHit(triggerTime, 2);
 							window.wp_sdtrk_history.push('Time_' + triggerTime.toString());
 						}, time);
 					});
@@ -229,6 +240,7 @@ class Wp_Sdtrk_Engine {
 						catcher_fb.catchClickHit(el[1], 2);
 						catcher_ga.catchClickHit(el[1], 2);
 						catcher_tt.catchClickHit(el[1], 2);
+						catcher_lin.catchClickHit(el[1], 2);
 						window.wp_sdtrk_history.push('Click_' + el[1]);
 					}
 				});
@@ -250,6 +262,7 @@ class Wp_Sdtrk_Engine {
 								catcher_fb.catchScrollHit(depth, 2);
 								catcher_ga.catchScrollHit(depth, 2);
 								catcher_tt.catchScrollHit(depth, 2);
+								catcher_lin.catchScrollHit(depth, 2);
 								window.wp_sdtrk_history.push('Scroll_' + depth.toString());
 							}
 						}
@@ -272,6 +285,7 @@ class Wp_Sdtrk_Engine {
 						catcher_fb.catchVisibilityHit(el[1], 2);
 						catcher_ga.catchVisibilityHit(el[1], 2);
 						catcher_tt.catchVisibilityHit(el[1], 2);
+						catcher_lin.catchVisibilityHit(el[1], 2);
 						window.wp_sdtrk_history.push('Visited_' + el[1]);
 					}
 				});
