@@ -1,219 +1,285 @@
-var mtcEventData = false;
-var mtcEventData_finishedLoading = false;
-var mtcScrollTracked_b = false;
-var mtcClickedButtons_b = [];
-var mtcLoaded = false;
-var mtcInitialized = false;
+class Wp_Sdtrk_Catcher_Mtc {
 
-function wp_sdtrk_runMTC() {
-	jQuery(document).ready(function() {
-		wp_sdtrk_collectMTCData();
-		wp_sdtrk_track_mtc();
-		mtcEventData_finishedLoading = true;
-	});
-}
-
-/**
-* Collects all available data for GA
- */
-function wp_sdtrk_collectMTCData() {
-	if (wp_sdtrk_mtc.mtc_id === "" || !wp_sdtrk_event) {
-		return;
-	}
-	//Initialize	
-	var prodId = wp_sdtrk_event.grabProdId();
-	var eventName = wp_sdtrk_event.grabEventName();
-	var value = wp_sdtrk_event.grabValue();
-	var eventData = {};
-	//var post_type = "page"; //product was sent only if value or purchase was sent, else page was sent. Testing this combination
-
-	//Value
-	if (value > 0 || eventName == 'purchase') {
-		//Transaction id was here and value/currency was ever sent before and ga4 worked. Testing this combination
-		eventData['value'] = value;
-		eventData['currency'] = "EUR";
+	/**
+	* Constructor
+	* @param {Wp_Sdtrk_Event} event The event
+	* @param {Wp_Sdtrk_Helper} helper The helper
+	*/
+	constructor(event, helper) {
+		this.localizedData = wp_sdtrk_mtc;
+		this.event = event;
+		this.helper = helper;
+		this.s_enabled = false;
+		this.b_enabled = false;
+		this.pixelLoaded = false;
+		this.validate();
 	}
 
-	//Items
-	if (prodId !== "") {
-		eventData['item_id'] = prodId;
-		eventData['item_name'] = wp_sdtrk_event.grabProdName();
-		eventData['item_quantity'] = 1;
-		eventData['item_price'] = value;
-		eventData['item_brand'] = wp_sdtrk_event.getBrandName();
-	}
-	//Meta-Data
-	eventData['transaction_id'] = wp_sdtrk_event.grabOrderId();
-	eventData['page_title'] = wp_sdtrk_event.getPageName();
-	eventData['post_id'] = wp_sdtrk_event.getPageId();
-	eventData['plugin'] = "Wp-Sdtrk";
-	eventData['event_url'] = wp_sdtrk_event.getEventSource();
-	eventData['user_role'] = "guest";
-
-	//UTM
-	for (var k in wp_sdtrk_event.getUtm()) {
-		if (wp_sdtrk_event.getUtm()[k] !== "") {
-			eventData[k] = wp_sdtrk_event.getUtm()[k];
+	/**
+	* Validate if tt is enabled 0 = browser, 1 = server, 2 = both
+	 */
+	validate(target = 2) {
+		if (this.localizedData.pid === "" || !this.event) {
+			return;
+		}
+		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {
+			this.b_enabled = true;
+			//load the base pixel
+			this.loadPixel();
+		}
+		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.s_ci, this.localizedData.s_cs, this.event) !== false && this.localizedData.s_e !== "") {
+			this.s_enabled = true;
 		}
 	}
-	eventData['event_time'] = wp_sdtrk_getDateTime()[0];
-	eventData['event_day'] = wp_sdtrk_getDateTime()[1];
-	eventData['event_month'] = wp_sdtrk_getDateTime()[2];
-	eventData['landing_page'] = wp_sdtrk_event.getLandingPage();
 
-	//Save to global
-	mtcEventData = {};
-	mtcEventData.eventData = eventData;
-	mtcEventData.eventName = eventName;
-	mtcEventData.timeTrigger = wp_sdtrk_event.getTimeTrigger();
-	mtcEventData.scrollTrigger = wp_sdtrk_event.getScrollTrigger();
-	mtcEventData.clickTrigger = wp_sdtrk_event.getClickTrigger();
-}
+	/**
+	* This method checks if the backload shall be done for given type
+	* @param {String} type The type which shall be checked
+	 */
+	isOngoingBackload(type) {
+		//init
+		var oldState = true;
+		var newState = false;
 
-//Inits the tracker
-function wp_sdtrk_track_mtc() {
-	if (mtcEventData === false) {
-		return;
+		if (type === 'b') {
+			oldState = this.pixelLoaded;
+			if (!oldState) {
+				this.validate(0);
+				newState = this.pixelLoaded;
+			}
+		}
+		if (type === 's') {
+			oldState = this.isEnabled('s');
+			if (!oldState) {
+				this.validate(1);
+				newState = this.isEnabled('s');
+			}
+		}
+		return (oldState === false && newState === true);
 	}
-	mtcEventData.bc = wp_sdtrk_checkServiceConsent(wp_sdtrk_mtc.c_mtc_b_i, wp_sdtrk_mtc.c_mtc_b_s);
-	//console.log(gaEventData);
 
-	//Browser: If consent is given
-	if (mtcEventData.bc !== false && wp_sdtrk_mtc.mtc_b_e !== "") {
-		wp_sdtrk_track_mtc_b();
+	/**
+	* Check if enabled
+	* @param {String} type The type which shall be checked
+	* @return  {Boolean} If the given type is enabled
+	 */
+	isEnabled(type) {
+		switch (type) {
+			case 'b':
+				return this.b_enabled;
+			case 's':
+				return this.s_enabled;
+		}
+		return false;
 	}
-}
 
-//Initialize Base-Tag
-function wp_sdtrk_initialize_mtc() {
-	if (!mtcInitialized) {
-		if (!mtcLoaded) {
-			var mauticUrl = wp_sdtrk_mtc.mtc_id;
-			
+	/**
+	* Catch page hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchPageHit(target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Page', { state: true });
+		}
+		this.catchEventHit(target);
+	}
+
+	/**
+	* Catch event hit - These hits are only fired if there is an event-name given
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchEventHit(target = 2) {
+		if (this.event.grabEventName()) {
+			if (target === 0 || target === 2) {
+				this.fireData('Event', { state: true });
+			}
+		}
+	}
+
+	/**
+	* Catch scroll hit
+	* @param {String} percent The % of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchScrollHit(percent, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Scroll', { percent: percent });
+		}
+	}
+
+	/**
+	* Catch time hit
+	* @param {String} time The time of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchTimeHit(time, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Time', { time: time });
+		}
+	}
+
+	/**
+	* Catch click hit
+	* @param {String} tag The tag of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchClickHit(tag, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Click', { tag: tag });
+		}
+	}
+
+	/**
+	* Catch visibility hit
+	* @param {String} tag The tag of the hit
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchVisibilityHit(tag, target = 2) {
+		if (target === 0 || target === 2) {
+			this.fireData('Visibility', { tag: tag });
+		}
+	}
+
+	/**
+	* Load the base pixel
+	 */
+	loadPixel() {
+		if (this.isEnabled('b') && !this.pixelLoaded) {
+			var mauticUrl = this.localizedData.pid;
 			//Check if string ends with slash
-			if(mauticUrl.substr(-1) !== '/'){
-				mauticUrl = mauticUrl+"/mtc.js";
+			if (mauticUrl.substr(-1) !== '/') {
+				mauticUrl = mauticUrl + "/mtc.js";
 			}
-			else{
-				mauticUrl = mauticUrl+"mtc.js";
+			else {
+				mauticUrl = mauticUrl + "mtc.js";
 			}
-
 			(function(w, d, t, u, n, a, m) {
 				w['MauticTrackingObject'] = n;
 				w[n] = w[n] || function() { (w[n].q = w[n].q || []).push(arguments) }, a = d.createElement(t),
 					m = d.getElementsByTagName(t)[0]; a.async = 1; a.src = u; m.parentNode.insertBefore(a, m)
 			})(window, document, 'script', mauticUrl, 'mt');
-			mtcLoaded = true;
+			this.pixelLoaded = true;
 		}
-		mtcInitialized = true;
-	}
-}
-
-//Fire Analytics in Browser
-function wp_sdtrk_track_mtc_b() {
-	//Load Mautic, if its not already loaded
-	wp_sdtrk_initialize_mtc();
-
-	var name = mtcEventData.eventName;
-	if (!name || name === "" || name === "page_view") {
-		name = 'pageview';
-	}
-	
-	//Fire all events with data
-	//if there is a prod-id add tags like lead_12345
-	if(mtcEventData.eventData['item_id'] && mtcEventData.eventData['item_id'] !== ""){
-		var mtcCustomData = wp_sdtrk_clone(mtcEventData.eventData);
-		mtcCustomData.tags = name+"_"+mtcEventData.eventData['item_id'];
-		mt('send', name, mtcCustomData);
-	}
-	else{
-		mt('send', name, mtcEventData.eventData);
 	}
 
-	//Time Trigger
-	if (mtcEventData.timeTrigger.length > 0) {
-		wp_sdtrk_track_mtc_b_timeTracker();
-	}
-
-	//Scroll-Trigger
-	if (mtcEventData.scrollTrigger !== false) {
-		wp_sdtrk_track_mtc_b_scrollTracker();
-	}
-
-	//Click-Trigger
-	if (mtcEventData.clickTrigger !== false) {
-		wp_sdtrk_track_mtc_b_clickTracker();
-	}
-}
-
-//Activate time-tracker for Browser
-function wp_sdtrk_track_mtc_b_timeTracker() {
-	if (!mtcInitialized || mtcEventData.timeTrigger.length < 1) {
-		return;
-	}
-	mtcEventData.timeTrigger.forEach((triggerTime) => {
-		var time = parseInt(triggerTime);
-		if (!isNaN(time)) {
-			time = time * 1000;
-			jQuery(document).ready(function() {
-				setTimeout(function() {
-					var timeEventName = 'Watchtime-' + triggerTime.toString() + '-Seconds';
-					mt('send', timeEventName, mtcEventData.eventData);
-				}, time);
-			});
-		}
-
-	});
-}
-
-//Activate scroll-tracker for Browser
-function wp_sdtrk_track_mtc_b_scrollTracker() {
-	if (mtcEventData.scrollTrigger === false || !mtcInitialized || mtcScrollTracked_b === true) {
-		return;
-	}
-	window.addEventListener('scroll', function() {
-		if (mtcScrollTracked_b === true) {
-			return;
-		}
-		var st = jQuery(this).scrollTop();
-		var wh = jQuery(document).height() - jQuery(window).height();
-		var target = mtcEventData.scrollTrigger;
-		var perc = Math.ceil((st * 100) / wh)
-
-		if (perc >= target) {
-			mtcScrollTracked_b = true;
-			var scrollEventName = 'Scrolldepth-' + mtcEventData.scrollTrigger + '-Percent';
-			mt('send', scrollEventName, mtcEventData.eventData);
-		}
-	});
-}
-
-//Activate click-tracker for Browser
-function wp_sdtrk_track_mtc_b_clickTracker() {
-	if (mtcEventData.clickTrigger === false || !mtcInitialized || wp_sdtrk_buttons.length < 1) {
-		return;
-	}
-	wp_sdtrk_buttons.forEach((el) => {
-		jQuery(el[0]).on('click', function() {
-			if (!mtcClickedButtons_b.includes(el[1])) {
-				mtcClickedButtons_b.push(el[1]);
-				var btnCustomData = wp_sdtrk_clone(mtcEventData.eventData);
-				var clickEventName = 'ButtonClick';
-				btnCustomData.buttonTag = el[1];
-				mt('send', clickEventName, btnCustomData);
+	/**
+	* Fire data in browser
+	* @param {String} handler The handler of event
+	* @param {Object} data Additional data to send
+	 */
+	fireData(handler, data) {
+		if (this.isEnabled('b') && this.pixelLoaded) {
+			//Fire the desired event
+			switch (handler) {
+				case 'Page':
+					mt('send', 'pageview', this.get_data_custom('pageview'));
+					break;
+				case 'Event':
+					mt('send', this.event.grabEventName(), this.get_data_custom(this.event.grabEventName()));
+					break;
+				case 'Time':
+					mt('send', 'Watchtime-' + data.time + '-Seconds', this.get_data_custom('Watchtime-' + data.time + '-Seconds', ['currency', 'value'], {}));
+					break;
+				case 'Scroll':
+					mt('send', 'Scrolldepth-' + data.percent + '-Percent', this.get_data_custom('Scrolldepth-' + data.percent + '-Percent', ['currency', 'value'], {}));
+					break;
+				case 'Click':
+					mt('send', 'ButtonClick', this.get_data_custom('ButtonClick', ['currency', 'value'], { buttonTag: data.tag }));
+					break;
+				case 'Visibility':
+					mt('send', 'ItemVisit', this.get_data_custom('ItemVisit', ['currency', 'value'], { itemTag: data.tag }));
+					break;
 			}
-		});
-
-	});
-}
-
-//Backload Analytics in Browser
-function wp_sdtrk_backload_mtc_b() {
-	//Dont fire if the consent was already given or the backload is called to 
-	if (mtcEventData === false || mtcEventData.bc !== false || wp_sdtrk_mtc.mtc_b_e === "" || !mtcEventData_finishedLoading) {
-		return;
+		}
 	}
-	//Save the given consent
-	mtcEventData.bc = true
-	wp_sdtrk_track_mtc_b();
+
+	/**
+	* Get custom data
+	* @return  {Array} The custom object
+	 */
+	get_data_custom(eventname = false, fieldsToKill = [], fieldsToAppend = {}) {
+		//Collect the Custom-Data
+		var customData = {};
+		//Value
+		if (this.event.grabValue() > 0 || this.event.grabEventName() === 'purchase') {
+			customData.currency = "EUR";
+			customData.value = this.event.grabValue();
+		}
+		//Product
+		if (this.event.grabProdId() !== "") {
+			customData.item_id = this.event.grabProdId();
+			customData.item_name = this.event.grabProdName();
+			customData.item_quantity = 1;
+			customData.item_price = this.event.grabValue();
+			customData.item_brand = this.event.getBrandName();
+			//if there is a prod-id add tags like lead_12345
+			if (eventname !== false) {
+				customData.tags = eventname + '_' + this.event.grabProdId();
+			}
+		}
+		//Meta
+		customData.transaction_id = this.event.grabOrderId();
+		customData.page_title = this.event.getPageName();
+		customData.post_id = this.event.getPageId();
+		customData.plugin = "Wp-Sdtrk";
+		customData.event_url = this.event.getEventSource();
+		customData.user_role = "guest";
+		customData.landing_page = this.event.getLandingPage();
+		customData.event_time = this.helper.get_time()[0];
+		customData.event_day = this.helper.get_time()[1];
+		customData.event_month = this.helper.get_time()[2];
+
+		//UTM
+		for (var k in this.event.getUtm()) {
+			if (this.event.getUtm()[k] !== "") {
+				customData[k] = this.event.getUtm()[k];
+			}
+		}
+
+		//if given, remove unwanted fields
+		for (var i = 0; i < fieldsToKill.length; i++) {
+			var fieldName = fieldsToKill[i];
+			if (customData.hasOwnProperty(fieldName)) {
+				delete customData[fieldName];
+			}
+		}
+
+		//if given, add some fields
+		for (const [key, value] of Object.entries(fieldsToAppend)) {
+			customData[key] = value;
+		}
+		return customData;
+	}
 }
+
+/**
+* Backload the Browser
+**/
+function wp_sdtrk_backload_mtc_b() {
+	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
+		var catcher_mtc = window.wp_sdtrk_engine_class.get_catcher_mtc();
+		if (catcher_mtc.isOngoingBackload('b')) {
+			for (const h of window.wp_sdtrk_history) {
+				data = h.split("_");
+				switch (data[0]) {
+					case 'Page':
+						catcher_mtc.catchPageHit(0);
+						break;
+					case 'Time':
+						catcher_mtc.catchTimeHit(data[1], 0);
+						break;
+					case 'Scroll':
+						catcher_mtc.catchScrollHit(data[1], 0);
+						break;
+					case 'Click':
+						catcher_mtc.catchClickHit(data[1], 0);
+						break;
+					case 'Visited':
+						catcher_mtc.catchVisibilityHit(data[1], 0);
+						break;
+				}
+			}
+		}
+	}
+}
+

@@ -304,7 +304,7 @@ class Wp_Sdtrk_Admin
                 // 'post_types' => array( 'post', 'page' ), // Could be multiple
             'context' => 'advanced', // The context within the screen where the boxes should display: 'normal', 'side', and 'advanced'.
             'priority' => 'default', // The priority within the context where the boxes should show ('high', 'low').
-            'title' => __('Product Meta', 'wp-sdtrk'), // The title of the metabox
+            'title' => 'Smart Server Side Tracking Plugin', // The title of the metabox
             'capability' => 'edit_posts', // The capability needed to view the page
             'tabbed' => true,
             // 'multilang' => false, // To turn of multilang, default off except if you have qTransalte-X.
@@ -323,10 +323,15 @@ class Wp_Sdtrk_Admin
         // General
         $fields[] = array(
             'name' => 'general',
-            'title' => __('Tracking-Settings', 'wp-sdtrk'),
+            'title' => 'Smart Server Side Tracking Plugin',
             'icon' => 'dashicons-admin-generic',
             'fields' => array(
-
+                array(
+                    'type' => 'content',
+                    'title' => '<h3>' . __('Basic Tracking Settings', 'wp-sdtrk') . '</h3>',
+                    'wrap_class' => 'divideHeader',
+                    'content' => ''
+                ),
                 array(
                     'id' => 'productid',
                     'type' => 'text',
@@ -412,7 +417,8 @@ class Wp_Sdtrk_Admin
             'fields' => array(
                 array(
                     'type' => 'content',
-                    'title' => '<h3>' . __('Basic Data Settings', 'wp-sdtrk') . '</h3>',
+                    'title' => '<h3>' . __('Basic Data Settings', 'wp-sdtrk') . '</h3>',                    
+                    'wrap_class' => 'pageHeader',
                     'content' => ''
                 ),
                 array(
@@ -424,6 +430,7 @@ class Wp_Sdtrk_Admin
                 array(
                     'type' => 'content',
                     'title' => '<h3>' . __('Basic Tracking Settings', 'wp-sdtrk') . '</h3>',
+                    'wrap_class' => 'divideHeader',
                     'content' => ''
                 ),
                 array(
@@ -474,6 +481,7 @@ class Wp_Sdtrk_Admin
                 array(
                     'id' => 'trk_scroll',
                     'type' => 'switcher',
+                    'wrap_class' => 'headsettings',
                     'title' => __('Fire signal-event on scroll-depth', 'wp-sdtrk'),
                     'description' => __('Check to fire a signal event after scroll-depth has been reached', 'wp-sdtrk'),
                     'default' => 'no'
@@ -481,6 +489,7 @@ class Wp_Sdtrk_Admin
                 array(
                     'type' => 'group',
                     'id' => 'trk_scroll_group',
+                    'wrap_class' => 'subsettings',
                     'title' => __('Scroll-Settings', 'wp-sdtrk'),
                     'description' => __('Fire signal-event if the user has scrolled to x percent of the page', 'wp-sdtrk'),
                     'after' => __('Attention: Every event must be processed! Make sure that the frequency is therefore not too high and not several events are triggered at the same depth!', 'wp-sdtrk'),
@@ -521,7 +530,7 @@ class Wp_Sdtrk_Admin
                     'title' => __('Fire signal-event on button-clicks', 'wp-sdtrk'),
                     'description' => __('Check to fire a signal event after an element has been clicked', 'wp-sdtrk'),
                     'default' => 'no',
-                    'after' => __('Attention: In order for clicks to be tracked, the element to be tracked must contain the class trkbtn-TAGNAME-trkbtn. The TAGNAME placeholder can be replaced by any word and will be passed as a parameter', 'wp-sdtrk') . '<br><b>' . __('Example:', 'wp-sdtrk') . '</b>' . htmlentities('<a href="https://example.com" class="trkbtn-mybutton-trkbtn">MyButton</a>')
+                    'after' => __('Attention: In order for clicks to be tracked, the element to be tracked must contain the class trkbtn-TAGNAME-trkbtn. The TAGNAME placeholder can be replaced by any word and will be passed as a parameter', 'wp-sdtrk') . '<br><b style="color:white">' . __('Example:', 'wp-sdtrk') . '</b> ' . htmlentities('<a href="https://example.com" class="trkbtn-mybutton-trkbtn">MyButton</a>')
                 ),
                 array(
                     'id' => 'trk_visibility',
@@ -529,7 +538,7 @@ class Wp_Sdtrk_Admin
                     'title' => __('Fire signal-event on visibility of items', 'wp-sdtrk'),
                     'description' => __('Check to fire a signal event after an element gets visible', 'wp-sdtrk'),
                     'default' => 'no',
-                    'after' => __('Attention: In order for tracking to work, the element to be tracked must contain the class watchitm-TAGNAME-watchitm. The TAGNAME placeholder can be replaced by any word and will be passed as a parameter', 'wp-sdtrk') . '<br><b>' . __('Example:', 'wp-sdtrk') . '</b>' . htmlentities('<h2 class="watchitm-mybutton-watchitm">My Headline</h2>')
+                    'after' => __('Attention: In order for tracking to work, the element to be tracked must contain the class watchitm-TAGNAME-watchitm. The TAGNAME placeholder can be replaced by any word and will be passed as a parameter', 'wp-sdtrk') . '<br><b style="color:white">' . __('Example:', 'wp-sdtrk') . '</b> ' . htmlentities('<h2 class="watchitm-mybutton-watchitm">My Headline</h2>')
                 )
             )
         );
@@ -545,7 +554,8 @@ class Wp_Sdtrk_Admin
                     'fields' => array(
                         array(
                             'type' => 'content',
-                            'title' => '<h3>' . __('Server based Tracking', 'wp-sdtrk') . '</h3>',
+                            'title' => '<h3>' . __('Local Tracking', 'wp-sdtrk') . '</h3>',
+                            'wrap_class' => 'pageHeader',
                             'content' => '',
                         ),
                         array(
@@ -566,6 +576,17 @@ class Wp_Sdtrk_Admin
                             'title' => __('Activate Debugging', 'wp-sdtrk'),
                             'description' => __('Check to debug into the wordpress system', 'wp-sdtrk'),
                             'default' => 'no'
+                        ),
+                        array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('CSV Sync Settings', 'wp-sdtrk') . '</h3>',
+                            'wrap_class' => 'divideHeader',
+                            'dependency' => array(
+                                'local_trk_server',
+                                '==',
+                                'true'
+                            ),
+                            'content' => ''
                         ),
                         array(
                             'id' => 'local_trk_server_csv',
@@ -613,19 +634,19 @@ class Wp_Sdtrk_Admin
                                 $this,
                                 'resetCSVsyncCron'
                             ),
-                            'title'   => '<span style="padding-left:20px">'.__('At what hour should the synchronization take place', 'wp-sdtrk').'</span>',
+                            'title'   => __('At what hour should the synchronization take place', 'wp-sdtrk'),
                             'default' => '0',
                             'min'     => '0',                                      // optional
                             'max'     => '23',                                     // optional
                             'step'    => '1',                                      // optional
-                            'description' => '<span style="padding-left:20px">'.__('Next sync is currently sheduled at', 'wp-sdtrk').' '.Wp_Sdtrk_Helper::wp_sdtrk_TimestampToDate('d.m.Y H:i:s',wp_next_scheduled( 'wp_sdtrk_csvsync_cron' ),'Europe/Berlin').'</span>',
+                            'description' => __('Next sync is currently sheduled at', 'wp-sdtrk').' '.Wp_Sdtrk_Helper::wp_sdtrk_TimestampToDate('d.m.Y H:i:s',wp_next_scheduled( 'wp_sdtrk_csvsync_cron' ),'Europe/Berlin'),
                             
                         ),
                         array(
                             'id' => 'local_trk_server_csv_crontime_force',
                             'type' => 'switcher',
-                            'title' => '<span style="padding-left:20px">'.__('Sync now', 'wp-sdtrk').'</span>',
-                            'description' => '<span style="padding-left:20px">'.__('Check to sync data directly after saving settings', 'wp-sdtrk').'</span>',
+                            'title' => __('Sync now', 'wp-sdtrk'),
+                            'description' => __('Check to sync data directly after saving settings', 'wp-sdtrk'),
                             'default' => 'no',
                             'dependency' => array(
                                 'local_trk_server_csv|local_trk_server',
@@ -636,6 +657,17 @@ class Wp_Sdtrk_Admin
                                 $this,
                                 'syncCSVsyncNowCallback'
                             )
+                        ),
+                        array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Google-Sheets Sync Settings', 'wp-sdtrk') . '</h3>',
+                            'wrap_class' => 'divideHeader',
+                            'dependency' => array(
+                                'local_trk_server',
+                                '==',
+                                'true'
+                            ),
+                            'content' => ''
                         ),
                         array(
                             'id' => 'local_trk_server_gsync',
@@ -696,7 +728,7 @@ class Wp_Sdtrk_Admin
                                 'true|true'
                             ),
                             'description' => __('You can get this data from Google Developer Console', 'wp-sdtrk'),
-                            'after' => '<strong>'.__('Your authorized javascript-origin:', 'wp-sdtrk').'</strong> <i>"'.'https://' . $_SERVER['HTTP_HOST'].'"</i>'.'<br><strong>'.__('Your authorized redirect-url:', 'wp-sdtrk').'</strong> <i>"'.'https://' . $_SERVER['HTTP_HOST'] . '/index.php'."?wp-sdtrk=gauth".'"</i>',
+                            'after' => '<strong style="color:white">'.__('Your authorized javascript-origin:', 'wp-sdtrk').'</strong> <i>"'.'https://' . $_SERVER['HTTP_HOST'].'"</i>'.'<br><strong style="color:white">'.__('Your authorized redirect-url:', 'wp-sdtrk').'</strong> <i>"'.'https://' . $_SERVER['HTTP_HOST'] . '/index.php'."?wp-sdtrk=gauth".'"</i>',
                         ),
                         array(
                             'id'      => 'local_trk_server_gsync_authenticate',
@@ -739,9 +771,10 @@ class Wp_Sdtrk_Admin
                             ),
                         ),
                         array(
-                            'type'    => 'notice',
-                            'class'   => 'danger',
-                            'content' => '<h3 style="color:red">' . __('Danger-Zone', 'wp-sdtrk') . '</h3><p><strong>'.__('Be careful with these functions!', 'wp-sdtrk').'</strong></p>',
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Danger-Zone', 'wp-sdtrk') . '</h3><p style="color:red"><strong>'.__('Be careful with these functions!', 'wp-sdtrk').'</strong></p>',
+                            'wrap_class' => 'divideHeader',
+                            'content' => ''
                         ),
                         array(
                             'id' => 'local_dng_clear_db',
@@ -757,13 +790,14 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'local_dng_clear_db_sure',
                             'type' => 'switcher',
+                            'wrap_class' => 'dangerZone',
                             'dependency' => array(
                                 'local_dng_clear_db',
                                 '==',
                                 'true'
                             ),
-                            'title' => '<span style="padding-left:20px;color:red">'.__('Are you sure?', 'wp-sdtrk').'</span>',
-                            'description' => '<span style="padding-left:20px">'.__('This cannot be undone!', 'wp-sdtrk').'</span>',
+                            'title' => __('Are you sure?', 'wp-sdtrk'),
+                            'description' => __('This cannot be undone!', 'wp-sdtrk'),
                             'default' => 'no',
                             'sanitize' => array(
                                 $this,
@@ -784,13 +818,14 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'local_dng_clear_sync_sure',
                             'type' => 'switcher',
+                            'wrap_class' => 'dangerZone',
                             'dependency' => array(
                                 'local_dng_clear_sync',
                                 '==',
                                 'true'
                             ),
-                            'title' => '<span style="padding-left:20px;color:red">'.__('Are you sure?', 'wp-sdtrk').'</span>',
-                            'description' => '<span style="padding-left:20px">'.__('This cannot be undone!', 'wp-sdtrk').'</span>',
+                            'title' => __('Are you sure?', 'wp-sdtrk'),
+                            'description' => __('This cannot be undone!', 'wp-sdtrk'),
                             'default' => 'no',
                             'sanitize' => array(
                                 $this,
@@ -806,6 +841,12 @@ class Wp_Sdtrk_Admin
                     'icon' => 'dashicons-facebook',
                     'fields' => array(
                         array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Facebook Tracking', 'wp-sdtrk') . '</h3>',
+                            'wrap_class' => 'pageHeader',
+                            'content' => '',
+                        ),
+                        array(
                             'id' => 'fb_pixelid',
                             'type' => 'text',
                             'title' => __('Facebook Pixel-ID', 'wp-sdtrk'),
@@ -814,12 +855,13 @@ class Wp_Sdtrk_Admin
                         array(
                             'type' => 'content',
                             'title' => '<h3>' . __('Browser based Tracking', 'wp-sdtrk') . '</h3>',
-                            'content' => '',
+                            'wrap_class' => 'divideHeader',
                             'dependency' => array(
                                 'fb_pixelid',
                                 '!=',
                                 ''
-                            )
+                            ),
+                            'content' => ''
                         ),
                         array(
                             'id' => 'fb_trk_browser',
@@ -849,6 +891,7 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'fb_trk_browser_cookie_id',
                             'type' => 'text',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
                                 'fb_trk_browser_cookie_service_borlabs|fb_trk_browser|fb_pixelid',
                                 '==|!=|!=',
@@ -856,17 +899,18 @@ class Wp_Sdtrk_Admin
                             ),
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_fb_b();</script>') . '</code></p>'
+                            'after' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_fb_b();</script>') . '</code></p>'
                         ),
                         array(
                             'type' => 'content',
                             'title' => '<h3>' . __('Server based Tracking', 'wp-sdtrk') . '</h3>',
-                            'content' => '',
+                            'wrap_class' => 'divideHeader',
                             'dependency' => array(
                                 'fb_pixelid',
                                 '!=',
                                 ''
-                            )
+                            ),
+                            'content' => ''
                         ),
                         array(
                             'id' => 'fb_trk_server',
@@ -907,6 +951,7 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'fb_trk_server_cookie_id',
                             'type' => 'text',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
                                 'fb_trk_server_cookie_service_borlabs|fb_trk_server|fb_pixelid',
                                 '==|!=|!=',
@@ -914,7 +959,7 @@ class Wp_Sdtrk_Admin
                             ),
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_fb_s();</script>') . '</code></p>'
+                            'after' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_fb_s();</script>') . '</code></p>'
                         ),
                         array(
                             'id' => 'fb_trk_server_debug',
@@ -931,6 +976,7 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'fb_trk_server_debug_code',
                             'type' => 'text',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
                                 'fb_trk_server|fb_trk_server_debug|fb_pixelid',
                                 '==|==|!=',
@@ -946,6 +992,12 @@ class Wp_Sdtrk_Admin
                     'title' => __('Google', 'wp-sdtrk'),
                     'icon' => 'dashicons-google',
                     'fields' => array(
+                        array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Google Tracking', 'wp-sdtrk') . '</h3>',
+                            'wrap_class' => 'pageHeader',
+                            'content' => '',
+                        ),
                         array(
                             'id' => 'ga_measurement_id',
                             'type' => 'text',
@@ -978,6 +1030,7 @@ class Wp_Sdtrk_Admin
                         ),
                         array(
                             'type' => 'content',
+                            'wrap_class' => 'divideHeader',
                             'dependency' => array(
                                 'ga_measurement_id',
                                 '!=',
@@ -1014,6 +1067,7 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'ga_trk_browser_cookie_id',
                             'type' => 'text',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
                                 'ga_trk_browser_cookie_service_borlabs|ga_trk_browser|ga_measurement_id',
                                 '==|!=|!=',
@@ -1021,10 +1075,11 @@ class Wp_Sdtrk_Admin
                             ),
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_ga_b();</script>') . '</code></p>'
+                            'after' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_ga_b();</script>') . '</code></p>'
                         ),
                         array(
                             'type' => 'content',
+                            'wrap_class' => 'divideHeader',
                             'title' => '<h3>' . __('Server based Tracking', 'wp-sdtrk') . '</h3>',
                             'content' => '',
                             'dependency' => array(
@@ -1072,6 +1127,7 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'ga_trk_server_cookie_id',
                             'type' => 'text',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
                                 'ga_trk_server_cookie_service_borlabs|ga_trk_server|ga_measurement_id',
                                 '==|!=|!=',
@@ -1079,7 +1135,7 @@ class Wp_Sdtrk_Admin
                             ),
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_ga_s();</script>') . '</code></p>'
+                            'after' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_ga_s();</script>') . '</code></p>'
                         )
                     )
                 ),
@@ -1089,6 +1145,12 @@ class Wp_Sdtrk_Admin
                     'icon' => 'dashicons-embed-audio',
                     'fields' => array(
                         array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('TikTok Tracking', 'wp-sdtrk') . '</h3>',
+                            'wrap_class' => 'pageHeader',
+                            'content' => '',
+                        ),
+                        array(
                             'id' => 'tt_pixelid',
                             'type' => 'text',
                             'title' => __('TikTok Pixel-ID', 'wp-sdtrk'),
@@ -1096,6 +1158,7 @@ class Wp_Sdtrk_Admin
                         ),
                         array(
                             'type' => 'content',
+                            'wrap_class' => 'divideHeader',
                             'title' => '<h3>' . __('Browser based Tracking', 'wp-sdtrk') . '</h3>',
                             'content' => '',
                             'dependency' => array(
@@ -1132,6 +1195,7 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'tt_trk_browser_cookie_id',
                             'type' => 'text',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
                                 'tt_trk_browser_cookie_service_borlabs|tt_trk_browser|tt_pixelid',
                                 '==|!=|!=',
@@ -1139,10 +1203,11 @@ class Wp_Sdtrk_Admin
                             ),
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_tt_b();</script>') . '</code></p>'
+                            'after' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_tt_b();</script>') . '</code></p>'
                         ),
                         array(
                             'type' => 'content',
+                            'wrap_class' => 'divideHeader',
                             'title' => '<h3>' . __('Server based Tracking', 'wp-sdtrk') . '</h3>',
                             'content' => '',
                             'dependency' => array(
@@ -1190,6 +1255,7 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'tt_trk_server_cookie_id',
                             'type' => 'text',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
                                 'tt_trk_server_cookie_service_borlabs|tt_trk_server|tt_pixelid',
                                 '==|!=|!=',
@@ -1197,7 +1263,7 @@ class Wp_Sdtrk_Admin
                             ),
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_tt_s();</script>') . '</code></p>'
+                            'after' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_tt_s();</script>') . '</code></p>'
                         ),
                         array(
                             'id' => 'tt_trk_server_debug',
@@ -1214,6 +1280,7 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'tt_trk_server_debug_code',
                             'type' => 'text',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
                                 'tt_trk_server|tt_trk_server_debug|tt_pixelid',
                                 '==|==|!=',
@@ -1230,6 +1297,12 @@ class Wp_Sdtrk_Admin
                     'icon' => 'dashicons-linkedin',
                     'fields' => array(
                         array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('LinkedIn Tracking', 'wp-sdtrk') . '</h3>',
+                            'wrap_class' => 'pageHeader',
+                            'content' => '',
+                        ),
+                        array(
                             'id' => 'lin_pixelid',
                             'type' => 'text',
                             'title' => __('LinkedIn Partner-ID', 'wp-sdtrk'),
@@ -1237,6 +1310,7 @@ class Wp_Sdtrk_Admin
                         ),
                         array(
                             'type' => 'content',
+                            'wrap_class' => 'divideHeader',
                             'title' => '<h3>' . __('Browser based Tracking', 'wp-sdtrk') . '</h3>',
                             'content' => '',
                             'dependency' => array(
@@ -1261,9 +1335,9 @@ class Wp_Sdtrk_Admin
                             'id' => 'lin_trk_browser_cookie_service',
                             'type' => 'radio',
                             'dependency' => array(
-                                'lin_trk_browser',
-                                '!=',
-                                'false'
+                                'lin_trk_browser|lin_pixelid',
+                                '!=|!=',
+                                'false|'
                             ),
                             'title' => __('Choose cookie consent behavior', 'wp-sdtrk'),
                             'options' => $cookieOptions,
@@ -1273,14 +1347,15 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'lin_trk_browser_cookie_id',
                             'type' => 'text',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
-                                'lin_trk_browser_cookie_service_borlabs|lin_trk_browser',
-                                '==|!=',
-                                'true|false'
+                                'lin_trk_browser_cookie_service_borlabs|lin_trk_browser|lin_pixelid',
+                                '==|!=|!=',
+                                'true|false|'
                             ),
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_lin_b();</script>') . '</code></p>'
+                            'after' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_lin_b();</script>') . '</code></p>'
                         ),
                         array(
                             'type' => 'custom_userinputgroup',
@@ -1424,6 +1499,12 @@ class Wp_Sdtrk_Admin
                     'icon' => 'dashicons-chart-area',
                     'fields' => array(
                         array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Funnelytics Tracking', 'wp-sdtrk') . '</h3>',
+                            'wrap_class' => 'pageHeader',
+                            'content' => '',
+                        ),
+                        array(
                             'id' => 'fl_tracking_id',
                             'type' => 'text',
                             'title' => __('Funnelytics Tracking-ID', 'wp-sdtrk'),
@@ -1432,6 +1513,7 @@ class Wp_Sdtrk_Admin
                         ),
                         array(
                             'type' => 'content',
+                            'wrap_class' => 'divideHeader',
                             'dependency' => array(
                                 'fl_tracking_id',
                                 '!=',
@@ -1456,9 +1538,9 @@ class Wp_Sdtrk_Admin
                             'id' => 'fl_trk_browser_cookie_service',
                             'type' => 'radio',
                             'dependency' => array(
-                                'fl_trk_browser',
-                                '!=',
-                                'false'
+                                'fl_trk_browser|fl_tracking_id',
+                                '!=|!=',
+                                'false|'
                             ),
                             'title' => __('Choose cookie consent behavior', 'wp-sdtrk'),
                             'options' => $cookieOptions,
@@ -1468,14 +1550,15 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'fl_trk_browser_cookie_id',
                             'type' => 'text',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
-                                'fl_trk_browser_cookie_service_borlabs|fl_trk_browser',
-                                '==|!=',
-                                'true|false'
+                                'fl_trk_browser_cookie_service_borlabs|fl_trk_browser|fl_tracking_id',
+                                '==|!=|!=',
+                                'true|false|'
                             ),
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_fl_b();</script>') . '</code></p>'
+                            'after' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_fl_b();</script>') . '</code></p>'
                         )
                     )
                 ),
@@ -1485,6 +1568,12 @@ class Wp_Sdtrk_Admin
                     'icon' => 'dashicons-email-alt',
                     'fields' => array(
                         array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Mautic Tracking', 'wp-sdtrk') . '</h3>',
+                            'wrap_class' => 'pageHeader',
+                            'content' => '',
+                        ),
+                        array(
                             'id' => 'mtc_tracking_id',
                             'type' => 'text',
                             'title' => __('Mautic Base URL', 'wp-sdtrk'),
@@ -1493,6 +1582,7 @@ class Wp_Sdtrk_Admin
                         ),
                         array(
                             'type' => 'content',
+                            'wrap_class' => 'divideHeader',
                             'dependency' => array(
                                 'mtc_tracking_id',
                                 '!=',
@@ -1517,9 +1607,9 @@ class Wp_Sdtrk_Admin
                             'id' => 'mtc_trk_browser_cookie_service',
                             'type' => 'radio',
                             'dependency' => array(
-                                'mtc_trk_browser',
-                                '!=',
-                                'false'
+                                'mtc_trk_browser|mtc_tracking_id',
+                                '!=|!=',
+                                'false|'
                             ),
                             'title' => __('Choose cookie consent behavior', 'wp-sdtrk'),
                             'options' => $cookieOptions,
@@ -1529,14 +1619,15 @@ class Wp_Sdtrk_Admin
                         array(
                             'id' => 'mtc_trk_browser_cookie_id',
                             'type' => 'text',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
-                                'mtc_trk_browser_cookie_service_borlabs|mtc_trk_browser',
-                                '==|!=',
-                                'true|false'
+                                'mtc_trk_browser_cookie_service_borlabs|mtc_trk_browser|mtc_tracking_id',
+                                '==|!=|!=',
+                                'true|false|'
                             ),
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-                            'after' => '<p>' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code>' . htmlentities('<script>wp_sdtrk_backload_mtc_b();</script>') . '</code></p>'
+                            'after' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_mtc_b();</script>') . '</code></p>'
                         )
                     )
                 )
@@ -1553,6 +1644,12 @@ class Wp_Sdtrk_Admin
                     'title' => __('Digistore24', 'wp-sdtrk'),
                     'icon' => 'dashicons-database',
                     'fields' => array(
+                        array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Digistore24', 'wp-sdtrk') . '</h3>',
+                            'wrap_class' => 'pageHeader',
+                            'content' => '',
+                        ),
                         array(
                             'id' => 'ds24_encrypt_data',
                             'type' => 'switcher',
@@ -1576,9 +1673,9 @@ class Wp_Sdtrk_Admin
             )
         );
 
-        $paramNameString = '<b>' . __('Parameter-Name(s)', 'wp-sdtrk') . ':</b> ';
-        $acceptsString = '<b>' . __('Accepts', 'wp-sdtrk') . ':</b> ';
-        $exampleString = '<b>' . __('Example', 'wp-sdtrk') . ':</b> ';
+        $paramNameString = '<b style="color:white">' . __('Parameter-Name(s)', 'wp-sdtrk') . ':</b> ';
+        $acceptsString = '<b style="color:white">' . __('Accepts', 'wp-sdtrk') . ':</b> ';
+        $exampleString = '<b style="color:white">' . __('Example', 'wp-sdtrk') . ':</b> ';
         $exampleDomain = get_home_url();
 
         $fields[] = array(
@@ -1588,13 +1685,27 @@ class Wp_Sdtrk_Admin
             'fields' => array(
                 array(
                     'type' => 'content',
-                    'title' => '<h3>' . __('Setup Tutorial', 'wp-sdtrk') . '</h3>',
+                    'title' => '<h3>' . __('Tutorials', 'wp-sdtrk') . '</h3>',
+                    'wrap_class' => 'pageHeader',
+                    'content' => '',
+                ),
+                array(
+                    'type' => 'content',
+                    'wrap_class' => 'divideHeader',
+                    'title' => '<h3>' . __('Video Tutorials', 'wp-sdtrk') . '</h3>',
+                    'content' => ''
+                ),
+                array(
+                    'type' => 'content',
+                    'wrap_class' => 'divideHeader',
+                    'title' => __('Setup Tutorial', 'wp-sdtrk'),
                     'content' => '<iframe src="https://player.vimeo.com/video/587429111?h=6660e0f5f6" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>'
                 ),
                 array(
                     'type' => 'content',
-                    'title' => '<h3>' . __('Supported GET-Parameters', 'wp-sdtrk') . '</h3>',
-                    'content' => '<b>' . __('Note', 'wp-sdtrk') . ':</b> ' . __('Enable "appending order details to thank you URL" on services like Digistore24 so that the parameters below are passed automatically.', 'wp-sdtrk')
+                    'wrap_class' => 'divideHeader',
+                    'title' => '<h3>' . __('Supported GET-Parameters', 'wp-sdtrk') . '</h3><br><strong style="color:white">' . __('Note', 'wp-sdtrk') . ':</strong> ' . __('Enable "appending order details to thank you URL" on services like Digistore24 so that the parameters below are passed automatically.', 'wp-sdtrk'),
+                    'content' => ''
                 ),
                 array(
                     'type' => 'content',
@@ -1624,7 +1735,7 @@ class Wp_Sdtrk_Admin
                 array(
                     'type' => 'content',
                     'title' => __('UTM', 'wp-sdtrk'),
-                    'content' => '<p>' . $paramNameString . 'utm_source | utm_campaign | utm_term | utm_medium | utm_content</p><p>' . $acceptsString . 'string</p><p>' . $exampleString . '<i>' . $exampleDomain . '?<b>utm_source=facebook&utm_medium=cpc</b></p></i><p><b>' . __('Note', 'wp-sdtrk') . ':</b> ' . __('UTM parameters are stored in cookies and automatically passed on further visits', 'wp-sdtrk') . '</p>'
+                    'content' => '<p>' . $paramNameString . 'utm_source | utm_campaign | utm_term | utm_medium | utm_content</p><p>' . $acceptsString . 'string</p><p>' . $exampleString . '<i>' . $exampleDomain . '?<b>utm_source=facebook&utm_medium=cpc</b></p></i><p><b style="color:white">' . __('Note', 'wp-sdtrk') . ':</b> ' . __('UTM parameters are stored in cookies and automatically passed on further visits!', 'wp-sdtrk') . '</p>'
                 )
             )
         );

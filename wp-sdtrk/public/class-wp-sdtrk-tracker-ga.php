@@ -133,32 +133,30 @@ class Wp_Sdtrk_Tracker_Ga
      */
     private function fireTracking_Server_Event($event, $data, $clientId)
     {
-        if ($event->getEventName() !== false && $event->getEventName() !== 'page_view') {
-            $customData = $this->getData_custom($event);
-            $customData['transaction_id'] = $event->getEventId();
-            // Add value if given
-            if ($event->getEventValue() > 0 || $event->getEventName() == 'purchase') {
-                $customData['value'] = $event->getEventValue();
-                $customData['currency'] = "EUR";
-            }
-            // Add product if given
-            if (! empty($event->getProductId())) {
-                $customData['items'] = array(
-                    $this->getData_products($event)
-                );
-            }
-            // ---Send Request
-            $requestData = array(
-                "client_id" => $clientId,
-                "events" => array(
-                    array(
-                        "name" => $event->getEventName(),
-                        "params" => $customData
-                    )
-                )
-            );
-            $response = $this->payLoadServerRequest($requestData);
+        $customData = $this->getData_custom($event);
+        $customData['transaction_id'] = $event->getEventId();
+        // Add value if given
+        if ($event->getEventValue() > 0 || $event->getEventName() == 'purchase') {
+            $customData['value'] = $event->getEventValue();
+            $customData['currency'] = "EUR";
         }
+        // Add product if given
+        if (! empty($event->getProductId())) {
+            $customData['items'] = array(
+                $this->getData_products($event)
+            );
+        }
+        // ---Send Request
+        $requestData = array(
+            "client_id" => $clientId,
+            "events" => array(
+                array(
+                    "name" => $event->getEventName(),
+                    "params" => $customData
+                )
+            )
+        );
+        $response = $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -174,7 +172,7 @@ class Wp_Sdtrk_Tracker_Ga
         $scrollEventId = $event->getEventId() . "-s" . $data['percent'];
         $scrollEventName = 'Scrolldepth-' . $data['percent'] . '-Percent';
         $event->setScrollTriggerData($scrollEventName, $scrollEventId);
-        
+
         $customData = $this->getData_custom($event);
         $customData['transaction_id'] = $event->getScrollTriggerData()['id'];
         $requestData = array(
@@ -188,7 +186,7 @@ class Wp_Sdtrk_Tracker_Ga
         );
         $response = $this->payLoadServerRequest($requestData);
     }
-    
+
     /**
      * Fires the Time-Hit-Tracking
      *
@@ -202,7 +200,7 @@ class Wp_Sdtrk_Tracker_Ga
         $timeEventId = $event->getEventId() . "-t" . $data['time'];
         $timeEventName = 'Watchtime-' . $data['time'] . '-Seconds';
         $event->setTimeTriggerData($timeEventName, $timeEventId);
-        
+
         $customData = $this->getData_custom($event);
         $customData['transaction_id'] = $event->getTimeTriggerData()['id'];
         $requestData = array(
@@ -216,7 +214,7 @@ class Wp_Sdtrk_Tracker_Ga
         );
         $response = $this->payLoadServerRequest($requestData);
     }
-    
+
     /**
      * Fires the Click-Hit-Tracking
      *
@@ -228,12 +226,12 @@ class Wp_Sdtrk_Tracker_Ga
     {
         // Update the event
         $clickEventId = $event->getEventId() . "-b" . $data['tag'];
-        $event->setClickTriggerData('ButtonClick', $clickEventId, $data['tag']);        
-        
+        $event->setClickTriggerData('ButtonClick', $clickEventId, $data['tag']);
+
         $customData = $this->getData_custom($event);
         $customData['transaction_id'] = $event->getClickTriggerData()['id'];
         $customData['buttonTag'] = $event->getClickTriggerData()['tag'];
-        
+
         $requestData = array(
             "client_id" => $clientId,
             "events" => array(
@@ -245,7 +243,7 @@ class Wp_Sdtrk_Tracker_Ga
         );
         $response = $this->payLoadServerRequest($requestData);
     }
-    
+
     /**
      * Fires the Scroll-Hit-Tracking
      *
@@ -258,11 +256,11 @@ class Wp_Sdtrk_Tracker_Ga
         // Update the event
         $visitEventId = $event->getEventId() . "-v" . $data['tag'];
         $event->setVisibilityTriggerData('ItemVisit', $visitEventId, $data['tag']);
-        
+
         $customData = $this->getData_custom($event);
         $customData['transaction_id'] = $event->getVisibilityTriggerData()['id'];
         $customData['itemTag'] = $event->getVisibilityTriggerData()['tag'];
-        
+
         $requestData = array(
             "client_id" => $clientId,
             "events" => array(
@@ -273,7 +271,7 @@ class Wp_Sdtrk_Tracker_Ga
             )
         );
         $response = $this->payLoadServerRequest($requestData);
-    }    
+    }
 
     /**
      * Return the base data of event

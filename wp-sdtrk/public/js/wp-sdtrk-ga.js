@@ -21,15 +21,15 @@ class Wp_Sdtrk_Catcher_Ga {
 	* Validate if fb is enabled 0 = browser, 1 = server, 2 = both
 	 */
 	validate(target = 2) {
-		if (this.localizedData.ga_id === "" || !this.event) {
+		if (this.localizedData.pid === "" || !this.event) {
 			return;
 		}
-		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.c_ga_b_i, this.localizedData.c_ga_b_s, this.event) !== false && this.localizedData.ga_b_e !== "") {
+		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {
 			this.b_enabled = true;
 			//load the base pixel
 			this.loadPixel();
 		}
-		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.c_ga_s_i, this.localizedData.c_ga_s_s, this.event) !== false && this.localizedData.ga_s_e !== "") {
+		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.s_ci, this.localizedData.s_cs, this.event) !== false && this.localizedData.s_e !== "") {
 			this.s_enabled = true;
 		}
 
@@ -51,10 +51,10 @@ class Wp_Sdtrk_Catcher_Ga {
 		var newState = false;
 
 		if (type === 'b') {
-			oldState = this.isPixelLoaded();
+			oldState = this.pixelLoaded;
 			if (!oldState) {
 				this.validate(0);
-				newState = this.isPixelLoaded();
+				newState = this.pixelLoaded;
 			}
 		}
 		if (type === 's') {
@@ -83,25 +83,31 @@ class Wp_Sdtrk_Catcher_Ga {
 	}
 
 	/**
-	* Check if pixel was loaded
-	* @return  {Boolean} If the base pixel was loaded
-	 */
-	isPixelLoaded() {
-		return this.pixelLoaded;
-	}
-
-	/**
 	* Catch page hit
 	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
 	 */
 	catchPageHit(target = 2) {
 		if (target === 0 || target === 2) {
 			//Pageview is fired on pixel-init automatically
-			this.fireData('Event', { state: true });
 		}
 		if (target === 1 || target === 2) {
 			this.sendData('Page', { state: true });
-			this.sendData('Event', { state: true });
+		}
+		this.catchEventHit(target);
+	}
+
+	/**
+	* Catch event hit - These hits are only fired if there is an event-name given
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchEventHit(target = 2) {
+		if (this.event.grabEventName()) {
+			if (target === 0 || target === 2) {
+				this.fireData('Event', { state: true });
+			}
+			if (target === 1 || target === 2) {
+				this.sendData('Event', { state: true });
+			}
 		}
 	}
 
@@ -176,7 +182,7 @@ class Wp_Sdtrk_Catcher_Ga {
 				a.async = 1;
 				a.src = src;
 				m.parentNode.insertBefore(a, m);
-			})(window, document, '//www.googletagmanager.com/gtag/js?id=' + this.localizedData.ga_id);
+			})(window, document, '//www.googletagmanager.com/gtag/js?id=' + this.localizedData.pid);
 
 			window.dataLayer = window.dataLayer || [];
 			window.gtag = window.gtag || function gtag() {
@@ -191,7 +197,7 @@ class Wp_Sdtrk_Catcher_Ga {
 
 			//init
 			gtag('js', new Date());
-			gtag('config', this.localizedData.ga_id, this.get_config());
+			gtag('config', this.localizedData.pid, this.get_config());
 			this.pixelLoaded = true;
 		}
 	}
@@ -231,7 +237,7 @@ class Wp_Sdtrk_Catcher_Ga {
 			'link_attribution': false,
 			'anonymize_ip': true,
 			'custom_map': this.get_dimensions(),
-			'debug_mode': this.localizedData.ga_debug === "1"
+			'debug_mode': this.localizedData.debug === "1"
 		};
 		var campaignData = this.get_storedCampaign(); // try to restore lost campaign-data		
 		if (campaignData) {
@@ -258,9 +264,7 @@ class Wp_Sdtrk_Catcher_Ga {
 			//Fire the desired event
 			switch (handler) {
 				case 'Event':
-					if (this.event.grabEventName() !== 'page_view' && this.event.grabEventName() !== false) {
-						gtag("event", this.event.grabEventName(), this.get_data_custom());
-					}
+					gtag("event", this.event.grabEventName(), this.get_data_custom());
 					break;
 				case 'Time':
 					gtag("event", 'Watchtime-' + data.time + '-Seconds', this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-t" + data.time }));
@@ -341,7 +345,7 @@ class Wp_Sdtrk_Catcher_Ga {
 		customData['event_day'] = this.event.getEventTimeDay();
 		customData['event_month'] = this.event.getEventTimeMonth();
 		customData['landing_page'] = this.event.getLandingPage();
-		customData['send_to'] = this.localizedData.ga_id;
+		customData['send_to'] = this.localizedData.pid;
 
 		//if given, remove unwanted fields
 		for (var i = 0; i < fieldsToKill.length; i++) {

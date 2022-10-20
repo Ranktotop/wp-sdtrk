@@ -165,36 +165,36 @@ class Wp_Sdtrk_Event {
 		var name = this.grabFirstValue(this.eventName);
 		return this.parseEventName(name);
 	}
-	
+
 	//Gets the Event-Hour
 	getEventTimeHour() {
 		return this.eventTimeHour;
 	}
-	
+
 	//Sets the Event-Hour
 	setEventTimeHour(value) {
 		this.eventTimeHour = value;
 	}
-	
+
 	//Gets the Event-Day
 	getEventTimeDay() {
 		return this.eventTimeDay;
 	}
-	
+
 	//Sets the Event-Day
 	setEventTimeDay(value) {
 		this.eventTimeDay = value;
 	}
-	
+
 	//Gets the Event-Month
 	getEventTimeMonth() {
 		return this.eventTimeMonth;
 	}
-	
+
 	//Sets the Event-Month
 	setEventTimeMonth(value) {
 		this.eventTimeMonth = value;
-	}	
+	}
 
 	//Sets the Landingpage-URL
 	setLandingPage(value) {
@@ -260,7 +260,7 @@ class Wp_Sdtrk_Event {
 	getEventUrl() {
 		return this.eventUrl;
 	}
-	
+
 	//Sets the full url of page with query
 	setEventUrl(value) {
 		this.eventUrl = value;
@@ -270,7 +270,7 @@ class Wp_Sdtrk_Event {
 	getEventPath() {
 		return this.eventPath;
 	}
-	
+
 	//Sets the path of page with subpages and query
 	setEventPath(value) {
 		this.eventPath = value;
@@ -280,7 +280,7 @@ class Wp_Sdtrk_Event {
 	getEventDomain() {
 		return this.eventDomain;
 	}
-	
+
 	//Sets the domain (without protocol)
 	setEventDomain(value) {
 		this.eventDomain = value;
@@ -354,12 +354,12 @@ class Wp_Sdtrk_Event {
 		}
 		return false;
 	}
-	
+
 	//Sets the Visibility-Trigger
 	setVisibilityTrigger(value) {
 		this.visibilityTrigger = value;
 	}
-	
+
 	//Gets the Visibility-Trigger
 	getVisibilityTrigger() {
 		if (this.visibilityTrigger === '1') {
@@ -378,32 +378,36 @@ class Wp_Sdtrk_Event {
 		return "";
 	}
 
-	//Converts the Event-Name to GA
+	//Converts the Event-Name to GA-default
 	parseEventName(name) {
-		name = (!name || name === "") ? name : name.toLowerCase();
+		//convert to lowercase without underlines or hyphens if valid value
+		name = (!name || name === "") ? name : name.toLowerCase().replace(/_/g, "").replace(/-/g, "");
+
+		//if no name is set but there is an order-id, setup as purchase
 		if (name === "" && this.grabFirstValue(this.orderId) !== "") {
 			return "purchase";
 		}
+		//if no name is set but there is an product-id, setup as view-item
 		if (name === "" && this.grabProdId() !== "") {
 			return 'view_item';
 		}
-		switch (name) {
-			case 'pageview':
-				return 'page_view';
-			case 'addtocart':
-				return 'add_to_cart';
-			case 'purchase':
-				return 'purchase';
-			case 'completeregistration':
-				return 'sign_up';
-			case 'lead':
-				return 'generate_lead';
-			case 'initiatecheckout':
-				return 'begin_checkout';
-			case 'viewcontent':
-				return 'view_item';
-			default:
-				return name === "" ? false : name;
+		//map typical names (eg. from fb or tt) to ga-events
+		var map = {
+			//page_view: ['pageview', 'viewpage', 'view'], //The page-view
+			view_item: ['viewitem', 'viewcontent'], //If an page is visited which relates to an product
+			generate_lead: ['generatelead', 'lead', 'submitform'], // The leads before doi
+			sign_up: ['signup', 'completeregistration', 'doi'], // The leads after doi
+			add_to_cart: ['addtocart', 'atc'],  //The add to cart
+			begin_checkout: ['begincheckout', 'initiatecheckout'], //The start of the checkout process
+			purchase: ['purchase', 'placeanorder', 'sale'],  //The purchase
 		}
+		for (var key in map) {
+			if (map.hasOwnProperty(key)) {
+				if(map[key].includes(name)){
+					return key;
+				}
+			}
+		}
+		return false;
 	}
 }

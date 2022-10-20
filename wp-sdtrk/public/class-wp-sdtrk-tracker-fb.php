@@ -120,6 +120,7 @@ class Wp_Sdtrk_Tracker_Fb
 
     /**
      * Fires the Page-Hit-Event-Tracking
+     * Note: These hits are only fired if there is an event-name given
      *
      * @param Wp_Sdtrk_Tracker_Event $event
      * @param Array $data
@@ -127,19 +128,16 @@ class Wp_Sdtrk_Tracker_Fb
      */
     private function fireTracking_Server_Event($event, $data)
     {
-        // The Conversion-Events
-        if ($this->readEventName($event) !== false && $this->readEventName($event) !== 'PageView') {
-            $requestData = $this->getData_base($event);
-            $requestData['event_name'] = $this->readEventName($event);
-            $requestData["user_data"] = $this->getData_user($event, $data);
-            $requestData['custom_data'] = $this->getData_custom($event);
-            // Add value if given
-            if ($event->getEventValue() > 0 || $this->readEventName($event) === 'Purchase') {
-                $requestData['custom_data']['currency'] = "EUR";
-                $requestData['custom_data']['value'] = $event->getEventValue();
-            }
-            $response = $this->payLoadServerRequest($requestData);
+        $requestData = $this->getData_base($event);
+        $requestData['event_name'] = $this->convert_eventname($event);
+        $requestData["user_data"] = $this->getData_user($event, $data);
+        $requestData['custom_data'] = $this->getData_custom($event);
+        // Add value if given
+        if ($event->getEventValue() > 0 || $this->convert_eventname($event) === 'Purchase') {
+            $requestData['custom_data']['currency'] = "EUR";
+            $requestData['custom_data']['value'] = $event->getEventValue();
         }
+        $response = $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -198,7 +196,7 @@ class Wp_Sdtrk_Tracker_Fb
         // Update the event
         $clickEventId = $event->getEventId() . "-b" . $data['tag'];
         $event->setClickTriggerData('ButtonClick', $clickEventId, $data['tag']);
-        
+
         $requestData = $this->getData_base($event);
         $requestData['event_id'] = $event->getClickTriggerData()['id'];
         $requestData['event_name'] = $event->getClickTriggerData()['name'];
@@ -228,7 +226,7 @@ class Wp_Sdtrk_Tracker_Fb
         $requestData['custom_data'] = $this->getData_custom($event);
         $requestData['custom_data']['itemTag'] = $event->getVisibilityTriggerData()['tag'];
         $response = $this->payLoadServerRequest($requestData);
-    }    
+    }
 
     /**
      * Return the base data of event
@@ -331,30 +329,29 @@ class Wp_Sdtrk_Tracker_Fb
     }
 
     /**
-     * Converts the Raw-Eventname to Facebook-Event-Name
+     * Converts an EventName to FB-EventName
      *
      * @param Wp_Sdtrk_Tracker_Event $event
      */
-    private function readEventName($event)
+    private function convert_eventname($event)
     {
-        $rawEvent = $event->getEventName();
-        switch ($rawEvent) {
+        switch ($event->getEventName()) {
             case 'page_view':
                 return 'PageView';
-            case 'add_to_cart':
-                return 'AddToCart';
-            case 'purchase':
-                return 'Purchase';
-            case 'sign_up':
-                return 'CompleteRegistration';
-            case 'generate_lead':
-                return 'Lead';
-            case 'begin_checkout':
-                return 'InitiateCheckout';
             case 'view_item':
                 return 'ViewContent';
+            case 'generate_lead':
+                return 'Lead';
+            case 'sign_up':
+                return 'CompleteRegistration';
+            case 'add_to_cart':
+                return 'AddToCart';
+            case 'begin_checkout':
+                return 'InitiateCheckout';
+            case 'purchase':
+                return 'Purchase';
             default:
-                return $rawEvent;
+                return false;
         }
     }
 }

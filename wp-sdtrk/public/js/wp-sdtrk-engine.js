@@ -13,7 +13,7 @@ class Wp_Sdtrk_Engine {
 		this.data = decryptedData;
 		this.event = new Wp_Sdtrk_Event();
 		this.localizedData = wp_sdtrk_engine; //comes from wp
-		this.helper = new Wp_Sdtrk_Helper(this.localizedData,this.data);
+		this.helper = new Wp_Sdtrk_Helper(this.localizedData, this.data);
 		this.clickBtns = [];
 
 		//this has to be global
@@ -41,6 +41,8 @@ class Wp_Sdtrk_Engine {
 		this.catcher_ga = new Wp_Sdtrk_Catcher_Ga(this.event, this.helper);
 		this.catcher_tt = new Wp_Sdtrk_Catcher_Tt(this.event, this.helper);
 		this.catcher_lin = new Wp_Sdtrk_Catcher_Lin(this.event, this.helper);
+		this.catcher_fl = new Wp_Sdtrk_Catcher_Fl(this.event, this.helper);
+		this.catcher_mtc = new Wp_Sdtrk_Catcher_Mtc(this.event, this.helper);
 
 		//this has to be global
 		window.wp_sdtrk_scrollDepths = this.event.getScrollTrigger()
@@ -69,7 +71,7 @@ class Wp_Sdtrk_Engine {
 	get_catcher_fb() {
 		return this.catcher_fb;
 	}
-	
+
 	/**
 	* Get the ga catcher
 	* @return  {Wp_Sdtrk_Catcher_Ga} The catcher-object
@@ -85,11 +87,27 @@ class Wp_Sdtrk_Engine {
 		return this.catcher_tt;
 	}
 	/**
-	* Get the tt catcher
+	* Get the lin catcher
 	* @return  {Wp_Sdtrk_Catcher_Lin} The catcher-object
 	 */
 	get_catcher_lin() {
 		return this.catcher_lin;
+	}
+
+	/**
+	* Get the fl catcher
+	* @return  {Wp_Sdtrk_Catcher_Fl} The catcher-object
+	 */
+	get_catcher_fl() {
+		return this.catcher_fl;
+	}
+	
+	/**
+	* Get the mtc catcher
+	* @return  {Wp_Sdtrk_Catcher_Mtc} The catcher-object
+	 */
+	get_catcher_mtc() {
+		return this.catcher_mtc;
 	}
 
 	/**
@@ -200,6 +218,8 @@ class Wp_Sdtrk_Engine {
 		var catcher_ga = this.catcher_ga;
 		var catcher_tt = this.catcher_tt;
 		var catcher_lin = this.catcher_lin;
+		var catcher_fl = this.catcher_fl;
+		var catcher_mtc = this.catcher_mtc;
 
 		//catchPageHit()
 		catcher_local.catchPageHit();
@@ -207,6 +227,8 @@ class Wp_Sdtrk_Engine {
 		catcher_ga.catchPageHit(2);
 		catcher_tt.catchPageHit(2);
 		catcher_lin.catchPageHit(2);
+		catcher_fl.catchPageHit(2);
+		catcher_mtc.catchPageHit(2);
 		window.wp_sdtrk_history.push('Page_0');
 
 		//catchTimeHit(time)
@@ -222,6 +244,8 @@ class Wp_Sdtrk_Engine {
 							catcher_ga.catchTimeHit(triggerTime, 2);
 							catcher_tt.catchTimeHit(triggerTime, 2);
 							catcher_lin.catchTimeHit(triggerTime, 2);
+							catcher_fl.catchTimeHit(triggerTime, 2);
+							catcher_mtc.catchTimeHit(triggerTime, 2);
 							window.wp_sdtrk_history.push('Time_' + triggerTime.toString());
 						}, time);
 					});
@@ -241,6 +265,8 @@ class Wp_Sdtrk_Engine {
 						catcher_ga.catchClickHit(el[1], 2);
 						catcher_tt.catchClickHit(el[1], 2);
 						catcher_lin.catchClickHit(el[1], 2);
+						catcher_fl.catchClickHit(el[1], 2);
+						catcher_mtc.catchClickHit(el[1], 2);
 						window.wp_sdtrk_history.push('Click_' + el[1]);
 					}
 				});
@@ -263,6 +289,8 @@ class Wp_Sdtrk_Engine {
 								catcher_ga.catchScrollHit(depth, 2);
 								catcher_tt.catchScrollHit(depth, 2);
 								catcher_lin.catchScrollHit(depth, 2);
+								catcher_fl.catchScrollHit(depth, 2);
+								catcher_mtc.catchScrollHit(depth, 2);
 								window.wp_sdtrk_history.push('Scroll_' + depth.toString());
 							}
 						}
@@ -286,6 +314,8 @@ class Wp_Sdtrk_Engine {
 						catcher_ga.catchVisibilityHit(el[1], 2);
 						catcher_tt.catchVisibilityHit(el[1], 2);
 						catcher_lin.catchVisibilityHit(el[1], 2);
+						catcher_fl.catchVisibilityHit(el[1], 2);
+						catcher_mtc.catchVisibilityHit(el[1], 2);
 						window.wp_sdtrk_history.push('Visited_' + el[1]);
 					}
 				});

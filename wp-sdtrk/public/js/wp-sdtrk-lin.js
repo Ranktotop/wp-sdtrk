@@ -19,15 +19,15 @@ class Wp_Sdtrk_Catcher_Lin {
 	* Validate if tt is enabled 0 = browser, 1 = server, 2 = both
 	 */
 	validate(target = 2) {
-		if (this.localizedData.lin_id === "" || !this.event) {
+		if (this.localizedData.pid === "" || !this.event) {
 			return;
 		}
-		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.c_lin_b_i, this.localizedData.c_lin_b_s, this.event) !== false && this.localizedData.lin_b_e !== "") {
+		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {
 			this.b_enabled = true;
 			//load the base pixel
 			this.loadPixel();
 		}
-		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.c_lin_s_i, this.localizedData.c_lin_s_s, this.event) !== false && this.localizedData.lin_s_e !== "") {
+		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.s_ci, this.localizedData.s_cs, this.event) !== false && this.localizedData.s_e !== "") {
 			this.s_enabled = true;
 		}
 	}
@@ -42,10 +42,10 @@ class Wp_Sdtrk_Catcher_Lin {
 		var newState = false;
 
 		if (type === 'b') {
-			oldState = this.isPixelLoaded();
+			oldState = this.pixelLoaded;
 			if (!oldState) {
 				this.validate(0);
-				newState = this.isPixelLoaded();
+				newState = this.pixelLoaded;
 			}
 		}
 		if (type === 's') {
@@ -74,21 +74,25 @@ class Wp_Sdtrk_Catcher_Lin {
 	}
 
 	/**
-	* Check if pixel was loaded
-	* @return  {Boolean} If the base pixel was loaded
-	 */
-	isPixelLoaded() {
-		return this.pixelLoaded;
-	}
-
-	/**
 	* Catch page hit
 	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
 	 */
 	catchPageHit(target = 2) {
 		if (target === 0 || target === 2) {
 			this.fireData('Page', { state: true });
-			this.fireData('Event', { state: true });
+		}
+		this.catchEventHit(target);
+	}
+
+	/**
+	* Catch event hit - These hits are only fired if there is an event-name given
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchEventHit(target = 2) {
+		if (this.event.grabEventName()) {
+			if (target === 0 || target === 2) {
+				this.fireData('Event', { state: true });
+			}
 		}
 	}
 
@@ -143,7 +147,7 @@ class Wp_Sdtrk_Catcher_Lin {
 		if (this.isEnabled('b') && !this.pixelLoaded) {
 			//Base Pixel
 			window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
-			window._linkedin_data_partner_ids.push(this.localizedData.lin_id);
+			window._linkedin_data_partner_ids.push(this.localizedData.pid);
 			(function(l) {
 				if (!l) {
 					window.lintrk = function(a, b) { window.lintrk.q.push([a, b]) };
@@ -170,19 +174,14 @@ class Wp_Sdtrk_Catcher_Lin {
 			//Fire the desired event
 			switch (handler) {
 				case 'Page':
-					if (this.event.grabEventName() === 'PageView' || this.event.grabEventName() === false) {
-						this.get_triggeredConversions('page_view').forEach(
-							element => window.lintrk('track', { conversion_id: element })
-						);
-					}
+					this.get_triggeredConversions('page_view').forEach(
+						element => window.lintrk('track', { conversion_id: element })
+					);
 					break;
 				case 'Event':
-					if (this.event.grabEventName() !== 'PageView' && this.event.grabEventName() !== false) {
-						//Event Pixel
-						this.get_triggeredConversions(this.event.grabEventName()).forEach(
-							element => window.lintrk('track', { conversion_id: element })
-						);
-					}
+					this.get_triggeredConversions(this.event.grabEventName()).forEach(
+						element => window.lintrk('track', { conversion_id: element })
+					);
 					break;
 				case 'Time':
 					this.get_triggeredConversions('timetracker-' + data.time).forEach(
@@ -218,10 +217,10 @@ class Wp_Sdtrk_Catcher_Lin {
 	get_triggeredConversions(currentEventName) {
 		var triggeredConversionIds = [];
 		//iterate all given events
-		for (var i = 0; i < this.localizedData.lin_map.length; i++) {
-			var eventName = this.localizedData.lin_map[i].eventName;
-			var eventConvId = this.localizedData.lin_map[i].convId;
-			var eventRules = this.localizedData.lin_map[i].rules;
+		for (var i = 0; i < this.localizedData.map_ev.length; i++) {
+			var eventName = this.localizedData.map_ev[i].eventName;
+			var eventConvId = this.localizedData.map_ev[i].convId;
+			var eventRules = this.localizedData.map_ev[i].rules;
 			//if the element is the current one
 			var state = (currentEventName === eventName);
 			if (state) {
@@ -261,9 +260,9 @@ class Wp_Sdtrk_Catcher_Lin {
 	* @return  {String|Boolean} The Conversion-ID if mapped, else false
 	*/
 	is_mappedBtn(buttontag) {
-		for (var i = 0; i < this.localizedData.lin_btnmap.length; i++) {
-			var btnTag = this.localizedData.lin_btnmap[i].btnTag;
-			var eventConvId = this.localizedData.lin_btnmap[i].convId;
+		for (var i = 0; i < this.localizedData.map_btn.length; i++) {
+			var btnTag = this.localizedData.map_btn[i].btnTag;
+			var eventConvId = this.localizedData.map_btn[i].convId;
 			var state = (buttontag === btnTag);
 			if (state && eventConvId.length !== 0) {
 				return eventConvId
@@ -278,9 +277,9 @@ class Wp_Sdtrk_Catcher_Lin {
 	* @return  {String|Boolean} The Conversion-ID if mapped, else false
 	*/
 	is_mappedIV(itemtag) {
-		for (var i = 0; i < this.localizedData.lin_ivmap.length; i++) {
-			var ivTag = this.localizedData.lin_ivmap[i].ivTag;
-			var eventConvId = this.localizedData.lin_ivmap[i].convId;
+		for (var i = 0; i < this.localizedData.map_iv.length; i++) {
+			var ivTag = this.localizedData.map_iv[i].ivTag;
+			var eventConvId = this.localizedData.map_iv[i].convId;
 			var state = (itemtag === ivTag);
 			if (state && eventConvId.length !== 0) {
 				return eventConvId

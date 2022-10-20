@@ -13,18 +13,18 @@ class Wp_Sdtrk_Catcher_Local {
 	}
 
 	/**
-	* Check if local is enabled
-	* @return  {Boolean} If enabled
-	 */
-	isEnabled() {
-		return this.enabled;
-	}
-
-	/**
 	* Catch page hit
 	 */
 	catchPageHit() {
 		this.sendData('Page', { state: true });
+		this.catchEventHit();
+	}
+	
+	/**
+	* Catch page hit
+	 */
+	catchEventHit() {
+		this.sendData('Event', { state: true });
 	}
 
 	/**
@@ -65,7 +65,7 @@ class Wp_Sdtrk_Catcher_Local {
 	* @param {Object} data The data to send
 	 */
 	sendData(handler, data) {
-		if (this.isEnabled()) {
+		if (this.enabled) {
 			this.helper.send_ajax({ event: this.event, type: 'local', handler: handler, data: data });
 		}
 	}

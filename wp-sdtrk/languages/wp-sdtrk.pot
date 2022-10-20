@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Smart Server Side Tracking Plugin\n"
-"POT-Creation-Date: 2022-10-19 13:49+0200\n"
+"POT-Creation-Date: 2022-10-20 21:38+0200\n"
 "PO-Revision-Date: 2021-03-29 12:05+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -36,777 +36,809 @@ msgstr ""
 msgid "Server-Side-Tracking"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:307
-msgid "Product Meta"
+#: admin/class-wp-sdtrk-admin.php:331 admin/class-wp-sdtrk-admin.php:432
+msgid "Basic Tracking Settings"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:326
-msgid "Tracking-Settings"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:333
+#: admin/class-wp-sdtrk-admin.php:338
 msgid "Product ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:335
+#: admin/class-wp-sdtrk-admin.php:340
 msgid "Please enter a product id in order to track the ViewContent-Event"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:341
+#: admin/class-wp-sdtrk-admin.php:346
 msgid "Overwrite Tracking-Consent"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:342
+#: admin/class-wp-sdtrk-admin.php:347
 msgid ""
 "Check to track all visitors of this page regardless of their cookie consent"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:356
+#: admin/class-wp-sdtrk-admin.php:361
 msgid "authenticated"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:356
+#: admin/class-wp-sdtrk-admin.php:361
 msgid "not authenticated"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:357
+#: admin/class-wp-sdtrk-admin.php:362
 msgid "Re-authenticate"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:357
+#: admin/class-wp-sdtrk-admin.php:362
 msgid "Authenticate"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:362
+#: admin/class-wp-sdtrk-admin.php:367
 msgid "Fire always"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:367
+#: admin/class-wp-sdtrk-admin.php:372
 msgid "Borlabs Cookie"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:372
+#: admin/class-wp-sdtrk-admin.php:377
 msgid "Page View"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:373
+#: admin/class-wp-sdtrk-admin.php:378
 msgid "Add to Cart"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:374
+#: admin/class-wp-sdtrk-admin.php:379
 msgid "Purchase"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:375
+#: admin/class-wp-sdtrk-admin.php:380
 msgid "Complete registration"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:376
+#: admin/class-wp-sdtrk-admin.php:381
 msgid "Lead"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:377
+#: admin/class-wp-sdtrk-admin.php:382
 msgid "Initiate checkout"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:378
+#: admin/class-wp-sdtrk-admin.php:383
 msgid "View Content"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:386
+#: admin/class-wp-sdtrk-admin.php:391
 msgid "Time-Tracker"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:386
+#: admin/class-wp-sdtrk-admin.php:391
 msgid "Seconds"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:395
+#: admin/class-wp-sdtrk-admin.php:400
 msgid "Scroll-Tracker"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:395
+#: admin/class-wp-sdtrk-admin.php:400
 msgid "Percent"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:401
+#: admin/class-wp-sdtrk-admin.php:406
 msgid ""
 "Note: Button-Click-Tracking is currently disabled in general settings! So "
 "this sttings will be ignored"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:405
+#: admin/class-wp-sdtrk-admin.php:410
 msgid ""
 "Note: Item-Visibility-Tracking is currently disabled in general settings! "
 "So this sttings will be ignored"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:410
+#: admin/class-wp-sdtrk-admin.php:415
 msgid "General"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:415
+#: admin/class-wp-sdtrk-admin.php:420
 msgid "Basic Data Settings"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:421
+#: admin/class-wp-sdtrk-admin.php:427
 msgid "Default Brand-Name"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:422
+#: admin/class-wp-sdtrk-admin.php:428
 msgid "This Name is used for several services"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:426
-msgid "Basic Tracking Settings"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:432
+#: admin/class-wp-sdtrk-admin.php:439
 msgid "Fire signal-event after time"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:433
+#: admin/class-wp-sdtrk-admin.php:440
 msgid "Check to fire a signal event after time"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:439 admin/class-wp-sdtrk-admin.php:451
+#: admin/class-wp-sdtrk-admin.php:446 admin/class-wp-sdtrk-admin.php:458
 msgid "Time-Settings"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:440
+#: admin/class-wp-sdtrk-admin.php:447
 msgid "Fire a signal-event after X Seconds"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:441
+#: admin/class-wp-sdtrk-admin.php:448
 msgid ""
 "Attention: Every event must be processed! Make sure that the frequency is "
 "therefore not too high and not several events are triggered at the same "
 "time!"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:450 admin/class-wp-sdtrk-admin.php:495
+#: admin/class-wp-sdtrk-admin.php:457 admin/class-wp-sdtrk-admin.php:504
 msgid "Add new"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:468
+#: admin/class-wp-sdtrk-admin.php:475
 msgid "Seconds to fire after"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:477
+#: admin/class-wp-sdtrk-admin.php:485
 msgid "Fire signal-event on scroll-depth"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:478
+#: admin/class-wp-sdtrk-admin.php:486
 msgid "Check to fire a signal event after scroll-depth has been reached"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:484 admin/class-wp-sdtrk-admin.php:496
+#: admin/class-wp-sdtrk-admin.php:493 admin/class-wp-sdtrk-admin.php:505
 msgid "Scroll-Settings"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:485
+#: admin/class-wp-sdtrk-admin.php:494
 msgid "Fire signal-event if the user has scrolled to x percent of the page"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:486
+#: admin/class-wp-sdtrk-admin.php:495
 msgid ""
 "Attention: Every event must be processed! Make sure that the frequency is "
 "therefore not too high and not several events are triggered at the same "
 "depth!"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:513
+#: admin/class-wp-sdtrk-admin.php:522
 msgid "Percent to reach"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:521
+#: admin/class-wp-sdtrk-admin.php:530
 msgid "Fire signal-event on button-clicks"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:522
+#: admin/class-wp-sdtrk-admin.php:531
 msgid "Check to fire a signal event after an element has been clicked"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:524
+#: admin/class-wp-sdtrk-admin.php:533
 msgid ""
 "Attention: In order for clicks to be tracked, the element to be tracked "
 "must contain the class trkbtn-TAGNAME-trkbtn. The TAGNAME placeholder can "
 "be replaced by any word and will be passed as a parameter"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:524 admin/class-wp-sdtrk-admin.php:532
+#: admin/class-wp-sdtrk-admin.php:533 admin/class-wp-sdtrk-admin.php:541
 msgid "Example:"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:529
+#: admin/class-wp-sdtrk-admin.php:538
 msgid "Fire signal-event on visibility of items"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:530
+#: admin/class-wp-sdtrk-admin.php:539
 msgid "Check to fire a signal event after an element gets visible"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:532
+#: admin/class-wp-sdtrk-admin.php:541
 msgid ""
 "Attention: In order for tracking to work, the element to be tracked must "
 "contain the class watchitm-TAGNAME-watchitm. The TAGNAME placeholder can "
 "be replaced by any word and will be passed as a parameter"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:538
+#: admin/class-wp-sdtrk-admin.php:547
 msgid "Tracking Services"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:543
+#: admin/class-wp-sdtrk-admin.php:552
 msgid "Local"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:548 admin/class-wp-sdtrk-admin.php:863
-#: admin/class-wp-sdtrk-admin.php:1028 admin/class-wp-sdtrk-admin.php:1146
-msgid "Server based Tracking"
+#: admin/class-wp-sdtrk-admin.php:557
+msgid "Local Tracking"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:554 admin/class-wp-sdtrk-admin.php:874
-#: admin/class-wp-sdtrk-admin.php:1044 admin/class-wp-sdtrk-admin.php:1157
+#: admin/class-wp-sdtrk-admin.php:564 admin/class-wp-sdtrk-admin.php:918
+#: admin/class-wp-sdtrk-admin.php:1099 admin/class-wp-sdtrk-admin.php:1222
 msgid "Activate server based tracking"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:555
+#: admin/class-wp-sdtrk-admin.php:565
 msgid "Check to save hits into the local database"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:566 admin/class-wp-sdtrk-admin.php:927
-#: admin/class-wp-sdtrk-admin.php:963 admin/class-wp-sdtrk-admin.php:1210
+#: admin/class-wp-sdtrk-admin.php:576 admin/class-wp-sdtrk-admin.php:972
+#: admin/class-wp-sdtrk-admin.php:1015 admin/class-wp-sdtrk-admin.php:1276
 msgid "Activate Debugging"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:567
+#: admin/class-wp-sdtrk-admin.php:577
 msgid "Check to debug into the wordpress system"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:578
+#: admin/class-wp-sdtrk-admin.php:582
+msgid "CSV Sync Settings"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:599
 msgid "Activate local CSV Sync"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:579
+#: admin/class-wp-sdtrk-admin.php:600
 msgid "Check to activate sync to csv-file"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:584
+#: admin/class-wp-sdtrk-admin.php:605
 msgid "CSV-Sync notes"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:585
+#: admin/class-wp-sdtrk-admin.php:606
 msgid "CSV-file will be stored here:"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:585
+#: admin/class-wp-sdtrk-admin.php:606
 msgid "You can connect GoogleDataStudio with this Connector:"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:600
+#: admin/class-wp-sdtrk-admin.php:621
 msgid "Sync hourly"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:601
+#: admin/class-wp-sdtrk-admin.php:622
 msgid "Check to sync per hour instead of the daily base"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:616 admin/class-wp-sdtrk-admin.php:664
+#: admin/class-wp-sdtrk-admin.php:637 admin/class-wp-sdtrk-admin.php:696
 msgid "At what hour should the synchronization take place"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:621
+#: admin/class-wp-sdtrk-admin.php:642
 msgid "Next sync is currently sheduled at"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:627 admin/class-wp-sdtrk-admin.php:673
+#: admin/class-wp-sdtrk-admin.php:648 admin/class-wp-sdtrk-admin.php:705
 msgid "Sync now"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:628 admin/class-wp-sdtrk-admin.php:674
+#: admin/class-wp-sdtrk-admin.php:649 admin/class-wp-sdtrk-admin.php:706
 msgid "Check to sync data directly after saving settings"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:648
+#: admin/class-wp-sdtrk-admin.php:663
+msgid "Google-Sheets Sync Settings"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:680
 msgid "Activate Google Sheets Sync"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:649
+#: admin/class-wp-sdtrk-admin.php:681
 msgid "Check to activate sync to google sheets"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:689
+#: admin/class-wp-sdtrk-admin.php:721
 msgid "O-Auth2 Credentials"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:691
+#: admin/class-wp-sdtrk-admin.php:723
 msgid "Insert your credentials-content here"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:698
+#: admin/class-wp-sdtrk-admin.php:730
 msgid "You can get this data from Google Developer Console"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:699
+#: admin/class-wp-sdtrk-admin.php:731
 msgid "Your authorized javascript-origin:"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:699
+#: admin/class-wp-sdtrk-admin.php:731
 msgid "Your authorized redirect-url:"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:704
+#: admin/class-wp-sdtrk-admin.php:736
 msgid "Authentication"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:711
+#: admin/class-wp-sdtrk-admin.php:743
 msgid "Click on the button after you have entered your credentials"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:712
+#: admin/class-wp-sdtrk-admin.php:744
 msgid "You are currently"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:722
+#: admin/class-wp-sdtrk-admin.php:754
 msgid "Google Sheet-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:723
+#: admin/class-wp-sdtrk-admin.php:755
 msgid "Insert the target sheet-id from google sheets"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:733
+#: admin/class-wp-sdtrk-admin.php:765
 msgid "Table-Name"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:734
+#: admin/class-wp-sdtrk-admin.php:766
 msgid "Insert the target table-name from your google sheet"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:744
+#: admin/class-wp-sdtrk-admin.php:775
 msgid "Danger-Zone"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:744
+#: admin/class-wp-sdtrk-admin.php:775
 msgid "Be careful with these functions!"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:749
+#: admin/class-wp-sdtrk-admin.php:782
 msgid "Clear Database"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:750
+#: admin/class-wp-sdtrk-admin.php:783
 msgid "Check to delete all entries in local database"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:765 admin/class-wp-sdtrk-admin.php:792
+#: admin/class-wp-sdtrk-admin.php:799 admin/class-wp-sdtrk-admin.php:827
 msgid "Are you sure?"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:766 admin/class-wp-sdtrk-admin.php:793
+#: admin/class-wp-sdtrk-admin.php:800 admin/class-wp-sdtrk-admin.php:828
 msgid "This cannot be undone!"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:776
+#: admin/class-wp-sdtrk-admin.php:810
 msgid "Reset google-sheet sync"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:777
+#: admin/class-wp-sdtrk-admin.php:811
 msgid "Check to re-sync all data to google-sheets"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:805
+#: admin/class-wp-sdtrk-admin.php:840
 msgid "Facebook"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:811
+#: admin/class-wp-sdtrk-admin.php:845
+msgid "Facebook Tracking"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:852
 msgid "Facebook Pixel-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:812
+#: admin/class-wp-sdtrk-admin.php:853
 msgid "Insert your own Facebook Pixel ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:816 admin/class-wp-sdtrk-admin.php:986
-#: admin/class-wp-sdtrk-admin.php:1099 admin/class-wp-sdtrk-admin.php:1240
-#: admin/class-wp-sdtrk-admin.php:1440 admin/class-wp-sdtrk-admin.php:1501
+#: admin/class-wp-sdtrk-admin.php:857 admin/class-wp-sdtrk-admin.php:1039
+#: admin/class-wp-sdtrk-admin.php:1162 admin/class-wp-sdtrk-admin.php:1314
+#: admin/class-wp-sdtrk-admin.php:1522 admin/class-wp-sdtrk-admin.php:1591
 msgid "Browser based Tracking"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:827 admin/class-wp-sdtrk-admin.php:997
-#: admin/class-wp-sdtrk-admin.php:1110 admin/class-wp-sdtrk-admin.php:1251
-#: admin/class-wp-sdtrk-admin.php:1451 admin/class-wp-sdtrk-admin.php:1512
+#: admin/class-wp-sdtrk-admin.php:869 admin/class-wp-sdtrk-admin.php:1050
+#: admin/class-wp-sdtrk-admin.php:1173 admin/class-wp-sdtrk-admin.php:1325
+#: admin/class-wp-sdtrk-admin.php:1533 admin/class-wp-sdtrk-admin.php:1602
 msgid "Activate browser based tracking"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:828
+#: admin/class-wp-sdtrk-admin.php:870
 msgid "Check to fire facebook browser pixel"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:844 admin/class-wp-sdtrk-admin.php:902
-#: admin/class-wp-sdtrk-admin.php:1009 admin/class-wp-sdtrk-admin.php:1067
-#: admin/class-wp-sdtrk-admin.php:1127 admin/class-wp-sdtrk-admin.php:1185
-#: admin/class-wp-sdtrk-admin.php:1268 admin/class-wp-sdtrk-admin.php:1463
-#: admin/class-wp-sdtrk-admin.php:1524
+#: admin/class-wp-sdtrk-admin.php:886 admin/class-wp-sdtrk-admin.php:946
+#: admin/class-wp-sdtrk-admin.php:1062 admin/class-wp-sdtrk-admin.php:1122
+#: admin/class-wp-sdtrk-admin.php:1190 admin/class-wp-sdtrk-admin.php:1250
+#: admin/class-wp-sdtrk-admin.php:1342 admin/class-wp-sdtrk-admin.php:1545
+#: admin/class-wp-sdtrk-admin.php:1614
 msgid "Choose cookie consent behavior"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:857 admin/class-wp-sdtrk-admin.php:915
-#: admin/class-wp-sdtrk-admin.php:1022 admin/class-wp-sdtrk-admin.php:1080
-#: admin/class-wp-sdtrk-admin.php:1140 admin/class-wp-sdtrk-admin.php:1198
-#: admin/class-wp-sdtrk-admin.php:1281 admin/class-wp-sdtrk-admin.php:1476
-#: admin/class-wp-sdtrk-admin.php:1537
+#: admin/class-wp-sdtrk-admin.php:900 admin/class-wp-sdtrk-admin.php:960
+#: admin/class-wp-sdtrk-admin.php:1076 admin/class-wp-sdtrk-admin.php:1136
+#: admin/class-wp-sdtrk-admin.php:1204 admin/class-wp-sdtrk-admin.php:1264
+#: admin/class-wp-sdtrk-admin.php:1356 admin/class-wp-sdtrk-admin.php:1559
+#: admin/class-wp-sdtrk-admin.php:1628
 msgid "Cookie ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:858 admin/class-wp-sdtrk-admin.php:916
-#: admin/class-wp-sdtrk-admin.php:1023 admin/class-wp-sdtrk-admin.php:1081
-#: admin/class-wp-sdtrk-admin.php:1141 admin/class-wp-sdtrk-admin.php:1199
-#: admin/class-wp-sdtrk-admin.php:1282 admin/class-wp-sdtrk-admin.php:1477
-#: admin/class-wp-sdtrk-admin.php:1538
+#: admin/class-wp-sdtrk-admin.php:901 admin/class-wp-sdtrk-admin.php:961
+#: admin/class-wp-sdtrk-admin.php:1077 admin/class-wp-sdtrk-admin.php:1137
+#: admin/class-wp-sdtrk-admin.php:1205 admin/class-wp-sdtrk-admin.php:1265
+#: admin/class-wp-sdtrk-admin.php:1357 admin/class-wp-sdtrk-admin.php:1560
+#: admin/class-wp-sdtrk-admin.php:1629
 msgid "You can get this information in the Plugins Consent-Settings"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:859 admin/class-wp-sdtrk-admin.php:917
-#: admin/class-wp-sdtrk-admin.php:1024 admin/class-wp-sdtrk-admin.php:1082
-#: admin/class-wp-sdtrk-admin.php:1142 admin/class-wp-sdtrk-admin.php:1200
-#: admin/class-wp-sdtrk-admin.php:1283 admin/class-wp-sdtrk-admin.php:1478
-#: admin/class-wp-sdtrk-admin.php:1539
+#: admin/class-wp-sdtrk-admin.php:902 admin/class-wp-sdtrk-admin.php:962
+#: admin/class-wp-sdtrk-admin.php:1078 admin/class-wp-sdtrk-admin.php:1138
+#: admin/class-wp-sdtrk-admin.php:1206 admin/class-wp-sdtrk-admin.php:1266
+#: admin/class-wp-sdtrk-admin.php:1358 admin/class-wp-sdtrk-admin.php:1561
+#: admin/class-wp-sdtrk-admin.php:1630
 msgid ""
 "For more accurate tracking, the following opt-in code should be stored in "
 "the cookie settings of Borlabs:"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:875
+#: admin/class-wp-sdtrk-admin.php:906 admin/class-wp-sdtrk-admin.php:1083
+#: admin/class-wp-sdtrk-admin.php:1211
+msgid "Server based Tracking"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:919
 msgid "Check to fire Facebook Conversion API"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:891 admin/class-wp-sdtrk-admin.php:1174
+#: admin/class-wp-sdtrk-admin.php:935 admin/class-wp-sdtrk-admin.php:1239
 msgid "Conversion-API Token"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:892
+#: admin/class-wp-sdtrk-admin.php:936
 msgid "You can get the token within the facebook events-manager"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:928 admin/class-wp-sdtrk-admin.php:1211
+#: admin/class-wp-sdtrk-admin.php:973 admin/class-wp-sdtrk-admin.php:1277
 msgid "Check to activate CAPI debugging"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:939 admin/class-wp-sdtrk-admin.php:1222
+#: admin/class-wp-sdtrk-admin.php:985 admin/class-wp-sdtrk-admin.php:1289
 msgid "Test-Code"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:940
+#: admin/class-wp-sdtrk-admin.php:986
 msgid "You can get the Test-Code within the facebook events-manager"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:946
+#: admin/class-wp-sdtrk-admin.php:992
 msgid "Google"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:952
+#: admin/class-wp-sdtrk-admin.php:997
+msgid "Google Tracking"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1004
 msgid "Google Analytics ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:953
+#: admin/class-wp-sdtrk-admin.php:1005
 msgid "Insert your own Measurement-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:964
+#: admin/class-wp-sdtrk-admin.php:1016
 msgid "Check to activate GA debugging"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:975
+#: admin/class-wp-sdtrk-admin.php:1027
 msgid "Debug in live-view"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:976
+#: admin/class-wp-sdtrk-admin.php:1028
 msgid "Check to show debug-hits in google analytics realtime"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:998
+#: admin/class-wp-sdtrk-admin.php:1051
 msgid "Check to fire analytics browser tracking"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1045
+#: admin/class-wp-sdtrk-admin.php:1100
 msgid "Check to fire Google Measurement Protocol"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1056
+#: admin/class-wp-sdtrk-admin.php:1111
 msgid "Measurement-API Token"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1057
+#: admin/class-wp-sdtrk-admin.php:1112
 msgid "You can get the token within the google datastream-settings"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1088
+#: admin/class-wp-sdtrk-admin.php:1144
 msgid "TikTok"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1094
+#: admin/class-wp-sdtrk-admin.php:1149
+msgid "TikTok Tracking"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1156
 msgid "TikTok Pixel-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1095
+#: admin/class-wp-sdtrk-admin.php:1157
 msgid "Insert your own TikTok Pixel ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1111
+#: admin/class-wp-sdtrk-admin.php:1174
 msgid "Check to fire TikTok browser pixel"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1158
+#: admin/class-wp-sdtrk-admin.php:1223
 msgid "Check to fire TikTok Event-API"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1175
+#: admin/class-wp-sdtrk-admin.php:1240
 msgid "You can get the token within the TikTok events-manager"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1223
+#: admin/class-wp-sdtrk-admin.php:1290
 msgid "You can get the Test-Code within the TikTok events-manager"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1229
+#: admin/class-wp-sdtrk-admin.php:1296
 msgid "LinkedIn"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1235
-msgid "LinkedIn Partner-ID"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1236
-msgid "Insert your own LinkedIn Partner ID"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1252
-msgid "Check to fire linkedIn browser pixel"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1293
-msgid "Conversion-Mapping"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1294
-msgid "Map linkedIn custom conversions"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1298 admin/class-wp-sdtrk-admin.php:1368
-#: admin/class-wp-sdtrk-admin.php:1400
-msgid "Map new"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1299
-msgid "Conversion-Mappings"
+#: admin/class-wp-sdtrk-admin.php:1301
+msgid "LinkedIn Tracking"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:1308
+msgid "LinkedIn Partner-ID"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1309
+msgid "Insert your own LinkedIn Partner ID"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1326
+msgid "Check to fire linkedIn browser pixel"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1368
+msgid "Conversion-Mapping"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1369
+msgid "Map linkedIn custom conversions"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1373 admin/class-wp-sdtrk-admin.php:1443
+#: admin/class-wp-sdtrk-admin.php:1475
+msgid "Map new"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1374
+msgid "Conversion-Mappings"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1383
 msgid "Event"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1310
+#: admin/class-wp-sdtrk-admin.php:1385
 msgid "Select event to be mapped"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1315 admin/class-wp-sdtrk-admin.php:1383
-#: admin/class-wp-sdtrk-admin.php:1415
+#: admin/class-wp-sdtrk-admin.php:1390 admin/class-wp-sdtrk-admin.php:1458
+#: admin/class-wp-sdtrk-admin.php:1490
 msgid "LinkedIn Conversion-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1320
+#: admin/class-wp-sdtrk-admin.php:1395
 msgid "Mapping rules"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1321
+#: admin/class-wp-sdtrk-admin.php:1396
 msgid ""
 "Combine several parameters that must ALL exist for this event to be "
 "triggered"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1325
+#: admin/class-wp-sdtrk-admin.php:1400
 msgid "Add rule"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1326
+#: admin/class-wp-sdtrk-admin.php:1401
 msgid "Rules"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1335
+#: admin/class-wp-sdtrk-admin.php:1410
 msgid "Attribute"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1337 admin/class-wp-sdtrk-admin.php:1606
+#: admin/class-wp-sdtrk-admin.php:1412 admin/class-wp-sdtrk-admin.php:1717
 msgid "Product-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1338 admin/class-wp-sdtrk-admin.php:1611
+#: admin/class-wp-sdtrk-admin.php:1413 admin/class-wp-sdtrk-admin.php:1722
 msgid "Product-Name"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1340
+#: admin/class-wp-sdtrk-admin.php:1415
 msgid "Please select an attribute..."
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1346 admin/class-wp-sdtrk-admin.php:1616
+#: admin/class-wp-sdtrk-admin.php:1421 admin/class-wp-sdtrk-admin.php:1727
 msgid "Value"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1348
+#: admin/class-wp-sdtrk-admin.php:1423
 msgid "Leave blank for all"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1363
+#: admin/class-wp-sdtrk-admin.php:1438
 msgid "Conversion-Button-Mapping"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1364
+#: admin/class-wp-sdtrk-admin.php:1439
 msgid "Map linkedIn custom conversions to button-clicks"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1369
+#: admin/class-wp-sdtrk-admin.php:1444
 msgid "Conversion-Button-Mappings"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1378
+#: admin/class-wp-sdtrk-admin.php:1453
 msgid "Button-Tag"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1395
+#: admin/class-wp-sdtrk-admin.php:1470
 msgid "Item-Visibility-Mapping"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1396
+#: admin/class-wp-sdtrk-admin.php:1471
 msgid "Map linkedIn custom conversions to item visibiliy"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1401
+#: admin/class-wp-sdtrk-admin.php:1476
 msgid "Item-Visibility-Mappings"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1410
+#: admin/class-wp-sdtrk-admin.php:1485
 msgid "Item-Tag"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1423
+#: admin/class-wp-sdtrk-admin.php:1498
 msgid "Funnelytics"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1429
+#: admin/class-wp-sdtrk-admin.php:1503
+msgid "Funnelytics Tracking"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1510
 msgid "Funnelytics Tracking-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1430
+#: admin/class-wp-sdtrk-admin.php:1511
 msgid "Insert your own funnelytics tracking id"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1431
+#: admin/class-wp-sdtrk-admin.php:1512
 msgid "What is funnelytics?"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1452
+#: admin/class-wp-sdtrk-admin.php:1534
 msgid "Check to fire funnelytics browser tracking"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1484
+#: admin/class-wp-sdtrk-admin.php:1567
 msgid "Mautic"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1490
-msgid "Mautic Base URL"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1491
-msgid "Insert the base-url of your mautic installation"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1492
-msgid "What is mautic?"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1513
-msgid "Check to fire mautic browser tracking"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1548
-msgid "Data Sources"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1553
-msgid "Digistore24"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1559
-msgid "Activate decryption"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1560
-msgid "Check to decrypt GET-Parameter before handling"
-msgstr ""
-
-#: admin/class-wp-sdtrk-admin.php:1571
-msgid "ThankYou-Key"
-msgstr ""
-
 #: admin/class-wp-sdtrk-admin.php:1572
-msgid "Please enter the ThankYou-Key which you have set in Digistore24"
+msgid "Mautic Tracking"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:1579
-msgid "Parameter-Name(s)"
+msgid "Mautic Base URL"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:1580
-msgid "Accepts"
+msgid "Insert the base-url of your mautic installation"
 msgstr ""
 
 #: admin/class-wp-sdtrk-admin.php:1581
+msgid "What is mautic?"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1603
+msgid "Check to fire mautic browser tracking"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1639
+msgid "Data Sources"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1644 admin/class-wp-sdtrk-admin.php:1649
+msgid "Digistore24"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1656
+msgid "Activate decryption"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1657
+msgid "Check to decrypt GET-Parameter before handling"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1668
+msgid "ThankYou-Key"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1669
+msgid "Please enter the ThankYou-Key which you have set in Digistore24"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1676
+msgid "Parameter-Name(s)"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1677
+msgid "Accepts"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1678
 msgid "Example"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1586
+#: admin/class-wp-sdtrk-admin.php:1683 admin/class-wp-sdtrk-admin.php:1688
 msgid "Tutorials"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1591
+#: admin/class-wp-sdtrk-admin.php:1695
+msgid "Video Tutorials"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:1701
 msgid "Setup Tutorial"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1596
+#: admin/class-wp-sdtrk-admin.php:1707
 msgid "Supported GET-Parameters"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1597 admin/class-wp-sdtrk-admin.php:1627
+#: admin/class-wp-sdtrk-admin.php:1707 admin/class-wp-sdtrk-admin.php:1738
 msgid "Note"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1597
+#: admin/class-wp-sdtrk-admin.php:1707
 msgid ""
 "Enable \"appending order details to thank you URL\" on services like "
 "Digistore24 so that the parameters below are passed automatically."
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1601
+#: admin/class-wp-sdtrk-admin.php:1712
 msgid "Transaction-ID"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1621
+#: admin/class-wp-sdtrk-admin.php:1732
 msgid "Type"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1626
+#: admin/class-wp-sdtrk-admin.php:1737
 msgid "UTM"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1627
+#: admin/class-wp-sdtrk-admin.php:1738
 msgid ""
 "UTM parameters are stored in cookies and automatically passed on further "
-"visits"
+"visits!"
 msgstr ""
 
-#: admin/class-wp-sdtrk-admin.php:1677
+#: admin/class-wp-sdtrk-admin.php:1788
 msgid "Thanks for updating"
 msgstr ""
 

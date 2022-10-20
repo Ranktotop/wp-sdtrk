@@ -21,15 +21,15 @@ class Wp_Sdtrk_Catcher_Tt {
 	* Validate if tt is enabled 0 = browser, 1 = server, 2 = both
 	 */
 	validate(target = 2) {
-		if (this.localizedData.tt_id === "" || !this.event) {
+		if (this.localizedData.pid === "" || !this.event) {
 			return;
 		}
-		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.c_tt_b_i, this.localizedData.c_tt_b_s, this.event) !== false && this.localizedData.tt_b_e !== "") {
+		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {
 			this.b_enabled = true;
 			//load the base pixel
 			this.loadPixel();
 		}
-		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.c_tt_s_i, this.localizedData.c_tt_s_s, this.event) !== false && this.localizedData.tt_s_e !== "") {
+		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.s_ci, this.localizedData.s_cs, this.event) !== false && this.localizedData.s_e !== "") {
 			this.s_enabled = true;
 		}
 		if (this.get_Ttc()) {
@@ -50,10 +50,10 @@ class Wp_Sdtrk_Catcher_Tt {
 		var newState = false;
 
 		if (type === 'b') {
-			oldState = this.isPixelLoaded();
+			oldState = this.pixelLoaded;
 			if (!oldState) {
 				this.validate(0);
-				newState = this.isPixelLoaded();
+				newState = this.pixelLoaded;
 			}
 		}
 		if (type === 's') {
@@ -82,25 +82,31 @@ class Wp_Sdtrk_Catcher_Tt {
 	}
 
 	/**
-	* Check if pixel was loaded
-	* @return  {Boolean} If the base pixel was loaded
-	 */
-	isPixelLoaded() {
-		return this.pixelLoaded;
-	}
-
-	/**
 	* Catch page hit
 	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
 	 */
 	catchPageHit(target = 2) {
 		if (target === 0 || target === 2) {
 			this.fireData('Page', { state: true });
-			this.fireData('Event', { state: true });
 		}
 		if (target === 1 || target === 2) {
 			this.sendData('Page', { state: true });
-			this.sendData('Event', { state: true });
+		}
+		this.catchEventHit(target);
+	}
+
+	/**
+	* Catch event hit - These hits are only fired if there is an event-name given
+	* @param {Integer} target 0 = browser 1= server 2 =both // doesnt overwrite consent
+	 */
+	catchEventHit(target = 2) {
+		if (this.event.grabEventName()) {
+			if (target === 0 || target === 2) {
+				this.fireData('Event', { state: true });
+			}
+			if (target === 1 || target === 2) {
+				this.sendData('Event', { state: true });
+			}
 		}
 	}
 
@@ -166,7 +172,7 @@ class Wp_Sdtrk_Catcher_Tt {
 	loadPixel() {
 		if (this.isEnabled('b') && !this.pixelLoaded) {
 			//Base Pixel
-			! function(w, d, t,pixelid) {
+			! function(w, d, t, pixelid) {
 				w.TiktokAnalyticsObject = t;
 				var ttq = w[t] = w[t] || [];
 				ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie"], ttq.setAndDefer = function(t, e) {
@@ -188,7 +194,7 @@ class Wp_Sdtrk_Catcher_Tt {
 				};
 
 				ttq.load(pixelid);
-			}(window, document, 'ttq',this.localizedData.tt_id);
+			}(window, document, 'ttq', this.localizedData.pid);
 
 			//Identify
 			ttq.identify(this.get_data_user());
@@ -210,9 +216,7 @@ class Wp_Sdtrk_Catcher_Tt {
 					ttq.page();
 					break;
 				case 'Event':
-					if (this.convert_eventname(this.event.grabEventName()) !== 'PageView' && this.event.grabEventName() !== false) {
-						ttq.track(this.convert_eventname(this.event.grabEventName()), this.get_data_custom(), { event_id: this.event.grabOrderId() + "_" + this.get_hashId() });
-					}
+					ttq.track(this.convert_eventname(this.event.grabEventName()), this.get_data_custom(), { event_id: this.event.grabOrderId() + "_" + this.get_hashId() });
 					break;
 				case 'Time':
 					ttq.track('Watchtime-' + data.time + '-Seconds', this.get_data_custom(['value', 'currency'], {}), { event_id: this.event.grabOrderId() + "-t" + data.time + "_" + this.get_hashId() })
@@ -313,22 +317,21 @@ class Wp_Sdtrk_Catcher_Tt {
 	* @param {String} name The given event-name
 	 */
 	convert_eventname(name) {
-		name = (!name || name === "") ? name : name.toLowerCase();
 		switch (name) {
 			case 'page_view':
 				return 'ViewContent';
-			case 'add_to_cart':
-				return 'AddToCart';
-			case 'purchase':
-				return 'PlaceAnOrder';
-			case 'sign_up':
-				return 'CompleteRegistration';
-			case 'generate_lead':
-				return 'SubmitForm';
-			case 'begin_checkout':
-				return 'InitiateCheckout';
 			case 'view_item':
 				return 'ViewContent';
+			case 'generate_lead':
+				return 'SubmitForm';
+			case 'sign_up':
+				return 'CompleteRegistration';
+			case 'add_to_cart':
+				return 'AddToCart';
+			case 'begin_checkout':
+				return 'InitiateCheckout';
+			case 'purchase':
+				return 'PlaceAnOrder';
 			default:
 				return false;
 		}

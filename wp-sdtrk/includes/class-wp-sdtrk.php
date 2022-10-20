@@ -204,12 +204,7 @@ class Wp_Sdtrk {
          * Tracker Tik Tok
          */
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-tt.php';
-        
-        /**
-         * Tracker LinkedIn
-         */
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-sdtrk-tracker-lin.php';
-        
+                
         /**
          * Decrypter
          */

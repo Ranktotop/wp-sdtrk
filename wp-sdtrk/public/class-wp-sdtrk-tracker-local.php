@@ -74,6 +74,21 @@ class Wp_Sdtrk_Tracker_Local
     private function fireTracking_Server_Page($event,$data)
     {   
         //Get Event-Name
+        $eventName = 'page_view';
+        $this->printEventDebug($eventName, $event, $data);
+        $dbHelper = new Wp_Sdtrk_DbHelper();
+        return $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData());
+    }
+    
+    /**
+     * Fires the Event-Hit-Tracking
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param Array $data
+     * @return boolean
+     */
+    private function fireTracking_Server_Event($event,$data)
+    {
+        //Get Event-Name
         $eventName = (!empty($event->getEventName())) ? $event->getEventName() : 'page_view';
         $this->printEventDebug($eventName, $event, $data);
         $dbHelper = new Wp_Sdtrk_DbHelper();
