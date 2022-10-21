@@ -5,7 +5,7 @@ class Wp_Sdtrk_Helper {
 	* @param {Array} localizedData The localized engine data
 	* @param {Array} data The decrypted GET-Data
 	*/
-	constructor(localizedData,data) {
+	constructor(localizedData, data) {
 		this.localizedData = localizedData;
 		this.data = data;
 	}
@@ -41,24 +41,36 @@ class Wp_Sdtrk_Helper {
 	/**
 	* Sends an AJAX to Server
 	* @param {Object} data The object which shall be sent
+	* @param {Boolean} debugMode If the log shall be printed
 	*/
-	send_ajax(data) {
+	send_ajax(data, debugMode = false) {
+		var helper = this; // for access to the logger
 		var dataJSON = {};
 		dataJSON["action"] = 'wp_sdtrk_handleAjaxCallback';
 		dataJSON["func"] = 'validateTracker';
 		dataJSON["data"] = data;
+		dataJSON["debug"] = debugMode;
 		dataJSON['_nonce'] = this.localizedData._nonce;
+		helper.debugLog(debugMode, data, 'Sent Data to Server (' + data.type + '-' + data.handler + ')');
 		jQuery.ajax({
 			cache: false,
 			type: "POST",
 			url: this.localizedData.ajax_url,
 			data: dataJSON,
 			success: function(response) {
-				//console.log(response);
+				try {
+					var r = JSON.parse(response);
+					if (r.state) {
+						var debugging = (debugMode === '1' && r.debug && r.debug === true);
+						helper.debugLog(debugging, r.state, 'Response Data from Server (' + data.type + '-' + data.handler + ')');
+					}
+				} catch (e) {
+					helper.debugLog(debugMode, e, 'JSON Error in Response from Server (' + data.type + '-' + data.handler + ')');
+				}
 			},
 			error: function(xhr, status, error) {
-				console.log('Status: ' + xhr.status);
-				console.log('Error: ' + xhr.responseText);
+				helper.debugLog(debugMode, xhr.status, 'Server-Status (' + data.type + '-' + data.handler + ')');
+				helper.debugLog(debugMode, xhr.responseText, 'Server-Error (' + data.type + '-' + data.handler + ')');
 			}
 		});
 	}
@@ -128,7 +140,7 @@ class Wp_Sdtrk_Helper {
 
 		return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
 	}
-	
+
 	/**
 	* Checks Cookie-Consent for given service
 	* @param {String} id The ID of the cookie
@@ -150,7 +162,7 @@ class Wp_Sdtrk_Helper {
 				return -1;
 		}
 	}
-	
+
 	/**
 	* Collect value from Cookie
 	* @param {String} cookieName The names of the cookies which shall be returned
@@ -219,7 +231,7 @@ class Wp_Sdtrk_Helper {
 	/**
 	* Collect value from GET Params
 	* @param {String} parameterName The name of the param which shall be returned
-	* @return  {String} The value of the param
+	* @return {String} The value of the param
 	*/
 	get_Param(parameterName) {
 		for (const key in this.data) {
@@ -242,5 +254,36 @@ class Wp_Sdtrk_Helper {
 			data[k] = (value) ? value : "";
 		}
 		return data;
+	}
+
+	/**
+	* Debug to console if enabled
+	* @param {Boolean} mode The debug mode
+	* @param {Object} msg The object to log
+	* @param {String} headline The Headline
+	 */
+	debugLog(mode, msg, headline = "") {
+		if (mode || mode === '1') {
+			if (headline !== "") {
+				console.log(headline + ":");
+			}
+			console.log(msg);
+		}
+	}
+
+	/**
+	* Gives an Event-Name for given type
+	* @param {String} type The type
+	* @param {String} data additional data
+	* @return {String} The Event-Name
+	 */
+	get_EventName(type, data = '0') {
+		var map = this.localizedData.evmap;
+		//if type exists in map
+		if(map[type]){
+			//return the value and replace variable with given data
+			return map[type].replace('%', data);
+		}
+		return type;
 	}
 }

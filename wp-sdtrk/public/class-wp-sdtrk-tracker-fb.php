@@ -10,6 +10,7 @@ class Wp_Sdtrk_Tracker_Fb
     private $debugCode;
 
     private $debugMode;
+    private $debugMode_frontend;
 
     private $trackServer;
 
@@ -19,6 +20,7 @@ class Wp_Sdtrk_Tracker_Fb
         $this->apiToken = false;
         $this->debugCode = false;
         $this->debugMode = false;
+        $this->debugMode_frontend = false;
         $this->trackServer = false;
         $this->init();
     }
@@ -44,7 +46,7 @@ class Wp_Sdtrk_Tracker_Fb
         $this->trackServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server"), "yes") == 0) ? true : false;
 
         // Debug Mode
-        $this->debugMode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_debug"), "yes") == 0) ? true : false;
+        $this->debugMode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_debug"), "yes") == 0) ? true : false;
     }
 
     /**
@@ -79,6 +81,15 @@ class Wp_Sdtrk_Tracker_Fb
     {
         return ($this->debugMode && $this->debugCode);
     }
+    
+    /**
+     * Set and return the frontend debug mode
+     * @param Boolean|String $debugMode
+     */
+    public function setAndGetDebugMode_frontend($debugMode){
+        $this->debugMode_frontend = ($debugMode === true || $debugMode === '1') ? true : false;
+        return ($this->debugMode_frontend === true && $this->debugMode === true);
+    }
 
     /**
      * Fires the Server-based Tracking
@@ -99,7 +110,10 @@ class Wp_Sdtrk_Tracker_Fb
         if (! method_exists($this, $functionName)) {
             return false;
         }
-        return $this->$functionName($event, $data);
+        $response = $this->$functionName($event, $data);
+        Wp_Sdtrk_Helper::wp_sdtrk_write_log("Response:", $this->debugMode);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($response, $this->debugMode);
+        return ($this->setAndGetDebugMode_frontend($this->debugMode_frontend)) ? $response : true;
     }
 
     /**
@@ -115,7 +129,7 @@ class Wp_Sdtrk_Tracker_Fb
         $requestData['event_name'] = "PageView";
         $requestData["user_data"] = $this->getData_user($event, $data);
         $requestData['custom_data'] = $this->getData_custom($event);
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -137,7 +151,7 @@ class Wp_Sdtrk_Tracker_Fb
             $requestData['custom_data']['currency'] = "EUR";
             $requestData['custom_data']['value'] = $event->getEventValue();
         }
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -151,7 +165,7 @@ class Wp_Sdtrk_Tracker_Fb
     {
         // Update the event
         $scrollEventId = $event->getEventId() . "-s" . $data['percent'];
-        $scrollEventName = 'Scrolldepth-' . $data['percent'] . '-Percent';
+        $scrollEventName = $event->get_CustomEventName('Scroll',$data['percent']);
         $event->setScrollTriggerData($scrollEventName, $scrollEventId);
 
         $requestData = $this->getData_base($event);
@@ -159,7 +173,7 @@ class Wp_Sdtrk_Tracker_Fb
         $requestData['event_name'] = $event->getScrollTriggerData()['name'];
         $requestData["user_data"] = $this->getData_user($event, $data);
         $requestData['custom_data'] = $this->getData_custom($event);
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -173,7 +187,7 @@ class Wp_Sdtrk_Tracker_Fb
     {
         // Update the event
         $timeEventId = $event->getEventId() . "-t" . $data['time'];
-        $timeEventName = 'Watchtime-' . $data['time'] . '-Seconds';
+        $timeEventName = $event->get_CustomEventName('Time',$data['time']);
         $event->setTimeTriggerData($timeEventName, $timeEventId);
 
         $requestData = $this->getData_base($event);
@@ -181,7 +195,7 @@ class Wp_Sdtrk_Tracker_Fb
         $requestData['event_name'] = $event->getTimeTriggerData()['name'];
         $requestData["user_data"] = $this->getData_user($event, $data);
         $requestData['custom_data'] = $this->getData_custom($event);
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -195,7 +209,7 @@ class Wp_Sdtrk_Tracker_Fb
     {
         // Update the event
         $clickEventId = $event->getEventId() . "-b" . $data['tag'];
-        $event->setClickTriggerData('ButtonClick', $clickEventId, $data['tag']);
+        $event->setClickTriggerData($event->get_CustomEventName('Click',$data['tag']), $clickEventId, $data['tag']);
 
         $requestData = $this->getData_base($event);
         $requestData['event_id'] = $event->getClickTriggerData()['id'];
@@ -203,7 +217,7 @@ class Wp_Sdtrk_Tracker_Fb
         $requestData["user_data"] = $this->getData_user($event, $data);
         $requestData['custom_data'] = $this->getData_custom($event);
         $requestData['custom_data']['buttonTag'] = $data['tag'];
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -217,7 +231,7 @@ class Wp_Sdtrk_Tracker_Fb
     {
         // Update the event
         $visitEventId = $event->getEventId() . "-v" . $data['tag'];
-        $event->setVisibilityTriggerData('ItemVisit', $visitEventId, $data['tag']);
+        $event->setVisibilityTriggerData($event->get_CustomEventName('Visibility',$data['tag']), $visitEventId, $data['tag']);
 
         $requestData = $this->getData_base($event);
         $requestData['event_id'] = $event->getVisibilityTriggerData()['id'];
@@ -225,7 +239,7 @@ class Wp_Sdtrk_Tracker_Fb
         $requestData["user_data"] = $this->getData_user($event, $data);
         $requestData['custom_data'] = $this->getData_custom($event);
         $requestData['custom_data']['itemTag'] = $event->getVisibilityTriggerData()['tag'];
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**

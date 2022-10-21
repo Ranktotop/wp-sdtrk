@@ -173,21 +173,27 @@ class Wp_Sdtrk_Catcher_Mtc {
 			switch (handler) {
 				case 'Page':
 					mt('send', 'pageview', this.get_data_custom('pageview'));
+					this.helper.debugLog(this.localizedData.dbg, { event: 'pageview' }, 'Fired in Browser (mtc-' + handler + ')');
 					break;
 				case 'Event':
 					mt('send', this.event.grabEventName(), this.get_data_custom(this.event.grabEventName()));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.event.grabEventName(), data: this.get_data_custom(this.event.grabEventName()), meta: {}}, 'Fired in Browser (mtc-' + handler + ')');
 					break;
 				case 'Time':
-					mt('send', 'Watchtime-' + data.time + '-Seconds', this.get_data_custom('Watchtime-' + data.time + '-Seconds', ['currency', 'value'], {}));
+					mt('send', this.helper.get_EventName(handler,data.time), this.get_data_custom(this.helper.get_EventName(handler,data.time), ['currency', 'value','transaction_id'], {transaction_id:this.event.grabOrderId() + "-t" + data.time}));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.time), data: this.get_data_custom(this.helper.get_EventName(handler,data.time), ['currency', 'value','transaction_id'], {transaction_id:this.event.grabOrderId() + "-t" + data.time})}, 'Fired in Browser (mtc-' + handler + ')');
 					break;
 				case 'Scroll':
-					mt('send', 'Scrolldepth-' + data.percent + '-Percent', this.get_data_custom('Scrolldepth-' + data.percent + '-Percent', ['currency', 'value'], {}));
+					mt('send', this.helper.get_EventName(handler,data.percent), this.get_data_custom(this.helper.get_EventName(handler,data.percent), ['currency', 'value','transaction_id'], {transaction_id:this.event.grabOrderId() + "-s" + data.percent}));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.percent), data: this.get_data_custom(this.helper.get_EventName(handler,data.percent), ['currency', 'value','transaction_id'], {transaction_id:this.event.grabOrderId() + "-s" + data.percent})}, 'Fired in Browser (mtc-' + handler + ')');
 					break;
 				case 'Click':
-					mt('send', 'ButtonClick', this.get_data_custom('ButtonClick', ['currency', 'value'], { buttonTag: data.tag }));
+					mt('send', this.helper.get_EventName(handler,data.tag), this.get_data_custom(this.helper.get_EventName(handler,data.tag), ['currency', 'value','transaction_id'], { buttonTag: data.tag,transaction_id: this.event.grabOrderId() + "-b" + data.tag}));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom(this.helper.get_EventName(handler,data.tag), ['currency', 'value','transaction_id'], { buttonTag: data.tag,transaction_id: this.event.grabOrderId() + "-b" + data.tag})}, 'Fired in Browser (mtc-' + handler + ')');
 					break;
 				case 'Visibility':
-					mt('send', 'ItemVisit', this.get_data_custom('ItemVisit', ['currency', 'value'], { itemTag: data.tag }));
+					mt('send', this.helper.get_EventName(handler,data.tag), this.get_data_custom(this.helper.get_EventName(handler,data.tag), ['currency', 'value','transaction_id'], { itemTag: data.tag,transaction_id: this.event.grabOrderId() + "-v" + data.tag}));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom(this.helper.get_EventName(handler,data.tag), ['currency', 'value','transaction_id'], { itemTag: data.tag,transaction_id: this.event.grabOrderId() + "-v" + data.tag})}, 'Fired in Browser (mtc-' + handler + ')');
 					break;
 			}
 		}

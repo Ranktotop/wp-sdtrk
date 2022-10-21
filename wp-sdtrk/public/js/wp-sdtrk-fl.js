@@ -150,8 +150,6 @@ class Wp_Sdtrk_Catcher_Fl {
 				window.funnelytics = {
 					events: {
 						trigger: function(name, attributes, callback, opts) {
-							console.log(name);
-							console.log(attributes);
 							deferredEvents.push({
 								name: name,
 								attributes: attributes,
@@ -185,21 +183,27 @@ class Wp_Sdtrk_Catcher_Fl {
 			switch (handler) {
 				case 'Page':
 					window.funnelytics.events.trigger('page_view', this.get_data_custom([], {}));
+					this.helper.debugLog(this.localizedData.dbg, { event: 'page_view', data: this.get_data_custom([], {}) }, 'Fired in Browser (fl-' + handler + ')');
 					break;
 				case 'Event':
 					window.funnelytics.events.trigger(this.convert_eventname(this.event.grabEventName()), this.get_data_custom());
+					this.helper.debugLog(this.localizedData.dbg, { event: this.convert_eventname(this.event.grabEventName()), data: this.get_data_custom() }, 'Fired in Browser (fl-' + handler + ')');
 					break;
 				case 'Time':
-					window.funnelytics.events.trigger('Watchtime-' + data.time + '-Seconds', this.get_data_custom(['__currency__', '__total_in_cents__','__order__'], {}));
+					window.funnelytics.events.trigger(this.helper.get_EventName(handler,data.time), this.get_data_custom(['__currency__', '__total_in_cents__','__order__'], {}));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.time), data: this.get_data_custom(['__currency__', '__total_in_cents__','__order__'], {}) }, 'Fired in Browser (fl-' + handler + ')');
 					break;
 				case 'Scroll':
-					window.funnelytics.events.trigger('Scrolldepth-' + data.percent + '-Percent', this.get_data_custom(['__currency__', '__total_in_cents__','__order__'], {}));
+					window.funnelytics.events.trigger(this.helper.get_EventName(handler,data.percent), this.get_data_custom(['__currency__', '__total_in_cents__','__order__'], {}));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.percent), data: this.get_data_custom(['__currency__', '__total_in_cents__','__order__'], {}) }, 'Fired in Browser (fl-' + handler + ')');
 					break;
 				case 'Click':
-					window.funnelytics.events.trigger('ButtonClick', this.get_data_custom(['__currency__', '__total_in_cents__','__order__'], { buttonTag: data.tag }));
+					window.funnelytics.events.trigger(this.helper.get_EventName(handler,data.tag), this.get_data_custom(['__currency__', '__total_in_cents__','__order__'], { buttonTag: data.tag }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom(['__currency__', '__total_in_cents__','__order__'], { buttonTag: data.tag }) }, 'Fired in Browser (fl-' + handler + ')');
 					break;
 				case 'Visibility':
-					window.funnelytics.events.trigger('ItemVisit', this.get_data_custom(['__currency__', '__total_in_cents__','__order__'], { itemTag: data.tag }));
+					window.funnelytics.events.trigger(this.helper.get_EventName(handler,data.tag), this.get_data_custom(['__currency__', '__total_in_cents__','__order__'], { itemTag: data.tag }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom(['__currency__', '__total_in_cents__','__order__'], { itemTag: data.tag }) }, 'Fired in Browser (fl-' + handler + ')');
 					break;
 			}
 		}
@@ -227,6 +231,13 @@ class Wp_Sdtrk_Catcher_Fl {
 		else {
 			customData.__sku__ = this.event.getPageId();
 			customData.__label__ = this.event.getPageName();
+		}
+		//UTM
+		for (var k in this.event.getUtm()) {
+			var value = this.event.getUtm()[k];
+			if (value !== "") {
+				customData[k] = value;
+			}
 		}
 		
 

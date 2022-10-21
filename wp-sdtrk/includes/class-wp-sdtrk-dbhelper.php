@@ -223,8 +223,7 @@ class Wp_Sdtrk_DbHelper
         global $wpdb;
 
         if (sizeof($knownData) == 0) {
-            $wpdb->insert($tablename, $dataset, $typeset);
-            return true;
+            return ($wpdb->insert($tablename, $dataset, $typeset) !== false) ? true : false;
         }
 
         return false;

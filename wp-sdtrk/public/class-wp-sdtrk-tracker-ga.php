@@ -8,6 +8,7 @@ class Wp_Sdtrk_Tracker_Ga
     private $apiToken;
 
     private $debugMode;
+    private $debugMode_frontend;
 
     private $trackServer;
 
@@ -16,6 +17,7 @@ class Wp_Sdtrk_Tracker_Ga
         $this->measurementId = false;
         $this->apiToken = false;
         $this->debugMode = false;
+        $this->debugMode_frontend = false;
         $this->debugModeLive = false;
         $this->trackServer = false;
         $this->init();
@@ -79,6 +81,15 @@ class Wp_Sdtrk_Tracker_Ga
     {
         return ($this->debugMode);
     }
+    
+    /**
+     * Set and return the frontend debug mode
+     * @param Boolean|String $debugMode
+     */
+    public function setAndGetDebugMode_frontend($debugMode){
+        $this->debugMode_frontend = ($debugMode === true || $debugMode === '1') ? true : false;
+        return ($this->debugMode_frontend === true && $this->debugMode === true);
+    }
 
     /**
      * Fires the Server-based Tracking
@@ -99,8 +110,11 @@ class Wp_Sdtrk_Tracker_Ga
         if (! method_exists($this, $functionName)) {
             return false;
         }
-        $clientId = (isset($data['cid']) && ! empty($data['cid'])) ? $data['cid'] : false;
-        return $this->$functionName($event, $data, $clientId);
+        $clientId = (isset($data['cid']) && ! empty($data['cid'])) ? $data['cid'] : false;        
+        $response = $this->$functionName($event, $data, $clientId);
+        Wp_Sdtrk_Helper::wp_sdtrk_write_log("Response:", $this->debugMode);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($response, $this->debugMode);
+        return ($this->setAndGetDebugMode_frontend($this->debugMode_frontend)) ? $response : true;
     }
 
     /**
@@ -121,7 +135,7 @@ class Wp_Sdtrk_Tracker_Ga
                 )
             )
         );
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -156,7 +170,7 @@ class Wp_Sdtrk_Tracker_Ga
                 )
             )
         );
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -170,7 +184,7 @@ class Wp_Sdtrk_Tracker_Ga
     {
         // Update the event
         $scrollEventId = $event->getEventId() . "-s" . $data['percent'];
-        $scrollEventName = 'Scrolldepth-' . $data['percent'] . '-Percent';
+        $scrollEventName = $event->get_CustomEventName('Scroll',$data['percent']);
         $event->setScrollTriggerData($scrollEventName, $scrollEventId);
 
         $customData = $this->getData_custom($event);
@@ -184,7 +198,7 @@ class Wp_Sdtrk_Tracker_Ga
                 )
             )
         );
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -198,7 +212,7 @@ class Wp_Sdtrk_Tracker_Ga
     {
         // Update the event
         $timeEventId = $event->getEventId() . "-t" . $data['time'];
-        $timeEventName = 'Watchtime-' . $data['time'] . '-Seconds';
+        $timeEventName = $event->get_CustomEventName('Time',$data['time']);
         $event->setTimeTriggerData($timeEventName, $timeEventId);
 
         $customData = $this->getData_custom($event);
@@ -212,7 +226,7 @@ class Wp_Sdtrk_Tracker_Ga
                 )
             )
         );
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -226,7 +240,7 @@ class Wp_Sdtrk_Tracker_Ga
     {
         // Update the event
         $clickEventId = $event->getEventId() . "-b" . $data['tag'];
-        $event->setClickTriggerData('ButtonClick', $clickEventId, $data['tag']);
+        $event->setClickTriggerData($event->get_CustomEventName('Click',$data['tag']), $clickEventId, $data['tag']);
 
         $customData = $this->getData_custom($event);
         $customData['transaction_id'] = $event->getClickTriggerData()['id'];
@@ -241,7 +255,7 @@ class Wp_Sdtrk_Tracker_Ga
                 )
             )
         );
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -255,7 +269,7 @@ class Wp_Sdtrk_Tracker_Ga
     {
         // Update the event
         $visitEventId = $event->getEventId() . "-v" . $data['tag'];
-        $event->setVisibilityTriggerData('ItemVisit', $visitEventId, $data['tag']);
+        $event->setVisibilityTriggerData($event->get_CustomEventName('Visibility',$data['tag']), $visitEventId, $data['tag']);
 
         $customData = $this->getData_custom($event);
         $customData['transaction_id'] = $event->getVisibilityTriggerData()['id'];
@@ -270,7 +284,7 @@ class Wp_Sdtrk_Tracker_Ga
                 )
             )
         );
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**

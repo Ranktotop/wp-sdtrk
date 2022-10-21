@@ -336,14 +336,15 @@ class Wp_Sdtrk_Admin
                     'id' => 'productid',
                     'type' => 'text',
                     'title' => __('Product ID', 'wp-sdtrk'),
+                    'description' => __('Please enter a product id in order to track the ViewContent-Event', 'wp-sdtrk'),
                     'attributes' => array(
-                        'placeholder' => __('Please enter a product id in order to track the ViewContent-Event', 'wp-sdtrk')
+                        'placeholder' => __('Product-ID', 'wp-sdtrk')
                     )
                 ),
                 array(
                     'id' => 'trkoverwrite',
                     'type' => 'switcher',
-                    'title' => __('Overwrite Tracking-Consent', 'wp-sdtrk'),
+                    'title' => __('Bypass Tracking-Consent', 'wp-sdtrk'),
                     'description' => __('Check to track all visitors of this page regardless of their cookie consent', 'wp-sdtrk'),
                     'default' => 'no'
                 )
@@ -446,6 +447,7 @@ class Wp_Sdtrk_Admin
                     'title' => __('Time-Settings', 'wp-sdtrk'),
                     'description' => __('Fire a signal-event after X Seconds', 'wp-sdtrk'),
                     'after' => __('Attention: Every event must be processed! Make sure that the frequency is therefore not too high and not several events are triggered at the same time!', 'wp-sdtrk'),
+                    'wrap_class' => 'shifted',
                     'dependency' => array(
                         'trk_time',
                         '!=',
@@ -456,7 +458,7 @@ class Wp_Sdtrk_Admin
                         'accordion' => true,
                         'button_title' => __('Add new', 'wp-sdtrk'),
                         'group_title' => __('Time-Settings', 'wp-sdtrk'),
-                        'limit' => 5,
+                        'limit' => 50,
                         'sortable' => true,
                         'mode' => 'compact'
                     ),
@@ -489,7 +491,7 @@ class Wp_Sdtrk_Admin
                 array(
                     'type' => 'group',
                     'id' => 'trk_scroll_group',
-                    'wrap_class' => 'subsettings',
+                    'wrap_class' => 'shifted',
                     'title' => __('Scroll-Settings', 'wp-sdtrk'),
                     'description' => __('Fire signal-event if the user has scrolled to x percent of the page', 'wp-sdtrk'),
                     'after' => __('Attention: Every event must be processed! Make sure that the frequency is therefore not too high and not several events are triggered at the same depth!', 'wp-sdtrk'),
@@ -503,7 +505,7 @@ class Wp_Sdtrk_Admin
                         'accordion' => true,
                         'button_title' => __('Add new', 'wp-sdtrk'),
                         'group_title' => __('Scroll-Settings', 'wp-sdtrk'),
-                        'limit' => 5,
+                        'limit' => 50,
                         'sortable' => true,
                         'mode' => 'compact'
                     ),
@@ -549,12 +551,12 @@ class Wp_Sdtrk_Admin
             'sections' => array(
                 array(
                     'name' => 'local',
-                    'title' => __('Local', 'wp-sdtrk'),
+                    'title' => 'Local',
                     'icon' => 'dashicons-database',
                     'fields' => array(
                         array(
                             'type' => 'content',
-                            'title' => '<h3>' . __('Local Tracking', 'wp-sdtrk') . '</h3>',
+                            'title' => '<h3>Local Tracking</h3>',
                             'wrap_class' => 'pageHeader',
                             'content' => '',
                         ),
@@ -574,7 +576,7 @@ class Wp_Sdtrk_Admin
                                 'true'
                             ),
                             'title' => __('Activate Debugging', 'wp-sdtrk'),
-                            'description' => __('Check to debug into the wordpress system', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to activate %s debugging', 'wp-sdtrk'),'Local'),
                             'default' => 'no'
                         ),
                         array(
@@ -837,20 +839,45 @@ class Wp_Sdtrk_Admin
                 ),
                 array(
                     'name' => 'facebook',
-                    'title' => __('Facebook', 'wp-sdtrk'),
+                    'title' => 'Meta',
                     'icon' => 'dashicons-facebook',
                     'fields' => array(
                         array(
                             'type' => 'content',
-                            'title' => '<h3>' . __('Facebook Tracking', 'wp-sdtrk') . '</h3>',
+                            'title' => '<h3>Meta Tracking</h3>',
                             'wrap_class' => 'pageHeader',
                             'content' => '',
                         ),
                         array(
                             'id' => 'fb_pixelid',
                             'type' => 'text',
-                            'title' => __('Facebook Pixel-ID', 'wp-sdtrk'),
-                            'description' => __('Insert your own Facebook Pixel ID', 'wp-sdtrk')
+                            'title' => 'Meta Pixel-ID',
+                            'description' => sprintf( __( 'Insert your %s Pixel-ID', 'wp-sdtrk'),'Meta'),
+                        ),                        
+                        array(
+                            'id' => 'fb_trk_debug',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'fb_pixelid',
+                                '!=',
+                                ''
+                            ),
+                            'title' => __('Activate Debugging', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to activate %s debugging', 'wp-sdtrk'),'Meta'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id' => 'fb_trk_server_debug_code',
+                            'type' => 'text',
+                            'wrap_class' => 'shifted',
+                            'dependency' => array(
+                                'fb_trk_debug|fb_pixelid',
+                                '==|!=',
+                                'true|'
+                            ),
+                            'title' => __('Server Test-Code', 'wp-sdtrk'),
+                            'description' => sprintf( __('If you want to debug the events in the %s events-manager, you have to enter the current test-code!', 'wp-sdtrk'),'Meta'),
+                            'after' => sprintf( __('You can get the Test-Code within the %s events-manager', 'wp-sdtrk'),'Meta'),
                         ),
                         array(
                             'type' => 'content',
@@ -867,7 +894,7 @@ class Wp_Sdtrk_Admin
                             'id' => 'fb_trk_browser',
                             'type' => 'switcher',
                             'title' => __('Activate browser based tracking', 'wp-sdtrk'),
-                            'description' => __('Check to fire facebook browser pixel', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to fire %s browser pixel', 'wp-sdtrk'),'Meta'),
                             'default' => 'no',
                             'dependency' => array(
                                 'fb_pixelid',
@@ -916,7 +943,7 @@ class Wp_Sdtrk_Admin
                             'id' => 'fb_trk_server',
                             'type' => 'switcher',
                             'title' => __('Activate server based tracking', 'wp-sdtrk'),
-                            'description' => __('Check to fire Facebook Conversion API', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to send %s-Events server-side to the API', 'wp-sdtrk'),'Meta'),
                             'default' => 'no',
                             'dependency' => array(
                                 'fb_pixelid',
@@ -932,8 +959,8 @@ class Wp_Sdtrk_Admin
                                 '==|!=',
                                 'true|'
                             ),
-                            'title' => __('Conversion-API Token', 'wp-sdtrk'),
-                            'description' => __('You can get the token within the facebook events-manager', 'wp-sdtrk')
+                            'title' => __('API Token', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'You can get the token within the %s %s settings', 'wp-sdtrk'),'Meta','Events-Manager'),
                         ),
                         array(
                             'id' => 'fb_trk_server_cookie_service',
@@ -960,49 +987,25 @@ class Wp_Sdtrk_Admin
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
                             'after' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_fb_s();</script>') . '</code></p>'
-                        ),
-                        array(
-                            'id' => 'fb_trk_server_debug',
-                            'type' => 'switcher',
-                            'dependency' => array(
-                                'fb_trk_server|fb_pixelid',
-                                '==|!=',
-                                'true|'
-                            ),
-                            'title' => __('Activate Debugging', 'wp-sdtrk'),
-                            'description' => __('Check to activate CAPI debugging', 'wp-sdtrk'),
-                            'default' => 'no'
-                        ),
-                        array(
-                            'id' => 'fb_trk_server_debug_code',
-                            'type' => 'text',
-                            'wrap_class' => 'shifted',
-                            'dependency' => array(
-                                'fb_trk_server|fb_trk_server_debug|fb_pixelid',
-                                '==|==|!=',
-                                'true|true|'
-                            ),
-                            'title' => __('Test-Code', 'wp-sdtrk'),
-                            'description' => __('You can get the Test-Code within the facebook events-manager', 'wp-sdtrk')
                         )
                     )
                 ),
                 array(
                     'name' => 'google',
-                    'title' => __('Google', 'wp-sdtrk'),
+                    'title' => 'Google',
                     'icon' => 'dashicons-google',
                     'fields' => array(
                         array(
                             'type' => 'content',
-                            'title' => '<h3>' . __('Google Tracking', 'wp-sdtrk') . '</h3>',
+                            'title' => '<h3>Google Tracking</h3>',
                             'wrap_class' => 'pageHeader',
                             'content' => '',
                         ),
                         array(
                             'id' => 'ga_measurement_id',
                             'type' => 'text',
-                            'title' => __('Google Analytics ID', 'wp-sdtrk'),
-                            'description' => __('Insert your own Measurement-ID', 'wp-sdtrk')
+                            'title' => 'Google Measurement ID',
+                            'description' => sprintf( __( 'Insert your %s Pixel-ID', 'wp-sdtrk'),'Google'),
                         ),
                         array(
                             'id' => 'ga_trk_debug',
@@ -1013,19 +1016,20 @@ class Wp_Sdtrk_Admin
                                 ''
                             ),
                             'title' => __('Activate Debugging', 'wp-sdtrk'),
-                            'description' => __('Check to activate GA debugging', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to activate %s debugging', 'wp-sdtrk'),'Google'),
                             'default' => 'no'
                         ),
                         array(
                             'id' => 'ga_trk_debug_live',
                             'type' => 'switcher',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
                                 'ga_measurement_id|ga_trk_debug',
                                 '!=|==',
                                 '|true'
                             ),
                             'title' => __('Debug in live-view', 'wp-sdtrk'),
-                            'description' => __('Check to show debug-hits in google analytics realtime', 'wp-sdtrk'),
+                            'description' => __('Check to show debug-hits in the google analytics realtime report', 'wp-sdtrk'),
                             'default' => 'no'
                         ),
                         array(
@@ -1048,7 +1052,7 @@ class Wp_Sdtrk_Admin
                                 ''
                             ),
                             'title' => __('Activate browser based tracking', 'wp-sdtrk'),
-                            'description' => __('Check to fire analytics browser tracking', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to fire %s browser pixel', 'wp-sdtrk'),'Google'),
                             'default' => 'no'
                         ),
                         array(
@@ -1097,7 +1101,7 @@ class Wp_Sdtrk_Admin
                                 ''
                             ),
                             'title' => __('Activate server based tracking', 'wp-sdtrk'),
-                            'description' => __('Check to fire Google Measurement Protocol', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to send %s-Events server-side to the API', 'wp-sdtrk'),'Google'),
                             'default' => 'no'
                         ),
                         array(
@@ -1108,8 +1112,8 @@ class Wp_Sdtrk_Admin
                                 '!=|==',
                                 '|true'
                             ),
-                            'title' => __('Measurement-API Token', 'wp-sdtrk'),
-                            'description' => __('You can get the token within the google datastream-settings', 'wp-sdtrk')
+                            'title' => __('API Token', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'You can get the token within the %s %s settings', 'wp-sdtrk'),'Google','Datastream'),
                         ),
                         array(
                             'id' => 'ga_trk_server_cookie_service',
@@ -1141,20 +1145,45 @@ class Wp_Sdtrk_Admin
                 ),
                 array(
                     'name' => 'tiktok',
-                    'title' => __('TikTok', 'wp-sdtrk'),
+                    'title' => 'TikTok',
                     'icon' => 'dashicons-embed-audio',
                     'fields' => array(
                         array(
                             'type' => 'content',
-                            'title' => '<h3>' . __('TikTok Tracking', 'wp-sdtrk') . '</h3>',
+                            'title' => '<h3>TikTok Tracking</h3>',
                             'wrap_class' => 'pageHeader',
                             'content' => '',
                         ),
                         array(
                             'id' => 'tt_pixelid',
                             'type' => 'text',
-                            'title' => __('TikTok Pixel-ID', 'wp-sdtrk'),
-                            'description' => __('Insert your own TikTok Pixel ID', 'wp-sdtrk')
+                            'title' => 'TikTok Pixel-ID',
+                            'description' => sprintf( __( 'Insert your %s Pixel-ID', 'wp-sdtrk'),'TikTok'),
+                        ),
+                        array(
+                            'id' => 'tt_trk_debug',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'tt_pixelid',
+                                '!=',
+                                ''
+                            ),
+                            'title' => __('Activate Debugging', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to activate %s debugging', 'wp-sdtrk'),'TikTok'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id' => 'tt_trk_server_debug_code',
+                            'type' => 'text',
+                            'wrap_class' => 'shifted',
+                            'dependency' => array(
+                                'tt_trk_debug|tt_pixelid',
+                                '==|!=',
+                                'true|'
+                            ),
+                            'title' => __('Server Test-Code', 'wp-sdtrk'),
+                            'description' => sprintf( __('If you want to debug the events in the %s events-manager, you have to enter the current test-code!', 'wp-sdtrk'),'TikTok'),
+                            'after' => sprintf( __('You can get the Test-Code within the %s events-manager', 'wp-sdtrk'),'TikTok'),
                         ),
                         array(
                             'type' => 'content',
@@ -1171,7 +1200,7 @@ class Wp_Sdtrk_Admin
                             'id' => 'tt_trk_browser',
                             'type' => 'switcher',
                             'title' => __('Activate browser based tracking', 'wp-sdtrk'),
-                            'description' => __('Check to fire TikTok browser pixel', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to fire %s browser pixel', 'wp-sdtrk'),'TikTok'),
                             'default' => 'no',
                             'dependency' => array(
                                 'tt_pixelid',
@@ -1220,7 +1249,7 @@ class Wp_Sdtrk_Admin
                             'id' => 'tt_trk_server',
                             'type' => 'switcher',
                             'title' => __('Activate server based tracking', 'wp-sdtrk'),
-                            'description' => __('Check to fire TikTok Event-API', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to send %s-Events server-side to the API', 'wp-sdtrk'),'TikTok'),
                             'default' => 'no',
                             'dependency' => array(
                                 'tt_pixelid',
@@ -1236,8 +1265,8 @@ class Wp_Sdtrk_Admin
                                 '==|!=',
                                 'true|'
                             ),
-                            'title' => __('Conversion-API Token', 'wp-sdtrk'),
-                            'description' => __('You can get the token within the TikTok events-manager', 'wp-sdtrk')
+                            'title' => __('API Token', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'You can get the token within the %s %s settings', 'wp-sdtrk'),'TikTok','Events-Manager'),
                         ),
                         array(
                             'id' => 'tt_trk_server_cookie_service',
@@ -1264,49 +1293,37 @@ class Wp_Sdtrk_Admin
                             'title' => __('Cookie ID', 'wp-sdtrk'),
                             'description' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
                             'after' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_tt_s();</script>') . '</code></p>'
-                        ),
-                        array(
-                            'id' => 'tt_trk_server_debug',
-                            'type' => 'switcher',
-                            'dependency' => array(
-                                'tt_trk_server|tt_pixelid',
-                                '==|!=',
-                                'true|'
-                            ),
-                            'title' => __('Activate Debugging', 'wp-sdtrk'),
-                            'description' => __('Check to activate CAPI debugging', 'wp-sdtrk'),
-                            'default' => 'no'
-                        ),
-                        array(
-                            'id' => 'tt_trk_server_debug_code',
-                            'type' => 'text',
-                            'wrap_class' => 'shifted',
-                            'dependency' => array(
-                                'tt_trk_server|tt_trk_server_debug|tt_pixelid',
-                                '==|==|!=',
-                                'true|true|'
-                            ),
-                            'title' => __('Test-Code', 'wp-sdtrk'),
-                            'description' => __('You can get the Test-Code within the TikTok events-manager', 'wp-sdtrk')
                         )
                     )
                 ),
                 array(
                     'name' => 'linkedin',
-                    'title' => __('LinkedIn', 'wp-sdtrk'),
+                    'title' => 'LinkedIn',
                     'icon' => 'dashicons-linkedin',
                     'fields' => array(
                         array(
                             'type' => 'content',
-                            'title' => '<h3>' . __('LinkedIn Tracking', 'wp-sdtrk') . '</h3>',
+                            'title' => '<h3>LinkedIn Tracking</h3>',
                             'wrap_class' => 'pageHeader',
                             'content' => '',
                         ),
                         array(
                             'id' => 'lin_pixelid',
                             'type' => 'text',
-                            'title' => __('LinkedIn Partner-ID', 'wp-sdtrk'),
-                            'description' => __('Insert your own LinkedIn Partner ID', 'wp-sdtrk')
+                            'title' => 'LinkedIn Partner-ID',
+                            'description' => sprintf( __( 'Insert your %s Pixel-ID', 'wp-sdtrk'),'LinkedIn'),
+                        ),
+                        array(
+                            'id' => 'lin_trk_debug',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'lin_pixelid',
+                                '!=',
+                                ''
+                            ),
+                            'title' => __('Activate Debugging', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to activate %s debugging', 'wp-sdtrk'),'LinkedIn'),
+                            'default' => 'no'
                         ),
                         array(
                             'type' => 'content',
@@ -1323,7 +1340,7 @@ class Wp_Sdtrk_Admin
                             'id' => 'lin_trk_browser',
                             'type' => 'switcher',
                             'title' => __('Activate browser based tracking', 'wp-sdtrk'),
-                            'description' => __('Check to fire linkedIn browser pixel', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to fire %s browser pixel', 'wp-sdtrk'),'LinkedIn'),
                             'default' => 'no',
                             'dependency' => array(
                                 'lin_pixelid',
@@ -1495,21 +1512,33 @@ class Wp_Sdtrk_Admin
                 ),
                 array(
                     'name' => 'funnelytics',
-                    'title' => __('Funnelytics', 'wp-sdtrk'),
+                    'title' => 'Funnelytics',
                     'icon' => 'dashicons-chart-area',
                     'fields' => array(
                         array(
                             'type' => 'content',
-                            'title' => '<h3>' . __('Funnelytics Tracking', 'wp-sdtrk') . '</h3>',
+                            'title' => '<h3>Funnelytics Tracking</h3>',
                             'wrap_class' => 'pageHeader',
                             'content' => '',
                         ),
                         array(
                             'id' => 'fl_tracking_id',
                             'type' => 'text',
-                            'title' => __('Funnelytics Tracking-ID', 'wp-sdtrk'),
-                            'description' => __('Insert your own funnelytics tracking id', 'wp-sdtrk'),
-                            'after' => '<a href="https://funnelytics.io/">' . __('What is funnelytics?', 'wp-sdtrk') . '</a>'
+                            'title' => 'Funnelytics Pixel-ID',
+                            'description' => sprintf( __( 'Insert your %s Pixel-ID', 'wp-sdtrk'),'Funnelytics'),
+                            'after' => sprintf( __('%sWhat is %s?%s', 'wp-sdtrk'),'<a target="blank" href="https://funnelytics.io/">','Funnelytics','</a>'),
+                        ),
+                        array(
+                            'id' => 'fl_trk_debug',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'fl_tracking_id',
+                                '!=',
+                                ''
+                            ),
+                            'title' => __('Activate Debugging', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to activate %s debugging', 'wp-sdtrk'),'Funnelytics'),
+                            'default' => 'no'
                         ),
                         array(
                             'type' => 'content',
@@ -1531,7 +1560,7 @@ class Wp_Sdtrk_Admin
                                 ''
                             ),
                             'title' => __('Activate browser based tracking', 'wp-sdtrk'),
-                            'description' => __('Check to fire funnelytics browser tracking', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to fire %s browser pixel', 'wp-sdtrk'),'Funnelytics'),
                             'default' => 'no'
                         ),
                         array(
@@ -1564,21 +1593,33 @@ class Wp_Sdtrk_Admin
                 ),
                 array(
                     'name' => 'mautic',
-                    'title' => __('Mautic', 'wp-sdtrk'),
+                    'title' => 'Mautic',
                     'icon' => 'dashicons-email-alt',
                     'fields' => array(
                         array(
                             'type' => 'content',
-                            'title' => '<h3>' . __('Mautic Tracking', 'wp-sdtrk') . '</h3>',
+                            'title' => '<h3>Mautic Tracking</h3>',
                             'wrap_class' => 'pageHeader',
                             'content' => '',
                         ),
                         array(
                             'id' => 'mtc_tracking_id',
                             'type' => 'text',
-                            'title' => __('Mautic Base URL', 'wp-sdtrk'),
+                            'title' => 'Mautic Base URL',
                             'description' => __('Insert the base-url of your mautic installation', 'wp-sdtrk'),
-                            'after' => '<a href="https://www.mautic.org/">' . __('What is mautic?', 'wp-sdtrk') . '</a>'
+                            'after' => sprintf( __('%sWhat is %s?%s', 'wp-sdtrk'),'<a target="blank" href="https://www.mautic.org/">','Mautic','</a>'),
+                        ),
+                        array(
+                            'id' => 'mtc_trk_debug',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'mtc_tracking_id',
+                                '!=',
+                                ''
+                            ),
+                            'title' => __('Activate Debugging', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to activate %s debugging', 'wp-sdtrk'),'Mautic'),
+                            'default' => 'no'
                         ),
                         array(
                             'type' => 'content',
@@ -1600,7 +1641,7 @@ class Wp_Sdtrk_Admin
                                 ''
                             ),
                             'title' => __('Activate browser based tracking', 'wp-sdtrk'),
-                            'description' => __('Check to fire mautic browser tracking', 'wp-sdtrk'),
+                            'description' => sprintf( __( 'Check to fire %s browser pixel', 'wp-sdtrk'),'Mautic'),
                             'default' => 'no'
                         ),
                         array(
@@ -1641,25 +1682,26 @@ class Wp_Sdtrk_Admin
             'sections' => array(
                 array(
                     'name' => 'digistore',
-                    'title' => __('Digistore24', 'wp-sdtrk'),
+                    'title' => 'Digistore24',
                     'icon' => 'dashicons-database',
                     'fields' => array(
                         array(
                             'type' => 'content',
-                            'title' => '<h3>' . __('Digistore24', 'wp-sdtrk') . '</h3>',
+                            'title' => '<h3>Digistore24</h3>',
                             'wrap_class' => 'pageHeader',
                             'content' => '',
                         ),
                         array(
                             'id' => 'ds24_encrypt_data',
                             'type' => 'switcher',
-                            'title' => __('Activate decryption', 'wp-sdtrk'),
-                            'description' => __('Check to decrypt GET-Parameter before handling', 'wp-sdtrk'),
+                            'title' => sprintf( __('Activate %s data-decryption', 'wp-sdtrk'),'Digistore24'),
+                            'description' => sprintf( __('Check to decrypt GET-Parameter from %s before handling', 'wp-sdtrk'),'Digistore24'),
                             'default' => 'no'
                         ),
                         array(
                             'id' => 'ds24_encrypt_data_key',
                             'type' => 'text',
+                            'wrap_class' => 'shifted',
                             'dependency' => array(
                                 'ds24_encrypt_data',
                                 '==',

@@ -10,6 +10,7 @@ class Wp_Sdtrk_Tracker_Tt
     private $debugCode;
 
     private $debugMode;
+    private $debugMode_frontend;
 
     private $trackServer;
 
@@ -19,6 +20,7 @@ class Wp_Sdtrk_Tracker_Tt
         $this->apiToken = false;
         $this->debugCode = false;
         $this->debugMode = false;
+        $this->debugMode_frontend = false;
         $this->trackServer = false;
         $this->init();
     }
@@ -44,7 +46,7 @@ class Wp_Sdtrk_Tracker_Tt
         $this->trackServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server"), "yes") == 0) ? true : false;
 
         // Debug Mode
-        $this->debugMode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_server_debug"), "yes") == 0) ? true : false;
+        $this->debugMode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "tt_trk_debug"), "yes") == 0) ? true : false;
     }
 
     /**
@@ -79,6 +81,15 @@ class Wp_Sdtrk_Tracker_Tt
     {
         return ($this->debugMode && $this->debugCode);
     }
+    
+    /**
+     * Set and return the frontend debug mode
+     * @param Boolean|String $debugMode
+     */
+    public function setAndGetDebugMode_frontend($debugMode){
+        $this->debugMode_frontend = ($debugMode === true || $debugMode === '1') ? true : false;
+        return ($this->debugMode_frontend === true && $this->debugMode === true);
+    }
 
     /**
      * Fires the Server-based Tracking
@@ -90,6 +101,7 @@ class Wp_Sdtrk_Tracker_Tt
      */
     public function fireTracking_Server($event, $handler, $data)
     {
+        //NOTE UTMs seems to be unsupported , if that changes they will be added
         // Abort if tracking is disabled
         if (! $this->trackingEnabled_Server()) {
             return true;
@@ -99,7 +111,10 @@ class Wp_Sdtrk_Tracker_Tt
         if (! method_exists($this, $functionName)) {
             return false;
         }
-        return $this->$functionName($event, $data);
+        $response = $this->$functionName($event, $data);        
+        Wp_Sdtrk_Helper::wp_sdtrk_write_log("Response:", $this->debugMode);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($response, $this->debugMode);
+        return ($this->setAndGetDebugMode_frontend($this->debugMode_frontend)) ? $response : true;
     }
 
     /**
@@ -113,7 +128,7 @@ class Wp_Sdtrk_Tracker_Tt
     {
         $requestData = $this->getData_base($event, $data);
         $requestData['event'] = "ViewContent"; // TT doesnt have an PageView-Event
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -135,7 +150,7 @@ class Wp_Sdtrk_Tracker_Tt
             $requestData["properties"]["currency"] = "EUR";
             $requestData["properties"]["value"] = $event->getEventValue();
         }
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -150,13 +165,13 @@ class Wp_Sdtrk_Tracker_Tt
 
         // Update the event
         $scrollEventId = $event->getEventId() . "-s" . $data['percent'] . '_' . $data['hash'];
-        $scrollEventName = 'Scrolldepth-' . $data['percent'] . '-Percent';
+        $scrollEventName = $event->get_CustomEventName('Scroll',$data['percent']);
         $event->setScrollTriggerData($scrollEventName, $scrollEventId);
 
         $requestData = $this->getData_base($event, $data);
         $requestData['event'] = $event->getScrollTriggerData()['name'];
         $requestData['event_id'] = $event->getScrollTriggerData()['id'];
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -170,13 +185,13 @@ class Wp_Sdtrk_Tracker_Tt
     {
         // Update the event
         $timeEventId = $event->getEventId() . "-t" . $data['time'] . '_' . $data['hash'];
-        $timeEventName = 'Watchtime-' . $data['time'] . '-Seconds';
+        $timeEventName = $event->get_CustomEventName('Time',$data['time']);
         $event->setTimeTriggerData($timeEventName, $timeEventId);
 
         $requestData = $this->getData_base($event, $data);
         $requestData['event'] = $event->getTimeTriggerData()['name'];
         $requestData['event_id'] = $event->getTimeTriggerData()['id'];
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -190,13 +205,13 @@ class Wp_Sdtrk_Tracker_Tt
     {
         // Update the event
         $clickEventId = $event->getEventId() . "-b" . $data['tag'] . '_' . $data['hash'];
-        $event->setClickTriggerData('ButtonClick', $clickEventId, $data['tag']);
+        $event->setClickTriggerData($event->get_CustomEventName('Click',$data['tag']), $clickEventId, $data['tag']);
 
         $requestData = $this->getData_base($event, $data);
         $requestData['event'] = $event->getClickTriggerData()['name'];
         $requestData['event_id'] = $event->getClickTriggerData()['id'];
         $requestData["properties"]["description"] = $event->getClickTriggerData()['name'] . "/" . $data['tag'];
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -210,13 +225,13 @@ class Wp_Sdtrk_Tracker_Tt
     {
         // Update the event
         $visitEventId = $event->getEventId() . "-v" . $data['tag'] . '_' . $data['hash'];
-        $event->setVisibilityTriggerData('ItemVisit', $visitEventId, $data['tag']);
+        $event->setVisibilityTriggerData($event->get_CustomEventName('Visibility',$data['tag']), $visitEventId, $data['tag']);
 
         $requestData = $this->getData_base($event, $data);
         $requestData['event'] = $event->getVisibilityTriggerData()['name'];
         $requestData['event_id'] = $event->getVisibilityTriggerData()['id'];
         $requestData["properties"]["description"] = $event->getVisibilityTriggerData()['name'] . "/" . $data['tag'];
-        $response = $this->payLoadServerRequest($requestData);
+        return $this->payLoadServerRequest($requestData);
     }
 
     /**
@@ -235,7 +250,7 @@ class Wp_Sdtrk_Tracker_Tt
             // "timestamp" => strval(intval($event->getTime())*1000),
             "context" => $this->getData_context($event, $data),
             "properties" => array(
-                "contents" => $this->getData_contents($event)
+                "contents" => array($this->getData_contents($event)) // has to be an array of contents
                 // "description" => "ViewContent", // will be replaced later on events
                 // "query" => "" // you can pass a keyword from on-page-search here
             )
@@ -283,7 +298,7 @@ class Wp_Sdtrk_Tracker_Tt
         // Add ttc if exists
         if (isset($data['ttc'])) {
             $contextData['ad'] = array(
-                "callback" => $data['ttc']
+                "callback" => $data['ttc'] // This should be the CLICKID which is appended as ttclid. See for more info: https://ads.tiktok.com/marketing_api/docs?id=1701890980108353
             );
         }
         // Add user-data if exists
@@ -331,9 +346,9 @@ class Wp_Sdtrk_Tracker_Tt
 
         // Create the Payload
         $fields = $requestData;
-        // Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($fields);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($fields, $this->debugEnabled_Server());
         $payload = json_encode($fields);
-        // Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($payload);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($payload, $this->debugEnabled_Server());
         $headers = array();
         array_push($headers, "Access-Token:" . $this->apiToken);
 

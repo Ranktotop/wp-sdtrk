@@ -619,4 +619,20 @@ class Wp_Sdtrk_Helper
             return $value;
         }
     }
+    /**
+     * Gets the default Event-Names
+     *
+     * @return array
+     */
+    public static function wp_sdtrk_getDefaultEventMap()
+    {
+        return array(
+            'Time' => 'time_spent_%',
+            'Scroll' => 'scroll_depth_%',
+            'Click' => 'button_click',
+            'Visibility' => 'item_visit',
+            'Click_Local' => 'button_click_%',
+            'Visibility_Local' => 'item_visit_%',            
+        );
+    }
 }

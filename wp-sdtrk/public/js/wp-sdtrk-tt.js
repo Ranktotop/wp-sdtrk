@@ -214,21 +214,27 @@ class Wp_Sdtrk_Catcher_Tt {
 				case 'Page':
 					//The Page View Note: This Event is neither shown in PixelHelper nor in Events Test Webkit
 					ttq.page();
+					this.helper.debugLog(this.localizedData.dbg, { event: 'page_view' }, 'Fired in Browser (tt-' + handler + ')');
 					break;
 				case 'Event':
 					ttq.track(this.convert_eventname(this.event.grabEventName()), this.get_data_custom(), { event_id: this.event.grabOrderId() + "_" + this.get_hashId() });
+					this.helper.debugLog(this.localizedData.dbg, { event: this.convert_eventname(this.event.grabEventName()), data: this.get_data_custom(), meta: { event_id: this.event.grabOrderId() + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
 					break;
 				case 'Time':
-					ttq.track('Watchtime-' + data.time + '-Seconds', this.get_data_custom(['value', 'currency'], {}), { event_id: this.event.grabOrderId() + "-t" + data.time + "_" + this.get_hashId() })
+					ttq.track(this.helper.get_EventName(handler,data.time), this.get_data_custom(['value', 'currency'], {}), { event_id: this.event.grabOrderId() + "-t" + data.time + "_" + this.get_hashId() })
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.time), data: this.get_data_custom(['value', 'currency'], {}), meta: { event_id: this.event.grabOrderId() + "-t" + data.time + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
 					break;
 				case 'Scroll':
-					ttq.track('Scrolldepth-' + data.percent + '-Percent', this.get_data_custom(['value', 'currency'], {}), { event_id: this.event.grabOrderId() + "-s" + data.percent + "_" + this.get_hashId() })
+					ttq.track(this.helper.get_EventName(handler,data.percent), this.get_data_custom(['value', 'currency'], {}), { event_id: this.event.grabOrderId() + "-s" + data.percent + "_" + this.get_hashId() })
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.percent), data: this.get_data_custom(['value', 'currency'], {}), meta: { event_id: this.event.grabOrderId() + "-s" + data.percent + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
 					break;
 				case 'Click':
-					ttq.track('ButtonClick', this.get_data_custom(['value', 'currency'], { buttonTag: data.tag }), { event_id: this.event.grabOrderId() + "-b" + data.tag + "_" + this.get_hashId() })
+					ttq.track(this.helper.get_EventName(handler,data.tag), this.get_data_custom(['value', 'currency'], { buttonTag: data.tag }), { event_id: this.event.grabOrderId() + "-b" + data.tag + "_" + this.get_hashId() })
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom(['value', 'currency'], { buttonTag: data.tag }), meta: { event_id: this.event.grabOrderId() + "-b" + data.tag + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
 					break;
 				case 'Visibility':
-					ttq.track('ItemVisit', this.get_data_custom(['value', 'currency'], { itemTag: data.tag }), { event_id: this.event.grabOrderId() + "-v" + data.tag + "_" + this.get_hashId() })
+					ttq.track(this.helper.get_EventName(handler,data.tag), this.get_data_custom(['value', 'currency'], { itemTag: data.tag }), { event_id: this.event.grabOrderId() + "-v" + data.tag + "_" + this.get_hashId() })
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom(['value', 'currency'], { itemTag: data.tag }), meta: { event_id: this.event.grabOrderId() + "-v" + data.tag + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
 					break;
 			}
 		}
@@ -250,7 +256,7 @@ class Wp_Sdtrk_Catcher_Tt {
 			}
 			//add hash
 			data.hash = this.get_hashId();
-			this.helper.send_ajax({ event: this.event, type: 'tt', handler: handler, data: data });
+			this.helper.send_ajax({ event: this.event, type: 'tt', handler: handler, data: data }, this.localizedData.dbg);
 		}
 	}
 
@@ -279,6 +285,13 @@ class Wp_Sdtrk_Catcher_Tt {
 			customData.content_name = this.event.getPageName();
 			customData.content_type = "product";
 			customData.quantity = 1;
+		}
+		//UTM
+		for (var k in this.event.getUtm()) {
+			var value = this.event.getUtm()[k];
+			if (value !== "") {
+				customData[k] = value;
+			}
 		}
 
 		//if given, remove unwanted fields

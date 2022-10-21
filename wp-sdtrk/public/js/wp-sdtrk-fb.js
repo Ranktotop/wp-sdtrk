@@ -199,21 +199,27 @@ class Wp_Sdtrk_Catcher_Fb {
 			switch (handler) {
 				case 'Page':
 					fbq('track', 'PageView', this.get_data_custom(['value', 'currency']), { eventID: this.event.grabOrderId() });
+					this.helper.debugLog(this.localizedData.dbg, { event: 'PageView', data: this.get_data_custom(['value', 'currency']), meta: { eventID: this.event.grabOrderId() }}, 'Fired in Browser (fb-' + handler + ')');
 					break;
 				case 'Event':
 					fbq('trackSingle', this.localizedData.pid, this.convert_eventname(this.event.grabEventName()), this.get_data_custom(), { eventID: this.event.grabOrderId() });
+					this.helper.debugLog(this.localizedData.dbg, { event: this.convert_eventname(this.event.grabEventName()), data: this.get_data_custom(), meta: { eventID: this.event.grabOrderId() }}, 'Fired in Browser (fb-' + handler + ')');
 					break;
 				case 'Time':
-					fbq('trackCustom', 'Watchtime-' + data.time + '-Seconds', this.get_data_custom(), { eventID: this.event.grabOrderId() + "-t" + data.time });
+					fbq('trackCustom', this.helper.get_EventName(handler,data.time), this.get_data_custom(), { eventID: this.event.grabOrderId() + "-t" + data.time });
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.time), data: this.get_data_custom(), meta: { eventID: this.event.grabOrderId() + "-t" + data.time }}, 'Fired in Browser (fb-' + handler + ')');
 					break;
 				case 'Scroll':
-					fbq('trackCustom', 'Scrolldepth-' + data.percent + '-Percent', this.get_data_custom(), { eventID: this.event.grabOrderId() + "-s" + data.percent });
+					fbq('trackCustom', this.helper.get_EventName(handler,data.percent), this.get_data_custom(), { eventID: this.event.grabOrderId() + "-s" + data.percent });
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.percent), data: this.get_data_custom(), meta: { eventID: this.event.grabOrderId() + "-s" + data.percent }}, 'Fired in Browser (fb-' + handler + ')');
 					break;
 				case 'Click':
-					fbq('trackCustom', 'ButtonClick', this.get_data_custom([], { buttonTag: data.tag }), { eventID: this.event.grabOrderId() + "-b" + data.tag });
+					fbq('trackCustom', this.helper.get_EventName(handler,data.tag), this.get_data_custom([], { buttonTag: data.tag }), { eventID: this.event.grabOrderId() + "-b" + data.tag });
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom([], { buttonTag: data.tag }), meta: { eventID: this.event.grabOrderId() + "-b" + data.tag }}, 'Fired in Browser (fb-' + handler + ')');
 					break;
 				case 'Visibility':
-					fbq('trackCustom', 'ItemVisit', this.get_data_custom([], { itemTag: data.tag }), { eventID: this.event.grabOrderId() + "-v" + data.tag });
+					fbq('trackCustom', this.helper.get_EventName(handler,data.tag), this.get_data_custom([], { itemTag: data.tag }), { eventID: this.event.grabOrderId() + "-v" + data.tag });
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom([], { itemTag: data.tag }), meta: { eventID: this.event.grabOrderId() + "-v" + data.tag }}, 'Fired in Browser (fb-' + handler + ')');
 					break;
 			}
 		}
@@ -233,7 +239,7 @@ class Wp_Sdtrk_Catcher_Fb {
 			if (this.fbp !== false) {
 				data.fbp = this.fbp;
 			}
-			this.helper.send_ajax({ event: this.event, type: 'fb', handler: handler, data: data });
+			this.helper.send_ajax({ event: this.event, type: 'fb', handler: handler, data: data },this.localizedData.dbg);
 		}
 	}
 

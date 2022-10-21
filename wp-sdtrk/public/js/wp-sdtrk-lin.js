@@ -174,35 +174,45 @@ class Wp_Sdtrk_Catcher_Lin {
 			//Fire the desired event
 			switch (handler) {
 				case 'Page':
-					this.get_triggeredConversions('page_view').forEach(
-						element => window.lintrk('track', { conversion_id: element })
-					);
+					var conversions = this.get_triggeredConversions('page_view');
+					for (let i = 0; i < conversions.length; i++) {
+						window.lintrk('track', { conversion_id: conversions[i] });
+						this.helper.debugLog(this.localizedData.dbg, { event: conversions[i] }, 'Fired in Browser (lin-' + handler + ')')
+					}
 					break;
 				case 'Event':
-					this.get_triggeredConversions(this.event.grabEventName()).forEach(
-						element => window.lintrk('track', { conversion_id: element })
-					);
+					var conversions = this.get_triggeredConversions(this.event.grabEventName());
+					for (let i = 0; i < conversions.length; i++) {
+						window.lintrk('track', { conversion_id: conversions[i] });
+						this.helper.debugLog(this.localizedData.dbg, { event: conversions[i] }, 'Fired in Browser (lin-' + handler + ')')
+					}
 					break;
 				case 'Time':
-					this.get_triggeredConversions('timetracker-' + data.time).forEach(
-						element => window.lintrk('track', { conversion_id: element })
-					);
+					var conversions = this.get_triggeredConversions('timetracker-' + data.time);
+					for (let i = 0; i < conversions.length; i++) {
+						window.lintrk('track', { conversion_id: conversions[i] });
+						this.helper.debugLog(this.localizedData.dbg, { event: conversions[i] }, 'Fired in Browser (lin-' + handler + ')')
+					}
 					break;
 				case 'Scroll':
-					this.get_triggeredConversions('scrolltracker-' + data.percent).forEach(
-						element => window.lintrk('track', { conversion_id: element })
-					);
+					var conversions = this.get_triggeredConversions('scrolltracker-' + data.percent);
+					for (let i = 0; i < conversions.length; i++) {
+						window.lintrk('track', { conversion_id: conversions[i] });
+						this.helper.debugLog(this.localizedData.dbg, { event: conversions[i] }, 'Fired in Browser (lin-' + handler + ')')
+					}
 					break;
 				case 'Click':
 					var convId = this.is_mappedBtn(data.tag);
 					if (convId !== false) {
 						window.lintrk('track', { conversion_id: convId })
+						this.helper.debugLog(this.localizedData.dbg, { event: convId }, 'Fired in Browser (lin-' + handler + ')')
 					}
 					break;
 				case 'Visibility':
 					var convId = this.is_mappedIV(data.tag);
 					if (convId !== false) {
 						window.lintrk('track', { conversion_id: convId })
+						this.helper.debugLog(this.localizedData.dbg, { event: convId }, 'Fired in Browser (lin-' + handler + ')')
 					}
 					break;
 			}

@@ -5,10 +5,12 @@ class Wp_Sdtrk_Tracker_Local
     private $debugMode;
 
     private $trackServer;
+    private $debugMode_frontend;
 
     public function __construct()
     {
         $this->debugMode = false;
+        $this->debugMode_frontend = false;
         $this->trackServer = false;
         $this->init();
     }
@@ -46,6 +48,15 @@ class Wp_Sdtrk_Tracker_Local
     }
     
     /**
+     * Set and return the frontend debug mode
+     * @param Boolean|String $debugMode
+     */
+    public function setAndGetDebugMode_frontend($debugMode){
+        $this->debugMode_frontend = ($debugMode === true || $debugMode === '1') ? true : false;
+        return ($this->debugMode_frontend === true && $this->debugMode === true);
+    }
+    
+    /**
      * Fires the Server-based Tracking
      * @param Wp_Sdtrk_Tracker_Event $event
      * @param String $handler
@@ -61,8 +72,11 @@ class Wp_Sdtrk_Tracker_Local
         $functionName = 'fireTracking_Server_'.$handler;
         if (! method_exists($this, $functionName)) {
             return false;
-        }
-        return $this->$functionName($event,$data);
+        }        
+        $response = $this->$functionName($event,$data);
+        Wp_Sdtrk_Helper::wp_sdtrk_write_log("Response:", $this->debugMode);
+        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($response, $this->debugMode);
+        return ($this->setAndGetDebugMode_frontend($this->debugMode_frontend)) ? $response : true;
     }
 
     /**
@@ -77,7 +91,7 @@ class Wp_Sdtrk_Tracker_Local
         $eventName = 'page_view';
         $this->printEventDebug($eventName, $event, $data);
         $dbHelper = new Wp_Sdtrk_DbHelper();
-        return $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData());
+        return $this->createResponse($eventName, $event->getEventTime(), $event->getLocalizedEventData(), $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData()));
     }
     
     /**
@@ -92,7 +106,7 @@ class Wp_Sdtrk_Tracker_Local
         $eventName = (!empty($event->getEventName())) ? $event->getEventName() : 'page_view';
         $this->printEventDebug($eventName, $event, $data);
         $dbHelper = new Wp_Sdtrk_DbHelper();
-        return $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData());
+        return $this->createResponse($eventName, $event->getEventTime(), $event->getLocalizedEventData(), $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData()));
     }
     
     /**
@@ -104,11 +118,11 @@ class Wp_Sdtrk_Tracker_Local
     private function fireTracking_Server_Time($event,$data)
     {
         //Get Event-Name
-        $eventName = (isset($data['time'])) ? 'Watchtime_'.$data['time'].'_Seconds' : 'Watchtime';
+        $eventName = $event->get_CustomEventName('Time',$data['time']);
         $event->setTimeTriggerData($eventName, "0");        
         $this->printEventDebug($eventName, $event, $data);
         $dbHelper = new Wp_Sdtrk_DbHelper();
-        return $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData());
+        return $this->createResponse($eventName, $event->getEventTime(), $event->getLocalizedEventData(), $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData()));
     }
     
     /**
@@ -120,11 +134,11 @@ class Wp_Sdtrk_Tracker_Local
     private function fireTracking_Server_Scroll($event,$data)
     {
         //Get Event-Name
-        $eventName = (isset($data['percent'])) ? 'Scrolldepth_'.$data['percent'].'_Percent' : 'Scrolldepth';
+        $eventName = $event->get_CustomEventName('Scroll',$data['percent']);
         $event->setScrollTriggerData($eventName, "0");
         $this->printEventDebug($eventName, $event, $data);
         $dbHelper = new Wp_Sdtrk_DbHelper();
-        return $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData());
+        return $this->createResponse($eventName, $event->getEventTime(), $event->getLocalizedEventData(), $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData()));
     }
     
     /**
@@ -136,12 +150,11 @@ class Wp_Sdtrk_Tracker_Local
     private function fireTracking_Server_Click($event,$data)
     {
         //Get Event-Name
-        $btnTag = (isset($data['tag'])) ? $data['tag'] : false;
-        $eventName = ($btnTag!==false) ? 'ButtonClick'.'_'.$btnTag : 'ButtonClick';        
-        $event->setClickTriggerData($eventName, strval(rand(10000,99999)), $btnTag);        
+        $eventName = $event->get_CustomEventName('Click_Local',$data['tag']);
+        $event->setClickTriggerData($eventName, strval(rand(10000,99999)), $data['tag']);        
         $this->printEventDebug($eventName, $event, $data);
         $dbHelper = new Wp_Sdtrk_DbHelper();
-        return $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData());
+        return $this->createResponse($eventName, $event->getEventTime(), $event->getLocalizedEventData(), $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData()));
     }
     
     /**
@@ -153,12 +166,11 @@ class Wp_Sdtrk_Tracker_Local
     private function fireTracking_Server_Visibility($event,$data)
     {
         //Get Event-Name
-        $elementTag = (isset($data['tag'])) ? $data['tag'] : false;
-        $eventName = ($elementTag!==false) ? 'Visibility'.'_'.$elementTag : 'Visibility';
-        $event->setVisibilityTriggerData($eventName, strval(rand(10000,99999)), $elementTag);
+        $eventName = $event->get_CustomEventName('Visibility_Local',$data['tag']);
+        $event->setVisibilityTriggerData($eventName, strval(rand(10000,99999)), $data['tag']);
         $this->printEventDebug($eventName, $event, $data);
         $dbHelper = new Wp_Sdtrk_DbHelper();
-        return $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData());
+        return $this->createResponse($eventName, $event->getEventTime(), $event->getLocalizedEventData(), $dbHelper->saveHit($eventName, $event->getEventTime(), $event->getLocalizedEventData()));
     }
     
     /**
@@ -168,6 +180,7 @@ class Wp_Sdtrk_Tracker_Local
      * @param Array $data
      */
     private function printEventDebug($eventName,$event,$data){
+        return; // currently not needed
         //Print some debug info
         Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("------Start Local Event-Data------:",$this->debugMode);
         Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("Event-Name: ".$eventName,$this->debugMode);
@@ -178,5 +191,24 @@ class Wp_Sdtrk_Tracker_Local
         Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("-->Converted-Event:",$this->debugMode);
         Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($event->getLocalizedEventData(),$this->debugMode);
         Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("------End Local Event-Data------:",$this->debugMode);
+    }
+    
+    /**
+     * 
+     * @param string $name the event-name
+     * @param string $time the event-time
+     * @param array $data the localized data
+     * @param boolean $result the database result
+     */
+    private function createResponse($name, $time, $data, $result){
+        $msg = ($result) ? $name.' wrote successfully on '.$time : 'Error while adding entry '.$name.' on '.$time;
+        return [
+            'state' => $result,
+            'code' => 0,
+            'msg' => $msg,
+            'payload_encoded' => json_encode($data),
+            'payload_decoded' => $data,
+            'destination' => 'localhost'
+        ];
     }
 }

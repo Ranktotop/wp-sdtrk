@@ -198,6 +198,7 @@ class Wp_Sdtrk_Catcher_Ga {
 			//init
 			gtag('js', new Date());
 			gtag('config', this.localizedData.pid, this.get_config());
+			this.helper.debugLog(this.localizedData.dbg, { event: 'page_view', data: this.get_config()}, 'Fired in Browser (ga-Page)');
 			this.pixelLoaded = true;
 		}
 	}
@@ -265,18 +266,23 @@ class Wp_Sdtrk_Catcher_Ga {
 			switch (handler) {
 				case 'Event':
 					gtag("event", this.event.grabEventName(), this.get_data_custom());
+					this.helper.debugLog(this.localizedData.dbg, { event: this.event.grabEventName(),data: this.get_data_custom() }, 'Fired in Browser (ga-' + handler + ')');
 					break;
 				case 'Time':
-					gtag("event", 'Watchtime-' + data.time + '-Seconds', this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-t" + data.time }));
+					gtag("event", this.helper.get_EventName(handler,data.time), this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-t" + data.time }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.time),data: this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-t" + data.time }) }, 'Fired in Browser (ga-' + handler + ')');
 					break;
 				case 'Scroll':
-					gtag("event", 'Scrolldepth-' + data.percent + '-Percent', this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-s" + data.percent }));
+					gtag("event", this.helper.get_EventName(handler,data.percent), this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-s" + data.percent }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.percent),data: this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-s" + data.percent }) }, 'Fired in Browser (ga-' + handler + ')');
 					break;
 				case 'Click':
-					gtag("event", 'ButtonClick', this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-b" + data.tag, buttonTag: data.tag }));
+					gtag("event", this.helper.get_EventName(handler,data.tag), this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-b" + data.tag, buttonTag: data.tag }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag),data: this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-b" + data.tag, buttonTag: data.tag }) }, 'Fired in Browser (ga-' + handler + ')');
 					break;
 				case 'Visibility':
-					gtag("event", 'ItemVisit', this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-v" + data.tag, itemTag: data.tag }));
+					gtag("event", this.helper.get_EventName(handler,data.tag), this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-v" + data.tag, itemTag: data.tag }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag),data: this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-v" + data.tag, itemTag: data.tag })}, 'Fired in Browser (ga-' + handler + ')');
 					break;
 			}
 		}
@@ -296,7 +302,7 @@ class Wp_Sdtrk_Catcher_Ga {
 			if (this.gclid !== false) {
 				data.gclid = this.gclid;
 			}
-			this.helper.send_ajax({ event: this.event, type: 'ga', handler: handler, data: data });
+			this.helper.send_ajax({ event: this.event, type: 'ga', handler: handler, data: data },this.localizedData.dbg);
 		}
 	}
 

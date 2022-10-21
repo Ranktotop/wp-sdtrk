@@ -507,4 +507,17 @@ class Wp_Sdtrk_Tracker_Event
         }
         return false;
     }
+    
+    /**
+     * Gives an Event-Name for given type
+     * @param string $type
+     * @param string $data
+     */
+    public function get_CustomEventName($type, $data = '0'){
+        $map = Wp_Sdtrk_Helper::wp_sdtrk_getDefaultEventMap();
+        if(isset($map[$type])){
+            return str_replace('%', $data, $map[$type]);
+        }
+        return $type;
+    }
 }

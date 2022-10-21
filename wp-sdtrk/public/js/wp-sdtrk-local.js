@@ -19,12 +19,14 @@ class Wp_Sdtrk_Catcher_Local {
 		this.sendData('Page', { state: true });
 		this.catchEventHit();
 	}
-	
+
 	/**
 	* Catch page hit
 	 */
 	catchEventHit() {
-		this.sendData('Event', { state: true });
+		if (this.event.grabEventName()) {
+			this.sendData('Event', { state: true });
+		}
 	}
 
 	/**
@@ -66,7 +68,7 @@ class Wp_Sdtrk_Catcher_Local {
 	 */
 	sendData(handler, data) {
 		if (this.enabled) {
-			this.helper.send_ajax({ event: this.event, type: 'local', handler: handler, data: data });
+			this.helper.send_ajax({ event: this.event, type: 'local', handler: handler, data: data }, this.localizedData.dbg);
 		}
 	}
 }
