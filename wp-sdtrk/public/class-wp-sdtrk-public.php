@@ -140,7 +140,7 @@ class Wp_Sdtrk_Public
          */
 
         // Load minifed JS Versions
-        $loadMinified = false;
+        $loadMinified = true;
         $minifySwitch = ($loadMinified) ? ".min" : "";
 
         $this->registerScript_localTracker($minifySwitch);
