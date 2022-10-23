@@ -14,6 +14,7 @@ class Wp_Sdtrk_Engine {
 		this.event = new Wp_Sdtrk_Event();
 		this.localizedData = wp_sdtrk_engine; //comes from wp
 		this.helper = new Wp_Sdtrk_Helper(this.localizedData, this.data);
+		this.fp = new Wp_Sdtrk_Fp();
 		this.clickBtns = [];
 
 		//this has to be global
@@ -180,8 +181,9 @@ class Wp_Sdtrk_Engine {
 		this.event.setEventUrl(window.location.href); //the url	
 		this.event.setUserFirstName(this.helper.get_Params(['buyer_first_name', 'first_name', 'firstname', 'vorname', 'license_data_first_name']));
 		this.event.setUserLastName(this.helper.get_Params(['buyer_last_name', 'last_name', 'lastname', 'nachname', 'license_data_last_name']));
+		this.event.setUserFP(this.fp.get_fp());
 		this.event.setUserEmail(this.helper.get_Params(['buyer_email', 'email', 'license_data_email']));
-
+		
 		//Additional
 		//TimeTrigger
 		if (this.localizedData.timeTrigger) {

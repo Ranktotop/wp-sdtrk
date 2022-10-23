@@ -435,6 +435,13 @@ class Wp_Sdtrk_Admin
                     'content' => ''
                 ),
                 array(
+                    'id' => 'trk_fp',
+                    'type' => 'switcher',
+                    'title' => __('Enable Fingerprinting', 'wp-sdtrk'),
+                    'description' => __('Check to fingerprint users (works cookie-less)', 'wp-sdtrk'),
+                    'default' => 'no'
+                ),
+                array(
                     'id' => 'trk_time',
                     'type' => 'switcher',
                     'title' => __('Fire signal-event after time', 'wp-sdtrk'),

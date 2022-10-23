@@ -101,6 +101,16 @@ class Wp_Sdtrk_Tracker_Event
     {
         return $this->grabFirstValue('userLastName');
     }
+    
+    /**
+     * Return the user-fingerprint
+     *
+     * @return string
+     */
+    public function getUserFingerprint()
+    {
+        return ($this->setAndFilled('userFP')) ? $this->eventData['userFP'] : false;
+    }
 
     /**
      * Return the user-email
@@ -418,6 +428,12 @@ class Wp_Sdtrk_Tracker_Event
             'name' => $this->getPageName(),
             'source' => $this->getEventSource()
         );
+        //if fingerprint is set
+        if($this->getUserFingerprint() !== false){
+            $data['user'] = array(
+                'id' => $this->getUserFingerprint()
+            );
+        }
 
         // UTM
         $utmData = array();
@@ -436,7 +452,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     private function setAndFilled($fieldname)
     {
-        return (isset($this->eventData[$fieldname]) && ! empty($this->eventData[$fieldname])) ? true : false;
+        return (isset($this->eventData[$fieldname]) && ! empty($this->eventData[$fieldname]) && $this->eventData[$fieldname] !== 'false') ? true : false;
     }
 
     /**

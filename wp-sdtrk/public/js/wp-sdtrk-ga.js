@@ -24,6 +24,10 @@ class Wp_Sdtrk_Catcher_Ga {
 		if (this.localizedData.pid === "" || !this.event) {
 			return;
 		}
+		//This has to be fired first, because GA uses the cookie for identification
+		if (this.get_Cid()) {
+			this.cid = this.get_Cid();
+		}
 		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {
 			this.b_enabled = true;
 			//load the base pixel
@@ -31,10 +35,6 @@ class Wp_Sdtrk_Catcher_Ga {
 		}
 		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.s_ci, this.localizedData.s_cs, this.event) !== false && this.localizedData.s_e !== "") {
 			this.s_enabled = true;
-		}
-
-		if (this.get_Cid()) {
-			this.cid = this.get_Cid();
 		}
 		if (this.get_Gclid()) {
 			this.gclid = this.get_Gclid();
@@ -436,11 +436,16 @@ class Wp_Sdtrk_Catcher_Ga {
 			var subdomainIndex = '1';
 			var creationTime = + new Date();
 			var randomNo = parseInt(Math.random() * 10000000000);
-			var cValue = version + '.' + subdomainIndex + '.' + creationTime + '.' + randomNo;
+			var clientId = creationTime + '.' + randomNo;
+			//use fp if available			
+			if(this.event.getUserFP()){
+				clientId = this.event.getUserFP()+ '.' +this.event.getUserFP();
+			}			
+			var cValue = version + '.' + subdomainIndex + '.' + clientId;
 			//var identifier = randomInteger(100000000, 999999999).toString() +'.'+ randomInteger(1000000000, 9999999999).toString()
 			//var userid = 'GA1.1.' + identifier;
 			this.helper.save_cookie('_ga', cValue, validDays, false);
-			return creationTime + '.' + randomNo;
+			return clientId;
 		}
 	}
 

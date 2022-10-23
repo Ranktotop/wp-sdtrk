@@ -16,7 +16,7 @@
  * Plugin Name:       Smart Server Side Tracking Plugin
  * Plugin URI:        https://marcmeese.de/
  * Description:       Adds server side tracking to non-woocommerce wordpress-sites
- * Version:           1.6.0
+ * Version:           1.6.1
  * Author:            Marc Meese
  * Author URI:        https://marcmeese.de/
  * License:           GPL-2.0+

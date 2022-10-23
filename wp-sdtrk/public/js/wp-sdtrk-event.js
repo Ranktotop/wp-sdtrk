@@ -81,6 +81,16 @@ class Wp_Sdtrk_Event {
 	getUserLastName() {
 		return this.grabFirstValue(this.userLastName);
 	}
+	
+	//Sets the User-FP
+	setUserFP(value) {
+		this.userFP = value;
+	}
+
+	//Gets the User-FP
+	getUserFP() {
+		return this.userFP;
+	}
 
 	//Gets the User-LastName as array
 	getUserLastName_all() {

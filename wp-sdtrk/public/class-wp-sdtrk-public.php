@@ -140,7 +140,7 @@ class Wp_Sdtrk_Public
          */
 
         // Load minifed JS Versions
-        $loadMinified = true;
+        $loadMinified = false;
         $minifySwitch = ($loadMinified) ? ".min" : "";
 
         $this->registerScript_localTracker($minifySwitch);
@@ -151,6 +151,7 @@ class Wp_Sdtrk_Public
         $this->registerScript_flTracker($minifySwitch);
         $this->registerScript_mtcTracker($minifySwitch);
         $this->registerScript_decrypter($minifySwitch);
+        $this->registerScript_fingerprinter($minifySwitch);
         $this->registerScript_engine($minifySwitch);
     }
 
@@ -168,7 +169,11 @@ class Wp_Sdtrk_Public
         $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_debug"), "yes") == 0) ? true : false;
         Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("----Write CSV File-----", $debug);
         $hitContainer = new Wp_Sdtrk_hitContainer($debug);
-        $hits = $hitContainer->getHitsForCSV();
+        $hits = $hitContainer->getHitsForCSV(); 
+        //order the header asc
+        $header = array_keys($hits[0]);
+        sort($header);
+        
         $filePath = plugin_dir_path(dirname(__FILE__)) . 'api/localHits.csv';
         Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("Write " . sizeof($hits) . " lines to " . $filePath, $debug);
         try {
@@ -176,31 +181,33 @@ class Wp_Sdtrk_Public
             // Write the header
             switch ($enclose) {
                 case "auto":
-                    fputcsv($fp, array_keys($hits[0]));
+                    fputcsv($fp, $header);
                     break;
                 case "off":
                     fputs($fp, implode(",", array_map(function ($item) {
                         return $item;
-                    }, array_keys($hits[0]))) . "\r\n");
+                    }, $header)) . "\r\n");
                     break;
                 case "on":
                     fputs($fp, implode(",", array_map(function ($item) {
                         return '"' . $item . '"';
-                    }, array_keys($hits[0]))) . "\r\n");
+                    }, $header)) . "\r\n");
                     break;
                 default:
-                    fputcsv($fp, array_keys($hits[0]));
+                    fputcsv($fp, $header);
                     break;
             }
             // Write fields
             switch ($enclose) {
                 case "auto":
                     foreach ($hits as $hit) {
+                        ksort($hit); //sort same as header
                         fputcsv($fp, $hit);
                     }
                     break;
                 case "off":
                     foreach ($hits as $hit) {
+                        ksort($hit); //sort same as header
                         fputs($fp, implode(",", array_map(function ($item) {
                             return $item;
                         }, $hit)) . "\r\n");
@@ -208,13 +215,14 @@ class Wp_Sdtrk_Public
                     break;
                 case "on":
                     foreach ($hits as $hit) {
+                        ksort($hit); //sort same as header
                         fputs($fp, implode(",", array_map(function ($item) {
                             return '"' . $item . '"';
                         }, $hit)) . "\r\n");
                     }
                     break;
                 default:
-                    fputcsv($fp, array_keys($hits[0]));
+                    fputcsv($fp, $header);
                     break;
             }
             fclose($fp);
@@ -668,6 +676,27 @@ class Wp_Sdtrk_Public
         wp_register_script($this->get_jsHandler('name', 'decrypter'), plugins_url("js/" . $this->get_jsHandler('file', 'decrypter') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
         wp_localize_script($this->get_jsHandler('name', 'decrypter'), $this->get_jsHandler('var', 'decrypter'), $localizedData);
     }
+    
+    /**
+     * Register and localize fingerprinter
+     *
+     * @param string $loadMinified
+     */
+    private function registerScript_fingerprinter($loadMinified = "")
+    {
+        // Init
+        $localizedData = array();
+        
+        // Digistore24
+        $enabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_fp"), "yes") == 0) ? true : false;
+        
+        // Merge to array
+        $localizedData['enabled'] = $enabled;
+        
+        // Register scripts
+        wp_register_script($this->get_jsHandler('name', 'fp'), plugins_url("js/" . $this->get_jsHandler('file', 'fp') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+        wp_localize_script($this->get_jsHandler('name', 'fp'), $this->get_jsHandler('var', 'fp'), $localizedData);
+    }
 
     /**
      * Register and localize engine
@@ -764,6 +793,7 @@ class Wp_Sdtrk_Public
         $deps = array(
             'jquery',
             $this->get_jsHandler('name', 'decrypter'),
+            $this->get_jsHandler('name', 'fp'),
             $this->get_jsHandler('name', 'event'),
             $this->get_jsHandler('name', 'helper'),
             $this->get_jsHandler('name', 'local'),

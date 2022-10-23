@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.6.1 =
+* Added fingerprinting feature
+
 = 1.6.0 =
 * Completely rewriten tracker logic for higher compatibility
 
