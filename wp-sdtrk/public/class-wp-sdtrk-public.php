@@ -770,8 +770,12 @@ class Wp_Sdtrk_Public
         global $post;
         $postId = ($post && $post->ID) ? $post->ID : false;
         $title = $postId ? get_the_title($post) : "";
+        
+        //admin
+        $isAdmin = ( current_user_can( 'manage_options' ) ) ? true : false;
 
         // Merge to array
+        $localizedData['admin'] = $isAdmin;
         $localizedData['prodId'] = $prodId;
         $localizedData['trkow'] = $trkOverwrite;
         $localizedData['pageId'] = $postId;

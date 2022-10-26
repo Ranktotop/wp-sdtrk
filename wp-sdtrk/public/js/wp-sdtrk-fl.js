@@ -19,7 +19,13 @@ class Wp_Sdtrk_Catcher_Fl {
 	* Validate if tt is enabled 0 = browser, 1 = server, 2 = both
 	 */
 	validate(target = 2) {
+		//Skip if invalid data
 		if (this.localizedData.pid === "" || !this.event) {
+			return;
+		}
+		//Skip if admin
+		if (this.helper.isAdmin()) {
+			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (fl)');					
 			return;
 		}
 		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {

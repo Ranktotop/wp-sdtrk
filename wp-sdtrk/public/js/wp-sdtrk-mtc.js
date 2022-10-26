@@ -22,6 +22,11 @@ class Wp_Sdtrk_Catcher_Mtc {
 		if (this.localizedData.pid === "" || !this.event) {
 			return;
 		}
+		//Skip if admin
+		if (this.helper.isAdmin()) {
+			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (mtc)');					
+			return;
+		}
 		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {
 			this.b_enabled = true;
 			//load the base pixel

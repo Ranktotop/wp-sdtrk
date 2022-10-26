@@ -24,6 +24,11 @@ class Wp_Sdtrk_Catcher_Ga {
 		if (this.localizedData.pid === "" || !this.event) {
 			return;
 		}
+		//Skip if admin
+		if (this.helper.isAdmin()) {
+			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (ga)');					
+			return;
+		}
 		//This has to be fired first, because GA uses the cookie for identification
 		if (this.get_Cid()) {
 			this.cid = this.get_Cid();

@@ -286,4 +286,15 @@ class Wp_Sdtrk_Helper {
 		}
 		return type;
 	}
+	
+	/**
+	* Checks if the current user is an admin
+	* @return {Boolean} is admin
+	 */
+	isAdmin(){
+		if(this.localizedData.admin === "1" || this.localizedData.admin === true){
+			return true;
+		}
+		return false;
+	}
 }

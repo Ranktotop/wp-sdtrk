@@ -67,6 +67,11 @@ class Wp_Sdtrk_Catcher_Local {
 	* @param {Object} data The data to send
 	 */
 	sendData(handler, data) {
+		//Skip if admin
+		if (this.helper.isAdmin()) {
+			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (local)');					
+			return;
+		}
 		if (this.enabled) {
 			this.helper.send_ajax({ event: this.event, type: 'local', handler: handler, data: data }, this.localizedData.dbg);
 		}
