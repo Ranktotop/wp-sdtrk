@@ -948,6 +948,9 @@ class Wp_Sdtrk_Public
                 case 'gauth':
                     include (WP_PLUGIN_DIR . '/' . $this->wp_sdtrk . '/api/gauth.php');
                     break;
+                case 'hitfeed':
+                    include (WP_PLUGIN_DIR . '/' . $this->wp_sdtrk . '/api/hitfeed.php');
+                    break;
             }
 
             exit();

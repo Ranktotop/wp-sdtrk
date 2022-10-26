@@ -362,6 +362,8 @@ class Wp_Sdtrk_Admin
         $gauth_state = ($localGauth_authenticated) ? '<span style="color:green">'.__('authenticated', 'wp-sdtrk').'</span>' : '<span style="color:red">'.__('not authenticated', 'wp-sdtrk').'</span>';
         $gauth_btnLabel = ($localGauth_authenticated) ? __('Re-authenticate', 'wp-sdtrk') : __('Authenticate', 'wp-sdtrk');
         
+        //XML Hit Feed data
+        $hitFeedUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/index.php?wp-sdtrk=hitfeed&key='.__('YOURSECRET','wp-sdtrk');
 
         // Check for activated Cookie-Plugins
         $cookieOptions = array(
@@ -585,6 +587,50 @@ class Wp_Sdtrk_Admin
                             'title' => __('Activate Debugging', 'wp-sdtrk'),
                             'description' => sprintf( __( 'Check to activate %s debugging', 'wp-sdtrk'),'Local'),
                             'default' => 'no'
+                        ),
+                        array(
+                            'type' => 'content',
+                            'title' => '<h3>' . __('Feed Sync Settings', 'wp-sdtrk') . '</h3>',
+                            'wrap_class' => 'divideHeader',
+                            'dependency' => array(
+                                'local_trk_server',
+                                '==',
+                                'true'
+                            ),
+                            'content' => ''
+                        ),
+                        array(
+                            'id' => 'local_trk_server_xml',
+                            'type' => 'switcher',
+                            'dependency' => array(
+                                'local_trk_server',
+                                '==',
+                                'true'
+                            ),
+                            'title' => __('Activate Hit-Feed', 'wp-sdtrk'),
+                            'description' => __('Check to activate access to the Live-Hit-Feed', 'wp-sdtrk'),
+                            'default' => 'no'
+                        ),
+                        array(
+                            'id' => 'local_trk_server_xml_secret',
+                            'type' => 'text',
+                            'title' => __('Secret Key', 'wp-sdtrk'),
+                            'description' => __('Here you can set a secret key (recommended)', 'wp-sdtrk'),
+                            'dependency' => array(
+                                'local_trk_server|local_trk_server_xml',
+                                '==|==',
+                                'true|true'
+                            ),
+                        ),
+                        array(
+                            'type' => 'content',
+                            'title' => __('Hit-Feed notes', 'wp-sdtrk'),
+                            'content' => __('Your feed will be accessible here:', 'wp-sdtrk').' <i>'.$hitFeedUrl.'</i><br>'.__('You can connect GoogleDataStudio with the exclusive Connector explained in the plugins tutorial section:', 'wp-sdtrk'),
+                            'dependency' => array(
+                                'local_trk_server|local_trk_server_xml',
+                                '==|==',
+                                'true|true'
+                            ),
                         ),
                         array(
                             'type' => 'content',
