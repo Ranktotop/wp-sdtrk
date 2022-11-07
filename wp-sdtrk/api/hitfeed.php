@@ -78,7 +78,7 @@ class Wp_Sdtrk_Hitfeed
                 $this->print_XML($hits, $header);
             }
             if ($mode === 'csv') {
-                $hits = $hitContainer->getHitsForCSV();
+                $hits = $hitContainer->getHitsForCSV("datastudio");
                 $header = array_keys($hits[0]);
                 sort($header);
                 $this->print_CSV($hits, $header);

@@ -398,7 +398,7 @@ class Wp_Sdtrk_hitContainer
      *
      * @return array
      */
-    public function getHitsForCSV()
+    public function getHitsForCSV($target="local")
     {
         $skipFields = array(
             "gsync"
@@ -411,7 +411,12 @@ class Wp_Sdtrk_hitContainer
             foreach ($hit as $key => $value) {
                 // convert time
                 if ($key === "date") {
-                    $value = Wp_Sdtrk_Helper::wp_sdtrk_TimestampToDate('d.m.Y H:i:s',$value,'Europe/Berlin');
+                    if($target === "local"){
+                        $value = Wp_Sdtrk_Helper::wp_sdtrk_TimestampToDate('d.m.Y H:i:s',$value,'Europe/Berlin');                        
+                    }
+                    if($target === "datastudio"){
+                        $value = Wp_Sdtrk_Helper::wp_sdtrk_TimestampToDate('YmdHis',$value,'Europe/Berlin');
+                    }
                 }                
                 //if key is not skipped add field
                 if (! in_array($key, $skipFields)) {

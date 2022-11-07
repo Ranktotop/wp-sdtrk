@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.6.4 =
+* Changed fieldtype of date in csv feed
+
 = 1.6.3 =
 * Added live-hit-feed sync feature
 
