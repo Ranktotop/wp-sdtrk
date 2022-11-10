@@ -288,6 +288,19 @@ class Wp_Sdtrk_Helper {
 	}
 	
 	/**
+	* Gives parameter-names for requested field
+	* @param {String} name The name of parameter-set which is requested
+	* @return {Array} The parameter names
+	 */
+	get_paramNames(name){
+		var map = this.localizedData.pmap;
+		if(map[name]){
+			return map[name];
+		}
+		return [];
+	}
+	
+	/**
 	* Checks if the current user is an admin
 	* @return {Boolean} is admin
 	 */

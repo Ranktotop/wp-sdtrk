@@ -151,21 +151,22 @@ class Wp_Sdtrk_Engine {
 	* Fetch Data and fill up the event object
 	 */
 	collect_eventData() {
+		
 		//UTMs
-		this.event.setUtm(this.helper.get_Params(['utm_source', 'utm_medium', 'utm_term', 'utm_content', 'utm_campaign']));
+		this.event.setUtm(this.helper.get_Params(this.helper.get_paramNames('utm')));		
 		this.helper.persist(this.event.getUtm());
 		this.event.setUtm(this.helper.get_Cookies(this.event.getUtm()));
 
 		//Event
-		this.event.setProdId(this.helper.get_Params(['prodid', 'product_id']));
+		this.event.setProdId(this.helper.get_Params(this.helper.get_paramNames('prodid')));
 		this.event.addProdId('postProdId', this.localizedData.prodId);
-		this.event.setProdName(this.helper.get_Params(['product_name']));
+		this.event.setProdName(this.helper.get_Params(this.helper.get_paramNames('prodname')));
 		this.event.setPageName(this.localizedData.pageTitle);
 		this.event.setPageId(this.localizedData.pageId);
-		this.event.setOrderId(this.helper.get_Params(['order_id']));
+		this.event.setOrderId(this.helper.get_Params(this.helper.get_paramNames('orderid')));
 		this.event.setEventId(Math.floor(Math.random() * 100) + "" + Date.now());
-		this.event.setValue(this.helper.get_Params(['value', 'net_amount', 'amount']));
-		this.event.setEventName(this.helper.get_Params(['type']));
+		this.event.setValue(this.helper.get_Params(this.helper.get_paramNames('value')));
+		this.event.setEventName(this.helper.get_Params(this.helper.get_paramNames('type')));
 		this.event.setBrandName(this.localizedData.brandName);
 		this.event.setLandingPage(this.localizedData.currentDomain);
 		this.event.setEventTime(Date.now() / 1000 | 0);
@@ -179,10 +180,10 @@ class Wp_Sdtrk_Engine {
 		this.event.setEventPath(document.location.pathname + document.location.search); //the page path
 		this.event.setEventDomain(window.location.host); //the domain
 		this.event.setEventUrl(window.location.href); //the url	
-		this.event.setUserFirstName(this.helper.get_Params(['buyer_first_name', 'first_name', 'firstname', 'vorname', 'license_data_first_name']));
-		this.event.setUserLastName(this.helper.get_Params(['buyer_last_name', 'last_name', 'lastname', 'nachname', 'license_data_last_name']));
+		this.event.setUserFirstName(this.helper.get_Params(this.helper.get_paramNames('firstname')));
+		this.event.setUserLastName(this.helper.get_Params(this.helper.get_paramNames('lastname')));
 		this.event.setUserFP(this.fp.get_fp());
-		this.event.setUserEmail(this.helper.get_Params(['buyer_email', 'email', 'license_data_email']));
+		this.event.setUserEmail(this.helper.get_Params(this.helper.get_paramNames('email')));
 		
 		//Additional
 		//TimeTrigger

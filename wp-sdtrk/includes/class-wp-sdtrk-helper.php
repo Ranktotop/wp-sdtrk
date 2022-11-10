@@ -619,6 +619,7 @@ class Wp_Sdtrk_Helper
             return $value;
         }
     }
+
     /**
      * Gets the default Event-Names
      *
@@ -632,7 +633,68 @@ class Wp_Sdtrk_Helper
             'Click' => 'button_click',
             'Visibility' => 'item_visit',
             'Click_Local' => 'button_click_%',
-            'Visibility_Local' => 'item_visit_%',            
+            'Visibility_Local' => 'item_visit_%'
         );
+    }
+
+    /**
+     * Get the param-names-map for events
+     *
+     * @return string[][]
+     */
+    public static function wp_sdtrk_getParamNames()
+    {
+        $params = array();
+        $params['firstname'] = array(
+            'buyer_first_name',
+            'first_name',
+            'firstname',
+            'vorname',
+            'license_data_first_name',
+            'customer_email'
+        );
+        $params['lastname'] = array(
+            'buyer_last_name',
+            'last_name',
+            'lastname',
+            'nachname',
+            'license_data_last_name'
+        );
+        $params['email'] = array(
+            'buyer_email',
+            'email',
+            'license_data_email',
+            'customer_email'
+        );
+        $params['value'] = array(
+            'value',
+            'net_amount',
+            'amount'
+        );
+        $params['prodid'] = array(
+            'prodid',
+            'product_id'
+        );
+        $params['prodname'] = array(
+            'product_name',
+            'prodname'
+        );
+        $params['orderid'] = array(
+            'order_id'
+        );
+        $params['affiliate'] = array(
+            'affiliate_id'
+        );
+        $params['type'] = array(
+            'type'
+        );
+        $params['utm'] = array(
+            'utm_source',
+            'utm_medium',
+            'utm_term',
+            'utm_content',
+            'utm_campaign'
+        );
+        return $params;
     }
 }

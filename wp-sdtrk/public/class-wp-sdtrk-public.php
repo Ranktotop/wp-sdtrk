@@ -788,6 +788,7 @@ class Wp_Sdtrk_Public
         $localizedData['source'] = Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL(true);
         $localizedData['referer'] = Wp_Sdtrk_Helper::wp_sdtrk_getCurrentReferer(true);
         $localizedData['evmap'] = Wp_Sdtrk_Helper::wp_sdtrk_getDefaultEventMap(); //eventmap for keep the custom-event-names in sync with server
+        $localizedData['pmap'] = Wp_Sdtrk_Helper::wp_sdtrk_getParamNames();
 
         // Register additional scripts
         wp_register_script($this->get_jsHandler('name', 'event'), plugins_url("js/" . $this->get_jsHandler('file', 'event') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
