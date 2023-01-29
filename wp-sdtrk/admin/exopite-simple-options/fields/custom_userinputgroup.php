@@ -26,8 +26,8 @@
  *   so this->name() should include name="" and
  *   fields are not
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_custom_userinputgroup' ) ) {
-    class Exopite_Simple_Options_Framework_Field_custom_userinputgroup extends Exopite_Simple_Options_Framework_Fields {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_custom_userinputgroup' ) ) {
+    class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_custom_userinputgroup extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
         
         public $license;
         
@@ -191,7 +191,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_custom_userinputgro
 			}
 			echo 'exopite-sof-accordion__content">';
 
-			$self                      = new Exopite_Simple_Options_Framework( $base_id, null );
+			$self                      = new Wp_Sdtrk_Exopite_Simple_Options_Framework( $base_id, null );
 			$self->config['multilang'] = $this->config['multilang'];
 
 			$num = 0;
@@ -203,7 +203,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_custom_userinputgro
 					continue;
 				}
 
-				$class = 'Exopite_Simple_Options_Framework_Field_' . $field['type'];
+				$class = 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_' . $field['type'];
 
 				if ( $this->config['is_options_simple'] ) {
 					$field['is_options_simple'] = true;

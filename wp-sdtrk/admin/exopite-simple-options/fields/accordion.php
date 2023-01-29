@@ -6,9 +6,9 @@
  * Field: Tab
  *
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_accordion' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_accordion' ) ) {
 
-	class Exopite_Simple_Options_Framework_Field_accordion extends Exopite_Simple_Options_Framework_Fields {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_accordion extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 
 		public function __construct( $field, $value = '', $unique = '', $config = array(), $multilang ) {
 			parent::__construct( $field, $value, $unique, $config, $multilang );
@@ -33,7 +33,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_accordion' ) ) {
 			$unique_id 	= ( ! empty( $this->unique ) ) ? $this->unique : $this->field['id'];
 
 
-			$self  = new Exopite_Simple_Options_Framework( array(
+			$self  = new Wp_Sdtrk_Exopite_Simple_Options_Framework( array(
 				'id' => $this->element_name(),
 				'multilang' => $this->config['multilang'],
 				'is_options_simple' => $this->config['is_options_simple'],

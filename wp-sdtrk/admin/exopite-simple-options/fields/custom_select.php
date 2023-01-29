@@ -67,9 +67,9 @@ OPTIONS OR QUERY:
 ),
 
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_custom_select' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_custom_select' ) ) {
 
-	class Exopite_Simple_Options_Framework_Field_custom_select extends Exopite_Simple_Options_Framework_Fields {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_custom_select extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 	    
 	    public $license;
 

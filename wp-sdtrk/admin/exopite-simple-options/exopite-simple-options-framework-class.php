@@ -62,9 +62,9 @@
  * - before
  * - after
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework' ) ) :
 
-	class Exopite_Simple_Options_Framework {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework {
 
 		/**
 		 *
@@ -219,7 +219,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		protected function setup_multilang() {
 
 			// Srt Defaults for all cases
-			$multilang_defaults = Exopite_Simple_Options_Framework_Helper::get_language_defaults();
+			$multilang_defaults = Wp_Sdtrk_Exopite_Simple_Options_Framework_Helper::get_language_defaults();
 
 			if ( is_array( $multilang_defaults ) ) {
 
@@ -343,7 +343,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public function is_special_multilang_active() {
 
-			return Exopite_Simple_Options_Framework_Helper::is_special_multilang_plugin_active();
+			return Wp_Sdtrk_Exopite_Simple_Options_Framework_Helper::is_special_multilang_plugin_active();
 
 		}
 
@@ -375,7 +375,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		protected function define_shared_hooks() {
 
 			// Upload hooks are only required for both,
-			Exopite_Simple_Options_Framework_Upload::add_hooks();
+			Wp_Sdtrk_Exopite_Simple_Options_Framework_Upload::add_hooks();
 
 			//scripts and styles
 			add_action( 'admin_enqueue_scripts', array( $this, 'load_scripts_styles' ) );
@@ -1121,7 +1121,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				}
 			}
 
-			$sanitizer = new Exopite_Simple_Options_Framework_Sanitize( $this->is_multilang(), $this->lang_current, $this->config, $this->fields );
+			$sanitizer = new Wp_Sdtrk_Exopite_Simple_Options_Framework_Sanitize( $this->is_multilang(), $this->lang_current, $this->config, $this->fields );
 			if ( $this->is_multilang() ) {
 				$section_fields_with_values[ $this->lang_current ] = $sanitizer->get_sanitized_values( $this->fields, $posted_data[$this->lang_current] );
 			} else {
@@ -1154,15 +1154,16 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				if ( isset( $post_id ) ) {
 
 					$valid = apply_filters( 'exopite_sof_save_meta_options', $section_fields_with_values, $this->unique, $post_id );
-					do_action( 'exopite_sof_do_save_meta_options', $section_fields_with_values, $this->unique, $post_id );
-
+					do_action( 'exopite_sof_do_save_meta_options', $section_fields_with_values, $this->unique, $post_id );					
 					if ( $this->is_options_simple() ) {
-
-						foreach ( $valid as $key => $value ) {
-
-							update_post_meta( $post_id, $key, $value );
-
-						}
+					    
+					    foreach ( $valid as $key => $value ) {
+					        //Custom - Save only fields which are from this plugin
+					        if(strpos($key, "wp-sdtrk-") !== false){
+					            update_post_meta( $post_id, $key, $value );
+					        }
+					        
+					    }
 					} else {
 						update_post_meta( $post_id, $this->unique, $valid );
 					}
@@ -1334,7 +1335,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                 $field = $field['type'];
             }
 
-			$class = 'Exopite_Simple_Options_Framework_Field_' . $field;
+			$class = 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_' . $field;
 
 			if ( ! class_exists( $class ) ) {
 
@@ -1360,7 +1361,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function enqueue_field_class( $field ) {
 
-			$class = 'Exopite_Simple_Options_Framework_Field_' . $field['type'];
+			$class = 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_' . $field['type'];
 
 			if ( class_exists( $class ) && method_exists( $class, 'enqueue' ) ) {
 
@@ -1389,7 +1390,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			do_action( 'exopite_sof_before_add_field', $field, $this->config );
 
 			$output     = '';
-			$class      = 'Exopite_Simple_Options_Framework_Field_' . $field['type'];
+			$class      = 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_' . $field['type'];
 			$depend     = '';
 			$wrap_class = ( ! empty( $field['wrap_class'] ) ) ? ' ' . $field['wrap_class'] : '';
 			$hidden     = ( $field['type'] == 'hidden' ) ? ' hidden' : '';
@@ -1957,11 +1958,11 @@ if ( ! function_exists( 'get_exopite_sof_option' ) ) {
 		 * @link https://codex.wordpress.org/Transients_API
 		 */
 
-		if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
+		if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Helper' ) ) {
 			require_once 'multilang-class.php';
 		}
 
-		$language_defaults = Exopite_Simple_Options_Framework_Helper::get_language_defaults();
+		$language_defaults = Wp_Sdtrk_Exopite_Simple_Options_Framework_Helper::get_language_defaults();
 
 		$options = apply_filters( 'get_exopite_sof_option', get_option( $option_slug, $default ), $option_slug, $default );
 

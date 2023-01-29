@@ -9,8 +9,8 @@
  * @version 1.0.0
  *
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_backup' ) ) {
-	class Exopite_Simple_Options_Framework_Field_backup extends Exopite_Simple_Options_Framework_Fields {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_backup' ) ) {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_backup extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 			parent::__construct( $field, $value, $unique, $config );

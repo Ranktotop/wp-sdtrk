@@ -6,9 +6,9 @@
  * Field: Random-ID
  *
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_custom_randomid' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_custom_randomid' ) ) {
 
-	class Exopite_Simple_Options_Framework_Field_custom_randomid extends Exopite_Simple_Options_Framework_Fields {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_custom_randomid extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 
 		public function __construct( $field, $value = '', $unique = '', $config = array(), $multilang ) {
 			parent::__construct( $field, $value, $unique, $config, $multilang );

@@ -6,9 +6,9 @@
  * Field: Button Bar
  *
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_button_bar' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_button_bar' ) ) {
 
-	class Exopite_Simple_Options_Framework_Field_button_bar extends Exopite_Simple_Options_Framework_Fields {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_button_bar extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 			parent::__construct( $field, $value, $unique, $config );

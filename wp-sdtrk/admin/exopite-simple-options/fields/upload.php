@@ -36,9 +36,9 @@
  * jQuery File Upload
  * https://blueimp.github.io/jQuery-File-Upload/jquery-ui.html
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_upload' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_upload' ) ) {
 
-	class Exopite_Simple_Options_Framework_Field_upload extends Exopite_Simple_Options_Framework_Fields {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_upload extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 
@@ -146,12 +146,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_upload' ) ) {
             </script>
 			<?php
 
-			$maxsize = Exopite_Simple_Options_Framework_Upload::file_upload_max_size();
-			if ( isset( $this->field['options']['maxsize'] ) && Exopite_Simple_Options_Framework_Upload::file_upload_max_size() >= $this->field['options']['maxsize'] ) {
+			$maxsize = Wp_Sdtrk_Exopite_Simple_Options_Framework_Upload::file_upload_max_size();
+			if ( isset( $this->field['options']['maxsize'] ) && Wp_Sdtrk_Exopite_Simple_Options_Framework_Upload::file_upload_max_size() >= $this->field['options']['maxsize'] ) {
 				$maxsize = $this->field['options']['maxsize'];
 			}
 
-			$allowed_mime_types = ( gettype( Exopite_Simple_Options_Framework_Upload::allowed_mime_types() ) == 'array' ) ? implode( ',', Exopite_Simple_Options_Framework_Upload::allowed_mime_types() ) : Exopite_Simple_Options_Framework_Upload::allowed_mime_types();
+			$allowed_mime_types = ( gettype( Wp_Sdtrk_Exopite_Simple_Options_Framework_Upload::allowed_mime_types() ) == 'array' ) ? implode( ',', Wp_Sdtrk_Exopite_Simple_Options_Framework_Upload::allowed_mime_types() ) : Wp_Sdtrk_Exopite_Simple_Options_Framework_Upload::allowed_mime_types();
 
 			if ( isset( $this->field['options']['allowed'] ) && is_array( $this->field['options']['allowed'] ) ) {
 				$allowed_mime_types_array = explode( ',', $allowed_mime_types );
@@ -179,7 +179,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_upload' ) ) {
 				<?php
 
 				echo esc_attr__( 'Max amount of files: ', 'exopite-sof' ) . $this->field['options']['filecount'] . '<br>';
-				echo esc_attr__( 'Max file upload size: ', 'exopite-sof' ) . number_format( (float) ( Exopite_Simple_Options_Framework_Upload::file_upload_max_size() / 1048576 ), 2, '.', '' ) . 'Mb<br><br>';
+				echo esc_attr__( 'Max file upload size: ', 'exopite-sof' ) . number_format( (float) ( Wp_Sdtrk_Exopite_Simple_Options_Framework_Upload::file_upload_max_size() / 1048576 ), 2, '.', '' ) . 'Mb<br><br>';
 				// echo '<i style="font-size:.9em;">' . esc_attr__( 'To increase file upload limit in the standard built-in WordPress media uploader up as large as available disk space allows, you could use', 'exopite-sof' ) . ' <a target="_blank" href="' . admin_url() . 'plugin-install.php?tab=plugin-information&plugin=tuxedo-big-file-uploads">Tuxedo Big File Uploads</a> ' . esc_attr__( 'Plugin', 'exopite-sof' ) . '</i>';
 
 				?>

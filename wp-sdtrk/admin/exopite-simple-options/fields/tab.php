@@ -6,9 +6,9 @@
  * Field: Tab
  *
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_tab' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_tab' ) ) {
 
-	class Exopite_Simple_Options_Framework_Field_tab extends Exopite_Simple_Options_Framework_Fields {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_tab extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 
 		public function __construct( $field, $value = '', $unique = '', $config = array(), $multilang ) {
 			parent::__construct( $field, $value, $unique, $config, $multilang );
@@ -22,7 +22,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_tab' ) ) {
 			$tabs    = array_values( $this->field['tabs'] );
 			$unique_id = ( ! empty( $this->unique ) ) ? $this->unique : $this->field['id'];
 
-			$self  = new Exopite_Simple_Options_Framework( array(
+			$self  = new Wp_Sdtrk_Exopite_Simple_Options_Framework( array(
 				'id' => $this->element_name(),
 				'multilang' => $this->config['multilang'],
 				'is_options_simple' => $this->config['is_options_simple'],
@@ -81,7 +81,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_tab' ) ) {
 						$field_value = $field['default'];
 					}
 
-					$class = 'Exopite_Simple_Options_Framework_Field_' . $field['type'];
+					$class = 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_' . $field['type'];
 
 					echo $self->add_field( $field, $field_value );
 

@@ -6,9 +6,9 @@
  * Field: Gallery
  *
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_gallery' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_gallery' ) ) {
 
-	class Exopite_Simple_Options_Framework_Field_gallery extends Exopite_Simple_Options_Framework_Fields {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_gallery extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 
 		public function __construct( $field, $value = '', $unique = '', $config = array(), $multilang ) {
 			parent::__construct( $field, $value, $unique, $config, $multilang );

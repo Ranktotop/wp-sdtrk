@@ -6,9 +6,9 @@
  * Field: Range
  *
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_range' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_range' ) ) {
 
-	class Exopite_Simple_Options_Framework_Field_range extends Exopite_Simple_Options_Framework_Fields {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_range extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 			parent::__construct( $field, $value, $unique, $config );

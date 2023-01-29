@@ -6,9 +6,9 @@
  * Field: Video
  *
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_video' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_video' ) ) {
 
-	class Exopite_Simple_Options_Framework_Field_video extends Exopite_Simple_Options_Framework_Fields {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_video extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 

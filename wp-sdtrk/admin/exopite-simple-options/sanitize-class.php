@@ -17,9 +17,9 @@
  *
  * https://www.sitepoint.com/community/t/best-way-to-do-array-search-on-multi-dimensional-array/16382/3
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Sanitize' ) ) {
 
-	class Exopite_Simple_Options_Framework_Sanitize {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Sanitize {
 
 		public $is_multilang;
 		public $lang_current;

@@ -6,9 +6,9 @@
  * Field: Attached
  *
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_attached' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_attached' ) ) {
 
-	class Exopite_Simple_Options_Framework_Field_attached extends Exopite_Simple_Options_Framework_Fields {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_attached extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 
 		public function __construct( $field, $value = '', $unique = '', $where = '' ) {
 

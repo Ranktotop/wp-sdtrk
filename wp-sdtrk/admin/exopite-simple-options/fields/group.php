@@ -26,8 +26,8 @@
  *   so this->name() should include name="" and
  *   fields are not
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
-	class Exopite_Simple_Options_Framework_Field_group extends Exopite_Simple_Options_Framework_Fields {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_group' ) ) {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_group extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 			parent::__construct( $field, $value, $unique, $config );
@@ -175,7 +175,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 			}
 			echo 'exopite-sof-accordion__content">';
 
-			$self                      = new Exopite_Simple_Options_Framework( $base_id, null );
+			$self                      = new Wp_Sdtrk_Exopite_Simple_Options_Framework( $base_id, null );
 			$self->config['multilang'] = $this->config['multilang'];
 
 			$num = 0;
@@ -187,7 +187,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 					continue;
 				}
 
-				$class = 'Exopite_Simple_Options_Framework_Field_' . $field['type'];
+				$class = 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_' . $field['type'];
 
 				if ( $this->config['is_options_simple'] ) {
 					$field['is_options_simple'] = true;

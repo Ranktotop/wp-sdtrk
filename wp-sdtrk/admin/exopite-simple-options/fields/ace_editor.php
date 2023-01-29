@@ -6,8 +6,8 @@
  * Field: Ace Editor
  *
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_ace_editor' ) ) {
-	class Exopite_Simple_Options_Framework_Field_ace_editor extends Exopite_Simple_Options_Framework_Fields {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_ace_editor' ) ) {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Field_ace_editor extends Wp_Sdtrk_Exopite_Simple_Options_Framework_Fields {
 
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 

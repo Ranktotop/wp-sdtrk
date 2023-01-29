@@ -13,18 +13,18 @@
  * @version 1.0.0
  *
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Upload' ) ) {
 
-	class Exopite_Simple_Options_Framework_Upload {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Upload {
 
 		public static function add_hooks() {
 
 			add_action( 'wp_ajax_exopite-sof-file_uploader', array(
-				'Exopite_Simple_Options_Framework_Upload',
+				'Wp_Sdtrk_Exopite_Simple_Options_Framework_Upload',
 				'file_uploader_callback'
 			) );
 			add_action( 'wp_ajax_exopite-sof-file-batch-delete', array(
-				'Exopite_Simple_Options_Framework_Upload',
+				'Wp_Sdtrk_Exopite_Simple_Options_Framework_Upload',
 				'file_batch_delete_callback'
 			) );
 

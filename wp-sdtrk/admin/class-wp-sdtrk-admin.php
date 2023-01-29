@@ -314,8 +314,8 @@ class Wp_Sdtrk_Admin
         /**
          * instantiate your admin page
          */
-        $options_panel = new Exopite_Simple_Options_Framework($config_submenu, $this->getGeneralSettingFields());
-        $options_panel = new Exopite_Simple_Options_Framework($config_metabox, $this->getMetaboxSettingFields());
+        $options_panel = new Wp_Sdtrk_Exopite_Simple_Options_Framework($config_submenu, $this->getGeneralSettingFields());
+        $options_panel = new Wp_Sdtrk_Exopite_Simple_Options_Framework($config_metabox, $this->getMetaboxSettingFields());
     }
 
     private function getMetaboxSettingFields()

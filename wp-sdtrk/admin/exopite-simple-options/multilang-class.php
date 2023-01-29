@@ -9,9 +9,9 @@
  * @version 1.0.0
  *
  */
-if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
+if ( ! class_exists( 'Wp_Sdtrk_Exopite_Simple_Options_Framework_Helper' ) ) {
 
-	class Exopite_Simple_Options_Framework_Helper {
+	class Wp_Sdtrk_Exopite_Simple_Options_Framework_Helper {
 
 
 		public static function get_active_multilang_plugins() {
