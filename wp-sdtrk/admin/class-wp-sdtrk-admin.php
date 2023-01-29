@@ -333,7 +333,7 @@ class Wp_Sdtrk_Admin
                     'content' => ''
                 ),
                 array(
-                    'id' => 'productid',
+                    'id' => 'wp-sdtrk-productid',
                     'type' => 'text',
                     'title' => __('Product ID', 'wp-sdtrk'),
                     'description' => __('Please enter a product id in order to track the ViewContent-Event', 'wp-sdtrk'),
@@ -342,7 +342,7 @@ class Wp_Sdtrk_Admin
                     )
                 ),
                 array(
-                    'id' => 'trkoverwrite',
+                    'id' => 'wp-sdtrk-trkoverwrite',
                     'type' => 'switcher',
                     'title' => __('Bypass Tracking-Consent', 'wp-sdtrk'),
                     'description' => __('Check to track all visitors of this page regardless of their cookie consent', 'wp-sdtrk'),

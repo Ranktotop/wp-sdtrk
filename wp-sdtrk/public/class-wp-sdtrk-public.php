@@ -712,10 +712,10 @@ class Wp_Sdtrk_Public
 
         global $post;
         $postId = ($post && $post->ID) ? $post->ID : false;
-        $prodId = get_post_meta($postId, 'productid', true);
+        $prodId = get_post_meta($postId, 'wp-sdtrk-productid', true);
         $prodId = (! $prodId) ? "" : $prodId;
 
-        $trkOverwrite = get_post_meta($postId, 'trkoverwrite', true);
+        $trkOverwrite = get_post_meta($postId, 'wp-sdtrk-trkoverwrite', true);
         $trkOverwrite = (! $trkOverwrite || $trkOverwrite === "no") ? false : true;
 
         // Get the brandName from Settings
