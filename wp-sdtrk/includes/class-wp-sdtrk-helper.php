@@ -697,4 +697,19 @@ class Wp_Sdtrk_Helper
         );
         return $params;
     }
+    
+    public static function wp_sdtrk_get_timestamp($shift,$specific = false){
+        $timezone = 'Europe/Berlin';
+        $date = new DateTime("now", new DateTimeZone($timezone));
+        
+        if($specific === false){
+            $date->add(new DateInterval("PT{$shift}H"));
+        }
+        else{
+            
+            $date->setTime($shift+1,0,0); // time is shifted by 1 hour back, thats why we need to add the value here
+        }
+        
+        return $date->getTimestamp();
+    }
 }

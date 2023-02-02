@@ -196,15 +196,12 @@ class Wp_Sdtrk_Admin
      * @param string $time
      */
     public function resetGsyncCron($time){
-        $timezone = 'Europe/Berlin';
-        $timestamp = strtotime($time.':00'.' '.$timezone. " +1 days");
-        
         // delete and re-schedule gsync cron job
         if (wp_next_scheduled( 'wp_sdtrk_gsync_cron' ) ) {
             wp_clear_scheduled_hook('wp_sdtrk_gsync_cron');
             
         }	
-        wp_schedule_event($timestamp, 'daily', 'wp_sdtrk_gsync_cron' );
+        wp_schedule_event(Wp_Sdtrk_Helper::wp_sdtrk_get_timestamp($time,true), 'daily', 'wp_sdtrk_gsync_cron' );
         return $time;
     }
     
@@ -228,17 +225,16 @@ class Wp_Sdtrk_Admin
      * @param string $time
      */
     public function resetCSVsyncCron($time){  
-        $timezone = 'Europe/Berlin';        
         $syncCsvHourly = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_csv_crontime_frequency"), "yes") == 0) ? true : false;
         
         //If hourly sync is activated
         if($syncCsvHourly){
             $csvFrequency = 'hourly';
-            $timestamp = time()+ $time*60*60;   
+            $timestamp = Wp_Sdtrk_Helper::wp_sdtrk_get_timestamp($time,false);
         }
         else{
             $csvFrequency = 'daily';
-            $timestamp = strtotime($time.':00'.' '.$timezone. " +1 days");
+            $timestamp = Wp_Sdtrk_Helper::wp_sdtrk_get_timestamp($time,true);
         }	
         
         // delete and re-schedule gsync cron job

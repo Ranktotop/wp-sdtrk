@@ -39,9 +39,7 @@ class Wp_Sdtrk_Activator {
 	    //create database for local tracking
 	    self::create_localTrackingDb();
 	    
-	    $timezone = 'Europe/Berlin';
 	    $gsynctime = intval(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync_crontime"));
-	    $gsynctimestamp = strtotime($gsynctime.':00'.' '.$timezone);
 	    
 	    $syncCsvHourly = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_csv_crontime_frequency"), "yes") == 0) ? true : false;
 	    $csvsynctime = intval(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_csv_crontime"));
@@ -49,15 +47,15 @@ class Wp_Sdtrk_Activator {
 	    //If hourly sync is activated
 	    if($syncCsvHourly){
 	        $csvFrequency = 'hourly';
-	        $csvsynctimestamp = time()+ $csvsynctime*60*60;
+	        $csvsynctimestamp = Wp_Sdtrk_Helper::wp_sdtrk_get_timestamp($csvsynctime,false);
 	    }
 	    else{
 	        $csvFrequency = 'daily';
-	        $csvsynctimestamp = strtotime($csvsynctime.':00'.' '.$timezone);
+	        $csvsynctimestamp = Wp_Sdtrk_Helper::wp_sdtrk_get_timestamp($csvsynctime,true);
 	    }	    	    
 	    // schedule gsync cron job
 	    if ( ! wp_next_scheduled( 'wp_sdtrk_gsync_cron' ) ) {
-	        wp_schedule_event($gsynctimestamp, 'daily', 'wp_sdtrk_gsync_cron' );
+	        wp_schedule_event(Wp_Sdtrk_Helper::wp_sdtrk_get_timestamp($gsynctime,true), 'daily', 'wp_sdtrk_gsync_cron' );
 	    }
 	    
 	    // schedule csvsync cron job
