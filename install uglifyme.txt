@@ -1,5 +1,0 @@
-Install NodeJS
-https://nodejs.org/
-
-Install UglifyMe
-CMD: npm install -g uglify-js
