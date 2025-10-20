@@ -1,0 +1,330 @@
+/**
+ * All of the CSS for your admin-specific functionality should be
+ * included in this file.
+ */
+.wpfce-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.wpfce-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+.wpfce-modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 6px;
+    z-index: 10;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+.wpfce-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+.hidden {
+    display: none;
+}
+
+.delete.wpfce_delete_product_btn,
+.delete.wpfce_delete_product_mapping_btn,
+.delete.wpfce_delete_access_rule_btn {
+    color: #fff;
+    background-color: #dc3232;
+    border-color: #dc3232;
+    transition: all 0.2s ease-in-out;
+}
+
+.delete.wpfce_delete_product_btn:hover,
+.delete.wpfce_delete_product_mapping_btn:hover,
+.delete.wpfce_delete_access_rule_btn:hover {
+    color: #fff;
+    background-color: #f36060;
+    border-color: #f36060;
+}
+
+#wpfce-notice-area {
+    position: fixed;
+    top: 32px;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+#wpfce-notice-area .wpfce-notice {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    pointer-events: auto;
+    padding: 5px 10px 5px 10px;
+    text-align: center;
+}
+
+#wpfce-notice-area .wpfce-notice p {
+    color: #fff;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+#wpfce-notice-area .wpfce-notice-success {
+    background-color: #81d381;
+}
+
+.wpfce-checkbox-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+.wpfce-checkbox-grid label {
+    min-width: 200px;
+    display: block;
+}
+/* API Endpoint Styles - Am Ende von admin/css/wp-fce-admin.css hinzufügen */
+
+.fce-endpoint-list code {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: #f1f1f1;
+    margin: 2px 0;
+    font-family: monospace;
+    word-break: break-all;
+}
+
+.fce-endpoint-item {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-left: 4px solid #0073aa;
+    border-radius: 4px;
+}
+
+.fce-endpoint-url {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.fce-endpoint-method {
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    min-width: 50px;
+    text-align: center;
+}
+
+.fce-method-get {
+    background: #28a745;
+}
+.fce-method-post {
+    background: #007bff;
+}
+.fce-method-delete {
+    background: #dc3545;
+}
+.fce-method-put {
+    background: #ffc107;
+    color: #212529;
+}
+.fce-method-patch {
+    background: #6f42c1;
+}
+
+.fce-endpoint-description {
+    color: #666;
+    font-style: italic;
+    line-height: 1.4;
+    margin-bottom: 15px;
+}
+
+/* Parameter-Tabelle */
+.fce-endpoint-parameters {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.fce-endpoint-parameters h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 14px;
+}
+
+.fce-params-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.fce-params-table th,
+.fce-params-table td {
+    padding: 8px 6px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+
+.fce-params-table th {
+    background: #f5f5f5;
+    font-weight: 600;
+    color: #555;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.fce-params-table code {
+    background: #e8e8e8;
+    padding: 2px 4px;
+    font-size: 11px;
+}
+
+/* Badge-Styles */
+.fce-required-badge,
+.fce-optional-badge,
+.fce-type-badge,
+.fce-location-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Required/Optional Badges */
+.fce-required-badge {
+    background: #dc3545;
+    color: white;
+}
+
+.fce-optional-badge {
+    background: #6c757d;
+    color: white;
+}
+
+/* Type Badges */
+.fce-type-string {
+    background: #17a2b8;
+    color: white;
+}
+
+.fce-type-integer,
+.fce-type-number {
+    background: #28a745;
+    color: white;
+}
+
+.fce-type-boolean {
+    background: #ffc107;
+    color: #212529;
+}
+
+.fce-type-array,
+.fce-type-object {
+    background: #6f42c1;
+    color: white;
+}
+
+/* Location Badges */
+.fce-location-url {
+    background: #fd7e14;
+    color: white;
+}
+
+.fce-location-json {
+    background: #20c997;
+    color: white;
+}
+
+.fce-location-header {
+    background: #e83e8c;
+    color: white;
+}
+
+.fce-location-form {
+    background: #6610f2;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .fce-endpoint-url {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .fce-endpoint-item {
+        padding: 10px;
+    }
+
+    .fce-params-table {
+        font-size: 11px;
+    }
+
+    .fce-params-table th,
+    .fce-params-table td {
+        padding: 6px 4px;
+    }
+
+    /* Stack table on mobile */
+    .fce-params-table,
+    .fce-params-table thead,
+    .fce-params-table tbody,
+    .fce-params-table th,
+    .fce-params-table td,
+    .fce-params-table tr {
+        display: block;
+    }
+
+    .fce-params-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .fce-params-table tr {
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        padding: 8px;
+        border-radius: 4px;
+        background: white;
+    }
+
+    .fce-params-table td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+        padding-bottom: 8px;
+    }
+
+    .fce-params-table td:before {
+        content: attr(data-label) ": ";
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+    }
+}

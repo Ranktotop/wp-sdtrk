@@ -1,0 +1,18 @@
+# Exclude files from export (used for `git archive` and GitHub Releases)
+
+# Ignore development files
+/.github export-ignore
+/tests export-ignore
+/phpunit.* export-ignore
+/composer.* export-ignore
+/README.md export-ignore
+
+# Ignore version control
+.gitignore export-ignore
+.gitattributes export-ignore
+
+# Optional: ignore markdown and docs
+/docs export-ignore
+*.md export-ignore
+
+# Keep only necessary plugin files

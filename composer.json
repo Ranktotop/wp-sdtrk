@@ -1,0 +1,32 @@
+{
+    "name": "rankt/wp_sdtrk",
+    "autoload": {
+        "psr-4": {
+            "Rankt\\WpSmartServerSideTracking\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Ranktotop",
+            "email": "marc@rank-to-top.de"
+        }
+    ],
+    "require": {
+        "wpackagist-plugin/redux-framework": "*",
+        "yahnis-elsts/plugin-update-checker": "^5.5",
+        "composer/installers": "^2.3",
+        "google/apiclient": "2.4"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://wpackagist.org"
+        }
+    ],
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true
+        }
+    },
+    "extra": {}
+}

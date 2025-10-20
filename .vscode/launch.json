@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Listen for Xdebug (Local)",
+            "type": "php",
+            "request": "launch",
+            "port": 9003,
+            "pathMappings": {
+                // Remote-Pfad in der Local-VM      : Lokaler Workspace
+                "C:\\Users\\rankt\\Local Sites\\fluentcommunity\\app\\public\\wp-content\\plugins\\wp-sdtrk": "${workspaceFolder}"
+            }
+        }
+    ]
+}
