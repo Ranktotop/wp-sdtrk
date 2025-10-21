@@ -9,10 +9,11 @@
 
     /**
      * Prüft welche Rules bereits verwendet werden
+     * @param {string} containerSelector - CSS Selector des Containers
      */
-    function getUsedRules() {
+    function getUsedRules(containerSelector) {
         const used = [];
-        $('#rules-container .rule-param').each(function () {
+        $(`${containerSelector} .rule-param`).each(function () {
             const value = $(this).val();
             if (value) {
                 used.push(value);
@@ -23,9 +24,10 @@
 
     /**
      * Prüft welche Rules noch verfügbar sind
+     * @param {string} containerSelector - CSS Selector des Containers
      */
-    function getAvailableRules() {
-        const used = getUsedRules();
+    function getAvailableRules(containerSelector) {
+        const used = getUsedRules(containerSelector);
         const available = {};
 
         for (const [key, label] of Object.entries(availableRules)) {
@@ -39,23 +41,19 @@
 
     /**
      * Aktualisiert die Dropdowns aller Rules
+     * @param {string} containerSelector - CSS Selector des Containers
      */
-    function updateRuleDropdowns() {
-        const used = getUsedRules();
+    function updateRuleDropdowns(containerSelector) {
+        const used = getUsedRules(containerSelector);
 
-        $('#rules-container .rule-item').each(function () {
+        $(`${containerSelector} .rule-item`).each(function () {
             const $select = $(this).find('.rule-param');
             const currentValue = $select.val();
 
-            // Dropdown leeren
             $select.empty();
-
-            // "Select" Option hinzufügen
             $select.append(`<option value="">${wp_sdtrk.label_dropdown_select}</option>`);
 
-            // Verfügbare Optionen hinzufügen
             for (const [key, label] of Object.entries(availableRules)) {
-                // Aktuelle Auswahl oder nicht verwendete Optionen anzeigen
                 if (key === currentValue || !used.includes(key)) {
                     const selected = key === currentValue ? 'selected' : '';
                     $select.append(`<option value="${key}" ${selected}>${label}</option>`);
@@ -66,39 +64,41 @@
 
     /**
      * Zeigt/versteckt den "Add Rule" Button
+     * @param {string} containerSelector - CSS Selector des Containers
+     * @param {string} buttonSelector - CSS Selector des Buttons
      */
-    function toggleAddRuleButton() {
-        const available = getAvailableRules();
+    function toggleAddRuleButton(containerSelector, buttonSelector) {
+        const available = getAvailableRules(containerSelector);
         const hasAvailable = Object.keys(available).length > 0;
 
         if (hasAvailable) {
-            $('#add-rule-btn').show();
+            $(buttonSelector).show();
         } else {
-            $('#add-rule-btn').hide();
+            $(buttonSelector).hide();
         }
     }
 
     /**
-     * Add Rule to Form
+     * Add Rule to Form (generisch)
+     * @param {string} buttonSelector - CSS Selector des Add-Buttons
+     * @param {string} containerSelector - CSS Selector des Containers
+     * @param {string} removeButtonClass - CSS Klasse des Remove-Buttons
      */
-    function handleAddRule() {
-        $(document).on('click', '#add-rule-btn', function () {
-            const available = getAvailableRules();
+    function handleAddRule(buttonSelector, containerSelector, removeButtonClass) {
+        $(document).on('click', buttonSelector, function () {
+            const available = getAvailableRules(containerSelector);
 
-            // Keine verfügbaren Rules mehr
             if (Object.keys(available).length === 0) {
                 alert(wp_sdtrk.msg_no_more_rules || 'All rule types are already in use.');
                 return;
             }
 
-            // Erstelle Dropdown mit verfügbaren Optionen
             let optionsHtml = `<option value="">${wp_sdtrk.label_dropdown_select}</option>`;
             for (const [key, label] of Object.entries(available)) {
                 optionsHtml += `<option value="${key}">${label}</option>`;
             }
 
-            // Eindeutiger Index für jede neue Rule
-            const ruleIndex = Date.now(); // Oder: $('#rules-container .rule-item').length
+            const ruleIndex = Date.now();
 
             const ruleHtml = `
             <div class="rule-item" data-rule-index="${ruleIndex}">
@@ -106,42 +106,38 @@
                     ${optionsHtml}
                 </select>
                 <input type="text" class="rule-value" name="rules[${ruleIndex}][value]" placeholder="${wp_sdtrk.placeholder_leave_empty_ignore}">
-                <button type="button" class="button button-small remove-rule-btn">× ${wp_sdtrk.label_delete}</button>
+                <button type="button" class="button button-small ${removeButtonClass}">× ${wp_sdtrk.label_delete}</button>
             </div>
         `;
 
-            $('#rules-container').append(ruleHtml);
-
-            // Button-Status aktualisieren
-            toggleAddRuleButton();
+            $(containerSelector).append(ruleHtml);
+            toggleAddRuleButton(containerSelector, buttonSelector);
         });
     }
 
     /**
-     * Remove Rule from Form
+     * Remove Rule from Form (generisch)
+     * @param {string} buttonClass - CSS Klasse des Remove-Buttons
+     * @param {string} containerSelector - CSS Selector des Containers
+     * @param {string} addButtonSelector - CSS Selector des Add-Buttons
      */
-    function handleRemoveRule() {
-        $(document).on('click', '.remove-rule-btn', function () {
+    function handleRemoveRule(buttonClass, containerSelector, addButtonSelector) {
+        $(document).on('click', `.${buttonClass}`, function () {
             $(this).closest('.rule-item').remove();
-
-            // Dropdowns aktualisieren
-            updateRuleDropdowns();
-
-            // Button-Status aktualisieren
-            toggleAddRuleButton();
+            updateRuleDropdowns(containerSelector);
+            toggleAddRuleButton(containerSelector, addButtonSelector);
         });
     }
 
     /**
-     * Wenn ein Dropdown geändert wird
+     * Wenn ein Dropdown geändert wird (generisch)
+     * @param {string} containerSelector - CSS Selector des Containers
+     * @param {string} addButtonSelector - CSS Selector des Add-Buttons
      */
-    function handleRuleChange() {
-        $(document).on('change', '.rule-param', function () {
-            // Alle Dropdowns aktualisieren
-            updateRuleDropdowns();
-
-            // Button-Status aktualisieren
-            toggleAddRuleButton();
+    function handleRuleChange(containerSelector, addButtonSelector) {
+        $(document).on('change', `${containerSelector} .rule-param`, function () {
+            updateRuleDropdowns(containerSelector);
+            toggleAddRuleButton(containerSelector, addButtonSelector);
         });
     }
 
@@ -180,7 +176,7 @@
                             if (result.state) {
                                 wpsdtrk_show_notice(wp_sdtrk.notice_success, 'success');
                                 setTimeout(() => {
-                                    location.reload(); // ganze Seite neu laden
+                                    location.reload();
                                 }, 800);
                             } else {
                                 wpsdtrk_show_notice(wp_sdtrk.notice_error + ': ' + result.message, 'error');
@@ -204,16 +200,10 @@
 
             if (!mappingId) return;
 
-            // Setze die Mapping-ID ins Hidden-Feld
             $('#wpsdtrk-edit-mapping-id').val(mappingId);
-
-            // Setze conversion id ins Feld
             $('#sdtrk_edit_mapping_convid').val(mappingConvid);
+            $('select[name="sdtrk_edit_mapping_event"]').val(event_name);
 
-            // Setze event in select
-            $('#sdtrk_edit_mapping_event').val(event_name);
-
-            // Lade Rules via AJAX
             $.post(wp_sdtrk.ajax_url, {
                 action: 'wp_sdtrk_handle_admin_ajax_callback',
                 func: 'get_linkedin_mapping',
@@ -222,27 +212,32 @@
                 _nonce: wp_sdtrk._nonce
             }, function (response) {
                 const result = typeof response === 'string' ? JSON.parse(response) : response;
-                console.log(result);
+
                 if (!result.state || !result.mapping) return;
 
-                // Hole NUR die Rules
                 const rules = result.mapping.rules;
-
-                // Add rules zum Modal
-                const $rulesContainer = $('#wpsdtrk-edit-mapping-rules-container');
+                const $rulesContainer = $('#edit-rules-container');
                 $rulesContainer.empty();
 
                 rules.forEach((rule, index) => {
+                    const ruleIndex = Date.now() + index;
                     const ruleHtml = `
-                    <div class="rule-item" data-rule-index="${index}">
-                        <label for="rule_${index}_key">${wp_sdtrk.labels.rule_key}</label>
-                        <input type="text" id="rule_${index}_key" class="regular-text" value="${esc_html(rule.key)}">
-                        <label for="rule_${index}_value">${wp_sdtrk.labels.rule_value}</label>
-                        <input type="text" id="rule_${index}_value" class="regular-text" value="${esc_html(rule.value)}">
+                    <div class="rule-item" data-rule-index="${ruleIndex}">
+                        <select class="rule-param" name="rules[${ruleIndex}][param]">
+                            <option value="">${wp_sdtrk.label_dropdown_select}</option>
+                            ${Object.entries(availableRules).map(([key, label]) =>
+                        `<option value="${key}" ${key === rule.key ? 'selected' : ''}>${label}</option>`
+                    ).join('')}
+                        </select>
+                        <input type="text" class="rule-value" name="rules[${ruleIndex}][value]" value="${rule.value || ''}" placeholder="${wp_sdtrk.placeholder_leave_empty_ignore}">
+                        <button type="button" class="button button-small remove-edit-rule-btn">× ${wp_sdtrk.label_delete}</button>
                     </div>
                     `;
                     $rulesContainer.append(ruleHtml);
                 });
+
+                updateRuleDropdowns('#edit-rules-container');
+                toggleAddRuleButton('#edit-rules-container', '#add-edit-rule-btn');
 
                 wpsdtrk_show_modal('edit-mapping');
             });
@@ -251,14 +246,20 @@
 
     // Initialize
     $(document).ready(function () {
-        handleAddRule();
-        handleRemoveRule();
-        handleRuleChange();
+        // CREATE Form
+        handleAddRule('#add-rule-btn', '#rules-container', 'remove-rule-btn');
+        handleRemoveRule('remove-rule-btn', '#rules-container', '#add-rule-btn');
+        handleRuleChange('#rules-container', '#add-rule-btn');
+
+        // EDIT Modal
+        handleAddRule('#add-edit-rule-btn', '#edit-rules-container', 'remove-edit-rule-btn');
+        handleRemoveRule('remove-edit-rule-btn', '#edit-rules-container', '#add-edit-rule-btn');
+        handleRuleChange('#edit-rules-container', '#add-edit-rule-btn');
+
         wpsdtrk_handle_click_delete_mapping_btn();
         wpsdtrk_handle_click_edit_mapping_btn();
 
-        // Initial Button-Status setzen
-        toggleAddRuleButton();
+        toggleAddRuleButton('#rules-container', '#add-rule-btn');
     });
 
 })(jQuery);
