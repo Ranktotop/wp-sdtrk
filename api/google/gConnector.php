@@ -1,5 +1,10 @@
 <?php
 
+use Google_Client;
+use Google\Service\Sheets;
+use Google\Service\Sheets\ClearValuesRequest;
+use Google\Service\Sheets\ValueRange;
+
 class gConnector
 {
 
@@ -76,12 +81,11 @@ class gConnector
 
     private function init()
     {
-        require 'google-api-php-client-2.4.0/vendor/autoload.php';
         try {
-            $this->service = new Google_Service_Sheets($this->getClient());
+            $this->service = new Sheets($this->getClient());
         } catch (Exception $e) {
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log($e->getMessage() . "\n", $this->debug);
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Error authenticate client. Abort...---\n", $this->debug);
+            sdtrk_log($e->getMessage(), "error");
+            sdtrk_log("---Error authenticate client. Abort...---", "error");
             delete_option('wp-sdtrk-gauth-token');
             die("Authentication error!");
         }
@@ -100,7 +104,7 @@ class gConnector
         $client->setApplicationName('Sheet ITNS Connection');
         $client->setAuthConfig($this->credentials);
         $client->setRedirectUri($redirect_uri);
-        $client->setScopes(Google_Service_Sheets::SPREADSHEETS);
+        $client->setScopes(Sheets::SPREADSHEETS);
         // Allow refreshing Tokens
         $client->setAccessType('offline');
         $client->setPrompt("consent");
@@ -113,27 +117,27 @@ class gConnector
         // Check if there is a token file and read it
         $tokenContent = $this->getToken();
         if ($tokenContent !== false) {
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Google Access-Token found...---\n", $this->debug);
+            sdtrk_log("---Google Access-Token found...---\n", "info");
             $accessToken = json_decode($tokenContent, true);
             $client->setAccessToken($accessToken);
         }
         // If there is no previous token or it's expired.
         if ($client->isAccessTokenExpired()) {
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Google Access-Token expired -> try refreshing...---\n", $this->debug);
+            sdtrk_log("---Google Access-Token expired -> try refreshing...---", "info");
             // Refresh the token if possible, else fetch a new one.
             if ($client->getRefreshToken()) {
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Refresh Token found -> refreshing...---\n", $this->debug);
+                sdtrk_log("---Refresh Token found -> refreshing...---\n", "info");
                 try {
                     $result = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-                    Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Refresh-Result: " . json_encode($result) . " ---\n", $this->debug);
+                    sdtrk_log("---Refresh-Result: " . json_encode($result) . " ---", "info");
                     $this->saveToken(json_encode($client->getAccessToken()));
                     $this->connected = true;
                 } catch (Exception $e) {
-                    Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Exception while refreshing! Maybe your Client was deleted in Google Developer Console! -> Die()---\n", $this->debug);
+                    sdtrk_log("---Exception while refreshing! Maybe your Client was deleted in Google Developer Console! -> Die()---", "error");
                     die();
                 }
             } else {
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Refresh Token not found! Init o-Auth procedure...---\n", $this->debug);
+                sdtrk_log("---Refresh Token not found! Init o-Auth procedure...---", "info");
                 if (isset($_GET['code'])) {
                     $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
                     $client->setAccessToken($token);
@@ -144,15 +148,15 @@ class gConnector
 
                     // Check to see if there was an error.
                     if (array_key_exists('error', $accessToken)) {
-                        Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Error refreshing Token: " . $accessToken . " ---\n", $this->debug);
+                        sdtrk_log("---Error refreshing Token: " . $accessToken . " ---", "error");
                         throw new Exception(join(', ', $accessToken));
                     } else {
                         // Save the token to options.
                         $this->saveToken(json_encode($client->getAccessToken()));
-                        Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Wrote Token to options! ---\n", $this->debug);
+                        sdtrk_log("---Wrote Token to options! ---", "info");
                     }
                 } else {
-                    Wp_Sdtrk_Helper::wp_sdtrk_write_log('---GET-Parameter "code" is missing...---\n', $this->debug);
+                    sdtrk_log('---GET-Parameter "code" is missing...---', "error");
                 }
                 // set the access token as part of the client
                 if (! empty($_SESSION['upload_token'])) {
@@ -162,12 +166,12 @@ class gConnector
                     }
                 } else {
                     $authUrl = $client->createAuthUrl();
-                    Wp_Sdtrk_Helper::wp_sdtrk_write_log('---Redirect to G-Auth-Login-Page "' . filter_var($authUrl, FILTER_SANITIZE_URL) . '"...---\n', $this->debug);
+                    sdtrk_log('---Redirect to G-Auth-Login-Page "' . filter_var($authUrl, FILTER_SANITIZE_URL) . '"...---', "info");
                     header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
                 }
             }
         } else {
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Google Access-Token valid -> Continue!---\n", $this->debug);
+            sdtrk_log("---Google Access-Token valid -> Continue!---", "info");
             $this->connected = true;
         }
         return $client;
@@ -179,13 +183,16 @@ class gConnector
     private function clearSheet()
     {
         try {
-            $clearRange = $this->tableName . '!' . 'A' . 1 . ':' . 'ZZ';
-            $clearBody = new \Google_Service_Sheets_ClearValuesRequest([
-                'range' => $clearRange
-            ]);
-            $this->service->spreadsheets_values->clear($this->sheetId, $clearRange, $clearBody);
+            $clearRange = $this->tableName . '!A1:ZZ';
+            $body = new ClearValuesRequest(); // PSR-4 Klasse, leer reicht
+
+            $this->service->spreadsheets_values->clear(
+                $this->sheetId,
+                $clearRange,
+                $body
+            );
             return true;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
     }
@@ -196,41 +203,39 @@ class gConnector
     private function uploadTableHeader($tableHeader)
     {
         try {
-            $skipFields = array(
-                "hitSource",
-                "gsync"
-            );
+            $skipFields = ["hitSource", "gsync"];
 
-            // Delete unwanted fields
+            // Unerwünschte Felder entfernen
             foreach ($skipFields as $field) {
-                $index = array_search($field, $tableHeader);
-                if ($index) {
+                $index = array_search($field, $tableHeader, true);
+                if ($index !== false) {
                     unset($tableHeader[$index]);
                 }
             }
 
-            // reorder index
+            // Index neu ordnen
             $tableHeader = array_values($tableHeader);
 
-            // write table-header
-            $startIndex = 1;
-            $updateRange = $this->tableName . '!' . 'A' . $startIndex . ':' . 'ZZ' . $startIndex;
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Adding following Data to Sheet from Index " . $startIndex . " (Range: " . $updateRange . ") ---\n", $this->debug);
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log(json_encode($tableHeader) . "\n", $this->debug);
+            // Range bauen
+            $startIndex  = 1;
+            $updateRange = $this->tableName . '!A' . $startIndex . ':ZZ' . $startIndex;
 
-            $updateBody = new \Google_Service_Sheets_ValueRange([
-                'range' => $updateRange,
+            // ValueRange (eine Zeile!)
+            $updateBody = new ValueRange([
+                'range'          => $updateRange,
                 'majorDimension' => 'ROWS',
-                'values' => [
-                    'values' => $tableHeader
-                ]
+                'values'         => [$tableHeader], // << wichtig: doppelt verschachtelt
             ]);
 
-            $this->service->spreadsheets_values->update($this->sheetId, $updateRange, $updateBody, [
-                'valueInputOption' => 'USER_ENTERED'
-            ]);
+            $this->service->spreadsheets_values->update(
+                $this->sheetId,
+                $updateRange,
+                $updateBody,
+                ['valueInputOption' => 'USER_ENTERED']
+            );
+
             return true;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
     }
@@ -243,39 +248,55 @@ class gConnector
     private function uploadEntries($stacks)
     {
         try {
-            // index 0 is the table header
+            // erste Datenzeile (1 = Header)
             $startIndex = 2;
 
             foreach ($stacks as $stack) {
-                $endIndex = $startIndex + sizeof($stack);
-                // Expand Sheet if needed
+                $rowsCount = is_countable($stack) ? count($stack) : 0;
+                if ($rowsCount === 0) {
+                    continue;
+                }
+
+                // inklusives Ende für die Range
+                $endIndex = $startIndex + $rowsCount - 1;
+
+                // Sheet ggf. vergrößern
                 if ($endIndex > $this->currentMaxRows) {
-                    $expandingSucess = $this->updateSheetSize($endIndex);
-                    if ($expandingSucess === false) {
+                    if ($this->updateSheetSize($endIndex) === false) {
                         return false;
                     }
                 }
-                $updateRange = $this->tableName . '!' . 'A' . $startIndex . ':' . 'ZZ' . $endIndex;
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Adding following Data to Sheet from Index " . $startIndex . " (Range: " . $updateRange . "), Stack-Size is " . sizeof($stack) . "---\n", $this->debug);
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log(json_encode($stack) . "\n", $this->debug);
 
-                $updateBody = new \Google_Service_Sheets_ValueRange([
-                    'range' => $updateRange,
+                $updateRange = $this->tableName . '!A' . $startIndex . ':ZZ' . $endIndex;
+                sdtrk_log("---Adding Data from row {$startIndex} (Range: {$updateRange}), Stack size: {$rowsCount} ---", "info");
+                sdtrk_log(json_encode($stack) . "\n", "debug");
+
+                // PSR-4 ValueRange
+                $updateBody = new ValueRange([
+                    'range'          => $updateRange,
                     'majorDimension' => 'ROWS',
-                    'values' => $stack
+                    'values'         => $stack,   // array von Zeilen: [ [..], [..], ... ]
                 ]);
 
-                $this->service->spreadsheets_values->update($this->sheetId, $updateRange, $updateBody, [
-                    'valueInputOption' => 'USER_ENTERED'
-                ]);
-                $startIndex = $endIndex;
+                $this->service->spreadsheets_values->update(
+                    $this->sheetId,
+                    $updateRange,
+                    $updateBody,
+                    ['valueInputOption' => 'USER_ENTERED']
+                );
+
+                // nächste Startzeile (Ende + 1)
+                $startIndex = $endIndex + 1;
+                $this->currentMaxRows = max($this->currentMaxRows, $endIndex);
             }
+
             return true;
-        } catch (Exception $e) {
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log($e->getMessage(), $this->debug);
+        } catch (\Exception $e) {
+            sdtrk_log($e->getMessage(), "error");
             return false;
         }
     }
+
 
     /**
      * Expands the size of the sheet to the given range
@@ -284,40 +305,42 @@ class gConnector
      * @return boolean
      */
     private function updateSheetSize($newSize)
-    {        
-        Wp_Sdtrk_Helper::wp_sdtrk_write_log("Sheet size " . $this->currentMaxRows . " is too small! Expand to " . $newSize . "...", $this->debug);
+    {
+        sdtrk_log("Sheet size {$this->currentMaxRows} is too small! Expanding to {$newSize}...", "debug");
+
         try {
-            //index starts by 1 in gsheet!
-            $startRows = $this->currentMaxRows;
-            if($startRows < 1){
-                $startRows = 1;
-            }
-            if($newSize <1){
-                $newSize = 1;
-            }
-            
-            $updateRange = $this->tableName . '!' . 'A' . $startRows . ':' . 'ZZ' . $newSize;
-            $valueRange = new Google_Service_Sheets_ValueRange();
-            $valueRange->setValues([
-                "values" => [
-                    ""
-                ]
+            // Index startet bei 1 in Google Sheets
+            $startRows = max(1, $this->currentMaxRows);
+            $newSize   = max(1, $newSize);
+
+            $updateRange = "{$this->tableName}!A{$startRows}:ZZ{$newSize}";
+
+            // ValueRange benötigt Array von Zeilen (jede Zeile ist ein Array)
+            $valueRange = new ValueRange([
+                'values' => [['']], // eine leere Zeile
             ]);
-            $conf = [
-                "valueInputOption" => "RAW"
+
+            $params = [
+                'valueInputOption' => 'RAW',
+                'insertDataOption' => 'INSERT_ROWS',
             ];
-            $ins = [
-                "insertDataOption" => "INSERT_ROWS"
-            ];
-            $this->service->spreadsheets_values->append($this->sheetId, $updateRange, $valueRange, $conf, $ins);
+
+            $this->service->spreadsheets_values->append(
+                $this->sheetId,
+                $updateRange,
+                $valueRange,
+                $params
+            );
+
             $this->currentMaxRows = $newSize;
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log("Sheet size successfully expanded!", $this->debug);
+            sdtrk_log("Sheet size successfully expanded!", "debug");
             return true;
-        } catch (Exception $e) {
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log($e->getMessage(), $this->debug);
+        } catch (\Exception $e) {
+            sdtrk_log($e->getMessage(), "error");
             return false;
         }
     }
+
 
     /**
      * Gets Data from local DB and pushes them to gSheet
@@ -327,30 +350,30 @@ class gConnector
     public function sync()
     {
         $hitContainer = new Wp_Sdtrk_hitContainer($this->debug);
-        $hitContainer->addGSheetHits($this->readEntries());             
-        Wp_Sdtrk_Helper::wp_sdtrk_write_log("Collect Stacks before clearing google sheet", $this->debug);
-        $stacks = $hitContainer->getHitsForGsync(true);        
-        
+        $hitContainer->addGSheetHits($this->readEntries());
+        sdtrk_log("Collect Stacks before clearing google sheet", "debug");
+        $stacks = $hitContainer->getHitsForGsync(true);
+
         if (sizeof($stacks) > 0) {
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log("Clearing google sheet", $this->debug);
+            sdtrk_log("Clearing google sheet", "debug");
             $result = $this->clearSheet();
             if ($result) {
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log("Uploading table-header to google sheet", $this->debug);
+                sdtrk_log("Uploading table-header to google sheet", "debug");
                 $result = $this->uploadTableHeader($hitContainer->getFieldNames());
             } else {
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log("Error while clearing google sheet", $this->debug);
+                sdtrk_log("Error while clearing google sheet", "error");
             }
             if ($result) {
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log("Uploading entries to google sheet", $this->debug);
+                sdtrk_log("Uploading entries to google sheet", "debug");
                 $result = $this->uploadEntries($stacks);
             } else {
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log("Error while uploading table-header", $this->debug);
+                sdtrk_log("Error while uploading table-header", "error");
             }
             if ($result) {
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log("Updating local gsync state", $this->debug);
+                sdtrk_log("Updating local gsync state", "debug");
                 return $hitContainer->updateGsyncStates();
             } else {
-                Wp_Sdtrk_Helper::wp_sdtrk_write_log("Error while uploading entries", $this->debug);
+                sdtrk_log("Error while uploading entries", "error");
             }
             return false;
         }
@@ -364,19 +387,19 @@ class gConnector
      */
     public function readEntries()
     {
-        Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Start readEntries() in gConnector---\n", $this->debug);
+        sdtrk_log("---Start readEntries() in gConnector---", "debug");
         $formattedData = array();
         try {
             $rows = $this->service->spreadsheets_values->get($this->sheetId, $this->sheetRange, [
                 'majorDimension' => 'ROWS'
             ]);
         } catch (Exception $e) {
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Token valid, but Permission denied! Is your Sheets API enabled? Visit: https://console.developers.google.com/apis/api/sheets.googleapis.com/ ---\n", $this->debug);
+            sdtrk_log("---Token valid, but Permission denied! Is your Sheets API enabled? Visit: https://console.developers.google.com/apis/api/sheets.googleapis.com/ ---", "error");
         }
 
         if (isset($rows['values'])) {
             $this->currentMaxRows = sizeof($rows['values']);
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---Found " . $this->currentMaxRows . " Rows in Sheet---\n", $this->debug);
+            sdtrk_log("---Found " . $this->currentMaxRows . " Rows in Sheet---", "debug");
 
             // save for later use
             $this->sheetData = $rows['values'];
@@ -385,11 +408,11 @@ class gConnector
                 $tableHeader = $rows['values'][0];
 
                 // Iterate all rows (first row is header)
-                for ($i = 1; $i < sizeof($rows['values']); $i ++) {
+                for ($i = 1; $i < sizeof($rows['values']); $i++) {
                     $formattedEntry = array();
 
                     // Iterate all columns
-                    for ($j = 0; $j < sizeof($tableHeader); $j ++) {
+                    for ($j = 0; $j < sizeof($tableHeader); $j++) {
                         $fieldName = $tableHeader[$j];
                         if (empty($fieldName)) {
                             continue;
@@ -405,7 +428,7 @@ class gConnector
                 }
             }
         } else {
-            Wp_Sdtrk_Helper::wp_sdtrk_write_log("---rows[values] not found in Sheet -> The sheet seems to be empty!---\n", $this->debug);
+            sdtrk_log("---rows[values] not found in Sheet -> The sheet seems to be empty!---", "warning");
         }
         return $formattedData;
     }

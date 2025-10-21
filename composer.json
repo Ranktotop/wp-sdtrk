@@ -28,5 +28,11 @@
             "composer/installers": true
         }
     },
-    "extra": {}
+    "extra": {
+        "installer-paths": {
+            "vendor/redux/": [
+                "wpackagist-plugin/redux-framework"
+            ]
+        }
+    }
 }

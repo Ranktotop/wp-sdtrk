@@ -56,7 +56,7 @@ if (! function_exists('sdtrk_log')) {
             // 1) Zeitstempel holen (WP-Lokalzeit)
             $timestamp = date_i18n('Y-m-d H:i:s');
             // 2) Prefix mit Datum, Plugin-Tag und Level
-            $prefix = sprintf('[%s] [WP_FCE][%s] ', $timestamp, strtoupper($level));
+            $prefix = sprintf('[%s] [WP_SDTRK][%s] ', $timestamp, strtoupper($level));
 
             // 3) Loggen
             if (is_array($message) || is_object($message)) {
