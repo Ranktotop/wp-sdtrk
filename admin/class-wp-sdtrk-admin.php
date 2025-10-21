@@ -104,25 +104,9 @@ class Wp_Sdtrk_Admin
 		wp_enqueue_script($this->wp_sdtrk . '-modal', plugin_dir_url(__FILE__) . 'js/wpsdtrk-modal.js', array('jquery'), $this->version, false);
 		wp_enqueue_script($this->wp_sdtrk, plugin_dir_url(__FILE__) . 'js/wp-sdtrk-admin.js', array('jquery'), $this->version, false);
 
-		// Seitenspezifische Skripte
-		if (strpos($hook_suffix, 'sdtrk_settings') !== false) {
-			// Community-API Assets
-			$this->enqueue_community_api_assets($hook_suffix);
-		}
-
-		if ($hook_suffix === 'toplevel_page_sdtrk_admin_manage_products') {
-			// Products Assets
-			$this->enqueue_products_assets($hook_suffix);
-		}
-
-		if ($hook_suffix === 'toplevel_page_sdtrk_admin_map_products') {
-			// Mappings Assets  
-			$this->enqueue_mappings_assets($hook_suffix);
-		}
-
-		if ($hook_suffix === 'toplevel_page_sdtrk_admin_manage_access') {
-			// Access Assets
-			$this->enqueue_access_assets($hook_suffix);
+		if ($hook_suffix === 'toplevel_page_wp_sdtrk_admin_map_linkedin') {
+			// LinkedIn Mappings
+			$this->enqueue_wp_sdtrk_admin_map_linkedin($hook_suffix);
 		}
 
 		/**
@@ -144,85 +128,12 @@ class Wp_Sdtrk_Admin
 			 * @link https://codex.wordpress.org/Function_Reference/wp_create_nonce
 			 */
 			'_nonce' => wp_create_nonce('security_wp-sdtrk'),
-			'msg_confirm_delete_product' => __('Do you really want to delete the product? This action cannot be undone!', 'wp-sdtrk'),
-			'msg_confirm_delete_product_mapping' => __('Do you really want to delete all mappings of this product? This action cannot be undone!', 'wp-sdtrk'),
-			'msg_confirm_delete_access_rule' => __('Are you sure you want to delete the rule? This action cannot be undone!', 'wp-sdtrk'),
 			'notice_success' => __('Saved successfully!', 'wp-sdtrk'),
 			'notice_error' => __('Error occurred!', 'wp-sdtrk'),
 			'label_edit' => __('Edit', 'wp-sdtrk'),
 			'label_save' => __('Save', 'wp-sdtrk'),
 			'label_confirm' => __('Are you sure?', 'wp-sdtrk'),
 		));
-	}
-
-	/**
-	 * Creates HTML for a single API endpoint description with detailed parameter info
-	 *
-	 * @param string $endpoint_path The endpoint URL path
-	 * @param string $method HTTP method (GET, POST, DELETE)
-	 * @param string $description Description of what the endpoint does
-	 * @param array $parameters Optional array of parameters with details
-	 * @return string HTML content
-	 */
-	private function create_endpoint_desc(string $endpoint_path, string $method, string $description, array $parameters = []): string
-	{
-		$base_url = untrailingslashit(rest_url('wp-sdtrk/v1'));
-		$url = $base_url . '/' . ltrim($endpoint_path, '/');
-
-		$parameters_html = '';
-		if (!empty($parameters)) {
-			$parameters_html = '<div class="sdtrk-endpoint-parameters">';
-			$parameters_html .= '<h4>' . __('Parameters:', 'wp-sdtrk') . '</h4>';
-			$parameters_html .= '<table class="sdtrk-params-table">';
-			$parameters_html .= '<thead><tr>';
-			$parameters_html .= '<th>' . __('Name', 'wp-sdtrk') . '</th>';
-			$parameters_html .= '<th>' . __('Type', 'wp-sdtrk') . '</th>';
-			$parameters_html .= '<th>' . __('Location', 'wp-sdtrk') . '</th>';
-			$parameters_html .= '<th>' . __('Required', 'wp-sdtrk') . '</th>';
-			$parameters_html .= '<th>' . __('Description', 'wp-sdtrk') . '</th>';
-			$parameters_html .= '</tr></thead><tbody>';
-
-			foreach ($parameters as $param) {
-				$required_badge = $param['required']
-					? '<span class="sdtrk-required-badge">' . __('Required', 'wp-sdtrk') . '</span>'
-					: '<span class="sdtrk-optional-badge">' . __('Optional', 'wp-sdtrk') . '</span>';
-
-				$parameters_html .= sprintf(
-					'<tr>
-                    <td><code>%s</code></td>
-                    <td><span class="sdtrk-type-badge sdtrk-type-%s">%s</span></td>
-                    <td><span class="sdtrk-location-badge sdtrk-location-%s">%s</span></td>
-                    <td>%s</td>
-                    <td>%s</td>
-                </tr>',
-					esc_html($param['name']),
-					esc_attr(strtolower($param['type'])),
-					esc_html($param['type']),
-					esc_attr(strtolower($param['location'])),
-					esc_html($param['location']),
-					$required_badge,
-					esc_html($param['description'] ?? '')
-				);
-			}
-
-			$parameters_html .= '</tbody></table></div>';
-		}
-
-		return sprintf(
-			'<div class="sdtrk-endpoint-item">
-            <div class="sdtrk-endpoint-url">
-                <code>%s</code>
-                <span class="sdtrk-endpoint-method sdtrk-method-%s">%s</span>
-            </div>
-            <div class="sdtrk-endpoint-description">%s</div>
-            %s
-        </div>',
-			esc_html($url),
-			strtolower($method),
-			esc_html($method),
-			esc_html($description),
-			$parameters_html
-		);
 	}
 
 	/**
@@ -241,8 +152,8 @@ class Wp_Sdtrk_Admin
 
 		Redux::set_args('wp_sdtrk_options', [
 			'opt_name'        => 'wp_sdtrk_options',
-			'menu_title'      => 'FluentCommunity Extreme',
-			'page_title'      => 'FluentCommunity Extreme',
+			'menu_title'      => 'Smart Serverside Tracking',
+			'page_title'      => 'Smart Serverside Tracking',
 			'menu_type'       => 'menu',
 			'page_priority' => 80,
 			'allow_sub_menu'  => true,
@@ -250,461 +161,700 @@ class Wp_Sdtrk_Admin
 			'display_version' => false,
 		]);
 
-		// ► Schlüssel vorab holen (gibt '' zurück, wenn noch nicht gesetzt)
-		$api_key_ipn   = Redux::get_option('wp_sdtrk_options', 'api_key_ipn');
-		$api_key_admin = Redux::get_option('wp_sdtrk_options', 'api_key_admin');
-
-		// Platzhalter einsetzen, falls leer
-		$ipn_param   = $api_key_ipn   ?: '{ipn_api_key}';
-		$admin_param = $api_key_admin ?: '{admin_api_key}';
-
+		/**
+		 * ============================================================
+		 * SECTION: General Settings
+		 * ============================================================
+		 */
 		Redux::set_section('wp_sdtrk_options', [
-			'title'  => __('API', 'wp-sdtrk'),
+			'title'  => __('General', 'wp-sdtrk'),
 			'id'     => 'general_section',
-			'desc'   => __('API-Settings', 'wp-sdtrk'),
-
-			// ───────────────────────────────────────────────
-			// 1) FELDER ZUERST
-			// ───────────────────────────────────────────────
+			'desc'   => __('Basic Tracking Settings', 'wp-sdtrk'),
+			'icon'   => 'el el-cog',
 			'fields' => [
 				[
-					'id'    => 'api_key_ipn',
+					'id'    => 'brandname',
 					'type'  => 'text',
-					'title' => __('API Key (IPN)', 'wp-sdtrk'),
-					'desc'  => __('Used to validate IPN requests.', 'wp-sdtrk'),
+					'title' => __('Default Brand-Name', 'wp-sdtrk'),
+					'desc'  => __('This Name is used for several services', 'wp-sdtrk'),
 				],
 				[
-					'id'    => 'api_key_admin',
-					'type'  => 'text',
-					'title' => __('API Key (Admin)', 'wp-sdtrk'),
-					'desc'  => __('Used to validate Admin requests to the REST API.', 'wp-sdtrk'),
-				],
-
-				// ────────────────────────────────────────────
-				// 2) HINWEIS-BLOCK MIT URL-LISTE
-				// ────────────────────────────────────────────
-				[
-					'id'      => 'api_endpoints_info',
-					'type'    => 'raw',
-					'title'   => __('Endpoint-Overview', 'wp-sdtrk'),
-					'content' => sprintf(
-						'<div class="sdtrk-endpoint-list">%s</div>',
-						implode('', [
-							$this->create_endpoint_desc(
-								"ipn?apikey={$ipn_param}",
-								'POST',
-								__('Receives instant payment notifications from external payment providers (CopeCart, Digistore24) to automatically create users and grant access to products.', 'wp-sdtrk'),
-								[
-									[
-										'name' => 'apikey',
-										'type' => 'string',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('IPN API key for authentication', 'wp-sdtrk')
-									],
-									[
-										'name' => 'user_email',
-										'type' => 'string',
-										'location' => 'JSON',
-										'required' => true,
-										'description' => __('Email address of the customer', 'wp-sdtrk')
-									],
-									[
-										'name' => 'product_id',
-										'type' => 'string',
-										'location' => 'JSON',
-										'required' => true,
-										'description' => __('External product identifier', 'wp-sdtrk')
-									],
-									[
-										'name' => 'transaction_id',
-										'type' => 'string',
-										'location' => 'JSON',
-										'required' => true,
-										'description' => __('Unique transaction identifier', 'wp-sdtrk')
-									],
-									[
-										'name' => 'source',
-										'type' => 'string',
-										'location' => 'JSON',
-										'required' => true,
-										'description' => __('Payment provider name (e.g. copecart, digistore24)', 'wp-sdtrk')
-									],
-								]
-							),
-							$this->create_endpoint_desc(
-								"register-user?apikey={$admin_param}",
-								'POST',
-								__('Creates or updates a WordPress user and automatically grants access to all public FluentCommunity spaces and courses.', 'wp-sdtrk'),
-								[
-									[
-										'name' => 'apikey',
-										'type' => 'string',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('Admin API key for authentication', 'wp-sdtrk')
-									],
-									[
-										'name' => 'user_email',
-										'type' => 'string',
-										'location' => 'JSON',
-										'required' => true,
-										'description' => __('Valid email address of the user', 'wp-sdtrk')
-									],
-									[
-										'name' => 'user_first_name',
-										'type' => 'string',
-										'location' => 'JSON',
-										'required' => false,
-										'description' => __('First name of the user', 'wp-sdtrk')
-									],
-									[
-										'name' => 'user_last_name',
-										'type' => 'string',
-										'location' => 'JSON',
-										'required' => false,
-										'description' => __('Last name of the user', 'wp-sdtrk')
-									],
-									[
-										'name' => 'send_welcome_email',
-										'type' => 'boolean',
-										'location' => 'JSON',
-										'required' => false,
-										'description' => __('Whether to send welcome email to new user (default: true)', 'wp-sdtrk')
-									],
-								]
-							),
-							$this->create_endpoint_desc(
-								"access/status?user_id={user_id}&entity_id={entity_id}&apikey={$admin_param}",
-								'GET',
-								__('Checks if a specific user has access to a specific space/course. Returns boolean status.', 'wp-sdtrk'),
-								[
-									[
-										'name' => 'user_id',
-										'type' => 'integer',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('WordPress user ID', 'wp-sdtrk')
-									],
-									[
-										'name' => 'entity_id',
-										'type' => 'integer',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('FluentCommunity space or course ID', 'wp-sdtrk')
-									],
-									[
-										'name' => 'apikey',
-										'type' => 'string',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('Admin API key for authentication', 'wp-sdtrk')
-									],
-								]
-							),
-							$this->create_endpoint_desc(
-								"access/sources?user_id={user_id}&entity_id={entity_id}&apikey={$admin_param}",
-								'GET',
-								__('Returns detailed information about why access was granted or denied, including all active sources and overrides.', 'wp-sdtrk'),
-								[
-									[
-										'name' => 'user_id',
-										'type' => 'integer',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('WordPress user ID', 'wp-sdtrk')
-									],
-									[
-										'name' => 'entity_id',
-										'type' => 'integer',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('FluentCommunity space or course ID', 'wp-sdtrk')
-									],
-									[
-										'name' => 'apikey',
-										'type' => 'string',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('Admin API key for authentication', 'wp-sdtrk')
-									],
-								]
-							),
-							$this->create_endpoint_desc(
-								"mapping?apikey={$admin_param}",
-								'POST',
-								__('Creates a new mapping between a product ID and a space ID. Requires product_id and space_id in POST body.', 'wp-sdtrk'),
-								[
-									[
-										'name' => 'apikey',
-										'type' => 'string',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('Admin API key for authentication', 'wp-sdtrk')
-									],
-									[
-										'name' => 'product_id',
-										'type' => 'integer',
-										'location' => 'JSON',
-										'required' => true,
-										'description' => __('Internal product ID to map', 'wp-sdtrk')
-									],
-									[
-										'name' => 'space_id',
-										'type' => 'integer',
-										'location' => 'JSON',
-										'required' => true,
-										'description' => __('FluentCommunity space or course ID', 'wp-sdtrk')
-									],
-								]
-							),
-							$this->create_endpoint_desc(
-								"mapping/{product_id}?apikey={$admin_param}",
-								'DELETE',
-								__('Removes all mappings for a specific product ID. Also removes access for users who only had access through this product.', 'wp-sdtrk'),
-								[
-									[
-										'name' => 'product_id',
-										'type' => 'integer',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('Internal product ID to remove mappings for', 'wp-sdtrk')
-									],
-									[
-										'name' => 'apikey',
-										'type' => 'string',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('Admin API key for authentication', 'wp-sdtrk')
-									],
-								]
-							),
-							$this->create_endpoint_desc(
-								"override?apikey={$admin_param}",
-								'POST',
-								__('Creates an admin override to manually grant or deny access. Requires user_id, product_id, override_type (allow/deny), and optional valid_until timestamp.', 'wp-sdtrk'),
-								[
-									[
-										'name' => 'apikey',
-										'type' => 'string',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('Admin API key for authentication', 'wp-sdtrk')
-									],
-									[
-										'name' => 'user_id',
-										'type' => 'integer',
-										'location' => 'JSON',
-										'required' => true,
-										'description' => __('WordPress user ID', 'wp-sdtrk')
-									],
-									[
-										'name' => 'product_id',
-										'type' => 'integer',
-										'location' => 'JSON',
-										'required' => true,
-										'description' => __('Internal product ID', 'wp-sdtrk')
-									],
-									[
-										'name' => 'override_type',
-										'type' => 'string',
-										'location' => 'JSON',
-										'required' => true,
-										'description' => __('Type of override: "allow" or "deny"', 'wp-sdtrk')
-									],
-									[
-										'name' => 'valid_until',
-										'type' => 'string',
-										'location' => 'JSON',
-										'required' => false,
-										'description' => __('Expiration date/time (ISO format, optional)', 'wp-sdtrk')
-									],
-									[
-										'name' => 'comment',
-										'type' => 'string',
-										'location' => 'JSON',
-										'required' => false,
-										'description' => __('Optional comment for the override', 'wp-sdtrk')
-									],
-								]
-							),
-							$this->create_endpoint_desc(
-								"override?user_id={user_id}&product_id={product_id}&apikey={$admin_param}",
-								'DELETE',
-								__('Removes all admin overrides for a specific user-product combination. Restores normal access evaluation.', 'wp-sdtrk'),
-								[
-									[
-										'name' => 'user_id',
-										'type' => 'integer',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('WordPress user ID', 'wp-sdtrk')
-									],
-									[
-										'name' => 'product_id',
-										'type' => 'integer',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('Internal product ID', 'wp-sdtrk')
-									],
-									[
-										'name' => 'apikey',
-										'type' => 'string',
-										'location' => 'URL',
-										'required' => true,
-										'description' => __('Admin API key for authentication', 'wp-sdtrk')
-									],
-								]
-							),
-						])
-					),
-				],
-			],
-		]);
-		Redux::set_section('wp_sdtrk_options', [
-			'title'  => __('Appearance', 'wp-sdtrk'),
-			'id'     => 'appearance_section',
-			'desc'   => __('Defines the appearance of the payments-overview page', 'wp-sdtrk'),
-			'icon'   => 'el el-picture',
-			'fields' => [
-				[
-					'id'       => 'orders_background_image',
-					'type'     => 'media',
-					'url'      => true,
-					'title'    => __('Background Image', 'wp-sdtrk'),
-					'subtitle' => __('Is shown on the payments-overview page', 'wp-sdtrk'),
-					'desc'     => __('Optional. Supports PNG and JPEG', 'wp-sdtrk'),
+					'id'      => 'trk_fp',
+					'type'    => 'switch',
+					'title'   => __('Enable Fingerprinting', 'wp-sdtrk'),
+					'desc'    => __('Check to fingerprint users (works cookie-less)', 'wp-sdtrk'),
+					'default' => 0,
 				],
 				[
-					'id'    => 'login_landingpage_url',
-					'type'  => 'text',
-					'title' => __('Login Landing Page URL', 'wp-sdtrk'),
-					'desc'  => __('URL of the page the user lands on after logging into wordpress', 'wp-sdtrk'),
-					'default' => home_url('/wp-admin/'),
-				],
-			],
-		]);
-		Redux::set_section('wp_sdtrk_options', [
-			'title'  => __('Manage Products', 'wp-sdtrk'),
-			'id'     => 'product_admin_link',
-			'desc'   => __('Manage products, mappings and access rules', 'wp-sdtrk'),
-			'fields' => [
-				[
-					'id'       => 'product_admin_manage_products',
-					'type'     => 'raw',
-					'content'  => '<a href="' . admin_url('admin.php?page=sdtrk_admin_manage_products') . '" class="button button-primary">' . __('Manage products', 'wp-sdtrk') . '</a>',
-				],
-				[
-					'id'       => 'product_admin_map_products',
-					'type'     => 'raw',
-					'content'  => '<a href="' . admin_url('admin.php?page=sdtrk_admin_map_products') . '" class="button button-primary">' . __('Manage mappings', 'wp-sdtrk') . '</a>',
-				],
-				[
-					'id'       => 'product_admin_manage_access',
-					'type'     => 'raw',
-					'content'  => '<a href="' . admin_url('admin.php?page=sdtrk_admin_manage_access') . '" class="button button-primary">' . __('Manage access', 'wp-sdtrk') . '</a>',
-				]
-			],
-		]);
-		Redux::set_section('wp_sdtrk_options', [
-			'title'  => __('Community-API', 'wp-sdtrk'),
-			'id'     => 'community_api_section',
-			'icon'   => 'el el-key',
-			'desc'   => __('Community-API Settings', 'wp-sdtrk'),
-			'fields' => [
-				[
-					'id'    => 'community_api_enabled',
+					'id'    => 'trk_time',
 					'type'  => 'switch',
-					'title' => __('Enable Community API', 'wp-sdtrk'),
-					'desc'  => __('Enable the Community API for this site', 'wp-sdtrk'),
-					'default' => false,
+					'title' => __('Enable timed signal events', 'wp-sdtrk'),
+					'desc'  => __('Check to fire signal events described below after time', 'wp-sdtrk'),
+					'default' => 0,
 				],
 				[
-					'id'    => 'community_api_url',
-					'type'  => 'text',
-					'title' => __('API URL', 'wp-sdtrk'),
-					'desc'  => __('Base URL of the Community API server', 'wp-sdtrk'),
-					'default' => 'localhost',
+					'id'         => 'trk_time_group',
+					'type'       => 'repeater',
+					'title'      => __('Timed signal events', 'wp-sdtrk'),
+					'desc'       => __('Fire a signal-event after X Seconds', 'wp-sdtrk'),
+					'fields'     => [
+						[
+							'id'      => 'trk_time_group_seconds',
+							'type'    => 'spinner',
+							'title'   => __('Seconds', 'wp-sdtrk'),
+							'min'     => 1,
+							'max'     => 18000,
+							'step'    => 1,
+							'default' => 10,
+						],
+					],
 				],
 				[
-					'id'    => 'community_api_port',
-					'type'  => 'text',
-					'title' => __('API Port', 'wp-sdtrk'),
-					'desc'  => __('Port of the Community API server', 'wp-sdtrk'),
-					'default' => '8000',
-				],
-				[
-					'id'    => 'community_api_ssl',
+					'id'    => 'trk_scroll',
 					'type'  => 'switch',
-					'title' => __('Use SSL', 'wp-sdtrk'),
-					'desc'  => __('Enable SSL/HTTPS for API connections', 'wp-sdtrk'),
-					'default' => false,
+					'title' => __('Enable scroll signal events', 'wp-sdtrk'),
+					'desc'  => __('Check to fire scroll events described below when reaching scroll-depth', 'wp-sdtrk'),
+					'default' => 0,
 				],
 				[
-					'id'    => 'community_api_master_token',
+					'id'       => 'trk_scroll_group',
+					'type'     => 'repeater',
+					'title'    => __('Scroll signal events', 'wp-sdtrk'),
+					'desc'     => __('Fire signal-event if the user has scrolled to x percent of the page', 'wp-sdtrk'),
+					'fields'   => [
+						[
+							'id'      => 'trk_scroll_group_percent',
+							'type'    => 'spinner',
+							'title'   => __('Percent to reach', 'wp-sdtrk'),
+							'min'     => 1,
+							'max'     => 100,
+							'step'    => 1,
+							'default' => 33,
+						],
+					],
+				],
+				[
+					'id'    => 'trk_buttons',
+					'type'  => 'switch',
+					'title' => __('Fire signal-event on button-clicks', 'wp-sdtrk'),
+					'desc'  => __('Check to fire a signal event after an element has been clicked', 'wp-sdtrk'),
+					'default' => 0,
+				],
+				[
+					'id'    => 'trk_visibility',
+					'type'  => 'switch',
+					'title' => __('Fire signal-event on visibility of items', 'wp-sdtrk'),
+					'desc'  => __('Check to fire a signal event after an element gets visible', 'wp-sdtrk'),
+					'default' => 0,
+				],
+			],
+		]);
+
+		/**
+		 * ============================================================
+		 * SECTION: Tracking Services (mit Subsections)
+		 * ============================================================
+		 */
+
+		// LOCAL TRACKING
+		Redux::set_section('wp_sdtrk_options', [
+			'title'      => __('Tracking Services', 'wp-sdtrk'),
+			'id'         => 'tracking_services',
+			'icon'       => 'el el-share-alt',
+			'subsection' => false,
+			'fields'     => [],
+		]);
+
+		// META (FACEBOOK) TRACKING
+		Redux::set_section('wp_sdtrk_options', [
+			'title'      => __('Meta Tracking', 'wp-sdtrk'),
+			'id'         => 'meta_tracking_section',
+			'parent_id'  => 'tracking_services',
+			'icon'       => 'el el-facebook',
+			'subsection' => true,
+			'fields'     => [
+				[
+					'id'    => 'fb_pixelid',
 					'type'  => 'text',
-					'title' => __('Master Token', 'wp-sdtrk'),
-					'desc'  => __('Master token for administrative operations', 'wp-sdtrk'),
+					'title' => __('Meta Pixel-ID', 'wp-sdtrk'),
+					'desc'  => __('Insert your Meta Pixel-ID', 'wp-sdtrk'),
 				],
 				[
-					'id'    => 'community_api_service_token',
+					'id'       => 'fb_trk_debug',
+					'type'     => 'switch',
+					'title'    => __('Activate Debugging', 'wp-sdtrk'),
+					'desc'     => __('Check to activate Meta debugging', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['fb_pixelid', '!=', ''],
+				],
+				[
+					'id'       => 'fb_trk_server_debug_code',
+					'type'     => 'text',
+					'title'    => __('Server Test-Code', 'wp-sdtrk'),
+					'desc'     => __('If you want to debug the events in the Meta events-manager, enter the test-code!', 'wp-sdtrk'),
+					'required' => [['fb_trk_debug', '=', '1'], ['fb_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'fb_trk_browser',
+					'type'     => 'switch',
+					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
+					'desc'     => __('Check to fire Meta browser pixel', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['fb_pixelid', '!=', ''],
+				],
+				[
+					'id'       => 'fb_trk_browser_cookie_service',
+					'type'     => 'select',
+					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
+					'options'  => [
+						'none'     => __('Fire always', 'wp-sdtrk'),
+						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
+					],
+					'default'  => 'none',
+					'required' => [['fb_trk_browser', '=', '1'], ['fb_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'fb_trk_browser_cookie_id',
+					'type'     => 'text',
+					'title'    => __('Cookie ID', 'wp-sdtrk'),
+					'desc'     => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
+					'required' => [['fb_trk_browser_cookie_service', '=', 'borlabs'], ['fb_trk_browser', '=', '1'], ['fb_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'fb_trk_server',
+					'type'     => 'switch',
+					'title'    => __('Activate server based tracking', 'wp-sdtrk'),
+					'desc'     => __('Check to send Meta-Events server-side to the API', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['fb_pixelid', '!=', ''],
+				],
+				[
+					'id'       => 'fb_trk_server_token',
+					'type'     => 'text',
+					'title'    => __('API Token', 'wp-sdtrk'),
+					'desc'     => __('You can get the token within the Meta Events-Manager settings', 'wp-sdtrk'),
+					'required' => [['fb_trk_server', '=', '1'], ['fb_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'fb_trk_server_cookie_service',
+					'type'     => 'select',
+					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
+					'options'  => [
+						'none'     => __('Fire always', 'wp-sdtrk'),
+						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
+					],
+					'default'  => 'none',
+					'required' => [['fb_trk_server', '=', '1'], ['fb_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'fb_trk_server_cookie_id',
+					'type'     => 'text',
+					'title'    => __('Cookie ID', 'wp-sdtrk'),
+					'required' => [['fb_trk_server_cookie_service', '=', 'borlabs'], ['fb_trk_server', '=', '1'], ['fb_pixelid', '!=', '']],
+				],
+			],
+		]);
+
+		// GOOGLE ANALYTICS 4 TRACKING
+		Redux::set_section('wp_sdtrk_options', [
+			'title'      => __('Google Analytics 4', 'wp-sdtrk'),
+			'id'         => 'google_tracking_section',
+			'parent_id'  => 'tracking_services',
+			'icon'       => 'el el-globe',
+			'subsection' => true,
+			'fields'     => [
+				[
+					'id'    => 'ga_measurement_id',
 					'type'  => 'text',
-					'title' => __('Service Token', 'wp-sdtrk'),
-					'desc'  => __('Service token for read-only operations', 'wp-sdtrk'),
+					'title' => __('Google Measurement ID', 'wp-sdtrk'),
+					'desc'  => __('Insert your Google Measurement ID (G-XXXXXXXXXX)', 'wp-sdtrk'),
 				],
 				[
-					'id'      => 'community_api_test_button',
-					'type'    => 'raw',
-					'title'   => __('Connection Test', 'wp-sdtrk'),
-					'content' => '<button type="button" class="button button-secondary" onclick="testCommunityAPIConnection()">' . __('Test Connection', 'wp-sdtrk') . '</button>
-              <div id="community-api-test-result" style="margin-top: 10px;"></div>',
+					'id'       => 'ga_trk_debug',
+					'type'     => 'switch',
+					'title'    => __('Activate Debugging', 'wp-sdtrk'),
+					'desc'     => __('Check to activate Google Analytics debugging', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['ga_measurement_id', '!=', ''],
 				],
 				[
-					'id'    => 'community_api_plugin_url_make',
+					'id'       => 'ga_trk_debug_live',
+					'type'     => 'switch',
+					'title'    => __('Debug in live-view', 'wp-sdtrk'),
+					'desc'     => __('Check to show debug-hits in the Google Analytics realtime report', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => [['ga_measurement_id', '!=', ''], ['ga_trk_debug', '=', '1']],
+				],
+				[
+					'id'       => 'ga_trk_browser',
+					'type'     => 'switch',
+					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
+					'desc'     => __('Check to fire Google Analytics browser pixel', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['ga_measurement_id', '!=', ''],
+				],
+				[
+					'id'       => 'ga_trk_browser_cookie_service',
+					'type'     => 'select',
+					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
+					'options'  => [
+						'none'     => __('Fire always', 'wp-sdtrk'),
+						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
+					],
+					'default'  => 'none',
+					'required' => [['ga_trk_browser', '=', '1'], ['ga_measurement_id', '!=', '']],
+				],
+				[
+					'id'       => 'ga_trk_browser_cookie_id',
+					'type'     => 'text',
+					'title'    => __('Cookie ID', 'wp-sdtrk'),
+					'required' => [['ga_trk_browser_cookie_service', '=', 'borlabs'], ['ga_trk_browser', '=', '1'], ['ga_measurement_id', '!=', '']],
+				],
+				[
+					'id'       => 'ga_trk_server',
+					'type'     => 'switch',
+					'title'    => __('Activate server based tracking', 'wp-sdtrk'),
+					'desc'     => __('Check to send Google Analytics-Events server-side to the API', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['ga_measurement_id', '!=', ''],
+				],
+				[
+					'id'       => 'ga_trk_server_token',
+					'type'     => 'text',
+					'title'    => __('API Token', 'wp-sdtrk'),
+					'desc'     => __('You can get the token within the Google Analytics Datastream settings', 'wp-sdtrk'),
+					'required' => [['ga_trk_server', '=', '1'], ['ga_measurement_id', '!=', '']],
+				],
+				[
+					'id'       => 'ga_trk_server_cookie_service',
+					'type'     => 'select',
+					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
+					'options'  => [
+						'none'     => __('Fire always', 'wp-sdtrk'),
+						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
+					],
+					'default'  => 'none',
+					'required' => [['ga_trk_server', '=', '1'], ['ga_measurement_id', '!=', '']],
+				],
+				[
+					'id'       => 'ga_trk_server_cookie_id',
+					'type'     => 'text',
+					'title'    => __('Cookie ID', 'wp-sdtrk'),
+					'required' => [['ga_trk_server_cookie_service', '=', 'borlabs'], ['ga_trk_server', '=', '1'], ['ga_measurement_id', '!=', '']],
+				],
+			],
+		]);
+
+		// TIKTOK TRACKING
+		Redux::set_section('wp_sdtrk_options', [
+			'title'      => __('TikTok', 'wp-sdtrk'),
+			'id'         => 'tiktok_tracking_section',
+			'parent_id'  => 'tracking_services',
+			'icon'       => 'el el-share',
+			'subsection' => true,
+			'fields'     => [
+				[
+					'id'    => 'tt_pixelid',
 					'type'  => 'text',
-					'title' => __('make.com plugin-url', 'wp-sdtrk'),
-					'desc'  => __('URL of the make.com plugin', 'wp-sdtrk')
+					'title' => __('TikTok Pixel-ID', 'wp-sdtrk'),
+					'desc'  => __('Insert your TikTok Pixel-ID', 'wp-sdtrk'),
 				],
 				[
-					'id'    => 'community_api_plugin_url_n8n',
-					'type'  => 'text',
-					'title' => __('n8n plugin-url', 'wp-sdtrk'),
-					'desc'  => __('URL of the n8n plugin', 'wp-sdtrk')
+					'id'       => 'tt_trk_debug',
+					'type'     => 'switch',
+					'title'    => __('Activate Debugging', 'wp-sdtrk'),
+					'desc'     => __('Check to activate TikTok debugging', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['tt_pixelid', '!=', ''],
 				],
 				[
-					'id'    => 'community_api_help_url',
+					'id'       => 'tt_trk_server_debug_code',
+					'type'     => 'text',
+					'title'    => __('Server Test-Code', 'wp-sdtrk'),
+					'desc'     => __('If you want to debug the events in the TikTok events-manager, enter the test-code!', 'wp-sdtrk'),
+					'required' => [['tt_trk_debug', '=', '1'], ['tt_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'tt_trk_browser',
+					'type'     => 'switch',
+					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
+					'desc'     => __('Check to fire TikTok browser pixel', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['tt_pixelid', '!=', ''],
+				],
+				[
+					'id'       => 'tt_trk_browser_cookie_service',
+					'type'     => 'select',
+					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
+					'options'  => [
+						'none'     => __('Fire always', 'wp-sdtrk'),
+						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
+					],
+					'default'  => 'none',
+					'required' => [['tt_trk_browser', '=', '1'], ['tt_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'tt_trk_browser_cookie_id',
+					'type'     => 'text',
+					'title'    => __('Cookie ID', 'wp-sdtrk'),
+					'required' => [['tt_trk_browser_cookie_service', '=', 'borlabs'], ['tt_trk_browser', '=', '1'], ['tt_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'tt_trk_server',
+					'type'     => 'switch',
+					'title'    => __('Activate server based tracking', 'wp-sdtrk'),
+					'desc'     => __('Check to send TikTok-Events server-side to the API', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['tt_pixelid', '!=', ''],
+				],
+				[
+					'id'       => 'tt_trk_server_token',
+					'type'     => 'text',
+					'title'    => __('API Token', 'wp-sdtrk'),
+					'desc'     => __('You can get the token within the TikTok Events-Manager settings', 'wp-sdtrk'),
+					'required' => [['tt_trk_server', '=', '1'], ['tt_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'tt_trk_server_cookie_service',
+					'type'     => 'select',
+					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
+					'options'  => [
+						'none'     => __('Fire always', 'wp-sdtrk'),
+						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
+					],
+					'default'  => 'none',
+					'required' => [['tt_trk_server', '=', '1'], ['tt_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'tt_trk_server_cookie_id',
+					'type'     => 'text',
+					'title'    => __('Cookie ID', 'wp-sdtrk'),
+					'required' => [['tt_trk_server_cookie_service', '=', 'borlabs'], ['tt_trk_server', '=', '1'], ['tt_pixelid', '!=', '']],
+				],
+			],
+		]);
+
+		// LINKEDIN TRACKING
+		Redux::set_section('wp_sdtrk_options', [
+			'title'      => __('LinkedIn', 'wp-sdtrk'),
+			'id'         => 'linkedin_tracking_section',
+			'parent_id'  => 'tracking_services',
+			'icon'       => 'fa fa-linkedin',
+			'subsection' => true,
+			'fields'     => [
+				[
+					'id'    => 'lin_pixelid',
 					'type'  => 'text',
-					'title' => __('Community API help page URL', 'wp-sdtrk'),
-					'desc'  => __('URL of the Community API help page', 'wp-sdtrk')
+					'title' => __('LinkedIn Partner-ID', 'wp-sdtrk'),
+					'desc'  => __('Insert your LinkedIn Pixel-ID', 'wp-sdtrk'),
+				],
+				[
+					'id'       => 'lin_trk_debug',
+					'type'     => 'switch',
+					'title'    => __('Activate Debugging', 'wp-sdtrk'),
+					'desc'     => __('Check to activate LinkedIn debugging', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['lin_pixelid', '!=', ''],
+				],
+				[
+					'id'       => 'lin_trk_browser',
+					'type'     => 'switch',
+					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
+					'desc'     => __('Check to fire LinkedIn browser pixel', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['lin_pixelid', '!=', ''],
+				],
+				[
+					'id'       => 'lin_trk_browser_cookie_service',
+					'type'     => 'select',
+					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
+					'options'  => [
+						'none'     => __('Fire always', 'wp-sdtrk'),
+						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
+					],
+					'default'  => 'none',
+					'required' => [['lin_trk_browser', '=', '1'], ['lin_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'lin_trk_browser_cookie_id',
+					'type'     => 'text',
+					'title'    => __('Cookie ID', 'wp-sdtrk'),
+					'required' => [['lin_trk_browser_cookie_service', '=', 'borlabs'], ['lin_trk_browser', '=', '1'], ['lin_pixelid', '!=', '']],
+				],
+
+				// EVENT CONVERSION-MAPPING
+				[
+					'id'       => 'lin_trk_manage_mappings',
+					'type'     => 'raw',
+					'content'  => '<a href="' . admin_url('admin.php?page=wp_sdtrk_admin_map_linkedin') . '" class="button button-primary">' . __('Manage conversion mappings', 'wp-sdtrk') . '</a>',
+				],
+			],
+		]);
+
+		// FUNNELYTICS TRACKING
+		Redux::set_section('wp_sdtrk_options', [
+			'title'      => __('Funnelytics', 'wp-sdtrk'),
+			'id'         => 'funnelytics_tracking_section',
+			'parent_id'  => 'tracking_services',
+			'icon'       => 'el el-glass',
+			'subsection' => true,
+			'fields'     => [
+				[
+					'id'    => 'fl_tracking_id',
+					'type'  => 'text',
+					'title' => __('Funnelytics Pixel-ID', 'wp-sdtrk'),
+					'desc'  => __('Insert your Funnelytics Pixel-ID', 'wp-sdtrk'),
+				],
+				[
+					'id'       => 'fl_trk_debug',
+					'type'     => 'switch',
+					'title'    => __('Activate Debugging', 'wp-sdtrk'),
+					'desc'     => __('Check to activate Funnelytics debugging', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['fl_tracking_id', '!=', ''],
+				],
+				[
+					'id'       => 'fl_trk_browser',
+					'type'     => 'switch',
+					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
+					'desc'     => __('Check to fire Funnelytics browser pixel', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['fl_tracking_id', '!=', ''],
+				],
+				[
+					'id'       => 'fl_trk_browser_cookie_service',
+					'type'     => 'select',
+					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
+					'options'  => [
+						'none'     => __('Fire always', 'wp-sdtrk'),
+						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
+					],
+					'default'  => 'none',
+					'required' => [['fl_trk_browser', '=', '1'], ['fl_tracking_id', '!=', '']],
+				],
+				[
+					'id'       => 'fl_trk_browser_cookie_id',
+					'type'     => 'text',
+					'title'    => __('Cookie ID', 'wp-sdtrk'),
+					'required' => [['fl_trk_browser_cookie_service', '=', 'borlabs'], ['fl_trk_browser', '=', '1'], ['fl_tracking_id', '!=', '']],
+				],
+			],
+		]);
+
+		// MAUTIC TRACKING
+		Redux::set_section('wp_sdtrk_options', [
+			'title'      => __('Mautic', 'wp-sdtrk'),
+			'id'         => 'mautic_tracking_section',
+			'parent_id'  => 'tracking_services',
+			'icon'       => 'el el-envelope',
+			'subsection' => true,
+			'fields'     => [
+				[
+					'id'    => 'mtc_tracking_id',
+					'type'  => 'text',
+					'title' => __('Mautic Base URL', 'wp-sdtrk'),
+					'desc'  => __('Insert the base-url of your mautic installation', 'wp-sdtrk'),
+				],
+				[
+					'id'       => 'mtc_trk_debug',
+					'type'     => 'switch',
+					'title'    => __('Activate Debugging', 'wp-sdtrk'),
+					'desc'     => __('Check to activate Mautic debugging', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['mtc_tracking_id', '!=', ''],
+				],
+				[
+					'id'       => 'mtc_trk_browser',
+					'type'     => 'switch',
+					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
+					'desc'     => __('Check to fire Mautic browser pixel', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['mtc_tracking_id', '!=', ''],
+				],
+				[
+					'id'       => 'mtc_trk_browser_cookie_service',
+					'type'     => 'select',
+					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
+					'options'  => [
+						'none'     => __('Fire always', 'wp-sdtrk'),
+						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
+					],
+					'default'  => 'none',
+					'required' => [['mtc_trk_browser', '=', '1'], ['mtc_tracking_id', '!=', '']],
+				],
+				[
+					'id'       => 'mtc_trk_browser_cookie_id',
+					'type'     => 'text',
+					'title'    => __('Cookie ID', 'wp-sdtrk'),
+					'required' => [['mtc_trk_browser_cookie_service', '=', 'borlabs'], ['mtc_trk_browser', '=', '1'], ['mtc_tracking_id', '!=', '']],
+				],
+			],
+		]);
+
+		// MATOMO TRACKING
+		Redux::set_section('wp_sdtrk_options', [
+			'title'      => __('Matomo', 'wp-sdtrk'),
+			'id'         => 'matomo_tracking_section',
+			'parent_id'  => 'tracking_services',
+			'icon'       => 'el el-idea',
+			'subsection' => true,
+			'fields'     => [
+				[
+					'id'    => 'mtm_site_id',
+					'type'  => 'text',
+					'title' => __('Matomo Site ID', 'wp-sdtrk'),
+					'desc'  => __('Insert the site ID of your Matomo installation', 'wp-sdtrk'),
+				],
+				[
+					'id'    => 'mtm_api_key',
+					'type'  => 'text',
+					'title' => __('Matomo API Key', 'wp-sdtrk'),
+					'desc'  => __('Insert the API key of your Matomo installation', 'wp-sdtrk'),
+					'required' => ['mtm_site_id', '!=', ''],
+				],
+				[
+					'id'       => 'mtm_trk_debug',
+					'type'     => 'switch',
+					'title'    => __('Activate Debugging', 'wp-sdtrk'),
+					'desc'     => __('Check to activate Matomo debugging', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => [['mtm_site_id', '!=', ''], ['mtm_api_key', '!=', '']],
+				],
+				[
+					'id'       => 'mtm_trk_browser',
+					'type'     => 'switch',
+					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
+					'desc'     => __('Check to fire Matomo browser pixel', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => [['mtm_site_id', '!=', ''], ['mtm_api_key', '!=', '']],
+				],
+				[
+					'id'       => 'mtm_trk_browser_cookie_service',
+					'type'     => 'select',
+					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
+					'options'  => [
+						'none'     => __('Fire always', 'wp-sdtrk'),
+						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
+					],
+					'default'  => 'none',
+					'required' => [['mtm_trk_browser', '=', '1'], ['mtm_site_id', '!=', ''], ['mtm_api_key', '!=', '']],
+				],
+				[
+					'id'       => 'mtm_trk_browser_cookie_id',
+					'type'     => 'text',
+					'title'    => __('Cookie ID', 'wp-sdtrk'),
+					'required' => [['mtm_trk_browser_cookie_service', '=', 'borlabs'], ['mtm_trk_browser', '=', '1'], ['mtm_site_id', '!=', ''], ['mtm_api_key', '!=', '']],
+				],
+			],
+		]);
+
+		/**
+		 * ============================================================
+		 * SECTION: Data Sources
+		 * ============================================================
+		 */
+
+		Redux::set_section('wp_sdtrk_options', [
+			'title'  => __('Data Sources', 'wp-sdtrk'),
+			'id'     => 'data_sources_section',
+			'icon'   => 'el el-network',
+			'fields' => [
+				[
+					'id'    => 'ds24_encrypt_data',
+					'type'  => 'switch',
+					'title' => __('Activate Digistore24 data-decryption', 'wp-sdtrk'),
+					'desc'  => __('Check to decrypt GET-Parameter from Digistore24 before handling', 'wp-sdtrk'),
+					'default' => 0,
+				],
+				[
+					'id'       => 'ds24_encrypt_data_key',
+					'type'     => 'text',
+					'title'    => __('ThankYou-Key', 'wp-sdtrk'),
+					'desc'     => __('Please enter the ThankYou-Key which you have set in Digistore24', 'wp-sdtrk'),
+					'required' => ['ds24_encrypt_data', '=', '1'],
+				],
+			],
+		]);
+
+		/**
+		 * ============================================================
+		 * SECTION: Tutorials
+		 * ============================================================
+		 */
+
+		Redux::set_section('wp_sdtrk_options', [
+			'title'  => __('Tutorials', 'wp-sdtrk'),
+			'id'     => 'tutorials_section',
+			'icon'   => 'fa fa-book',
+			'fields' => [
+				[
+					'id'    => 'tutorial_video_setup',
+					'type'  => 'raw',
+					'title' => __('Setup Tutorial', 'wp-sdtrk'),
+					'content' => '<iframe width="100%" height="400" src="https://player.vimeo.com/video/587429111?h=6660e0f5f6" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>',
+				],
+				[
+					'id'    => 'tutorial_parameters',
+					'type'  => 'raw',
+					'title' => __('Supported GET-Parameters', 'wp-sdtrk'),
+					'content' => '<p><strong>' . __('Note:', 'wp-sdtrk') . '</strong> ' . __('Enable "appending order details to thank you URL" on services like Digistore24 so that the parameters below are passed automatically.', 'wp-sdtrk') . '</p>
+                <h4>' . __('Transaction-ID', 'wp-sdtrk') . '</h4>
+                <p><strong>' . __('Parameter-Name(s):', 'wp-sdtrk') . '</strong> order_id</p>
+                <p><strong>' . __('Type:', 'wp-sdtrk') . '</strong> string</p>
+                <p><strong>' . __('Example:', 'wp-sdtrk') . '</strong> <code>' . get_home_url() . '?order_id=9854</code></p>
+                
+                <h4>' . __('Product-ID', 'wp-sdtrk') . '</h4>
+                <p><strong>' . __('Parameter-Name(s):', 'wp-sdtrk') . '</strong> prodid | product_id</p>
+                <p><strong>' . __('Type:', 'wp-sdtrk') . '</strong> string</p>
+                <p><strong>' . __('Example:', 'wp-sdtrk') . '</strong> <code>' . get_home_url() . '?prodid=1337</code></p>
+                
+                <h4>' . __('Product-Name', 'wp-sdtrk') . '</h4>
+                <p><strong>' . __('Parameter-Name(s):', 'wp-sdtrk') . '</strong> product_name</p>
+                <p><strong>' . __('Type:', 'wp-sdtrk') . '</strong> string</p>
+                <p><strong>' . __('Example:', 'wp-sdtrk') . '</strong> <code>' . get_home_url() . '?product_name=newproduct</code></p>
+                
+                <h4>' . __('Value', 'wp-sdtrk') . '</h4>
+                <p><strong>' . __('Parameter-Name(s):', 'wp-sdtrk') . '</strong> value | net_amount | amount</p>
+                <p><strong>' . __('Type:', 'wp-sdtrk') . '</strong> number</p>
+                <p><strong>' . __('Example:', 'wp-sdtrk') . '</strong> <code>' . get_home_url() . '?value=99</code></p>
+                
+                <h4>' . __('Type', 'wp-sdtrk') . '</h4>
+                <p><strong>' . __('Parameter-Name(s):', 'wp-sdtrk') . '</strong> type</p>
+                <p><strong>' . __('Accepts:', 'wp-sdtrk') . '</strong> AddToCart | Purchase | CompleteRegistration | Lead | InitiateCheckout | ViewContent</p>
+                <p><strong>' . __('Example:', 'wp-sdtrk') . '</strong> <code>' . get_home_url() . '?type=Lead</code></p>
+                
+                <h4>' . __('UTM', 'wp-sdtrk') . '</h4>
+                <p><strong>' . __('Parameter-Name(s):', 'wp-sdtrk') . '</strong> utm_source | utm_campaign | utm_term | utm_medium | utm_content</p>
+                <p><strong>' . __('Type:', 'wp-sdtrk') . '</strong> string</p>
+                <p><strong>' . __('Example:', 'wp-sdtrk') . '</strong> <code>' . get_home_url() . '?utm_source=facebook&utm_medium=cpc</code></p>
+                <p><strong style="color: #d63638;">' . __('Note:', 'wp-sdtrk') . '</strong> ' . __('UTM parameters are stored in cookies and automatically passed on further visits!', 'wp-sdtrk') . '</p>',
 				],
 			],
 		]);
 	}
-
 	/**
-	 * Register the page for managing products.
+	 * Lädt Skripte und Styles für die Produkte-Adminseite.
 	 *
-	 * This function registers a new top-level menu page in the WordPress admin area.
-	 * The page is accessible for users with the 'manage_options' capability, and is
-	 * rendered by the 'render_page_manage_products' method of this class.
-	 *
-	 * The CSS code added in the 'admin_head' action is used to hide the menu item
-	 * from the admin menu, so that the page is only accessible via the link in the
-	 * FluentCommunity Extreme settings page.
 	 */
-	public function register_page_manage_products(): void
+	public function enqueue_wp_sdtrk_admin_map_linkedin(): void
 	{
-		add_action('admin_head', function () {
-			echo '<style>#toplevel_page_sdtrk_admin_manage_products { display: none !important; }</style>';
-		});
-		add_menu_page(
-			'Produkte verwalten',           // Page Title
-			'Produkte verwalten',           // Menu Title
-			'manage_options',               // Capability
-			'sdtrk_admin_manage_products',                 // Menu Slug
-			[$this, 'render_page_manage_products'], // Callback
-			'',                             // Icon
-			null                            // Position
+		// JS
+		wp_enqueue_script(
+			$this->wp_sdtrk . '-admin-map-linkedin-js',
+			plugin_dir_url(__FILE__) . 'js/wp-sdtrk-admin-map-linkedin.js',
+			['jquery', $this->wp_sdtrk],
+			$this->version,
+			true
+		);
+
+		// Konfig für AJAX im JS
+		wp_localize_script(
+			$this->wp_sdtrk . '-admin-map-linkedin-js',
+			'SDTRK_Linkedin',
+			[
+				'ajaxUrl'    => admin_url('admin-ajax.php'),
+				'nonce'      => wp_create_nonce('security_wp-sdtrk'),
+			]
 		);
 	}
 
@@ -719,70 +869,41 @@ class Wp_Sdtrk_Admin
 	 * from the admin menu, so that the page is only accessible via the link in the
 	 * FluentCommunity Extreme settings page.
 	 */
-	public function register_page_map_products(): void
+	public function register_page_wp_sdtrk_admin_map_linkedin(): void
 	{
 		add_action('admin_head', function () {
-			echo '<style>#toplevel_page_sdtrk_admin_map_products { display: none !important; }</style>';
+			echo '<style>#toplevel_page_wp_sdtrk_admin_map_linkedin { display: none !important; }</style>';
 		});
 		add_menu_page(
-			'Produkte zuweisen',           // Page Title
-			'Produkte zuweisen',           // Menu Title
+			'LinkedIn Conversion Mapping',           // Page Title
+			'LinkedIn Conversion Mapping',           // Menu Title
 			'manage_options',               // Capability
-			'sdtrk_admin_map_products',                 // Menu Slug
-			[$this, 'render_page_map_products'], // Callback
+			'wp_sdtrk_admin_map_linkedin',                 // Menu Slug
+			[$this, 'render_page_wp_sdtrk_admin_map_linkedin'], // Callback
 			'',                             // Icon
 			null                            // Position
 		);
 	}
 
-	public function register_page_manage_access(): void
-	{
-		add_action('admin_head', function () {
-			echo '<style>#toplevel_page_sdtrk_admin_manage_access { display: none !important; }</style>';
-		});
-		add_menu_page(
-			'Zugänge verwalten',           // Page Title
-			'Zugänge verwalten',           // Menu Title
-			'manage_options',               // Capability
-			'sdtrk_admin_manage_access',                 // Menu Slug
-			[$this, 'render_page_manage_access'], // Callback
-			'',                             // Icon
-			null                            // Position
-		);
-	}
-
-	// In admin/class-wp-sdtrk-admin.php
 	/**
-	 * Handle login redirect based on admin settings - only for non-admins
+	 * Register the page for managing linkedin mappings.
 	 *
-	 * @param string $redirect_to URL to redirect to
-	 * @param string $requested_redirect_to The requested redirect destination URL passed as a parameter
-	 * @param WP_User|WP_Error $user WP_User object if login was successful, WP_Error object otherwise
-	 * @return string
+	 * This function registers a new top-level menu page in the WordPress admin area.
+	 * The page is accessible for users with the 'manage_options' capability, and is
+	 * rendered by the 'render_page_manage_linkedin_mappings' method of this class.
+	 *
+	 * The CSS code added in the 'admin_head' action is used to hide the menu item
+	 * from the admin menu, so that the page is only accessible via the link in the
+	 * FluentCommunity Extreme settings page.
 	 */
-	public function handle_login_redirect($redirect_to, $requested_redirect_to, $user)
+	public function render_page_wp_sdtrk_admin_map_linkedin(): void
 	{
-		// Nur für erfolgreiche Logins
-		if (is_wp_error($user)) {
-			return $redirect_to;
+		$view = plugin_dir_path(dirname(__FILE__)) . 'templates/wp-sdtrk-admin-map-linkedin.php';
+		if (file_exists($view)) {
+			include $view;
 		}
-
-		// Prüfe ob der Nutzer Admin-Rechte hat
-		if (user_can($user, 'manage_options')) {
-			// Für Admins: Standard-Verhalten beibehalten
-			return $redirect_to;
-		}
-
-		// Nur für Nicht-Admins: Prüfe ob eine custom URL konfiguriert ist
-		$custom_url = Redux::get_option('wp_sdtrk_options', 'login_landingpage_url');
-
-		if (!empty($custom_url) && $custom_url !== home_url('/wp-admin/')) {
-			return $custom_url;
-		}
-
-		// Fallback auf Standard-Verhalten
-		return $redirect_to;
 	}
+
 
 	/**
 	 * Injects global admin UI components for SDTRK pages.
@@ -824,171 +945,6 @@ class Wp_Sdtrk_Admin
 		if (file_exists($modal_path)) {
 			include $modal_path;
 		}
-	}
-
-	/**
-	 * Renders the page for managing products.
-	 *
-	 * This function renders the page used for managing products. It is called
-	 * when the 'sdtrk_admin_manage_products' page is accessed in the WordPress admin area.
-	 *
-	 * The page is rendered by including the 'partials/wp-sdtrk-admin-product-ui.php'
-	 * file, which contains the HTML code for the page.
-	 */
-	public function render_page_manage_products(): void
-	{
-		$view = plugin_dir_path(dirname(__FILE__)) . 'templates/wp-sdtrk-admin-manage-products.php';
-		if (file_exists($view)) {
-			include $view;
-		}
-	}
-
-	/**
-	 * Renders the page for mapping products.
-	 *
-	 * This function renders the page used for mapping products. It is called
-	 * when the 'sdtrk_admin_map_products' page is accessed in the WordPress admin area.
-	 *
-	 * The page is rendered by including the 'templates/wp-sdtrk-admin-map-products.php'
-	 * file, which contains the HTML code for the page.
-	 */
-
-	public function render_page_map_products(): void
-	{
-		$view = plugin_dir_path(dirname(__FILE__)) . 'templates/wp-sdtrk-admin-map-products.php';
-		if (file_exists($view)) {
-			include $view;
-		}
-	}
-
-	public function render_page_manage_access(): void
-	{
-		$view = plugin_dir_path(dirname(__FILE__)) . 'templates/wp-sdtrk-admin-manage-access.php';
-		if (file_exists($view)) {
-			include $view;
-		}
-	}
-
-	/**
-	 * Lädt Skripte und Styles für die Community-API Einstellungen.
-	 *
-	 * @param string $hook_suffix Aktueller Admin-Page-Hook.
-	 */
-	public function enqueue_community_api_assets(string $hook_suffix): void
-	{
-		// Nur auf Redux-Einstellungsseiten laden
-		if (strpos($hook_suffix, 'sdtrk_settings') === false) {
-			return;
-		}
-
-		// JS
-		wp_enqueue_script(
-			$this->wp_sdtrk . '-community-api-js',
-			plugin_dir_url(__FILE__) . 'js/wp-sdtrk-admin-community-api.js',
-			['jquery'],
-			$this->version,
-			true
-		);
-
-		// Konfig für AJAX im JS
-		wp_localize_script(
-			$this->wp_sdtrk . '-community-api-js',
-			'SDTRK_CommunityAPI',
-			[
-				'ajaxUrl' => admin_url('admin-ajax.php'),
-				'nonce'   => wp_create_nonce('security_wp-sdtrk'),
-				'messages' => [
-					'testing' => __('Testing...', 'wp-sdtrk'),
-					'connection_failed' => __('Connection failed', 'wp-sdtrk'),
-				]
-			]
-		);
-	}
-
-	/**
-	 * Lädt Skripte und Styles für die Produkte-Adminseite.
-	 *
-	 */
-	public function enqueue_products_assets(): void
-	{
-		// JS
-		wp_enqueue_script(
-			$this->wp_sdtrk . '-products-js',
-			plugin_dir_url(__FILE__) . 'js/wp-sdtrk-admin-products.js',
-			['jquery', $this->wp_sdtrk],
-			$this->version,
-			true
-		);
-
-		// Konfig für AJAX im JS
-		wp_localize_script(
-			$this->wp_sdtrk . '-products-js',
-			'SDTRK_Products',
-			[
-				'ajaxUrl'    => admin_url('admin-ajax.php'),
-				'nonce'      => wp_create_nonce('sdtrk_products_nonce'),
-			]
-		);
-	}
-
-	/**
-	 * Lädt Skripte und Styles für die Mappings-Adminseite.
-	 *
-	 */
-	public function enqueue_mappings_assets(): void
-	{
-		// JS
-		wp_enqueue_script(
-			$this->wp_sdtrk . '-mappings-js',
-			plugin_dir_url(__FILE__) . 'js/wp-sdtrk-admin-mappings.js',
-			['jquery', $this->wp_sdtrk],  // Abhängigkeit von wp-sdtrk-admin.js
-			$this->version,
-			true
-		);
-
-		// Konfig für AJAX im JS
-		wp_localize_script(
-			$this->wp_sdtrk . '-mappings-js',
-			'SDTRK_Mappings',
-			[
-				'ajaxUrl' => admin_url('admin-ajax.php'),
-				'nonce'   => wp_create_nonce('security_wp-sdtrk'),
-				'messages' => [
-					'loading' => __('Loading...', 'wp-sdtrk'),
-					'error' => __('Error occurred', 'wp-sdtrk'),
-				]
-			]
-		);
-	}
-
-	/**
-	 * Lädt Skripte und Styles für die Access-Adminseite.
-	 *
-	 */
-	public function enqueue_access_assets(): void
-	{
-		// JS
-		wp_enqueue_script(
-			$this->wp_sdtrk . '-access-js',
-			plugin_dir_url(__FILE__) . 'js/wp-sdtrk-admin-access.js',
-			['jquery', $this->wp_sdtrk],  // Abhängigkeit von wp-sdtrk-admin.js
-			$this->version,
-			true
-		);
-
-		// Konfig für AJAX im JS
-		wp_localize_script(
-			$this->wp_sdtrk . '-access-js',
-			'SDTRK_Access',
-			[
-				'ajaxUrl' => admin_url('admin-ajax.php'),
-				'nonce'   => wp_create_nonce('security_wp-sdtrk'),
-				'messages' => [
-					'loading' => __('Loading...', 'wp-sdtrk'),
-					'error' => __('Error occurred', 'wp-sdtrk'),
-				]
-			]
-		);
 	}
 
 	/**

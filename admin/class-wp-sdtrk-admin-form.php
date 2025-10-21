@@ -25,17 +25,8 @@ class Wp_Sdtrk_Admin_Form_Handler
         }
 
         // Zentrale Routing-Logik
-        if (isset($_POST['wp_sdtrk_form_action']) && $_POST['wp_sdtrk_form_action'] === 'create_product') {
-            $this->handle_create_product();
-        }
-        if (isset($_POST['wp_sdtrk_form_action']) && $_POST['wp_sdtrk_form_action'] === 'create_product_mapping') {
-            $this->handle_create_product_mapping();
-        }
-        if (isset($_POST['wp_sdtrk_form_action']) && $_POST['wp_sdtrk_form_action'] === 'update_product_mapping') {
-            $this->handle_update_product_mapping();
-        }
-        if (isset($_POST['wp_sdtrk_form_action']) && $_POST['wp_sdtrk_form_action'] === 'create_override') {
-            $this->handle_override_access();
+        if (isset($_POST['wp_sdtrk_form_action']) && $_POST['wp_sdtrk_form_action'] === 'linkedin_mappings') {
+            $this->handle_linkedin_mappings();
         }
 
         // weitere: elseif ($_POST['wp_sdtrk_form_action'] === '...') ...
@@ -43,109 +34,61 @@ class Wp_Sdtrk_Admin_Form_Handler
 
 
     /**
-     * Handles the creation of new products.
-     *
-     * This function is called when the form submission contains the
-     * 'wp_sdtrk_form_action' parameter with the value 'create_product'.
-     *
-     * It checks the nonce and verifies that the product ID and title are
-     * not empty. If the checks pass, it creates a new product using the
-     * WP_SDTRK_Helper_Product class and redirects the user to the same page
-     * with a success message. If the checks fail, it adds an error message
-     * to the admin notices.
-     *
-     * @since 1.0.0
-     */
-    private function handle_create_product(): void
-    {
-        if (
-            !isset($_POST['wp_sdtrk_nonce']) ||
-            !wp_verify_nonce($_POST['wp_sdtrk_nonce'], 'wp_sdtrk_create_product')
-        ) {
-            return;
-        }
-
-        $sku  = sanitize_text_field($_POST['sdtrk_new_product_sku'] ?? '');
-        $name = sanitize_text_field($_POST['sdtrk_new_product_name'] ?? '');
-        $desc = sanitize_textarea_field($_POST['sdtrk_new_product_description'] ?? '');
-
-        if (!$sku || !$name) {
-            add_action('admin_notices', function () {
-                echo '<div class="notice notice-error"><p>' . esc_html__('Product ID and title are required', 'wp-sdtrk') . '</p></div>';
-            });
-            return;
-        }
-
-        try {
-            WP_SDTRK_Helper_Product::create($sku, $name, $desc);
-
-            wp_safe_redirect(add_query_arg('sdtrk_success', urlencode(__('Product created successfully', 'wp-sdtrk')), $_SERVER['REQUEST_URI']));
-            exit;
-        } catch (\Exception $e) {
-            add_action('admin_notices', function () use ($e) {
-                echo '<div class="notice notice-error"><p>' . esc_html($e->getMessage()) . '</p></div>';
-            });
-        }
-    }
-
-    /**
-     * Handles the creation of product mappings.
-     *
-     * This function is called when the form submission contains the
-     * 'wp_sdtrk_form_action' parameter with the value 'create_product_mapping'.
-     * It verifies the nonce and checks if a product has been selected.
-     * If so, it merges space and course IDs and assigns them to the product.
-     * Successful operations redirect the user with a success message, 
-     * while errors are displayed as admin notices.
-     *
-     * @since 1.0.0
-     */
-
-    /**
-     * Handle the product→space mapping form submission.
+     * Handle LinkedIn mapping form submission.
      *
      * @return void
      */
-    private function handle_create_product_mapping(): void
+    private function handle_linkedin_mappings(): void
     {
         // 1) Nonce prüfen
-        if (
-            ! isset($_POST['wp_sdtrk_nonce']) ||
-            ! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['wp_sdtrk_nonce'])), 'wp_sdtrk_map_product')
-        ) {
+        if (!isset($_POST['wp_sdtrk_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['wp_sdtrk_nonce'])), 'wp_sdtrk_linkedin_mappings')) {
             return;
         }
 
         // 2) Eingaben säubern
-        $product_id = isset($_POST['sdtrk_product_id']) ? intval($_POST['sdtrk_product_id']) : 0;
-        $space_ids  = isset($_POST['sdtrk_spaces']) ? array_map('intval', (array) $_POST['sdtrk_spaces']) : [];
+        $mappings_data = isset($_POST['sdtrk_linkedin_mappings']) ? array_map(function ($mapping) {
+            return [
+                'event'   => sanitize_text_field($mapping['event'] ?? ''),
+                'convid'  => sanitize_text_field($mapping['convid'] ?? ''),
+                'rules'   => is_array($mapping['rules'] ?? []) ? array_map(function ($rule) {
+                    return [
+                        'param' => sanitize_text_field($rule['param'] ?? ''),
+                        'value' => sanitize_text_field($rule['value'] ?? ''),
+                    ];
+                }, $mapping['rules']) : [],
+            ];
+        }, (array) $_POST['sdtrk_linkedin_mappings']) : [];
 
         // 3) Pflicht prüfen
-        if ($product_id <= 0) {
+        if (empty($mappings_data)) {
             add_action('admin_notices', function () {
                 echo '<div class="notice notice-error"><p>'
-                    . esc_html__('Please select a product', 'wp-sdtrk')
+                    . esc_html__('No mappings provided', 'wp-sdtrk')
                     . '</p></div>';
             });
             return;
         }
 
-        try {
-            // 4) Alte Mappings löschen
-            WP_SDTRK_Helper_Product_Space::remove_mappings_for_product($product_id);
-
-            // 5) Neue Mappings anlegen und retroaktiv Zugänge vergeben
-            foreach ($space_ids as $space_id) {
-                WP_SDTRK_Helper_Product_Space::create_mapping_and_assign_users($product_id, $space_id);
+        // 4) Validierung: Jedes Mapping muss Event und Conversion-ID haben
+        foreach ($mappings_data as $mapping) {
+            if (empty($mapping['event']) || empty($mapping['convid'])) {
+                add_action('admin_notices', function () {
+                    echo '<div class="notice notice-error"><p>'
+                        . esc_html__('Each mapping must have an Event and LinkedIn Conversion-ID', 'wp-sdtrk')
+                        . '</p></div>';
+                });
+                return;
             }
+        }
 
-            //update access
-            WP_SDTRK_Cron::check_expirations(product_id: $product_id);
+        try {
+            // 5) Speichere Mappings
+            update_option('sdtrk_linkedin_mappings', $mappings_data);
 
             // 6) Erfolg – Redirect mit Hinweis
             $redirect_url = add_query_arg(
                 'sdtrk_success',
-                urlencode(__('Product mappings created successfully', 'wp-sdtrk')),
+                urlencode(__('LinkedIn mappings saved successfully', 'wp-sdtrk')),
                 $_SERVER['REQUEST_URI']
             );
             wp_safe_redirect($redirect_url);
@@ -156,124 +99,6 @@ class Wp_Sdtrk_Admin_Form_Handler
                 echo '<div class="notice notice-error"><p>'
                     . esc_html($e->getMessage())
                     . '</p></div>';
-            });
-        }
-    }
-
-    /**
-     * Handle the product→space mapping update form submission.
-     *
-     * @return void
-     */
-    private function handle_update_product_mapping(): void
-    {
-        // 1) Nonce prüfen
-        if (
-            ! isset($_POST['wp_sdtrk_nonce']) ||
-            ! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['wp_sdtrk_nonce'])), 'wp_sdtrk_update_product_mapping')
-        ) {
-            return;
-        }
-
-        // 2) Eingaben säubern
-        $product_id     = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
-        $new_space_ids  = isset($_POST['sdtrk_edit_entities'])
-            ? array_map('intval', (array) $_POST['sdtrk_edit_entities'])
-            : [];
-
-        // 3) Pflicht prüfen
-        if ($product_id <= 0) {
-            add_action('admin_notices', function () {
-                echo '<div class="notice notice-error"><p>'
-                    . esc_html__('Invalid product ID', 'wp-sdtrk')
-                    . '</p></div>';
-            });
-            return;
-        }
-
-        try {
-            // 4) Alle alten Mappings entfernen
-            WP_SDTRK_Helper_Product_Space::remove_mappings_for_product($product_id);
-
-            // 5) Neue Mappings anlegen und retroaktiv Zugänge vergeben
-            foreach ($new_space_ids as $space_id) {
-                WP_SDTRK_Helper_Product_Space::create_mapping_and_assign_users($product_id, $space_id);
-            }
-
-            //update access
-            WP_SDTRK_Cron::check_expirations(product_id: $product_id);
-
-            // 6) Erfolg – Redirect mit Hinweis
-            $redirect_url = add_query_arg(
-                'sdtrk_success',
-                urlencode(__('Successfully updated product mappings', 'wp-sdtrk')),
-                $_SERVER['REQUEST_URI']
-            );
-            wp_safe_redirect($redirect_url);
-            exit;
-        } catch (\Exception $e) {
-            // 7) Fehler anzeigen
-            add_action('admin_notices', function () use ($e) {
-                echo '<div class="notice notice-error"><p>'
-                    . esc_html($e->getMessage())
-                    . '</p></div>';
-            });
-        }
-    }
-
-    /**
-     * Handles creation or update of admin-defined access overrides.
-     *
-     * @since 1.0.0
-     */
-    private function handle_override_access(): void
-    {
-        if (
-            !isset($_POST['wp_sdtrk_nonce']) ||
-            !wp_verify_nonce($_POST['wp_sdtrk_nonce'], 'wp_sdtrk_create_override')
-        ) {
-            return;
-        }
-
-        $user_id     = (int) ($_POST['user_id'] ?? 0);
-        $product_id  = (int) ($_POST['product_id'] ?? 0);
-        $mode        = sanitize_text_field($_POST['mode'] ?? '');
-        $comment        = sanitize_text_field($_POST['comment'] ?? '');
-        $valid_until = sanitize_text_field($_POST['valid_until'] ?? '');
-
-        if (
-            !$user_id ||
-            !$product_id ||
-            !in_array($mode, ['allow', 'deny'], true) ||
-            empty($valid_until)
-        ) {
-            add_action('admin_notices', function () {
-                echo '<div class="notice notice-error"><p>' . esc_html__('Invalid form data for access override', 'wp-sdtrk') . '</p></div>';
-            });
-            return;
-        }
-
-        // Konvertiere ins externe Produkt-ID-Format
-        $product = WP_SDTRK_Model_Product::load_by_id($product_id);
-
-        try {
-            $existing = WP_SDTRK_Helper_Access_Override::get_latest_override_by_product_user($user_id, $product->get_id(), false);
-
-            if ($existing) {
-                WP_SDTRK_Helper_Access_Override::patch_override($existing->get_id(), $valid_until, $mode, $comment);
-            } else {
-                $existing =
-                    WP_SDTRK_Helper_Access_Override::add_override($user_id, $product->get_id(), $mode, $valid_until, $comment);
-            }
-
-            //update access
-            WP_SDTRK_Cron::check_expirations(user_id: $user_id, product_id: $product->get_id());
-
-            wp_safe_redirect(add_query_arg('sdtrk_success', urlencode(__('Access override saved', 'wp-sdtrk')), $_SERVER['REQUEST_URI']));
-            exit;
-        } catch (\Exception $e) {
-            add_action('admin_notices', function () use ($e) {
-                echo '<div class="notice notice-error"><p>' . esc_html($e->getMessage()) . '</p></div>';
             });
         }
     }

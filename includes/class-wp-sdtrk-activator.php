@@ -20,7 +20,8 @@
  * @subpackage Wp_Sdtrk/includes
  * @author     Your Name <email@example.com>
  */
-class Wp_Sdtrk_Activator {
+class Wp_Sdtrk_Activator
+{
 
 	/**
 	 * Short Description. (use period)
@@ -29,78 +30,34 @@ class Wp_Sdtrk_Activator {
 	 *
 	 * @since    1.0.0
 	 */
-	public static function activate() {
+	public static function activate()
+	{
 
-	    // schedule cron job
-	    if ( ! wp_next_scheduled( 'wp_sdtrk_licensecheck_cron' ) ) {
-	        wp_schedule_event( time(), 'hourly', 'wp_sdtrk_licensecheck_cron' );
-	    }	    
-	    
-	    //create database for local tracking
-	    self::create_localTrackingDb();
-	    
-	    $gsynctime = intval(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_gsync_crontime"));
-	    
-	    $syncCsvHourly = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_csv_crontime_frequency"), "yes") == 0) ? true : false;
-	    $csvsynctime = intval(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_csv_crontime"));
-	    
-	    //If hourly sync is activated
-	    if($syncCsvHourly){
-	        $csvFrequency = 'hourly';
-	        $csvsynctimestamp = Wp_Sdtrk_Helper::wp_sdtrk_get_timestamp($csvsynctime,false);
-	    }
-	    else{
-	        $csvFrequency = 'daily';
-	        $csvsynctimestamp = Wp_Sdtrk_Helper::wp_sdtrk_get_timestamp($csvsynctime,true);
-	    }	    	    
-	    // schedule gsync cron job
-	    if ( ! wp_next_scheduled( 'wp_sdtrk_gsync_cron' ) ) {
-	        wp_schedule_event(Wp_Sdtrk_Helper::wp_sdtrk_get_timestamp($gsynctime,true), 'daily', 'wp_sdtrk_gsync_cron' );
-	    }
-	    
-	    // schedule csvsync cron job
-	    if ( ! wp_next_scheduled( 'wp_sdtrk_csvsync_cron' ) ) {
-	        wp_schedule_event($csvsynctimestamp, $csvFrequency, 'wp_sdtrk_csvsync_cron' );
-	    }
-	}
-	
-	/**
-	 * Create a database for local tracking
-	 */
-	public static function create_localTrackingDb() {
-	    
-	    global $wpdb;
-	    $table_name = $wpdb->prefix . "wpsdtrk_hits";
-	    $wp_sdtrk_db_version = get_option( 'wp-sdtrk_db_version', '1.0' );
-	    
-	    if( $wpdb->get_var( "show tables like '{$table_name}'" ) != $table_name ||
-	    version_compare( $wp_sdtrk_db_version, '1.0' ) < 0 ) {
-	        
-	        $charset_collate = $wpdb->get_charset_collate();
-	        
-	        $sql[] = "CREATE TABLE " . $table_name." (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            date bigint(10) NOT NULL,
-            eventName tinytext NOT NULL,            
-            eventParams text,
-            gsync BOOLEAN NOT NULL,
-            PRIMARY KEY  (id)
-        ) $charset_collate;";
-	        
-	        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-	        
-	        /**
-	         * It seems IF NOT EXISTS isn't needed if you're using dbDelta - if the table already exists it'll
-	         * compare the schema and update it instead of overwriting the whole table.
-	         *
-	         * @link https://code.tutsplus.com/tutorials/custom-database-tables-maintaining-the-database--wp-28455
-	         */
-	        dbDelta( $sql );
-	        
-	        add_option( 'wp-sdtrk_db_version', $wp_sdtrk_db_version );
-	        
-	    }
-	    
+		// 1) Tabellen (ohne FK) anlegen
+		self::create_db_local_tracking();
+
+		// 2) FOREIGN KEY Constraints einmalig hinzufügen
+
+		// 3) Rewrite-Regeln flushen & Cron schedule
+		flush_rewrite_rules();
+		WP_SDTRK_Cron::register_cronjobs();
 	}
 
+	private static function create_db_local_tracking(): void
+	{
+		global $wpdb;
+		$t = $wpdb->prefix . 'sdtrk_hits';
+		$c = $wpdb->get_charset_collate();
+		$sql = "CREATE TABLE `{$t}` (
+            `id`                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            `date`            	  DATETIME          NOT NULL,
+            `event_name`          VARCHAR(255)      NOT NULL,
+            `event_data`          LONGTEXT          NOT NULL,
+            `event_hash`          CHAR(32)          NOT NULL,
+            `synced`              BOOLEAN           NOT NULL,
+            PRIMARY KEY  (`id`)
+        ) ENGINE=InnoDB {$c};";
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		dbDelta($sql);
+	}
 }

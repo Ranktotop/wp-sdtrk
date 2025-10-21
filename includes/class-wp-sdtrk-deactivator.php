@@ -20,7 +20,8 @@
  * @subpackage Wp_Sdtrk/includes
  * @author     Your Name <email@example.com>
  */
-class Wp_Sdtrk_Deactivator {
+class Wp_Sdtrk_Deactivator
+{
 
 	/**
 	 * Short Description. (use period)
@@ -29,16 +30,21 @@ class Wp_Sdtrk_Deactivator {
 	 *
 	 * @since    1.0.0
 	 */
-	public static function deactivate() {
+	public static function deactivate()
+	{
 
-	    wp_clear_scheduled_hook('wp_sdtrk_licensecheck_cron');
-	    wp_clear_scheduled_hook('wp_sdtrk_gsync_cron');
-	    wp_clear_scheduled_hook('wp_sdtrk_csvsync_cron');
-        /**
-         * This only required if custom post type has rewrite!
-         */
-        flush_rewrite_rules();
+		global $wpdb;
+		$p = $wpdb->prefix;
 
+		// 1) Alle alten FOREIGN KEYS entfernen
+		$map = [];
+		foreach ($map as $table => $keys) {
+			foreach ($keys as $fk) {
+				$wpdb->query("ALTER TABLE `{$table}` DROP FOREIGN KEY `{$fk}`");
+			}
+		}
+
+		// 2) Cron‐Event löschen
+		WP_SDTRK_Cron::unregister_cronjobs();
 	}
-
 }
