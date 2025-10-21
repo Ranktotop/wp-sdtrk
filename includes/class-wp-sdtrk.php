@@ -195,6 +195,7 @@ class Wp_Sdtrk
 
 		//Register Redux
 		$this->loader->add_action('after_setup_theme', $plugin_admin, 'wp_sdtrk_register_redux_options');
+		$this->loader->add_action('after_setup_theme', $plugin_admin, 'register_redux_metabox');
 
 		// Register Admin Pages
 		$this->loader->add_action('in_admin_footer', $plugin_admin, 'inject_global_admin_ui');

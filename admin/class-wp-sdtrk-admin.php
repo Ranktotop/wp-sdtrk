@@ -63,7 +63,7 @@ class Wp_Sdtrk_Admin
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_styles()
+	public function enqueue_styles($hook_suffix = '')
 	{
 
 		/**
@@ -79,6 +79,16 @@ class Wp_Sdtrk_Admin
 		 */
 
 		wp_enqueue_style($this->wp_sdtrk, plugin_dir_url(__FILE__) . 'css/wp-sdtrk-admin.css', array(), $this->version, 'all');
+		// Redux Metabox Styling
+		if (in_array($hook_suffix, ['post.php', 'post-new.php'])) {
+			wp_enqueue_style(
+				$this->wp_sdtrk . '-redux-metabox',
+				plugin_dir_url(__FILE__) . 'css/wp-sdtrk-redux-metabox.css',
+				array(),
+				$this->version,
+				'all'
+			);
+		}
 	}
 
 	/**
@@ -838,6 +848,55 @@ class Wp_Sdtrk_Admin
 			],
 		]);
 	}
+
+	/**
+	 * Register Redux Metabox for Pages
+	 */
+	public function register_redux_metabox()
+	{
+		if (!class_exists('Redux')) {
+			return;
+		}
+
+		// WICHTIG: opt_name muss mit deinem Redux Options Panel übereinstimmen
+		$opt_name = 'wp_sdtrk_options';
+
+		Redux_Metaboxes::set_box(
+			$opt_name,
+			array(
+				'id'         => 'wp_sdtrk_page_metabox',
+				'title'      => __('Smart Server Side Tracking Plugin', 'wp-sdtrk'),
+				'post_types' => array('page'), // Kann erweitert werden: array('page', 'post')
+				'position'   => 'advanced',    // normal, advanced, side
+				'priority'   => 'default',     // high, core, default, low
+				'sections'   => array(
+					array(
+						'title'  => __('Basic Tracking Settings', 'wp-sdtrk'),
+						'id'     => 'wp_sdtrk_basic_settings',
+						'icon'   => 'el-icon-cog',
+						'fields' => array(
+							array(
+								'id'          => 'wp_sdtrk_product_id',
+								'type'        => 'text',
+								'title'       => __('Product ID', 'wp-sdtrk'),
+								'subtitle'    => __('Please enter a product id in order to track the ViewContent-Event', 'wp-sdtrk'),
+								'placeholder' => __('Product-ID', 'wp-sdtrk'),
+							),
+							array(
+								'id'       => 'wp_sdtrk_bypass_consent',
+								'type'     => 'switch',
+								'title'    => __('Bypass Tracking-Consent', 'wp-sdtrk'),
+								'subtitle' => __('Check to track all visitors of this page regardless of their cookie consent', 'wp-sdtrk'),
+								'default'  => 0,
+							),
+						),
+					),
+				),
+			)
+		);
+	}
+
+
 	/**
 	 * Lädt Skripte und Styles für die Produkte-Adminseite.
 	 *

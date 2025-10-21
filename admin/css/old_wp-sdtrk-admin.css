@@ -8,13 +8,13 @@
 /**************************************/
 
 /* Style the Text */
-.wp-sdtrk-options{
+.wp-sdtrk-options {
 	font-family: 'Work Sans', Helvetica, Arial, Lucida, sans-serif;
 	color: #edededa6;
 }
 /* Style the Links */
-.wp-sdtrk-options a{
-	color:#57b957;
+.wp-sdtrk-options a {
+	color: #57b957;
 }
 
 /* Style the Header */
@@ -59,7 +59,7 @@
 	background-position: top left;
 	background-repeat: no-repeat;
 	background-image: linear-gradient(90deg, rgba(22, 25, 40, 0.82) 0%,
-		rgba(22, 25, 40, 0.36) 100%), url(./bg.jpg) !important;
+			rgba(22, 25, 40, 0.36) 100%), url(./bg.jpg) !important;
 	background-repeat: no-repeat;
 }
 /* Style the Content-Area */
@@ -75,62 +75,65 @@
 	padding-left: 20px;
 }
 /* Remove default bottom borders */
-.exopite-sof-section>.exopite-sof-field{
-	border:none !important;
+.exopite-sof-section>.exopite-sof-field {
+	border: none !important;
 }
 
 /* Style the Metabox position*/
-.exopite-sof-wrapper-metabox.wp-sdtrk-options{
-	margin: -6px -12px -12px -12px!important;
+.exopite-sof-wrapper-metabox.wp-sdtrk-options {
+	margin: -6px -12px -12px -12px !important;
 }
 
 /* Style the Content-Wrapper for Metaboxes*/
 .exopite-sof-wrapper-metabox.wp-sdtrk-options .exopite-sof-sections {
 	background-position: bottom left;
-	padding:10px;
+	padding: 10px;
 }
 
 /* Style the Fields */
-.wp-sdtrk-options .exopite-sof-fieldset input[type=email],.wp-sdtrk-options .exopite-sof-fieldset input[type=password],
-	.wp-sdtrk-options .exopite-sof-fieldset input[type=text], .wp-sdtrk-options .exopite-sof-fieldset select ,.wp-sdtrk-options .exopite-sof-fieldset input[type=number]{
-	font-size: 14px!important;
-	text-align: left!important;
-	color: #fff!important;
-	margin-top: 0px!important;
-	margin-bottom: 5px!important;
+.wp-sdtrk-options .exopite-sof-fieldset input[type=email],
+.wp-sdtrk-options .exopite-sof-fieldset input[type=password],
+.wp-sdtrk-options .exopite-sof-fieldset input[type=text],
+.wp-sdtrk-options .exopite-sof-fieldset select,
+.wp-sdtrk-options .exopite-sof-fieldset input[type=number] {
+	font-size: 14px !important;
+	text-align: left !important;
+	color: #fff !important;
+	margin-top: 0px !important;
+	margin-bottom: 5px !important;
 	background: rgb(255 255 255 / 2%) !important;
-	border: 1px solid rgb(255 255 255 / 15%)!important;
-	padding: 6px 10px 6px!important;
+	border: 1px solid rgb(255 255 255 / 15%) !important;
+	padding: 6px 10px 6px !important;
 }
 /* Style the Select-Box-Background */
-.wp-sdtrk-options .exopite-sof-fieldset select{
-	background:#00000080 !important;
+.wp-sdtrk-options .exopite-sof-fieldset select {
+	background: #00000080 !important;
 }
 
 /* Style the Repeater-Fields */
-.wp-sdtrk-options .exopite-sof-cloneable__title{
+.wp-sdtrk-options .exopite-sof-cloneable__title {
 	background: #57b957 !important;
 }
-.wp-sdtrk-options .exopite-sof-cloneable--helper{
+.wp-sdtrk-options .exopite-sof-cloneable--helper {
 	color: #fff !important;
 }
-.wp-sdtrk-options .exopite-sof-cloneable--helper i:hover{
+.wp-sdtrk-options .exopite-sof-cloneable--helper i:hover {
 	color: #111113 !important;
 }
 
 /* Style the Radio-Buttons (outer circle) */
-.wp-sdtrk-options .exopite-sof-field-radio .radio-button__input:checked+.radio-button__checkmark::before{
+.wp-sdtrk-options .exopite-sof-field-radio .radio-button__input:checked+.radio-button__checkmark::before {
 	border: 1px solid #57b957 !important;
 	background: #000 !important;
 }
 /* Style the Radio-Buttons (inner circle) */
-.wp-sdtrk-options .exopite-sof-field-radio .radio-button__checkmark::after{
+.wp-sdtrk-options .exopite-sof-field-radio .radio-button__checkmark::after {
 	background: #57b957 !important;
 }
 /* Style the Radio-Buttons (non-checked) */
-.wp-sdtrk-options .exopite-sof-field-radio .radio-button__checkmark::before{
+.wp-sdtrk-options .exopite-sof-field-radio .radio-button__checkmark::before {
 	background: rgb(255 255 255 / 2%) !important;
-	border: 1px solid rgb(255 255 255 / 15%)!important;
+	border: 1px solid rgb(255 255 255 / 15%) !important;
 }
 /* Style the Switcher */
 .wp-sdtrk-options .exopite-sof-fieldset .checkbox__switch {
@@ -149,14 +152,14 @@
 /* Style the Switcher (the moving button part)*/
 .wp-sdtrk-options .exopite-sof-fieldset .checkbox__switch:after {
 	border-radius: 50px !important;
-	background-image: linear-gradient(234deg, #a5a5a5 0%, #ededed 16%, #a5a5a5 42%, #ededed
-		62%, #f2f2f2 71%, #a5a5a5 82%, #a5a5a5 91%);
+	background-image: linear-gradient(234deg, #a5a5a5 0%, #ededed 16%, #a5a5a5 42%, #ededed 62%, #f2f2f2 71%, #a5a5a5 82%, #a5a5a5 91%);
 	box-shadow: 0px 12px 18px -6px rgb(0 0 0/ 30%) !important;
 }
 
 /* Style the Buttons */
-.wp-sdtrk-options .exopite-sof-field .button.button-primary, #wp-sdtrk-save,
-	.wp-sdtrk-options .exopite-sof-submit-button-js {
+.wp-sdtrk-options .exopite-sof-field .button.button-primary,
+#wp-sdtrk-save,
+.wp-sdtrk-options .exopite-sof-submit-button-js {
 	font-size: 14px;
 	background-color: #57b957 !important;
 	border-width: 0px !important;
@@ -166,7 +169,8 @@
 	transition: 0.3s;
 }
 /* Style the Buttons (Hover */
-.wp-sdtrk-options .exopite-sof-field .button.button-primary:hover, #wp-sdtrk-save:hover {
+.wp-sdtrk-options .exopite-sof-field .button.button-primary:hover,
+#wp-sdtrk-save:hover {
 	background-color: #66c766 !important;
 	border-color: #66c766 !important;
 }
@@ -176,20 +180,21 @@
 /**************************************/
 
 .wp-sdtrk-options .shifted {
-	margin-left:30px;
+	margin-left: 30px;
 }
 
 .wp-sdtrk-options .dangerZone {
 	border: 1px solid #ff0000 !important;
-	margin-left:30px;
+	margin-left: 30px;
 	background: rgb(153 11 11 / 35%);
 }
-.wp-sdtrk-options .dangerZone p.exopite-sof-description{
-	color:#ff0000;
+.wp-sdtrk-options .dangerZone p.exopite-sof-description {
+	color: #ff0000;
 }
 
-.wp-sdtrk-options .pageHeader, .exopite-sof-wrapper-metabox.wp-sdtrk-options h2.exopite-sof-section-header {
-	background:none;
+.wp-sdtrk-options .pageHeader,
+.exopite-sof-wrapper-metabox.wp-sdtrk-options h2.exopite-sof-section-header {
+	background: none;
 	border-bottom: 3px solid #57b957 !important;
 }
 .wp-sdtrk-options .divideHeader {
@@ -200,8 +205,8 @@
 	text-transform: uppercase;
 	font-size: 18px;
 	letter-spacing: 3px;
-	line-height:1em;
-	margin:15px 0px 5px 0px;
+	line-height: 1em;
+	margin: 15px 0px 5px 0px;
 }
 
 .wp-sdtrk-options .pageHeader h3 {
@@ -209,14 +214,74 @@
 	font-size: 24px;
 	letter-spacing: 3px;
 	color: #ededed !important;
-	line-height:1em;
-	margin:5px 0px 5px 0px;
+	line-height: 1em;
+	margin: 5px 0px 5px 0px;
 }
-.wp-sdtrk-options .exopite-sof-field-content h3{
+.wp-sdtrk-options .exopite-sof-field-content h3 {
 	color: #ededed !important;
 }
 
 
 .wp-sdtrk-options h4.exopite-sof-title {
 	color: #ededed;
+}
+
+/* Redux Switch - Exopite Style */
+.redux-container .switch-options {
+	position: relative;
+	display: inline-block;
+	width: 60px;
+	height: 34px;
+}
+
+.redux-container .switch-options .cb-enable,
+.redux-container .switch-options .cb-disable {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 60px;
+	height: 34px;
+	border-radius: 50px !important;
+	border: 2px solid #b95757 !important;
+	background-color: #b957574a !important;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.redux-container .switch-options .cb-enable span,
+.redux-container .switch-options .cb-disable span {
+	display: none;
+}
+
+.redux-container .switch-options .cb-enable {
+	display: none;
+}
+
+.redux-container .switch-options .cb-disable.selected {
+	display: block;
+}
+
+.redux-container .switch-options .cb-enable.selected {
+	display: block;
+	border-color: #57b957 !important;
+	background-color: #00ff0096 !important;
+	box-shadow: 0px 0px 10px 0px #00ff00 !important;
+}
+
+.redux-container .switch-options .cb-enable:after,
+.redux-container .switch-options .cb-disable:after {
+	content: '';
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 24px;
+	height: 24px;
+	border-radius: 50px !important;
+	background-image: linear-gradient(234deg, #a5a5a5 0%, #ededed 16%, #a5a5a5 42%, #ededed 62%, #f2f2f2 71%, #a5a5a5 82%, #a5a5a5 91%);
+	box-shadow: 0px 12px 18px -6px rgb(0 0 0 / 30%) !important;
+	transition: all 0.3s ease;
+}
+
+.redux-container .switch-options .cb-enable.selected:after {
+	left: 29px;
 }

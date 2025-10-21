@@ -1,330 +1,365 @@
-/**
- * All of the CSS for your admin-specific functionality should be
- * included in this file.
- */
-.wpsdtrk-modal {
-    position: fixed;
+/*======================
+  Container Styling
+======================*/
+
+.redux-container {
+    background-color: #000;
+    background-image: none;
+}
+
+.redux-container #info_bar {
+    background-color: #111113;
+    box-shadow: none;
+    border-bottom: 3px solid #a5a5a5 !important;
+
+}
+
+.redux-container #redux-header {
+    background-color: #111113 !important;
+    box-shadow: none;
+    border-bottom: none;
+}
+
+.redux-container .redux-main {
+    border-left: none;
+    background-attachment: fixed;
+    background-position: top left;
+    background-repeat: no-repeat;
+    background-image: linear-gradient(90deg, rgba(22, 25, 40, 0.82) 0%, rgba(22, 25, 40, 0.36) 100%), url(./bg.jpg) !important;
+    background-repeat: no-repeat;
+}
+
+.redux-container .redux-sidebar .redux-group-menu {
+    background-color: #000;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: #ededed !important;
+    letter-spacing: 3px;
+}
+
+.redux-container .redux-sidebar .redux-group-menu li.active a {
+    background-color: #57b957 !important;
+}
+
+.redux-container .redux-sidebar .redux-group-menu li a:hover {
+    background-color: #000 !important;
+    box-shadow: none;
+}
+
+.redux-container .redux-sidebar .redux-group-menu li.hasSubSections.redux-section-hover>a {
+    background-color: #111113 !important;
+}
+
+.redux-container .redux-sidebar .redux-group-menu li.hasSubSections.redux-section-hover .subsection .redux-group-tab-link-a:hover {
+    background-color: #111113 !important;
+    box-shadow: none;
+    color: #57b957 !important;
+}
+
+.redux-sidebar .redux-group-menu li ul.subsection,
+.redux-container .redux-sidebar .redux-group-menu li .subsection .redux-group-tab-link-li .redux-group-tab-link-a {
+    background-color: #111113 !important;
+    background: #111113 !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+}
+
+/*======================
+  Content Area Styling
+======================*/
+
+.redux-group-tab {
+    margin: 20px;
+    background-color: #111113d9 !important;
+    border-radius: 5px 5px 5px 5px;
+    overflow: hidden;
+    border: 3px solid #a5a5a5;
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+}
+
+.redux-main .redux-group-tab h2,
+.redux-main .redux-group-tab h3 {
+    text-transform: uppercase;
+    font-size: 24px;
+    letter-spacing: 3px;
+    color: #ededed !important;
+    line-height: 1em;
+    margin: 5px 0px 5px 0px;
+}
+
+.redux-main .redux-group-tab .redux-section-desc,
+.redux-main .redux-group-tab .field-desc {
+    color: #999 !important;
+}
+
+.redux-main .redux-group-tab .redux_field_th {
+    color: #ededed !important;
+}
+
+.redux-container #redux-footer {
+    background-color: #111113 !important;
+    box-shadow: none;
+    border-top: 3px solid #a5a5a5 !important;
+}
+
+/*======================
+  Input Styling
+======================*/
+
+.redux-container .button {
+    color: #fff;
+    font-size: 14px;
+    background-color: #ffffff1c;
+    border-width: 0px;
+    border-radius: 0px;
+    letter-spacing: 1px;
+    transition: 0.3s;
+}
+
+.redux-container .button:hover {
+    background-color: #ffffff4d;
+    color: #fff;
+}
+
+.redux-container .button.button-primary {
+    font-size: 14px;
+    background-color: #57b957;
+    border-width: 0px;
+    border-color: #57b957;
+    border-radius: 0px;
+    letter-spacing: 1px;
+    transition: 0.3s;
+}
+
+.redux-container .button.button-primary:hover {
+    background-color: #66c766;
+    border-color: #66c766;
+    color: #fff;
+}
+
+.redux-main .redux-group-tab input[type=email],
+.redux-main .redux-group-tab input[type=password],
+.redux-main .redux-group-tab input[type=text],
+.redux-main .redux-group-tab select,
+.redux-main .redux-group-tab input[type=number] {
+    font-size: 14px !important;
+    text-align: left !important;
+    color: #fff !important;
+    margin-top: 0px !important;
+    margin-bottom: 5px !important;
+    background: rgb(255 255 255 / 2%) !important;
+    border: 1px solid rgb(255 255 255 / 15%) !important;
+    padding: 6px 10px 6px !important;
+}
+
+.redux-main .redux-group-tab input[type=email]:focus,
+.redux-main .redux-group-tab input[type=password]:focus,
+.redux-main .redux-group-tab input[type=text]:focus,
+.redux-main .redux-group-tab input[type=number]:focus {
+    border-color: #57b957;
+    box-shadow: 0 0 0 1px #57b957;
+    outline: 1px solid transparent;
+}
+
+/*======================
+  Switcher
+======================*/
+.redux-container .switch-options {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.redux-container .switch-options .cb-enable,
+.redux-container .switch-options .cb-disable {
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
+    width: 60px;
+    height: 34px;
+    border-radius: 50px !important;
+    cursor: pointer;
+    transition: opacity 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    background: transparent !important;
 }
-.wpsdtrk-modal-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+
+.redux-container .switch-options .cb-enable:not(.selected) {
+    opacity: 0;
+    z-index: 2;
 }
-.wpsdtrk-modal-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 6px;
-    z-index: 10;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+
+.redux-container .switch-options .cb-disable:not(.selected) {
+    opacity: 0;
+    z-index: 2;
 }
-.wpsdtrk-modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
+
+.redux-container .switch-options .cb-enable.selected,
+.redux-container .switch-options .cb-disable.selected {
+    opacity: 1;
+    z-index: 1;
 }
-.hidden {
+
+.redux-container .switch-options .cb-enable span,
+.redux-container .switch-options .cb-disable span {
     display: none;
 }
 
-.delete.wpsdtrk_delete_product_btn,
-.delete.wpsdtrk_delete_product_mapping_btn,
-.delete.wpsdtrk_delete_access_rule_btn {
-    color: #fff;
-    background-color: #dc3232;
-    border-color: #dc3232;
-    transition: all 0.2s ease-in-out;
+/* OFF State */
+.redux-container .switch-options .cb-disable.selected {
+    border: 2px solid #b95757 !important;
+    background: #b957574a !important;
+    box-shadow: none !important;
 }
 
-.delete.wpsdtrk_delete_product_btn:hover,
-.delete.wpsdtrk_delete_product_mapping_btn:hover,
-.delete.wpsdtrk_delete_access_rule_btn:hover {
-    color: #fff;
-    background-color: #f36060;
-    border-color: #f36060;
+/* ON State */
+.redux-container .switch-options .cb-enable.selected {
+    border: 2px solid #57b957 !important;
+    background: #00ff0096 !important;
+    box-shadow: 0px 0px 10px 0px #00ff00 !important;
 }
 
-#wpsdtrk-notice-area {
-    position: fixed;
-    top: 32px;
-    left: 0;
-    width: 100%;
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
+/* Verstecke original :after */
+.redux-container .switch-options .cb-enable:after,
+.redux-container .switch-options .cb-disable:after {
+    display: none;
+}
+
+/* Gemeinsamer Slider Ball über :before am Container */
+.redux-container .switch-options:before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50px;
+    background-image: linear-gradient(234deg, #a5a5a5 0%, #ededed 16%, #a5a5a5 42%, #ededed 62%, #f2f2f2 71%, #a5a5a5 82%, #a5a5a5 91%);
+    box-shadow: 0px 12px 18px -6px rgb(0 0 0 / 30%);
+    transition: left 0.3s ease;
+    z-index: 3;
     pointer-events: none;
 }
 
-#wpsdtrk-notice-area .wpsdtrk-notice {
-    width: 100%;
-    max-width: 100%;
-    margin: 0;
-    border-radius: 0;
-    pointer-events: auto;
-    padding: 5px 10px 5px 10px;
-    text-align: center;
+/* Ball Position wenn ON */
+.redux-container .switch-options:has(.cb-enable.selected):before {
+    left: 31px;
 }
 
-#wpsdtrk-notice-area .wpsdtrk-notice p {
-    color: #fff;
-    font-weight: 600;
-    font-size: 18px;
+/*======================
+  Notices
+======================*/
+.redux-container .notice-yellow {
+    background-color: #342d01f7 !important;
+    color: #ffe200 !important;
+    border-bottom: 1px solid #ffe200 !important;
+    letter-spacing: 2px;
+    box-shadow: 0px 3px 9px 3px rgb(255 200 2 / 19%);
+}
+.redux-container .notice-yellow b,
+.redux-container .notice-yellow strong {
+    text-shadow: none;
 }
 
-#wpsdtrk-notice-area .wpsdtrk-notice-success {
-    background-color: #81d381;
+.redux-container .notice-red {
+    background-color: #340101f7 !important;
+    color: #ff0000 !important;
+    border-bottom: 1px solid #ff0000 !important;
+    letter-spacing: 2px;
+    box-shadow: 0px 3px 9px 3px rgba(255, 2, 2, 0.19);
+}
+.redux-container .notice-red b,
+.redux-container .notice-red strong {
+    text-shadow: none;
 }
 
-.wpsdtrk-checkbox-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 2rem;
+.redux-container .notice-green {
+    background-color: #053401f7 !important;
+    color: #6eff6e !important;
+    border-bottom: 1px solid #6eff6e !important;
+    letter-spacing: 2px;
+    box-shadow: 0px 3px 9px 3px rgba(2, 255, 2, 0.19);
 }
-.wpsdtrk-checkbox-grid label {
-    min-width: 200px;
-    display: block;
-}
-/* API Endpoint Styles - Am Ende von admin/css/wp-sdtrk-admin.css hinzufügen */
-
-.sdtrk-endpoint-list code {
-    display: inline-block;
-    padding: 2px 6px;
-    border-radius: 3px;
-    background: #f1f1f1;
-    margin: 2px 0;
-    font-family: monospace;
-    word-break: break-all;
+.redux-container .notice-green b,
+.redux-container .notice-green strong {
+    text-shadow: none;
 }
 
-.sdtrk-endpoint-item {
-    margin-bottom: 20px;
-    padding: 15px;
-    background: #f9f9f9;
-    border-left: 4px solid #0073aa;
-    border-radius: 4px;
+/*======================
+  Repeater
+======================*/
+.redux-container-repeater .redux-repeater-accordion-repeater h3.ui-accordion-header {
+    border: 1px solid #ededed !important;
+    background-color: #00000000 !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    border-radius: 0px !important;
 }
 
-.sdtrk-endpoint-url {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 10px;
+.redux-container .ui-accordion .ui-accordion-header .ui-icon {
+    filter: brightness(3);
 }
 
-.sdtrk-endpoint-method {
-    color: white;
-    padding: 3px 8px;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: bold;
-    text-transform: uppercase;
-    min-width: 50px;
-    text-align: center;
+.redux-container-repeater .ui-accordion .ui-accordion-content {
+    background-color: #ffffff07 !important;
+    background-image: none !important;
+    border: 1px solid #444449 !important;
+    box-shadow: none !important;
+    border-color: #ededed !important;
+    border-top: 0px !important;
+    border-bottom: 1px solid #ededed !important;
+    border-left: 1px solid #ededed !important;
+    border-right: 1px solid #ededed !important;
+    color: #ededed !important;
 }
 
-.sdtrk-method-get {
-    background: #28a745;
-}
-.sdtrk-method-post {
-    background: #007bff;
-}
-.sdtrk-method-delete {
-    background: #dc3545;
-}
-.sdtrk-method-put {
-    background: #ffc107;
-    color: #212529;
-}
-.sdtrk-method-patch {
-    background: #6f42c1;
+.redux-container-repeater .ui-accordion .ui-accordion-content .redux-container-spinner .ui-widget .ui-spinner-button .ui-icon {
+    background-color: #57b957 !important;
+    background-image: none !important;
+    border: 2px solid #57b957 !important;
+    border-radius: 2px !important;
+    box-shadow: none !important;
 }
 
-.sdtrk-endpoint-description {
-    color: #666;
-    font-style: italic;
-    line-height: 1.4;
-    margin-bottom: 15px;
+/*======================
+  Select2 Styling
+======================*/
+.redux-container .select2-container--default .select2-selection--single {
+    background: rgb(255 255 255 / 2%) !important;
+    border: 1px solid rgb(255 255 255 / 15%) !important;
+    color: #fff !important;
 }
 
-/* Parameter-Tabelle */
-.sdtrk-endpoint-parameters {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #ddd;
+.redux-container .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #fff !important;
 }
 
-.sdtrk-endpoint-parameters h4 {
-    margin: 0 0 10px 0;
-    color: #333;
-    font-size: 14px;
+.redux-container .select2-container--default .select2-selection--single .select2-selection__clear {
+    color: #fff !important;
 }
 
-.sdtrk-params-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
+.select2-container--open .select2-dropdown--below,
+.select2-container--open .select2-dropdown--above {
+    background-color: #111113 !important;
+    color: #ededed !important;
+    border: none !important;
 }
 
-.sdtrk-params-table th,
-.sdtrk-params-table td {
-    padding: 8px 6px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-    vertical-align: top;
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+    background-color: #57b957 !important;
+    color: #fff !important;
 }
 
-.sdtrk-params-table th {
-    background: #f5f5f5;
-    font-weight: 600;
-    color: #555;
-    font-size: 11px;
-    text-transform: uppercase;
+.select2-container--default .select2-results__option--selected {
+    background-color: #111113 !important;
+    color: #fff !important;
 }
 
-.sdtrk-params-table code {
-    background: #e8e8e8;
-    padding: 2px 4px;
-    font-size: 11px;
-}
-
-/* Badge-Styles */
-.sdtrk-required-badge,
-.sdtrk-optional-badge,
-.sdtrk-type-badge,
-.sdtrk-location-badge {
-    display: inline-block;
-    padding: 2px 6px;
-    border-radius: 2px;
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-/* Required/Optional Badges */
-.sdtrk-required-badge {
-    background: #dc3545;
-    color: white;
-}
-
-.sdtrk-optional-badge {
-    background: #6c757d;
-    color: white;
-}
-
-/* Type Badges */
-.sdtrk-type-string {
-    background: #17a2b8;
-    color: white;
-}
-
-.sdtrk-type-integer,
-.sdtrk-type-number {
-    background: #28a745;
-    color: white;
-}
-
-.sdtrk-type-boolean {
-    background: #ffc107;
-    color: #212529;
-}
-
-.sdtrk-type-array,
-.sdtrk-type-object {
-    background: #6f42c1;
-    color: white;
-}
-
-/* Location Badges */
-.sdtrk-location-url {
-    background: #fd7e14;
-    color: white;
-}
-
-.sdtrk-location-json {
-    background: #20c997;
-    color: white;
-}
-
-.sdtrk-location-header {
-    background: #e83e8c;
-    color: white;
-}
-
-.sdtrk-location-form {
-    background: #6610f2;
-    color: white;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .sdtrk-endpoint-url {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .sdtrk-endpoint-item {
-        padding: 10px;
-    }
-
-    .sdtrk-params-table {
-        font-size: 11px;
-    }
-
-    .sdtrk-params-table th,
-    .sdtrk-params-table td {
-        padding: 6px 4px;
-    }
-
-    /* Stack table on mobile */
-    .sdtrk-params-table,
-    .sdtrk-params-table thead,
-    .sdtrk-params-table tbody,
-    .sdtrk-params-table th,
-    .sdtrk-params-table td,
-    .sdtrk-params-table tr {
-        display: block;
-    }
-
-    .sdtrk-params-table thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-    }
-
-    .sdtrk-params-table tr {
-        border: 1px solid #ccc;
-        margin-bottom: 10px;
-        padding: 8px;
-        border-radius: 4px;
-        background: white;
-    }
-
-    .sdtrk-params-table td {
-        border: none;
-        position: relative;
-        padding-left: 50%;
-        padding-bottom: 8px;
-    }
-
-    .sdtrk-params-table td:before {
-        content: attr(data-label) ": ";
-        position: absolute;
-        left: 6px;
-        width: 45%;
-        text-align: left;
-        font-weight: 600;
-        color: #333;
-    }
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    background: rgb(255 255 255 / 2%) !important;
+    border: 1px solid rgb(255 255 255 / 15%) !important;
+    color: #fff !important;
 }
