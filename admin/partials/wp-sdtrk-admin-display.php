@@ -8,8 +8,8 @@
  * @link       http://example.com
  * @since      1.0.0
  *
- * @package    Wp_Fce
- * @subpackage Wp_Fce/admin/partials
+ * @package    Wp_Sdtrk
+ * @subpackage Wp_Sdtrk/admin/partials
  */
 ?>
 

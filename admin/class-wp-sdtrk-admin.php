@@ -130,9 +130,15 @@ class Wp_Sdtrk_Admin
 			'_nonce' => wp_create_nonce('security_wp-sdtrk'),
 			'notice_success' => __('Saved successfully!', 'wp-sdtrk'),
 			'notice_error' => __('Error occurred!', 'wp-sdtrk'),
+			'msg_confirm_delete_mapping' => __('Do you really want to delete the mapping? This action cannot be undone!', 'wp-sdtrk'),
+			'label_dropdown_select' => __('Select an option...', 'wp-sdtrk'),
+			'label_product_id' => __('Product ID', 'wp-sdtrk'),
+			'label_product_name' => __('Product Name', 'wp-sdtrk'),
+			'label_delete' => __('Delete', 'wp-sdtrk'),
 			'label_edit' => __('Edit', 'wp-sdtrk'),
 			'label_save' => __('Save', 'wp-sdtrk'),
 			'label_confirm' => __('Are you sure?', 'wp-sdtrk'),
+			'placeholder_leave_empty_ignore' => __('Leave empty to ignore', 'wp-sdtrk'),
 		));
 	}
 

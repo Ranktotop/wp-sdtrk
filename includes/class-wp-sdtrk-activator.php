@@ -34,7 +34,7 @@ class Wp_Sdtrk_Activator
 	{
 
 		// 1) Tabellen (ohne FK) anlegen
-		self::create_db_local_tracking();
+		self::create_db_linkedin_mapping();
 
 		// 2) FOREIGN KEY Constraints einmalig hinzufügen
 
@@ -43,20 +43,19 @@ class Wp_Sdtrk_Activator
 		WP_SDTRK_Cron::register_cronjobs();
 	}
 
-	private static function create_db_local_tracking(): void
+	private static function create_db_linkedin_mapping(): void
 	{
 		global $wpdb;
-		$t = $wpdb->prefix . 'sdtrk_hits';
+		$t = $wpdb->prefix . 'sdtrk_linkedin';
 		$c = $wpdb->get_charset_collate();
 		$sql = "CREATE TABLE `{$t}` (
-            `id`                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            `date`            	  DATETIME          NOT NULL,
-            `event_name`          VARCHAR(255)      NOT NULL,
-            `event_data`          LONGTEXT          NOT NULL,
-            `event_hash`          CHAR(32)          NOT NULL,
-            `synced`              BOOLEAN           NOT NULL,
-            PRIMARY KEY  (`id`)
-        ) ENGINE=InnoDB {$c};";
+        `id`                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        `event`               VARCHAR(255)      NOT NULL,
+        `convid`              VARCHAR(255)      NOT NULL,
+        `rules`               LONGTEXT          NOT NULL,
+        PRIMARY KEY  (`id`),
+        UNIQUE KEY `idx_event_convid` (`event`, `convid`)
+    ) ENGINE=InnoDB {$c};";
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta($sql);
 	}

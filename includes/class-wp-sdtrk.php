@@ -137,10 +137,16 @@ class Wp_Sdtrk
 		/**
 		 * The model classes
 		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/models/class-wp-sdtrk-model-base.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/models/class-wp-sdtrk-model-linkedin.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/models/class-wp-sdtrk-model-linkedin-rule.php';
 
 		/**
 		 * The helper classes
 		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/helpers/class-wp-sdtrk-helper-options.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/helpers/class-wp-sdtrk-helper-base.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/helpers/class-wp-sdtrk-helper-linkedin.php';
 
 		/**
 		 * Cronjob classes

@@ -83,7 +83,7 @@ $updateChecker->getVcsApi()->enableReleaseAssets();
 
 /**
  * The code that runs during plugin activation.
- * This action is documented in includes/class-wp-fce-activator.php
+ * This action is documented in includes/class-wp-sdtrk-activator.php
  */
 function activate_wp_sdtrk()
 {

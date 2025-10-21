@@ -1,94 +1,142 @@
 <?php
 class Wp_Sdtrk_Admin_Form_Handler
 {
-
-    /**
-     * Handles form submissions in the admin area.
-     *
-     * This function is attached to the 'admin_init' action hook and is called
-     * on every admin page load. It is responsible for handling form submissions
-     * and redirecting the user to the appropriate page after submission.
-     *
-     * It currently handles the creation of new products, but could be extended
-     * to handle other types of form submissions in the future.
-     *
-     * @since 1.0.0
-     */
     public function handle_admin_form_callback(): void
     {
-        // Nonce check
-        // We don't check nonce here, because each handler uses its own nonce field
-
-        // Admin check
         if (!is_admin() || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             return;
         }
 
-        // Zentrale Routing-Logik
-        if (isset($_POST['wp_sdtrk_form_action']) && $_POST['wp_sdtrk_form_action'] === 'linkedin_mappings') {
-            $this->handle_linkedin_mappings();
+        if (isset($_POST['wp_sdtrk_form_action']) && $_POST['wp_sdtrk_form_action'] === 'create_linkedin_mapping') {
+            $this->handle_create_linkedin_mapping();
         }
 
-        // weitere: elseif ($_POST['wp_sdtrk_form_action'] === '...') ...
+        if (isset($_POST['wp_sdtrk_form_action']) && $_POST['wp_sdtrk_form_action'] === 'update_linkedin_mapping') {
+            $this->handle_update_linkedin_mapping();
+        }
     }
 
+    private function handle_create_linkedin_mapping(): void
+    {
+        if (
+            !isset($_POST['wp_sdtrk_nonce']) ||
+            !wp_verify_nonce($_POST['wp_sdtrk_nonce'], 'wp_sdtrk_create_linkedin_mapping')
+        ) {
+            return;
+        }
+
+        $event_name = sanitize_text_field($_POST['sdtrk_new_mapping_event'] ?? '');
+        $conversion_id = sanitize_text_field($_POST['sdtrk_new_mapping_convid'] ?? '');
+
+        if (!$event_name || !$conversion_id) {
+            add_action('admin_notices', function () {
+                echo '<div class="notice notice-error"><p>' . esc_html__('Event and LinkedIn Conversion-ID are required', 'wp-sdtrk') . '</p></div>';
+            });
+            return;
+        }
+
+        // Rules sammeln
+        $rules = [];
+        if (isset($_POST['rules']) && is_array($_POST['rules'])) {
+            foreach ($_POST['rules'] as $rule) {
+                if (!empty($rule['param'])) {
+                    $rules[] = [
+                        'param' => sanitize_text_field($rule['param']),
+                        'value' => sanitize_text_field($rule['value'] ?? ''),
+                    ];
+                }
+            }
+        }
+
+        try {
+            WP_SDTRK_Helper_Linkedin::create($conversion_id, $event_name, $rules);
+
+            wp_safe_redirect(add_query_arg('sdtrk_success', urlencode(__('Mapping created successfully', 'wp-sdtrk')), $_SERVER['REQUEST_URI']));
+            exit;
+        } catch (\Exception $e) {
+            add_action('admin_notices', function () use ($e) {
+                echo '<div class="notice notice-error"><p>' . esc_html($e->getMessage()) . '</p></div>';
+            });
+        }
+    }
 
     /**
-     * Handle LinkedIn mapping form submission.
+     * Handle the linkedin mapping update form submission.
      *
      * @return void
      */
-    private function handle_linkedin_mappings(): void
+    private function handle_update_linkedin_mapping(): void
     {
         // 1) Nonce prüfen
-        if (!isset($_POST['wp_sdtrk_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['wp_sdtrk_nonce'])), 'wp_sdtrk_linkedin_mappings')) {
+        if (
+            ! isset($_POST['wp_sdtrk_nonce']) ||
+            ! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['wp_sdtrk_nonce'])), 'wp_sdtrk_update_linkedin_mapping')
+        ) {
             return;
         }
 
         // 2) Eingaben säubern
-        $mappings_data = isset($_POST['sdtrk_linkedin_mappings']) ? array_map(function ($mapping) {
-            return [
-                'event'   => sanitize_text_field($mapping['event'] ?? ''),
-                'convid'  => sanitize_text_field($mapping['convid'] ?? ''),
-                'rules'   => is_array($mapping['rules'] ?? []) ? array_map(function ($rule) {
-                    return [
-                        'param' => sanitize_text_field($rule['param'] ?? ''),
+        $mapping_id     = isset($_POST['mapping_id']) ? intval($_POST['mapping_id']) : 0;
+        $conversion_id  = sanitize_text_field($_POST['sdtrk_edit_mapping_convid'] ?? '');
+        $event_name     = sanitize_text_field($_POST['sdtrk_edit_mapping_event'] ?? '');
+
+        if (!$conversion_id || !$event_name) {
+            add_action('admin_notices', function () {
+                echo '<div class="notice notice-error"><p>' . esc_html__('LinkedIn Conversion-ID and Event Name are required', 'wp-sdtrk') . '</p></div>';
+            });
+            return;
+        }
+
+        // Rules sammeln
+        $rules = [];
+        if (isset($_POST['rules']) && is_array($_POST['rules'])) {
+            foreach ($_POST['rules'] as $rule) {
+                if (!empty($rule['param'])) {
+                    $rules[] = [
+                        'param' => sanitize_text_field($rule['param']),
                         'value' => sanitize_text_field($rule['value'] ?? ''),
                     ];
-                }, $mapping['rules']) : [],
-            ];
-        }, (array) $_POST['sdtrk_linkedin_mappings']) : [];
+                }
+            }
+        }
 
         // 3) Pflicht prüfen
-        if (empty($mappings_data)) {
+        if ($mapping_id <= 0) {
             add_action('admin_notices', function () {
                 echo '<div class="notice notice-error"><p>'
-                    . esc_html__('No mappings provided', 'wp-sdtrk')
+                    . esc_html__('Invalid mapping ID', 'wp-sdtrk')
                     . '</p></div>';
             });
             return;
         }
 
-        // 4) Validierung: Jedes Mapping muss Event und Conversion-ID haben
-        foreach ($mappings_data as $mapping) {
-            if (empty($mapping['event']) || empty($mapping['convid'])) {
-                add_action('admin_notices', function () {
-                    echo '<div class="notice notice-error"><p>'
-                        . esc_html__('Each mapping must have an Event and LinkedIn Conversion-ID', 'wp-sdtrk')
-                        . '</p></div>';
-                });
-                return;
-            }
-        }
-
         try {
-            // 5) Speichere Mappings
-            update_option('sdtrk_linkedin_mappings', $mappings_data);
+            // 4) Neue Regeln setzen
+            $mapping = WP_SDTRK_Model_Linkedin::load_by_id($mapping_id);
+            $mapping->set_rules(json_encode($rules));
+
+            $check_for_duplicate = $mapping->get_conversion_id() !== $conversion_id || $mapping->get_event() !== $event_name;
+
+            // 5) Wenn neue convid prüfe auf Duplikat und ggf. setzen
+            if ($check_for_duplicate) {
+                $existing = WP_SDTRK_Helper_Linkedin::get_by_event_and_convid($event_name, $conversion_id);
+                if ($existing && $existing->get_id() !== $mapping->get_id()) {
+                    throw new \Exception(sprintf(
+                        __('Mapping with event "%s" and conversion ID "%s" already exists.', 'wp-sdtrk'),
+                        $event_name,
+                        $conversion_id
+                    ));
+                }
+                $mapping->set_conversion_id($conversion_id);
+                $mapping->set_event($event_name);
+            }
+
+            $mapping->save();
 
             // 6) Erfolg – Redirect mit Hinweis
             $redirect_url = add_query_arg(
                 'sdtrk_success',
-                urlencode(__('LinkedIn mappings saved successfully', 'wp-sdtrk')),
+                urlencode(__('Successfully updated linkedin mapping', 'wp-sdtrk')),
                 $_SERVER['REQUEST_URI']
             );
             wp_safe_redirect($redirect_url);
