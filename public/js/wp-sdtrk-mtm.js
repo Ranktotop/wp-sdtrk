@@ -12,9 +12,8 @@ class Wp_Sdtrk_Catcher_Mtm {
 		this.s_enabled = false;
 		this.b_enabled = false;
 		this.pixelLoaded = false;
-		this.cid = false;
-		this.gclid = false;
 		this.validate();
+		console.log(this);
 	}
 
 	/**
@@ -29,10 +28,6 @@ class Wp_Sdtrk_Catcher_Mtm {
 			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (mtm)');
 			return;
 		}
-		// Matomo can also work with a client id concept if you want to tie server/browser together
-		if (this.get_Cid()) {
-			this.cid = this.get_Cid();
-		}
 		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {
 			this.b_enabled = true;
 			//load the base tracker
@@ -40,9 +35,6 @@ class Wp_Sdtrk_Catcher_Mtm {
 		}
 		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.s_ci, this.localizedData.s_cs, this.event) !== false && this.localizedData.s_e !== "") {
 			this.s_enabled = true;
-		}
-		if (this.get_Gclid()) {
-			this.gclid = this.get_Gclid();
 		}
 	}
 
