@@ -256,6 +256,7 @@ class Wp_Sdtrk_Admin
 					'title' => __('Fire signal-event on button-clicks', 'wp-sdtrk'),
 					'subtitle'  => __('Check to fire a signal event after an element has been clicked', 'wp-sdtrk'),
 					'default' => 0,
+					'desc' => __('Attention: In order for clicks to be tracked, the element to be tracked must contain the class trkbtn-TAGNAME-trkbtn. The TAGNAME placeholder can be replaced by any word and will be passed as a parameter', 'wp-sdtrk') . '<br><b style="color:white">' . __('Example:', 'wp-sdtrk') . '</b> ' . htmlentities('<a href="https://example.com" class="trkbtn-mybutton-trkbtn">MyButton</a>'),
 				],
 				[
 					'id'    => 'trk_visibility',
@@ -263,6 +264,7 @@ class Wp_Sdtrk_Admin
 					'title' => __('Fire signal-event on visibility of items', 'wp-sdtrk'),
 					'subtitle'  => __('Check to fire a signal event after an element gets visible', 'wp-sdtrk'),
 					'default' => 0,
+					'desc' => __('Attention: In order for tracking to work, the element to be tracked must contain the class watchitm-TAGNAME-watchitm. The TAGNAME placeholder can be replaced by any word and will be passed as a parameter', 'wp-sdtrk') . '<br><b style="color:white">' . __('Example:', 'wp-sdtrk') . '</b> ' . htmlentities('<h2 class="watchitm-mybutton-watchitm">My Headline</h2>'),
 				],
 			],
 		]);

@@ -15,29 +15,6 @@ class WP_SDTRK_Helper_Linkedin extends WP_SDTRK_Helper_Base
     protected static string $model_class = WP_SDTRK_Model_Linkedin::class;
 
     /**
-     * Retrieves an array of common LinkedIn tracking events.
-     *
-     * This method returns a predefined list of standard LinkedIn Insight Tag events
-     * that are commonly used for tracking user interactions and conversions.
-     *
-     * @since 1.0.0
-     *
-     * @return array An array of common LinkedIn tracking event names/identifiers.
-     */
-    public static function get_common_events(): array
-    {
-        return [
-            'page_view'       => __('Page View', 'wp-sdtrk'),
-            'add_to_cart'    => __('Add to Cart', 'wp-sdtrk'),
-            'purchase'       => __('Purchase', 'wp-sdtrk'),
-            'sign_up'        => __('Sign Up', 'wp-sdtrk'),
-            'generate_lead'  => __('Generate Lead', 'wp-sdtrk'),
-            'begin_checkout' => __('Begin Checkout', 'wp-sdtrk'),
-            'view_item'      => __('View Item', 'wp-sdtrk'),
-        ];
-    }
-
-    /**
      * Retrieve the currently saved mappings
      * 
      * @return WP_SDTRK_Model_Linkedin[]

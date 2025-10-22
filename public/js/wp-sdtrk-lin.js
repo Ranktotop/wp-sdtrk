@@ -193,14 +193,14 @@ class Wp_Sdtrk_Catcher_Lin {
 					}
 					break;
 				case 'Time':
-					var conversions = this.get_triggeredConversions('timetracker-' + data.time);
+					var conversions = this.get_triggeredConversions(this.localizedData.pattern_time_event.replace('%s', data.time));
 					for (let i = 0; i < conversions.length; i++) {
 						window.lintrk('track', { conversion_id: conversions[i] });
 						this.helper.debugLog(this.localizedData.dbg, { event: conversions[i] }, 'Fired in Browser (lin-' + handler + ')')
 					}
 					break;
 				case 'Scroll':
-					var conversions = this.get_triggeredConversions('scrolltracker-' + data.percent);
+					var conversions = this.get_triggeredConversions(this.localizedData.pattern_scroll_event.replace('%s', data.percent));
 					for (let i = 0; i < conversions.length; i++) {
 						window.lintrk('track', { conversion_id: conversions[i] });
 						this.helper.debugLog(this.localizedData.dbg, { event: conversions[i] }, 'Fired in Browser (lin-' + handler + ')')
@@ -230,6 +230,7 @@ class Wp_Sdtrk_Catcher_Lin {
 	* @return  {Array} The conversion ids of the mapped events whose conditions are met.
 	*/
 	get_triggeredConversions(currentEventName) {
+		console.log(currentEventName);
 		var triggeredConversionIds = [];
 		//iterate all given events
 		for (var i = 0; i < this.localizedData.map_ev.length; i++) {

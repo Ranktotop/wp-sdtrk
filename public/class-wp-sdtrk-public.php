@@ -360,6 +360,8 @@ class Wp_Sdtrk_Public
 		$localizedData['s_e'] = $serverEnabled;
 		$localizedData['s_cs'] = $serverCookieService;
 		$localizedData['s_ci'] = $serverCookieId;
+		$localizedData['pattern_scroll_event'] = WP_SDTRK_Helper_Event::get_scroll_event_pattern();
+		$localizedData['pattern_time_event'] = WP_SDTRK_Helper_Event::get_time_event_pattern();
 		$localizedData['dbg'] = $debugEnabled;
 
 		// Register scripts
@@ -594,7 +596,7 @@ class Wp_Sdtrk_Public
 		$localizedData['agent'] = $_SERVER['HTTP_USER_AGENT'];
 		$localizedData['source'] = WP_SDTRK_Helper_Event::getCurrentURL(true);
 		$localizedData['referer'] = WP_SDTRK_Helper_Event::getCurrentReferer(true);
-		$localizedData['evmap'] = WP_SDTRK_Helper_Event::getDefaultEventMap(); //eventmap for keep the custom-event-names in sync with server
+		$localizedData['evmap'] = WP_SDTRK_Helper_Event::getGlobalEventMap(); //eventmap for keep the custom-event-names in sync with server
 		$localizedData['pmap'] = WP_SDTRK_Helper_Event::getParamNames(); // for stripping data from url before sending url to service (required by meta for example)
 
 		// Register additional scripts

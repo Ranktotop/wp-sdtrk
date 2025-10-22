@@ -129,7 +129,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getBrandName()
     {
-        $brandName = ($this->setAndFilled('brandName')) ? $this->eventData['brandName'] : WP_SDTRK_Helper_Event::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "brandname");
+        $brandName = ($this->setAndFilled('brandName')) ? $this->eventData['brandName'] : WP_SDTRK_Helper_Options::get_string_option('brandname');
         return ($brandName && ! empty(trim($brandName))) ? $brandName : get_bloginfo('name');
     }
 
@@ -531,7 +531,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function get_CustomEventName($type, $data = '0')
     {
-        $map = WP_SDTRK_Helper_Event::getDefaultEventMap();
+        $map = WP_SDTRK_Helper_Event::getGlobalEventMap();
         if (isset($map[$type])) {
             return str_replace('%', $data, $map[$type]);
         }

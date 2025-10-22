@@ -71,7 +71,8 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
      */
     public function is_scroll_event(): bool
     {
-        return str_starts_with($this->event, 'scroll_');
+        $regex = $this->buildExtractRegex(WP_SDTRK_Helper_Event::get_scroll_event_pattern(), true);
+        return preg_match($regex, $this->event) === 1;
     }
 
     /**
@@ -84,7 +85,8 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
      */
     public function is_time_event(): bool
     {
-        return str_starts_with($this->event, 'time_');
+        $regex = $this->buildExtractRegex(WP_SDTRK_Helper_Event::get_time_event_pattern(), true);
+        return preg_match($regex, $this->event) === 1;
     }
 
     /**
@@ -94,7 +96,8 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
      */
     public function is_button_click_event(): bool
     {
-        return str_starts_with($this->event, 'button_click_');
+        $regex = $this->buildExtractRegex(WP_SDTRK_Helper_Event::get_button_click_event_pattern(), false);
+        return preg_match($regex, $this->event) === 1;
     }
 
     /**
@@ -104,7 +107,8 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
      */
     public function is_element_visibility_event(): bool
     {
-        return str_starts_with($this->event, 'element_visible_');
+        $regex = $this->buildExtractRegex(WP_SDTRK_Helper_Event::get_element_visible_event_pattern(), false);
+        return preg_match($regex, $this->event) === 1;
     }
 
     /**
@@ -174,25 +178,25 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
     {
         //if is scroll event, return label from scroll triggers
         if ($this->is_scroll_event()) {
-            return sprintf(__('Scroll %s%%', 'wp-sdtrk'), esc_html($this->get_scroll_depth()));
+            return sprintf(WP_SDTRK_Helper_Event::get_scroll_event_pattern(true), esc_html($this->get_scroll_depth()));
         }
 
         //if is time event, return label from time triggers
         if ($this->is_time_event()) {
-            return sprintf(__('Time %s seconds', 'wp-sdtrk'), esc_html($this->get_time_seconds()));
+            return sprintf(WP_SDTRK_Helper_Event::get_time_event_pattern(true), esc_html($this->get_time_seconds()));
         }
 
         //if is button click event, return label from button triggers
         if ($this->is_button_click_event()) {
-            return sprintf(__('Button click on: %s', 'wp-sdtrk'), esc_html($this->get_tag_name()));
+            return sprintf(WP_SDTRK_Helper_Event::get_button_click_event_pattern(true), esc_html($this->get_tag_name()));
         }
 
         //if is element visibility event, return label from element triggers
         if ($this->is_element_visibility_event()) {
-            return sprintf(__('Element visible: %s', 'wp-sdtrk'), esc_html($this->get_tag_name()));
+            return sprintf(WP_SDTRK_Helper_Event::get_element_visible_event_pattern(true), esc_html($this->get_tag_name()));
         }
 
-        $events = WP_SDTRK_Helper_Linkedin::get_common_events();
+        $events = WP_SDTRK_Helper_Event::get_default_events();
 
         //if the name is in events, return its label
         if (isset($events[$this->event])) {
@@ -214,9 +218,10 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
     public function get_scroll_depth(): int
     {
         if ($this->is_scroll_event()) {
-            $depth = str_replace('scroll_', '', $this->event);
-            $depth = (int)str_replace('_percent', '', $depth);
-            return $depth;
+            $regex = $this->buildExtractRegex(WP_SDTRK_Helper_Event::get_scroll_event_pattern(), true);
+            if (preg_match($regex, $this->event, $m) === 1) {
+                return (int)trim($m[1]);
+            }
         }
         return -1;
     }
@@ -229,9 +234,10 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
     public function get_time_seconds(): int
     {
         if ($this->is_time_event()) {
-            $seconds = str_replace('time_', '', $this->event);
-            $seconds = (int)str_replace('_seconds', '', $seconds);
-            return $seconds;
+            $regex = $this->buildExtractRegex(WP_SDTRK_Helper_Event::get_time_event_pattern(), true);
+            if (preg_match($regex, $this->event, $m) === 1) {
+                return (int)trim($m[1]);
+            }
         }
         return -1;
     }
@@ -243,14 +249,18 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
      */
     public function get_tag_name(): string
     {
-        $plain_tag = '';
         if ($this->is_button_click_event()) {
-            $plain_tag = str_replace('button_click_', '', $this->event);
+            $regex = $this->buildExtractRegex(WP_SDTRK_Helper_Event::get_button_click_event_pattern(), false);
+            if (preg_match($regex, $this->event, $m) === 1) {
+                return trim($m[1]);
+            }
+        } elseif ($this->is_element_visibility_event()) {
+            $regex = $this->buildExtractRegex(WP_SDTRK_Helper_Event::get_element_visible_event_pattern(), false);
+            if (preg_match($regex, $this->event, $m) === 1) {
+                return trim($m[1]);
+            }
         }
-        if ($this->is_element_visibility_event()) {
-            $plain_tag = str_replace('element_visible_', '', $this->event);
-        }
-        return trim($plain_tag);
+        return '';
     }
 
     /**
@@ -288,39 +298,17 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
 
     public function set_event(string $event): static
     {
-        $valid_events = [
-            'page_view',
-            'add_to_cart',
-            'purchase',
-            'sign_up',
-            'generate_lead',
-            'begin_checkout',
-            'view_item',
-        ];
+        $event = trim($event);
+        $default_events = WP_SDTRK_Helper_Event::get_default_events();
+        $dynamic_events = WP_SDTRK_Helper_Event::get_dynamic_events();
+        $valid_events = array_merge(array_keys($default_events), array_keys($dynamic_events));
 
-        // Add scroll events
-        $scroll_triggers = WP_SDTRK_Helper_Options::get_scroll_triggers();
-        foreach ($scroll_triggers as $depth) {
-            $valid_events[] = 'scroll_' . $depth . '_percent';
-        }
-
-        // Add time events
-        $time_triggers = WP_SDTRK_Helper_Options::get_time_triggers();
-        foreach ($time_triggers as $seconds) {
-            $valid_events[] = 'time_' . $seconds . '_seconds';
-        }
-
-        // On tag based events we simply add the event if it starts with the correct prefix and has a valid tag
-        foreach (['button_click', 'element_visible'] as $prefix) {
-            //check if prefix matches
-            if (!str_starts_with($event, $prefix . '_')) {
-                continue;
-            }
-            //check if tag is valid
-            $tag = str_replace($prefix . '_', '', $event);
-            if (empty(trim($tag))) {
-                continue;
-            }
+        // On tag based events we simply add the event if it matches the pattern and has a valid tag
+        $regex_buttonclick = $this->buildExtractRegex(WP_SDTRK_Helper_Event::get_button_click_event_pattern(), false);
+        $regex_elementvisibility = $this->buildExtractRegex(WP_SDTRK_Helper_Event::get_element_visible_event_pattern(), false);
+        if (preg_match($regex_buttonclick, $event, $m) === 1) {
+            $valid_events[] = $event;
+        } elseif (preg_match($regex_elementvisibility, $event, $m) === 1) {
             $valid_events[] = $event;
         }
 
@@ -339,5 +327,17 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
         }
         $this->rules = $decoded;
         return $this;
+    }
+
+    /**********************************/
+    /**********************************/
+    /* OTHER                          */
+    /**********************************/
+    /**********************************/
+
+    private function buildExtractRegex(string $pattern, bool $numbersOnly = true): string
+    {
+        $capture = $numbersOnly ? '(\d+)' : '(.+)';
+        return '/^' . str_replace('%s', $capture, preg_quote($pattern, '/')) . '$/';
     }
 }

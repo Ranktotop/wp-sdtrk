@@ -262,20 +262,132 @@ class WP_SDTRK_Helper_Event
     }
 
     /**
-     * Gets the default Event-Names
+     * Gets the global Event-Names
+     * These are the names which are used for sending to tracking services like meta, google...
+     * The functions return value is given to serverside trackers and browser side trackers for keeping the event names between these two consistent
      *
      * @return array
      */
-    public static function getDefaultEventMap()
+    public static function getGlobalEventMap()
     {
         return array(
             'Time' => 'time_spent_%',
             'Scroll' => 'scroll_depth_%',
             'Click' => 'button_click',
-            'Visibility' => 'item_visit',
-            'Click_Local' => 'button_click_%',
-            'Visibility_Local' => 'item_visit_%'
+            'Visibility' => 'item_visit'
         );
+    }
+
+    /**
+     * Get the default events configuration array.
+     *
+     * Returns an array with event name as key and translated label as value.
+     * These events are used within dropdowns on admin ui
+     *
+     * @since 1.0.0
+     *
+     * @return array The default events configuration array.
+     */
+    public static function get_default_events(): array
+    {
+        return [
+            'page_view'       => __('Page View', 'wp-sdtrk'),
+            'add_to_cart'    => __('Add to Cart', 'wp-sdtrk'),
+            'purchase'       => __('Purchase', 'wp-sdtrk'),
+            'sign_up'        => __('Sign Up', 'wp-sdtrk'),
+            'generate_lead'  => __('Generate Lead', 'wp-sdtrk'),
+            'begin_checkout' => __('Begin Checkout', 'wp-sdtrk'),
+            'view_item'      => __('View Item', 'wp-sdtrk'),
+        ];
+    }
+
+    /**
+     * Get the dynamic events configuration array.
+     *
+     * Returns an array with dynamic event name as key and translated label as value.
+     * These events are used within dropdowns on admin ui AND within js trackers which needs mapping (like linkedin)
+     *
+     * @since 1.0.0
+     *
+     * @return array The dynamic events configuration array.
+     */
+    public static function get_dynamic_events(): array
+    {
+        $scroll_triggers = WP_SDTRK_Helper_Options::get_scroll_triggers();
+        $time_triggers = WP_SDTRK_Helper_Options::get_time_triggers();
+        $events = [];
+        //add scroll-triggers to available events
+        foreach ($scroll_triggers as $scroll_trigger) {
+            $events[sprintf(self::get_scroll_event_pattern(), $scroll_trigger)] = sprintf(self::get_scroll_event_pattern(true), esc_html($scroll_trigger));
+        }
+
+        //add time-triggers to available events
+        foreach ($time_triggers as $time_trigger) {
+            $events[sprintf(self::get_time_event_pattern(), $time_trigger)] = sprintf(self::get_time_event_pattern(true), esc_html($time_trigger));
+        }
+        return $events;
+    }
+
+    /**
+     * Retrieves the scroll event pattern string.
+     *
+     * @param bool $asLabel Optional. Whether to return the pattern as a label format. Default false.
+     * @return string The scroll event pattern string.
+     */
+    public static function get_scroll_event_pattern(bool $asLabel = false): string
+    {
+        if ($asLabel) {
+            return __('Scroll Depth %s Percent', 'wp-sdtrk');
+        }
+        return 'scroll_%s_percent';
+    }
+
+    /**
+     * Retrieves the time event pattern.
+     *
+     * @since 1.0.0
+     *
+     * @param bool $asLabel Optional. Whether to return the pattern as a label format. Default false.
+     * @return string The time event pattern string.
+     */
+    public static function get_time_event_pattern(bool $asLabel = false): string
+    {
+        if ($asLabel) {
+            return __('Time passed %s seconds', 'wp-sdtrk');
+        }
+        return 'time_%s_seconds';
+    }
+
+    /**
+     * Retrieves the button click event pattern.
+     *
+     * @since 1.0.0
+     *
+     * @param bool $asLabel Optional. Whether to return the pattern as a label format. Default false.
+     * @return string The button click event pattern string.
+     */
+    public static function get_button_click_event_pattern(bool $asLabel = false): string
+    {
+        if ($asLabel) {
+            return __('Button Click on: %s', 'wp-sdtrk');
+        }
+        return 'button_click_%s';
+    }
+
+    /**
+     * Retrieves the element visible event pattern.
+     *
+     * @since 1.0.0
+     *
+     * @param bool $asLabel Optional. Whether to return the pattern as a label format. Default false.
+     * @return string The element visible event pattern string.
+     */
+    public static function get_element_visible_event_pattern(bool $asLabel = false): string
+    {
+        if ($asLabel) {
+            return __('Element Visible: %s', 'wp-sdtrk');
+        }
+        return 'element_visible_%s';
     }
 
     /**

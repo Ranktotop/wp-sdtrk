@@ -11,17 +11,10 @@ $mappings = $helper_linkedin->get_all();
 $scroll_triggers = WP_SDTRK_Helper_Options::get_scroll_triggers();
 $time_triggers = WP_SDTRK_Helper_Options::get_time_triggers();
 
-$available_events = WP_SDTRK_Helper_Linkedin::get_common_events();
-
-//add scroll-triggers to available events
-foreach ($scroll_triggers as $scroll_trigger) {
-    $available_events['scroll_' . $scroll_trigger . '_percent'] = sprintf(__('Scroll %s%%', 'wp-sdtrk'), esc_html($scroll_trigger));
-}
-
-//add time-triggers to available events
-foreach ($time_triggers as $time_trigger) {
-    $available_events['time_' . $time_trigger . '_seconds'] = sprintf(__('Time %s seconds', 'wp-sdtrk'), esc_html($time_trigger));
-}
+//Get available events for dropdown
+$default_events = WP_SDTRK_Helper_Event::get_default_events();
+$dynamic_events = WP_SDTRK_Helper_Event::get_dynamic_events();
+$available_events = array_merge($default_events, $dynamic_events);
 
 //Add "button" and "visibility" events
 $available_events['button_click'] = __('Button Click', 'wp-sdtrk');

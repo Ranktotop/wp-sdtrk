@@ -9,6 +9,7 @@ class Wp_Sdtrk_Tracker_Ga
 
     private $debugMode;
     private $debugMode_frontend;
+    private $debugModeLive;
 
     private $trackServer;
 
@@ -41,7 +42,7 @@ class Wp_Sdtrk_Tracker_Ga
         $this->debugMode = WP_SDTRK_Helper_Options::get_bool_option('ga_trk_debug', false);
 
         // Debug Mode Live
-        $this->debugMode = WP_SDTRK_Helper_Options::get_bool_option('ga_trk_debug_live', false);
+        $this->debugModeLive = WP_SDTRK_Helper_Options::get_bool_option('ga_trk_debug_live', false);
     }
 
     /**
