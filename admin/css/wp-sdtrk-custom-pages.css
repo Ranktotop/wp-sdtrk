@@ -1,0 +1,283 @@
+/*======================
+  Container Styling
+======================*/
+
+#wpcontent {
+    border-left: none;
+    background-attachment: fixed;
+    background-position: top left;
+    background-repeat: no-repeat;
+    background-image: linear-gradient(90deg, rgba(22, 25, 40, 0.82) 0%, rgba(22, 25, 40, 0.36) 100%), url(./bg.jpg) !important;
+    background-repeat: no-repeat;
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+}
+
+#wpbody {
+    background-color: #111113d9 !important;
+    border-radius: 5px 5px 5px 5px;
+    overflow: hidden;
+    border: 3px solid #a5a5a5;
+    padding-top: 0px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+}
+
+/*======================
+  Content Area Styling
+======================*/
+#wpbody-content .wrap h1,
+#wpbody-content .wrap h2,
+#wpbody-content .wrap h3 {
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #ededed !important;
+    line-height: 1.3em;
+    margin: 20px 0px 5px 0px;
+}
+
+#wpbody-content .wrap h4 {
+    letter-spacing: 2px;
+    color: #ededed !important;
+    line-height: 1.2em;
+    margin: 25px 0px 5px 0px;
+}
+
+#wpbody-content .wrap h1 {
+    font-size: 27px;
+    border-bottom: 3px solid #57b957 !important;
+}
+
+#wpbody-content .wrap h2 {
+    font-size: 24px;
+}
+
+#wpbody-content .wrap h3 {
+    font-size: 21px;
+}
+
+#wpbody-content .wrap h4 {
+    font-size: 18px;
+}
+
+#wpbody-content .wrap p {
+    color: #999;
+    font-size: 15px;
+    line-height: 1.3em;
+    margin: 15px 0px 15px 0px;
+}
+
+#wpbody-content .wrap label {
+    color: #ededed;
+    font-size: 15px;
+    line-height: 1.3em;
+    margin: 15px 0px 15px 0px;
+}
+
+/*======================
+  Input Styling
+======================*/
+
+#wpbody-content .wrap .button,
+#wpbody-content .wrap .button-secondary,
+#wpbody-content .wrap .button:focus,
+#wpbody-content .wrap .button-secondary:focus {
+    color: #fff;
+    font-size: 14px;
+    background-color: #ffffff1c;
+    border-width: 0px;
+    border-radius: 0px;
+    letter-spacing: 1px;
+    transition: 0.3s;
+    box-shadow: none;
+}
+
+#wpbody-content .wrap .button:hover,
+#wpbody-content .wrap .button-secondary:hover {
+    background-color: #ffffff4d;
+    color: #fff;
+}
+
+#wpbody-content .wrap button.button-primary,
+#wpbody-content .wrap input.button-primary,
+#wpbody-content .wrap a.button-primary,
+#wpbody-content .wrap button.button-primary:focus,
+#wpbody-content .wrap input.button-primary:focus,
+#wpbody-content .wrap a.button-primary:focus {
+    font-size: 14px;
+    background-color: #57b957;
+    border-width: 0px;
+    border-color: #57b957;
+    border-radius: 0px;
+    letter-spacing: 1px;
+    transition: 0.3s;
+    box-shadow: none;
+}
+
+#wpbody-content .wrap button.button-primary:hover,
+#wpbody-content .wrap input.button-primary:hover,
+#wpbody-content .wrap a.button-primary:hover {
+    background-color: #66c766;
+    border-color: #66c766;
+    color: #fff;
+}
+
+#wpbody-content .wrap input[type=email],
+#wpbody-content .wrap input[type=password],
+#wpbody-content .wrap input[type=text],
+#wpbody-content .wrap input[type=number] {
+    font-size: 14px !important;
+    text-align: left !important;
+    color: #fff !important;
+    margin-top: 0px !important;
+    margin-bottom: 5px !important;
+    background: rgb(255 255 255 / 2%) !important;
+    border: 1px solid rgb(255 255 255 / 15%) !important;
+    padding: 6px 10px 6px !important;
+}
+
+#wpbody-content .wrap input[type=email]:focus,
+#wpbody-content .wrap input[type=password]:focus,
+#wpbody-content .wrap input[type=text]:focus,
+#wpbody-content .wrap input[type=number]:focus {
+    border-color: #57b957;
+    box-shadow: 0 0 0 1px #57b957;
+    outline: 1px solid transparent;
+}
+#wpbody-content .wrap select:focus {
+    border-color: #57b957;
+    box-shadow: 0 0 0 1px #57b957;
+    outline: 1px solid transparent;
+}
+
+#wpbody-content .wrap select {
+    font-size: 14px !important;
+    text-align: left !important;
+    color: #fff !important;
+    margin-top: 0px !important;
+    margin-bottom: 5px !important;
+    background: rgb(255 255 255 / 2%) url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E') no-repeat right 5px top 55%;
+    border: 1px solid rgb(255 255 255 / 15%) !important;
+    padding: 6px 10px 6px !important;
+}
+
+#wpbody-content .wrap select option {
+    background-color: rgb(30 30 34) !important;
+    color: #999 !important;
+}
+
+#wpbody-content .wrap select option:checked {
+    color: #fff !important;
+}
+
+/*======================
+  Notices
+======================*/
+
+#wpbody-content .notice-warning {
+    background-color: #342d01f7 !important;
+    border: 1px solid #ffe200 !important;
+    box-shadow: 0px 3px 9px 3px rgb(255 200 2 / 19%);
+}
+#wpbody-content .notice-warning p {
+    color: #ffe200 !important;
+    letter-spacing: 2px;
+}
+
+#wpbody-content .notice-error {
+    background-color: #340101f7 !important;
+    border: 1px solid #ff0000 !important;
+    box-shadow: 0px 3px 9px 3px rgba(255, 2, 2, 0.19);
+}
+#wpbody-content .notice-error p {
+    color: #ff0000 !important;
+    letter-spacing: 2px;
+}
+
+#wpbody-content .notice-success {
+    background-color: #053401f7 !important;
+    border: 1px solid #6eff6e !important;
+    box-shadow: 0px 3px 9px 3px rgba(2, 255, 2, 0.19);
+}
+#wpbody-content .notice-success p {
+    color: #6eff6e !important;
+    letter-spacing: 2px;
+}
+
+#wpbody-content .notice-info {
+    background-color: #2c2c2cf7 !important;
+    border: 1px solid #ededed !important;
+    box-shadow: 0px 3px 9px 3px rgba(236, 236, 236, 0.19);
+}
+#wpbody-content .notice-info p {
+    color: #ededed !important;
+    letter-spacing: 2px;
+}
+
+/*======================
+  Table Styling
+======================*/
+
+.wpsdtrk-table-glass {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    margin-top: 20px;
+    position: relative;
+}
+
+/* Base Table - Grundstil für alle Tabellen */
+.wpsdtrk-table-glass table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.wpsdtrk-table-glass table th {
+    color: #ededed;
+}
+
+.wpsdtrk-table-glass table td {
+    color: #999;
+}
+
+.wpsdtrk-table-glass table td strong {
+    color: #ededed;
+}
+
+.wpsdtrk-table-glass table th,
+.wpsdtrk-table-glass table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.wpsdtrk-table-glass table th {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.wpsdtrk-table-glass table a {
+    color: #45d4ffdd;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block;
+    transition: transform 0.1s ease;
+}
+
+.wpsdtrk-table-glass table a:hover {
+    transform: scale(1.1);
+}

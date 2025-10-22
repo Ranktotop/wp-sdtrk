@@ -79,16 +79,17 @@ class Wp_Sdtrk_Admin
 		 */
 
 		wp_enqueue_style($this->wp_sdtrk, plugin_dir_url(__FILE__) . 'css/wp-sdtrk-admin.css', array(), $this->version, 'all');
-		// Redux Metabox Styling
-		if (in_array($hook_suffix, ['post.php', 'post-new.php'])) {
-			wp_enqueue_style(
-				$this->wp_sdtrk . '-redux-metabox',
-				plugin_dir_url(__FILE__) . 'css/wp-sdtrk-redux-metabox.css',
-				array(),
-				$this->version,
-				'all'
-			);
-		}
+		wp_enqueue_style($this->wp_sdtrk . '-redux-customize', plugin_dir_url(__FILE__) . 'css/wp-sdtrk-redux.css', array(), $this->version, 'all');
+	}
+
+	private function enqueue_custom_page_css(): void
+	{
+		wp_enqueue_style(
+			$this->wp_sdtrk . '-custom-pages',
+			plugin_dir_url(__FILE__) . 'css/wp-sdtrk-custom-pages.css',
+			array(),
+			$this->version
+		);
 	}
 
 	/**
@@ -963,6 +964,7 @@ class Wp_Sdtrk_Admin
 	 */
 	public function render_page_wp_sdtrk_admin_map_linkedin(): void
 	{
+		$this->enqueue_custom_page_css();
 		$view = plugin_dir_path(dirname(__FILE__)) . 'templates/wp-sdtrk-admin-map-linkedin.php';
 		if (file_exists($view)) {
 			include $view;

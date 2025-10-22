@@ -260,6 +260,11 @@
         wpsdtrk_handle_click_edit_mapping_btn();
 
         toggleAddRuleButton('#rules-container', '#add-rule-btn');
+
+        // Modal close handler
+        $('.wpsdtrk-modal-close').on('click', function () {
+            wpsdtrk_close_modal('edit-mapping');
+        });
     });
 
 })(jQuery);

@@ -23,62 +23,72 @@ foreach ($time_triggers as $time_trigger) {
     $available_events['time_' . $time_trigger . '_seconds'] = sprintf(__('Time %s seconds', 'wp-sdtrk'), esc_html($time_trigger));
 }
 ?>
+<style>
+    select.rule-param {
+        width: 200px;
+    }
 
+    input.rule-value {
+        width: 300px;
+    }
+</style>
 <div class="wrap">
     <h1><?php esc_html_e('Linked In Conversion Management', 'wp-sdtrk'); ?></h1>
     <h2><?php esc_html_e('Existing Mappings', 'wp-sdtrk'); ?></h2>
 
-    <table class="widefat striped">
-        <thead>
-            <tr>
-                <th><?php esc_html_e('Event', 'wp-sdtrk'); ?></th>
-                <th><?php esc_html_e('Conversion ID', 'wp-sdtrk'); ?></th>
-                <th><?php esc_html_e('Rules', 'wp-sdtrk'); ?></th>
-                <th><?php esc_html_e('Action', 'wp-sdtrk'); ?></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            if (empty($mappings)) :
-            ?>
+    <div class="wpsdtrk-table-glass">
+        <table>
+            <thead>
                 <tr>
-                    <td colspan="4"><?php esc_html_e('No Mappings found', 'wp-sdtrk'); ?></td>
+                    <th><?php esc_html_e('Event', 'wp-sdtrk'); ?></th>
+                    <th><?php esc_html_e('Conversion ID', 'wp-sdtrk'); ?></th>
+                    <th><?php esc_html_e('Rules', 'wp-sdtrk'); ?></th>
+                    <th><?php esc_html_e('Action', 'wp-sdtrk'); ?></th>
                 </tr>
+            </thead>
+            <tbody>
                 <?php
-            else :
-                foreach ($mappings as $mapping) :
+                if (empty($mappings)) :
                 ?>
                     <tr>
-                        <td><?php echo esc_html($mapping->get_event_label()); ?></td>
-                        <td><?php echo esc_html($mapping->get_conversion_id()); ?></td>
-                        <td>
-                            <ul style="margin: 0; padding-left: 1.2em;">
-                                <?php foreach ($mapping->get_rules() as $rule): ?>
-                                    <li><strong><?php echo esc_html($rule->get_key_name()); ?></strong>: <?php echo esc_html($rule->get_value()); ?></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </td>
-                        <td>
-                            <button
-                                type="button"
-                                class="button wpsdtrk_edit_mapping_btn"
-                                data-mapping-id="<?php echo esc_attr($mapping->get_id()); ?>"
-                                data-mapping-convid="<?php echo esc_attr($mapping->get_conversion_id()); ?>"
-                                data-event="<?php echo esc_attr($mapping->get_event()); ?>">
-                                <?php esc_html_e('Edit', 'wp-sdtrk'); ?>
-                            </button>
-                            <button
-                                type="button"
-                                class="button button-primary delete wpsdtrk_delete_linkedin_mapping_btn"
-                                data-mapping-id="<?php echo esc_attr($mapping->get_id()); ?>">
-                                ✕ <?php esc_html_e('Delete', 'wp-sdtrk'); ?>
-                            </button>
-                        </td>
+                        <td colspan="4"><?php esc_html_e('No Mappings found', 'wp-sdtrk'); ?></td>
                     </tr>
-            <?php endforeach;
-            endif; ?>
-        </tbody>
-    </table>
+                    <?php
+                else :
+                    foreach ($mappings as $mapping) :
+                    ?>
+                        <tr>
+                            <td><?php echo esc_html($mapping->get_event_label()); ?></td>
+                            <td><?php echo esc_html($mapping->get_conversion_id()); ?></td>
+                            <td>
+                                <ul style="margin: 0; padding-left: 1.2em;">
+                                    <?php foreach ($mapping->get_rules() as $rule): ?>
+                                        <li><strong><?php echo esc_html($rule->get_key_name()); ?></strong>: <?php echo esc_html($rule->get_value()); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="button wpsdtrk_edit_mapping_btn"
+                                    data-mapping-id="<?php echo esc_attr($mapping->get_id()); ?>"
+                                    data-mapping-convid="<?php echo esc_attr($mapping->get_conversion_id()); ?>"
+                                    data-event="<?php echo esc_attr($mapping->get_event()); ?>">
+                                    <?php esc_html_e('Edit', 'wp-sdtrk'); ?>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="button button-primary delete wpsdtrk_delete_linkedin_mapping_btn"
+                                    data-mapping-id="<?php echo esc_attr($mapping->get_id()); ?>">
+                                    ✕ <?php esc_html_e('Delete', 'wp-sdtrk'); ?>
+                                </button>
+                            </td>
+                        </tr>
+                <?php endforeach;
+                endif; ?>
+            </tbody>
+        </table>
+    </div>
 
     <hr style="margin: 40px 0;">
 
