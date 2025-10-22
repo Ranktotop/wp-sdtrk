@@ -1,4 +1,4 @@
-class Wp_Sdtrk_Catcher_Fb {
+class Wp_Sdtrk_Catcher_Meta {
 
 	/**
 	* Constructor
@@ -6,7 +6,7 @@ class Wp_Sdtrk_Catcher_Fb {
 	* @param {Wp_Sdtrk_Helper} helper The helper
 	*/
 	constructor(event, helper) {
-		this.localizedData = wp_sdtrk_fb;
+		this.localizedData = wp_sdtrk_meta;
 		this.event = event;
 		this.helper = helper;
 		this.s_enabled = false;
@@ -18,7 +18,7 @@ class Wp_Sdtrk_Catcher_Fb {
 	}
 
 	/**
-	* Validate if fb is enabled 0 = browser, 1 = server, 2 = both
+	* Validate if meta is enabled 0 = browser, 1 = server, 2 = both
 	 */
 	validate(target = 2) {
 		//Skip if invalid data
@@ -27,10 +27,10 @@ class Wp_Sdtrk_Catcher_Fb {
 		}
 		//Skip if admin
 		if (this.helper.isAdmin()) {
-			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (fb)');					
+			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (meta)');
 			return;
 		}
-		
+
 		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {
 			this.b_enabled = true;
 			//load the base pixel
@@ -179,8 +179,8 @@ class Wp_Sdtrk_Catcher_Fb {
 	loadPixel() {
 		if (this.isEnabled('b') && !this.pixelLoaded) {
 			//Base Pixel
-			!function(f, b, e, v, n, t, s) {
-				if (f.fbq) return; n = f.fbq = function() {
+			!function (f, b, e, v, n, t, s) {
+				if (f.fbq) return; n = f.fbq = function () {
 					n.callMethod ?
 						n.callMethod.apply(n, arguments) : n.queue.push(arguments)
 				};
@@ -206,27 +206,27 @@ class Wp_Sdtrk_Catcher_Fb {
 			switch (handler) {
 				case 'Page':
 					fbq('track', 'PageView', this.get_data_custom(['value', 'currency']), { eventID: this.event.grabOrderId() });
-					this.helper.debugLog(this.localizedData.dbg, { event: 'PageView', data: this.get_data_custom(['value', 'currency']), meta: { eventID: this.event.grabOrderId() }}, 'Fired in Browser (fb-' + handler + ')');
+					this.helper.debugLog(this.localizedData.dbg, { event: 'PageView', data: this.get_data_custom(['value', 'currency']), meta: { eventID: this.event.grabOrderId() } }, 'Fired in Browser (meta-' + handler + ')');
 					break;
 				case 'Event':
 					fbq('trackSingle', this.localizedData.pid, this.convert_eventname(this.event.grabEventName()), this.get_data_custom(), { eventID: this.event.grabOrderId() });
-					this.helper.debugLog(this.localizedData.dbg, { event: this.convert_eventname(this.event.grabEventName()), data: this.get_data_custom(), meta: { eventID: this.event.grabOrderId() }}, 'Fired in Browser (fb-' + handler + ')');
+					this.helper.debugLog(this.localizedData.dbg, { event: this.convert_eventname(this.event.grabEventName()), data: this.get_data_custom(), meta: { eventID: this.event.grabOrderId() } }, 'Fired in Browser (meta-' + handler + ')');
 					break;
 				case 'Time':
-					fbq('trackCustom', this.helper.get_EventName(handler,data.time), this.get_data_custom(), { eventID: this.event.grabOrderId() + "-t" + data.time });
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.time), data: this.get_data_custom(), meta: { eventID: this.event.grabOrderId() + "-t" + data.time }}, 'Fired in Browser (fb-' + handler + ')');
+					fbq('trackCustom', this.helper.get_EventName(handler, data.time), this.get_data_custom(), { eventID: this.event.grabOrderId() + "-t" + data.time });
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.time), data: this.get_data_custom(), meta: { eventID: this.event.grabOrderId() + "-t" + data.time } }, 'Fired in Browser (meta-' + handler + ')');
 					break;
 				case 'Scroll':
-					fbq('trackCustom', this.helper.get_EventName(handler,data.percent), this.get_data_custom(), { eventID: this.event.grabOrderId() + "-s" + data.percent });
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.percent), data: this.get_data_custom(), meta: { eventID: this.event.grabOrderId() + "-s" + data.percent }}, 'Fired in Browser (fb-' + handler + ')');
+					fbq('trackCustom', this.helper.get_EventName(handler, data.percent), this.get_data_custom(), { eventID: this.event.grabOrderId() + "-s" + data.percent });
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.percent), data: this.get_data_custom(), meta: { eventID: this.event.grabOrderId() + "-s" + data.percent } }, 'Fired in Browser (meta-' + handler + ')');
 					break;
 				case 'Click':
-					fbq('trackCustom', this.helper.get_EventName(handler,data.tag), this.get_data_custom([], { buttonTag: data.tag }), { eventID: this.event.grabOrderId() + "-b" + data.tag });
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom([], { buttonTag: data.tag }), meta: { eventID: this.event.grabOrderId() + "-b" + data.tag }}, 'Fired in Browser (fb-' + handler + ')');
+					fbq('trackCustom', this.helper.get_EventName(handler, data.tag), this.get_data_custom([], { buttonTag: data.tag }), { eventID: this.event.grabOrderId() + "-b" + data.tag });
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.tag), data: this.get_data_custom([], { buttonTag: data.tag }), meta: { eventID: this.event.grabOrderId() + "-b" + data.tag } }, 'Fired in Browser (meta-' + handler + ')');
 					break;
 				case 'Visibility':
-					fbq('trackCustom', this.helper.get_EventName(handler,data.tag), this.get_data_custom([], { itemTag: data.tag }), { eventID: this.event.grabOrderId() + "-v" + data.tag });
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom([], { itemTag: data.tag }), meta: { eventID: this.event.grabOrderId() + "-v" + data.tag }}, 'Fired in Browser (fb-' + handler + ')');
+					fbq('trackCustom', this.helper.get_EventName(handler, data.tag), this.get_data_custom([], { itemTag: data.tag }), { eventID: this.event.grabOrderId() + "-v" + data.tag });
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.tag), data: this.get_data_custom([], { itemTag: data.tag }), meta: { eventID: this.event.grabOrderId() + "-v" + data.tag } }, 'Fired in Browser (meta-' + handler + ')');
 					break;
 			}
 		}
@@ -246,7 +246,7 @@ class Wp_Sdtrk_Catcher_Fb {
 			if (this.fbp !== false) {
 				data.fbp = this.fbp;
 			}
-			this.helper.send_ajax({ event: this.event, type: 'fb', handler: handler, data: data },this.localizedData.dbg);
+			this.helper.send_ajax({ event: this.event, type: 'meta', handler: handler, data: data }, this.localizedData.dbg);
 		}
 	}
 
@@ -383,27 +383,27 @@ class Wp_Sdtrk_Catcher_Fb {
 /**
 * Backload the Browser
 **/
-function wp_sdtrk_backload_fb_b() {
+function wp_sdtrk_backload_meta_b() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
-		var catcher_fb = window.wp_sdtrk_engine_class.get_catcher_fb();
-		if (catcher_fb.isOngoingBackload('b')) {
+		var catcher_meta = window.wp_sdtrk_engine_class.get_catcher_meta();
+		if (catcher_meta.isOngoingBackload('b')) {
 			for (const h of window.wp_sdtrk_history) {
 				data = h.split("_");
 				switch (data[0]) {
 					case 'Page':
-						catcher_fb.catchPageHit(0);
+						catcher_meta.catchPageHit(0);
 						break;
 					case 'Time':
-						catcher_fb.catchTimeHit(data[1], 0);
+						catcher_meta.catchTimeHit(data[1], 0);
 						break;
 					case 'Scroll':
-						catcher_fb.catchScrollHit(data[1], 0);
+						catcher_meta.catchScrollHit(data[1], 0);
 						break;
 					case 'Click':
-						catcher_fb.catchClickHit(data[1], 0);
+						catcher_meta.catchClickHit(data[1], 0);
 						break;
 					case 'Visited':
-						catcher_fb.catchVisibilityHit(data[1], 0);
+						catcher_meta.catchVisibilityHit(data[1], 0);
 						break;
 				}
 			}
@@ -414,27 +414,27 @@ function wp_sdtrk_backload_fb_b() {
 /**
 * Backload the Server
 **/
-function wp_sdtrk_backload_fb_s() {
+function wp_sdtrk_backload_meta_s() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
-		var catcher_fb = window.wp_sdtrk_engine_class.get_catcher_fb();
-		if (catcher_fb.isOngoingBackload('s')) {
+		var catcher_meta = window.wp_sdtrk_engine_class.get_catcher_meta();
+		if (catcher_meta.isOngoingBackload('s')) {
 			for (const h of window.wp_sdtrk_history) {
 				data = h.split("_");
 				switch (data[0]) {
 					case 'Page':
-						catcher_fb.catchPageHit(1);
+						catcher_meta.catchPageHit(1);
 						break;
 					case 'Time':
-						catcher_fb.catchTimeHit(data[1], 1);
+						catcher_meta.catchTimeHit(data[1], 1);
 						break;
 					case 'Scroll':
-						catcher_fb.catchScrollHit(data[1], 1);
+						catcher_meta.catchScrollHit(data[1], 1);
 						break;
 					case 'Click':
-						catcher_fb.catchClickHit(data[1], 1);
+						catcher_meta.catchClickHit(data[1], 1);
 						break;
 					case 'Visited':
-						catcher_fb.catchVisibilityHit(data[1], 1);
+						catcher_meta.catchVisibilityHit(data[1], 1);
 						break;
 				}
 			}

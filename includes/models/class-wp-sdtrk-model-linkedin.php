@@ -163,16 +163,12 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
     {
         if ($this->is_scroll_event()) {
             $scroll_triggers = WP_SDTRK_Helper_Options::get_scroll_triggers();
-            //convert each trigger from string to int
-            $scroll_triggers = array_map('intval', $scroll_triggers);
             if (!in_array($this->get_scroll_depth(), $scroll_triggers, true)) {
                 return false;
             }
         }
         if ($this->is_time_event()) {
             $time_triggers = WP_SDTRK_Helper_Options::get_time_triggers();
-            //convert each trigger from string to int
-            $time_triggers = array_map('intval', $time_triggers);
             if (!in_array($this->get_time_seconds(), $time_triggers, true)) {
                 return false;
             }
@@ -234,6 +230,19 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
             'begin_checkout',
             'view_item',
         ];
+
+        // Add scroll events
+        $scroll_triggers = WP_SDTRK_Helper_Options::get_scroll_triggers();
+        foreach ($scroll_triggers as $depth) {
+            $valid_events[] = 'scroll_' . $depth . '_percent';
+        }
+
+        // Add time events
+        $time_triggers = WP_SDTRK_Helper_Options::get_time_triggers();
+        foreach ($time_triggers as $seconds) {
+            $valid_events[] = 'time_' . $seconds . '_seconds';
+        }
+
         if (!in_array($event, $valid_events, true)) {
             throw new \InvalidArgumentException(sprintf('Ungültiger Event-Typ: %s', $event));
         }

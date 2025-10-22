@@ -8,7 +8,7 @@ class Wp_Sdtrk_Decrypter {
 		this.decryptedData = false;
 		this.encryptedData = this.paramsToObject();
 	}
-	
+
 	/**
 	* Convert all GET-Params to Object
 	* @return  {Array} The key-value-pairs
@@ -21,12 +21,12 @@ class Wp_Sdtrk_Decrypter {
 		}
 		return result;
 	}
-	
+
 	/**
 	* Returns the assigned services
 	* @return  {Array} The services
 	*/
-	get_Services(){
+	get_Services() {
 		return this.localizedData.services;
 	}
 
@@ -53,7 +53,7 @@ class Wp_Sdtrk_Decrypter {
 	getDecryptedData() {
 		return this.decryptedData;
 	}
-	
+
 	/**
 	* Set decrypted data
 	* @param {Array} data The decrypted data
@@ -61,7 +61,7 @@ class Wp_Sdtrk_Decrypter {
 	setDecryptedData(data) {
 		this.decryptedData = data;
 	}
-	
+
 
 	/**
 	* Decrypt data on server if needed
@@ -73,13 +73,13 @@ class Wp_Sdtrk_Decrypter {
 			if (this.has_Services()) {
 				//Payload
 				var dataJSON = {};
-				dataJSON["action"] = 'wp_sdtrk_handleAjaxCallback';
+				dataJSON["action"] = 'wp_sdtrk_handle_public_ajax_callback';
 				dataJSON["func"] = 'decryptData';
-				dataJSON["data"] = {data: this.getEncryptedData(), meta: this.get_Services()};
+				dataJSON["data"] = { data: this.getEncryptedData(), meta: this.get_Services() };
 				dataJSON['_nonce'] = wp_sdtrk_engine._nonce; //comes from wp
-				this.decryptOnServer(dataJSON, this).then(function(decrypter) {
+				this.decryptOnServer(dataJSON, this).then(function (decrypter) {
 					wp_sdtrk_startEngine(decrypter);
-				}).catch(function(err) {
+				}).catch(function (err) {
 					console.log(err);
 				})
 			}
@@ -97,17 +97,17 @@ class Wp_Sdtrk_Decrypter {
 	* @param {Wp_Sdtrk_Decrypter} decrypter The reference of the trigger decrypter
 	*/
 	decryptOnServer(dataJSON, decrypter) {
-		return new Promise(function(resolve, reject) {
+		return new Promise(function (resolve, reject) {
 			jQuery.ajax({
 				cache: false,
 				type: "POST",
 				url: wp_sdtrk_engine.ajax_url, //comes from wp
 				data: dataJSON,
-				success: function(response) {
+				success: function (response) {
 					decrypter.setDecryptedData(JSON.parse(response).data);
 					resolve(decrypter);
 				},
-				error: function(xhr, status, error) {
+				error: function (xhr, status, error) {
 					reject(error);
 				}
 			});

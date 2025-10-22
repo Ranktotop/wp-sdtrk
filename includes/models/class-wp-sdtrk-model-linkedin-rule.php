@@ -27,4 +27,12 @@ class WP_SDTRK_Model_Linkedin_Rule
     {
         return $this->value;
     }
+    public function get_label(): string
+    {
+        $map = [
+            "prodid" => __('Product ID', 'wp-sdtrk'),
+            "prodname" => __('Product Name', 'wp-sdtrk'),
+        ];
+        return $map[$this->key_name] ?? $this->key_name;
+    }
 }

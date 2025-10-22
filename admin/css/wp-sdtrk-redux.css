@@ -116,6 +116,10 @@
     border-bottom: 1px solid rgb(255 255 255 / 25%) !important;
 }
 
+.redux-container .redux-main span.description {
+    color: #999 !important;
+}
+
 .redux-container .redux-main .form-table tr td {
     color: #999;
 }

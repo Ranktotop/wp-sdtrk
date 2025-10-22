@@ -186,34 +186,34 @@ class Wp_Sdtrk_Admin
 		Redux::set_section('wp_sdtrk_options', [
 			'title'  => __('General', 'wp-sdtrk'),
 			'id'     => 'general_section',
-			'desc'   => __('Basic Tracking Settings', 'wp-sdtrk'),
+			'subtitle'   => __('Basic Tracking Settings', 'wp-sdtrk'),
 			'icon'   => 'el el-cog',
 			'fields' => [
 				[
 					'id'    => 'brandname',
 					'type'  => 'text',
 					'title' => __('Default Brand-Name', 'wp-sdtrk'),
-					'desc'  => __('This Name is used for several services', 'wp-sdtrk'),
+					'subtitle'  => __('This Name is used for several services', 'wp-sdtrk'),
 				],
 				[
 					'id'      => 'trk_fp',
 					'type'    => 'switch',
 					'title'   => __('Enable Fingerprinting', 'wp-sdtrk'),
-					'desc'    => __('Check to fingerprint users (works cookie-less)', 'wp-sdtrk'),
+					'subtitle'    => __('Check to fingerprint users (works cookie-less)', 'wp-sdtrk'),
 					'default' => 0,
 				],
 				[
 					'id'    => 'trk_time',
 					'type'  => 'switch',
 					'title' => __('Enable timed signal events', 'wp-sdtrk'),
-					'desc'  => __('Check to fire signal events described below after time', 'wp-sdtrk'),
+					'subtitle'  => __('Check to fire signal events described below after time', 'wp-sdtrk'),
 					'default' => 0,
 				],
 				[
 					'id'         => 'trk_time_group',
 					'type'       => 'repeater',
 					'title'      => __('Timed signal events', 'wp-sdtrk'),
-					'desc'       => __('Fire a signal-event after X Seconds', 'wp-sdtrk'),
+					'subtitle'       => __('Fire a signal-event after X Seconds', 'wp-sdtrk'),
 					'fields'     => [
 						[
 							'id'      => 'trk_time_group_seconds',
@@ -230,14 +230,14 @@ class Wp_Sdtrk_Admin
 					'id'    => 'trk_scroll',
 					'type'  => 'switch',
 					'title' => __('Enable scroll signal events', 'wp-sdtrk'),
-					'desc'  => __('Check to fire scroll events described below when reaching scroll-depth', 'wp-sdtrk'),
+					'subtitle'  => __('Check to fire scroll events described below when reaching scroll-depth', 'wp-sdtrk'),
 					'default' => 0,
 				],
 				[
 					'id'       => 'trk_scroll_group',
 					'type'     => 'repeater',
 					'title'    => __('Scroll signal events', 'wp-sdtrk'),
-					'desc'     => __('Fire signal-event if the user has scrolled to x percent of the page', 'wp-sdtrk'),
+					'subtitle'     => __('Fire signal-event if the user has scrolled to x percent of the page', 'wp-sdtrk'),
 					'fields'   => [
 						[
 							'id'      => 'trk_scroll_group_percent',
@@ -254,14 +254,14 @@ class Wp_Sdtrk_Admin
 					'id'    => 'trk_buttons',
 					'type'  => 'switch',
 					'title' => __('Fire signal-event on button-clicks', 'wp-sdtrk'),
-					'desc'  => __('Check to fire a signal event after an element has been clicked', 'wp-sdtrk'),
+					'subtitle'  => __('Check to fire a signal event after an element has been clicked', 'wp-sdtrk'),
 					'default' => 0,
 				],
 				[
 					'id'    => 'trk_visibility',
 					'type'  => 'switch',
 					'title' => __('Fire signal-event on visibility of items', 'wp-sdtrk'),
-					'desc'  => __('Check to fire a signal event after an element gets visible', 'wp-sdtrk'),
+					'subtitle'  => __('Check to fire a signal event after an element gets visible', 'wp-sdtrk'),
 					'default' => 0,
 				],
 			],
@@ -282,7 +282,7 @@ class Wp_Sdtrk_Admin
 			'fields'     => [],
 		]);
 
-		// META (FACEBOOK) TRACKING
+		// META TRACKING
 		Redux::set_section('wp_sdtrk_options', [
 			'title'      => __('Meta Tracking', 'wp-sdtrk'),
 			'id'         => 'meta_tracking_section',
@@ -291,36 +291,36 @@ class Wp_Sdtrk_Admin
 			'subsection' => true,
 			'fields'     => [
 				[
-					'id'    => 'fb_pixelid',
+					'id'    => 'meta_pixelid',
 					'type'  => 'text',
 					'title' => __('Meta Pixel-ID', 'wp-sdtrk'),
-					'desc'  => __('Insert your Meta Pixel-ID', 'wp-sdtrk'),
+					'subtitle'  => __('Insert your Meta Pixel-ID', 'wp-sdtrk'),
 				],
 				[
-					'id'       => 'fb_trk_debug',
+					'id'       => 'meta_trk_debug',
 					'type'     => 'switch',
 					'title'    => __('Activate Debugging', 'wp-sdtrk'),
-					'desc'     => __('Check to activate Meta debugging', 'wp-sdtrk'),
+					'subtitle'     => __('Check to activate Meta debugging', 'wp-sdtrk'),
 					'default'  => 0,
-					'required' => ['fb_pixelid', '!=', ''],
+					'required' => ['meta_pixelid', '!=', ''],
 				],
 				[
-					'id'       => 'fb_trk_server_debug_code',
+					'id'       => 'meta_trk_server_debug_code',
 					'type'     => 'text',
 					'title'    => __('Server Test-Code', 'wp-sdtrk'),
-					'desc'     => __('If you want to debug the events in the Meta events-manager, enter the test-code!', 'wp-sdtrk'),
-					'required' => [['fb_trk_debug', '=', '1'], ['fb_pixelid', '!=', '']],
+					'subtitle'     => __('If you want to debug the events in the Meta events-manager, enter the test-code!', 'wp-sdtrk'),
+					'required' => [['meta_trk_debug', '=', '1'], ['meta_pixelid', '!=', '']],
 				],
 				[
-					'id'       => 'fb_trk_browser',
+					'id'       => 'meta_trk_browser',
 					'type'     => 'switch',
 					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
-					'desc'     => __('Check to fire Meta browser pixel', 'wp-sdtrk'),
+					'subtitle'     => __('Check to fire Meta browser pixel', 'wp-sdtrk'),
 					'default'  => 0,
-					'required' => ['fb_pixelid', '!=', ''],
+					'required' => ['meta_pixelid', '!=', ''],
 				],
 				[
-					'id'       => 'fb_trk_browser_cookie_service',
+					'id'       => 'meta_trk_browser_cookie_service',
 					'type'     => 'select',
 					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
 					'options'  => [
@@ -328,32 +328,33 @@ class Wp_Sdtrk_Admin
 						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
 					],
 					'default'  => 'none',
-					'required' => [['fb_trk_browser', '=', '1'], ['fb_pixelid', '!=', '']],
+					'required' => [['meta_trk_browser', '=', '1'], ['meta_pixelid', '!=', '']],
 				],
 				[
-					'id'       => 'fb_trk_browser_cookie_id',
+					'id'       => 'meta_trk_browser_cookie_id',
 					'type'     => 'text',
 					'title'    => __('Cookie ID', 'wp-sdtrk'),
-					'desc'     => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
-					'required' => [['fb_trk_browser_cookie_service', '=', 'borlabs'], ['fb_trk_browser', '=', '1'], ['fb_pixelid', '!=', '']],
+					'subtitle' => __('You can get this information in the Plugins Consent-Settings', 'wp-sdtrk'),
+					'desc' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_meta_b();</script>') . '</code></p>',
+					'required' => [['meta_trk_browser_cookie_service', '=', 'borlabs'], ['meta_trk_browser', '=', '1'], ['meta_pixelid', '!=', '']],
 				],
 				[
-					'id'       => 'fb_trk_server',
+					'id'       => 'meta_trk_server',
 					'type'     => 'switch',
 					'title'    => __('Activate server based tracking', 'wp-sdtrk'),
-					'desc'     => __('Check to send Meta-Events server-side to the API', 'wp-sdtrk'),
+					'subtitle'     => __('Check to send Meta-Events server-side to the API', 'wp-sdtrk'),
 					'default'  => 0,
-					'required' => ['fb_pixelid', '!=', ''],
+					'required' => ['meta_pixelid', '!=', ''],
 				],
 				[
-					'id'       => 'fb_trk_server_token',
+					'id'       => 'meta_trk_server_token',
 					'type'     => 'text',
 					'title'    => __('API Token', 'wp-sdtrk'),
-					'desc'     => __('You can get the token within the Meta Events-Manager settings', 'wp-sdtrk'),
-					'required' => [['fb_trk_server', '=', '1'], ['fb_pixelid', '!=', '']],
+					'subtitle'     => __('You can get the token within the Meta Events-Manager settings', 'wp-sdtrk'),
+					'required' => [['meta_trk_server', '=', '1'], ['meta_pixelid', '!=', '']],
 				],
 				[
-					'id'       => 'fb_trk_server_cookie_service',
+					'id'       => 'meta_trk_server_cookie_service',
 					'type'     => 'select',
 					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
 					'options'  => [
@@ -361,13 +362,14 @@ class Wp_Sdtrk_Admin
 						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
 					],
 					'default'  => 'none',
-					'required' => [['fb_trk_server', '=', '1'], ['fb_pixelid', '!=', '']],
+					'required' => [['meta_trk_server', '=', '1'], ['meta_pixelid', '!=', '']],
 				],
 				[
-					'id'       => 'fb_trk_server_cookie_id',
+					'id'       => 'meta_trk_server_cookie_id',
 					'type'     => 'text',
 					'title'    => __('Cookie ID', 'wp-sdtrk'),
-					'required' => [['fb_trk_server_cookie_service', '=', 'borlabs'], ['fb_trk_server', '=', '1'], ['fb_pixelid', '!=', '']],
+					'required' => [['meta_trk_server_cookie_service', '=', 'borlabs'], ['meta_trk_server', '=', '1'], ['meta_pixelid', '!=', '']],
+					'desc' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_meta_s();</script>') . '</code></p>',
 				],
 			],
 		]);
@@ -384,13 +386,13 @@ class Wp_Sdtrk_Admin
 					'id'    => 'ga_measurement_id',
 					'type'  => 'text',
 					'title' => __('Google Measurement ID', 'wp-sdtrk'),
-					'desc'  => __('Insert your Google Measurement ID (G-XXXXXXXXXX)', 'wp-sdtrk'),
+					'subtitle'  => __('Insert your Google Measurement ID (G-XXXXXXXXXX)', 'wp-sdtrk'),
 				],
 				[
 					'id'       => 'ga_trk_debug',
 					'type'     => 'switch',
 					'title'    => __('Activate Debugging', 'wp-sdtrk'),
-					'desc'     => __('Check to activate Google Analytics debugging', 'wp-sdtrk'),
+					'subtitle'     => __('Check to activate Google Analytics debugging', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => ['ga_measurement_id', '!=', ''],
 				],
@@ -398,7 +400,7 @@ class Wp_Sdtrk_Admin
 					'id'       => 'ga_trk_debug_live',
 					'type'     => 'switch',
 					'title'    => __('Debug in live-view', 'wp-sdtrk'),
-					'desc'     => __('Check to show debug-hits in the Google Analytics realtime report', 'wp-sdtrk'),
+					'subtitle'     => __('Check to show debug-hits in the Google Analytics realtime report', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => [['ga_measurement_id', '!=', ''], ['ga_trk_debug', '=', '1']],
 				],
@@ -406,7 +408,7 @@ class Wp_Sdtrk_Admin
 					'id'       => 'ga_trk_browser',
 					'type'     => 'switch',
 					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
-					'desc'     => __('Check to fire Google Analytics browser pixel', 'wp-sdtrk'),
+					'subtitle'     => __('Check to fire Google Analytics browser pixel', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => ['ga_measurement_id', '!=', ''],
 				],
@@ -426,12 +428,13 @@ class Wp_Sdtrk_Admin
 					'type'     => 'text',
 					'title'    => __('Cookie ID', 'wp-sdtrk'),
 					'required' => [['ga_trk_browser_cookie_service', '=', 'borlabs'], ['ga_trk_browser', '=', '1'], ['ga_measurement_id', '!=', '']],
+					'desc' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_ga_b();</script>') . '</code></p>',
 				],
 				[
 					'id'       => 'ga_trk_server',
 					'type'     => 'switch',
 					'title'    => __('Activate server based tracking', 'wp-sdtrk'),
-					'desc'     => __('Check to send Google Analytics-Events server-side to the API', 'wp-sdtrk'),
+					'subtitle'     => __('Check to send Google Analytics-Events server-side to the API', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => ['ga_measurement_id', '!=', ''],
 				],
@@ -439,7 +442,7 @@ class Wp_Sdtrk_Admin
 					'id'       => 'ga_trk_server_token',
 					'type'     => 'text',
 					'title'    => __('API Token', 'wp-sdtrk'),
-					'desc'     => __('You can get the token within the Google Analytics Datastream settings', 'wp-sdtrk'),
+					'subtitle'     => __('You can get the token within the Google Analytics Datastream settings', 'wp-sdtrk'),
 					'required' => [['ga_trk_server', '=', '1'], ['ga_measurement_id', '!=', '']],
 				],
 				[
@@ -458,6 +461,7 @@ class Wp_Sdtrk_Admin
 					'type'     => 'text',
 					'title'    => __('Cookie ID', 'wp-sdtrk'),
 					'required' => [['ga_trk_server_cookie_service', '=', 'borlabs'], ['ga_trk_server', '=', '1'], ['ga_measurement_id', '!=', '']],
+					'desc' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_ga_s();</script>') . '</code></p>',
 				],
 			],
 		]);
@@ -474,13 +478,13 @@ class Wp_Sdtrk_Admin
 					'id'    => 'tt_pixelid',
 					'type'  => 'text',
 					'title' => __('TikTok Pixel-ID', 'wp-sdtrk'),
-					'desc'  => __('Insert your TikTok Pixel-ID', 'wp-sdtrk'),
+					'subtitle'  => __('Insert your TikTok Pixel-ID', 'wp-sdtrk'),
 				],
 				[
 					'id'       => 'tt_trk_debug',
 					'type'     => 'switch',
 					'title'    => __('Activate Debugging', 'wp-sdtrk'),
-					'desc'     => __('Check to activate TikTok debugging', 'wp-sdtrk'),
+					'subtitle'     => __('Check to activate TikTok debugging', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => ['tt_pixelid', '!=', ''],
 				],
@@ -488,14 +492,14 @@ class Wp_Sdtrk_Admin
 					'id'       => 'tt_trk_server_debug_code',
 					'type'     => 'text',
 					'title'    => __('Server Test-Code', 'wp-sdtrk'),
-					'desc'     => __('If you want to debug the events in the TikTok events-manager, enter the test-code!', 'wp-sdtrk'),
+					'subtitle'     => __('If you want to debug the events in the TikTok events-manager, enter the test-code!', 'wp-sdtrk'),
 					'required' => [['tt_trk_debug', '=', '1'], ['tt_pixelid', '!=', '']],
 				],
 				[
 					'id'       => 'tt_trk_browser',
 					'type'     => 'switch',
 					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
-					'desc'     => __('Check to fire TikTok browser pixel', 'wp-sdtrk'),
+					'subtitle'     => __('Check to fire TikTok browser pixel', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => ['tt_pixelid', '!=', ''],
 				],
@@ -515,12 +519,13 @@ class Wp_Sdtrk_Admin
 					'type'     => 'text',
 					'title'    => __('Cookie ID', 'wp-sdtrk'),
 					'required' => [['tt_trk_browser_cookie_service', '=', 'borlabs'], ['tt_trk_browser', '=', '1'], ['tt_pixelid', '!=', '']],
+					'desc' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_tt_b();</script>') . '</code></p>',
 				],
 				[
 					'id'       => 'tt_trk_server',
 					'type'     => 'switch',
 					'title'    => __('Activate server based tracking', 'wp-sdtrk'),
-					'desc'     => __('Check to send TikTok-Events server-side to the API', 'wp-sdtrk'),
+					'subtitle'     => __('Check to send TikTok-Events server-side to the API', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => ['tt_pixelid', '!=', ''],
 				],
@@ -528,7 +533,7 @@ class Wp_Sdtrk_Admin
 					'id'       => 'tt_trk_server_token',
 					'type'     => 'text',
 					'title'    => __('API Token', 'wp-sdtrk'),
-					'desc'     => __('You can get the token within the TikTok Events-Manager settings', 'wp-sdtrk'),
+					'subtitle'     => __('You can get the token within the TikTok Events-Manager settings', 'wp-sdtrk'),
 					'required' => [['tt_trk_server', '=', '1'], ['tt_pixelid', '!=', '']],
 				],
 				[
@@ -547,6 +552,7 @@ class Wp_Sdtrk_Admin
 					'type'     => 'text',
 					'title'    => __('Cookie ID', 'wp-sdtrk'),
 					'required' => [['tt_trk_server_cookie_service', '=', 'borlabs'], ['tt_trk_server', '=', '1'], ['tt_pixelid', '!=', '']],
+					'desc' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_tt_s();</script>') . '</code></p>',
 				],
 			],
 		]);
@@ -563,13 +569,13 @@ class Wp_Sdtrk_Admin
 					'id'    => 'lin_pixelid',
 					'type'  => 'text',
 					'title' => __('LinkedIn Partner-ID', 'wp-sdtrk'),
-					'desc'  => __('Insert your LinkedIn Pixel-ID', 'wp-sdtrk'),
+					'subtitle'  => __('Insert your LinkedIn Pixel-ID', 'wp-sdtrk'),
 				],
 				[
 					'id'       => 'lin_trk_debug',
 					'type'     => 'switch',
 					'title'    => __('Activate Debugging', 'wp-sdtrk'),
-					'desc'     => __('Check to activate LinkedIn debugging', 'wp-sdtrk'),
+					'subtitle'     => __('Check to activate LinkedIn debugging', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => ['lin_pixelid', '!=', ''],
 				],
@@ -577,7 +583,7 @@ class Wp_Sdtrk_Admin
 					'id'       => 'lin_trk_browser',
 					'type'     => 'switch',
 					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
-					'desc'     => __('Check to fire LinkedIn browser pixel', 'wp-sdtrk'),
+					'subtitle'     => __('Check to fire LinkedIn browser pixel', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => ['lin_pixelid', '!=', ''],
 				],
@@ -620,13 +626,13 @@ class Wp_Sdtrk_Admin
 					'id'    => 'fl_tracking_id',
 					'type'  => 'text',
 					'title' => __('Funnelytics Pixel-ID', 'wp-sdtrk'),
-					'desc'  => __('Insert your Funnelytics Pixel-ID', 'wp-sdtrk'),
+					'subtitle'  => __('Insert your Funnelytics Pixel-ID', 'wp-sdtrk'),
 				],
 				[
 					'id'       => 'fl_trk_debug',
 					'type'     => 'switch',
 					'title'    => __('Activate Debugging', 'wp-sdtrk'),
-					'desc'     => __('Check to activate Funnelytics debugging', 'wp-sdtrk'),
+					'subtitle'     => __('Check to activate Funnelytics debugging', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => ['fl_tracking_id', '!=', ''],
 				],
@@ -634,7 +640,7 @@ class Wp_Sdtrk_Admin
 					'id'       => 'fl_trk_browser',
 					'type'     => 'switch',
 					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
-					'desc'     => __('Check to fire Funnelytics browser pixel', 'wp-sdtrk'),
+					'subtitle'     => __('Check to fire Funnelytics browser pixel', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => ['fl_tracking_id', '!=', ''],
 				],
@@ -670,13 +676,13 @@ class Wp_Sdtrk_Admin
 					'id'    => 'mtc_tracking_id',
 					'type'  => 'text',
 					'title' => __('Mautic Base URL', 'wp-sdtrk'),
-					'desc'  => __('Insert the base-url of your mautic installation', 'wp-sdtrk'),
+					'subtitle'  => __('Insert the base-url of your mautic installation', 'wp-sdtrk'),
 				],
 				[
 					'id'       => 'mtc_trk_debug',
 					'type'     => 'switch',
 					'title'    => __('Activate Debugging', 'wp-sdtrk'),
-					'desc'     => __('Check to activate Mautic debugging', 'wp-sdtrk'),
+					'subtitle'     => __('Check to activate Mautic debugging', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => ['mtc_tracking_id', '!=', ''],
 				],
@@ -684,7 +690,7 @@ class Wp_Sdtrk_Admin
 					'id'       => 'mtc_trk_browser',
 					'type'     => 'switch',
 					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
-					'desc'     => __('Check to fire Mautic browser pixel', 'wp-sdtrk'),
+					'subtitle'     => __('Check to fire Mautic browser pixel', 'wp-sdtrk'),
 					'default'  => 0,
 					'required' => ['mtc_tracking_id', '!=', ''],
 				],
@@ -717,33 +723,40 @@ class Wp_Sdtrk_Admin
 			'subsection' => true,
 			'fields'     => [
 				[
+					'id'    => 'mtm_tracking_id',
+					'type'  => 'text',
+					'title' => __('Matomo Base URL', 'wp-sdtrk'),
+					'subtitle'  => __('Insert the base-url of your Matomo installation', 'wp-sdtrk'),
+				],
+				[
 					'id'    => 'mtm_site_id',
 					'type'  => 'text',
 					'title' => __('Matomo Site ID', 'wp-sdtrk'),
-					'desc'  => __('Insert the site ID of your Matomo installation', 'wp-sdtrk'),
+					'subtitle'  => __('Insert the site ID of your Matomo installation', 'wp-sdtrk'),
+					'required' => [['mtm_tracking_id', '!=', '']],
 				],
 				[
 					'id'    => 'mtm_api_key',
 					'type'  => 'text',
 					'title' => __('Matomo API Key', 'wp-sdtrk'),
-					'desc'  => __('Insert the API key of your Matomo installation', 'wp-sdtrk'),
+					'subtitle'  => __('Insert the API key of your Matomo installation', 'wp-sdtrk'),
 					'required' => ['mtm_site_id', '!=', ''],
 				],
 				[
 					'id'       => 'mtm_trk_debug',
 					'type'     => 'switch',
 					'title'    => __('Activate Debugging', 'wp-sdtrk'),
-					'desc'     => __('Check to activate Matomo debugging', 'wp-sdtrk'),
+					'subtitle'     => __('Check to activate Matomo debugging', 'wp-sdtrk'),
 					'default'  => 0,
-					'required' => [['mtm_site_id', '!=', ''], ['mtm_api_key', '!=', '']],
+					'required' => ['mtm_api_key', '!=', ''],
 				],
 				[
 					'id'       => 'mtm_trk_browser',
 					'type'     => 'switch',
 					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
-					'desc'     => __('Check to fire Matomo browser pixel', 'wp-sdtrk'),
+					'subtitle'     => __('Check to fire Matomo browser pixel', 'wp-sdtrk'),
 					'default'  => 0,
-					'required' => [['mtm_site_id', '!=', ''], ['mtm_api_key', '!=', '']],
+					'required' => ['mtm_api_key', '!=', ''],
 				],
 				[
 					'id'       => 'mtm_trk_browser_cookie_service',
@@ -754,13 +767,13 @@ class Wp_Sdtrk_Admin
 						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
 					],
 					'default'  => 'none',
-					'required' => [['mtm_trk_browser', '=', '1'], ['mtm_site_id', '!=', ''], ['mtm_api_key', '!=', '']],
+					'required' => ['mtm_trk_browser', '=', '1'],
 				],
 				[
 					'id'       => 'mtm_trk_browser_cookie_id',
 					'type'     => 'text',
 					'title'    => __('Cookie ID', 'wp-sdtrk'),
-					'required' => [['mtm_trk_browser_cookie_service', '=', 'borlabs'], ['mtm_trk_browser', '=', '1'], ['mtm_site_id', '!=', ''], ['mtm_api_key', '!=', '']],
+					'required' => ['mtm_trk_browser_cookie_service', '=', 'borlabs'],
 				],
 			],
 		]);
@@ -780,14 +793,14 @@ class Wp_Sdtrk_Admin
 					'id'    => 'ds24_encrypt_data',
 					'type'  => 'switch',
 					'title' => __('Activate Digistore24 data-decryption', 'wp-sdtrk'),
-					'desc'  => __('Check to decrypt GET-Parameter from Digistore24 before handling', 'wp-sdtrk'),
+					'subtitle'  => __('Check to decrypt GET-Parameter from Digistore24 before handling', 'wp-sdtrk'),
 					'default' => 0,
 				],
 				[
 					'id'       => 'ds24_encrypt_data_key',
 					'type'     => 'text',
 					'title'    => __('ThankYou-Key', 'wp-sdtrk'),
-					'desc'     => __('Please enter the ThankYou-Key which you have set in Digistore24', 'wp-sdtrk'),
+					'subtitle'     => __('Please enter the ThankYou-Key which you have set in Digistore24', 'wp-sdtrk'),
 					'required' => ['ds24_encrypt_data', '=', '1'],
 				],
 			],
@@ -843,7 +856,7 @@ class Wp_Sdtrk_Admin
                 <h4>' . __('UTM', 'wp-sdtrk') . '</h4>
                 <p><strong>' . __('Parameter-Name(s):', 'wp-sdtrk') . '</strong> utm_source | utm_campaign | utm_term | utm_medium | utm_content</p>
                 <p><strong>' . __('Type:', 'wp-sdtrk') . '</strong> string</p>
-                <p><strong>' . __('Example:', 'wp-sdtrk') . '</strong> <code>' . get_home_url() . '?utm_source=facebook&utm_medium=cpc</code></p>
+                <p><strong>' . __('Example:', 'wp-sdtrk') . '</strong> <code>' . get_home_url() . '?utm_source=meta&utm_medium=cpc</code></p>
                 <p><strong style="color: #d63638;">' . __('Note:', 'wp-sdtrk') . '</strong> ' . __('UTM parameters are stored in cookies and automatically passed on further visits!', 'wp-sdtrk') . '</p>',
 				],
 			],
@@ -1011,6 +1024,22 @@ class Wp_Sdtrk_Admin
 		$modal_path = plugin_dir_path(dirname(__FILE__)) . 'templates/partials/html-modal-confirm.php';
 		if (file_exists($modal_path)) {
 			include $modal_path;
+		}
+	}
+
+	public function after_redux_save($options, $changed_values)
+	{
+		//Do nothing if no values changed
+		if (empty($changed_values)) {
+			return;
+		}
+		// Check if linked in triggers are still valid
+		$mappings = WP_SDTRK_Helper_Linkedin::get_all_mappings();
+		foreach ($mappings as $mapping) {
+			if (!$mapping->is_valid_event()) {
+				// Delete invalid mapping
+				$mapping->delete();
+			}
 		}
 	}
 

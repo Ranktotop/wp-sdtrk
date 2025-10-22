@@ -19,7 +19,7 @@ class Wp_Sdtrk_Helper {
 		// Convert to JSON array
 		return dataItem ? JSON.parse('{"'
 			+ dataItem.replace(/&/g, '","').replace(/=/g, '":"') + '"}',
-			function(key, value) {
+			function (key, value) {
 				return key === "" ? value : decodeURIComponent(value);
 			}) : {};
 	}
@@ -46,7 +46,7 @@ class Wp_Sdtrk_Helper {
 	send_ajax(data, debugMode = false) {
 		var helper = this; // for access to the logger
 		var dataJSON = {};
-		dataJSON["action"] = 'wp_sdtrk_handleAjaxCallback';
+		dataJSON["action"] = 'wp_sdtrk_handle_public_ajax_callback';
 		dataJSON["func"] = 'validateTracker';
 		dataJSON["data"] = data;
 		dataJSON["debug"] = debugMode;
@@ -57,7 +57,7 @@ class Wp_Sdtrk_Helper {
 			type: "POST",
 			url: this.localizedData.ajax_url,
 			data: dataJSON,
-			success: function(response) {
+			success: function (response) {
 				try {
 					var r = JSON.parse(response);
 					if (r.state) {
@@ -68,7 +68,7 @@ class Wp_Sdtrk_Helper {
 					helper.debugLog(debugMode, e, 'JSON Error in Response from Server (' + data.type + '-' + data.handler + ')');
 				}
 			},
-			error: function(xhr, status, error) {
+			error: function (xhr, status, error) {
 				helper.debugLog(debugMode, xhr.status, 'Server-Status (' + data.type + '-' + data.handler + ')');
 				helper.debugLog(debugMode, xhr.responseText, 'Server-Error (' + data.type + '-' + data.handler + ')');
 			}
@@ -114,7 +114,7 @@ class Wp_Sdtrk_Helper {
 		var hash = (window.location.hash) ? "#" + window.location.hash.substring(1) : "";
 
 		//Delete sensitive params
-		privacyParams.forEach(function(param) {
+		privacyParams.forEach(function (param) {
 			if (urlParams.has(param)) {
 				urlParams.delete(param);
 			}
@@ -280,32 +280,32 @@ class Wp_Sdtrk_Helper {
 	get_EventName(type, data = '0') {
 		var map = this.localizedData.evmap;
 		//if type exists in map
-		if(map[type]){
+		if (map[type]) {
 			//return the value and replace variable with given data
 			return map[type].replace('%', data);
 		}
 		return type;
 	}
-	
+
 	/**
 	* Gives parameter-names for requested field
 	* @param {String} name The name of parameter-set which is requested
 	* @return {Array} The parameter names
 	 */
-	get_paramNames(name){
+	get_paramNames(name) {
 		var map = this.localizedData.pmap;
-		if(map[name]){
+		if (map[name]) {
 			return map[name];
 		}
 		return [];
 	}
-	
+
 	/**
 	* Checks if the current user is an admin
 	* @return {Boolean} is admin
 	 */
-	isAdmin(){
-		if(this.localizedData.admin === "1" || this.localizedData.admin === true){
+	isAdmin() {
+		if (this.localizedData.admin === "1" || this.localizedData.admin === true) {
 			return true;
 		}
 		return false;

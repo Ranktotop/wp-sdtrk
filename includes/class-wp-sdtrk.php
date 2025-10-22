@@ -153,6 +153,36 @@ class Wp_Sdtrk
 		 */
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-wp-sdtrk-cron.php';
 
+		/**
+		 * Tracker Event
+		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-tracker-event.php';
+
+		/**
+		 * Tracker Facebook
+		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-tracker-fb.php';
+
+		/**
+		 * Tracker Google
+		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-tracker-ga.php';
+
+		/**
+		 * Tracker Tik Tok
+		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-tracker-tt.php';
+
+		/**
+		 * Decrypter
+		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-decryptor-ds24.php';
+
+		/**
+		 * Hit Manager
+		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-hitContainer.php';
+
 		$this->loader = new Wp_Sdtrk_Loader();
 	}
 
@@ -196,6 +226,7 @@ class Wp_Sdtrk
 		//Register Redux
 		$this->loader->add_action('after_setup_theme', $plugin_admin, 'wp_sdtrk_register_redux_options');
 		$this->loader->add_action('after_setup_theme', $plugin_admin, 'register_redux_metabox');
+		$this->loader->add_action('redux/options/wp_sdtrk_options/saved', $plugin_admin, 'after_redux_save', 10, 2);
 
 		// Register Admin Pages
 		$this->loader->add_action('in_admin_footer', $plugin_admin, 'inject_global_admin_ui');

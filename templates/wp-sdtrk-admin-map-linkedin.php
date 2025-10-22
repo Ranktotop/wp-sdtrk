@@ -63,7 +63,7 @@ foreach ($time_triggers as $time_trigger) {
                             <td>
                                 <ul style="margin: 0; padding-left: 1.2em;">
                                     <?php foreach ($mapping->get_rules() as $rule): ?>
-                                        <li><strong><?php echo esc_html($rule->get_key_name()); ?></strong>: <?php echo esc_html($rule->get_value()); ?></li>
+                                        <li><strong><?php echo esc_html($rule->get_label()); ?>:</strong> <?php echo esc_html($rule->get_value()); ?></li>
                                     <?php endforeach; ?>
                                 </ul>
                             </td>
