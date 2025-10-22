@@ -13,7 +13,7 @@ class WP_SDTRK_Helper_Options
      */
     public static function get_metabox_option(int $post_id, string $key, mixed $default = null): string|array|bool|null
     {
-        $meta = get_post_meta($post_id, 'wp_sdtrk_options', true);
+        $meta = redux_post_meta('wp_sdtrk_options', $post_id);
 
         if (!is_array($meta)) {
             return $default;

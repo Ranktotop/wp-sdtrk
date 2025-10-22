@@ -615,7 +615,8 @@ class Wp_Sdtrk_Public
 			$this->get_jsHandler('name', 'tt'),
 			$this->get_jsHandler('name', 'lin'),
 			$this->get_jsHandler('name', 'fl'),
-			$this->get_jsHandler('name', 'mtc')
+			$this->get_jsHandler('name', 'mtc'),
+			$this->get_jsHandler('name', 'mtm')
 		);
 
 		// Register scripts
