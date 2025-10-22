@@ -1,6 +1,6 @@
 //Backup for IE8
 if (!Date.now) {
-	Date.now = function() { return new Date().getTime(); }
+	Date.now = function () { return new Date().getTime(); }
 }
 
 class Wp_Sdtrk_Engine {
@@ -37,8 +37,7 @@ class Wp_Sdtrk_Engine {
 		this.collect_items();
 
 		//intantiate catcher
-		this.catcher_local = new Wp_Sdtrk_Catcher_Local(this.event, this.helper);
-		this.catcher_fb = new Wp_Sdtrk_Catcher_Fb(this.event, this.helper);
+		this.catcher_fb = new Wp_Sdtrk_Catcher_Meta(this.event, this.helper);
 		this.catcher_ga = new Wp_Sdtrk_Catcher_Ga(this.event, this.helper);
 		this.catcher_tt = new Wp_Sdtrk_Catcher_Tt(this.event, this.helper);
 		this.catcher_lin = new Wp_Sdtrk_Catcher_Lin(this.event, this.helper);
@@ -67,7 +66,7 @@ class Wp_Sdtrk_Engine {
 
 	/**
 	* Get the fb catcher
-	* @return  {Wp_Sdtrk_Catcher_Fb} The catcher-object
+	* @return  {Wp_Sdtrk_Catcher_Meta} The catcher-object
 	 */
 	get_catcher_fb() {
 		return this.catcher_fb;
@@ -102,7 +101,7 @@ class Wp_Sdtrk_Engine {
 	get_catcher_fl() {
 		return this.catcher_fl;
 	}
-	
+
 	/**
 	* Get the mtc catcher
 	* @return  {Wp_Sdtrk_Catcher_Mtc} The catcher-object
@@ -118,7 +117,7 @@ class Wp_Sdtrk_Engine {
 		//Search for clickTriggerItems
 		if (this.event.getClickTrigger() !== false) {
 			var clickElements = [];
-			jQuery("[class*='trkbtn-']").each(function(index) {
+			jQuery("[class*='trkbtn-']").each(function (index) {
 				var el = jQuery(this);
 				var classes = el.attr("class").split(/\s+/);
 				for (const className of classes) {
@@ -133,7 +132,7 @@ class Wp_Sdtrk_Engine {
 		//Search for visibilityTriggerItems
 		if (this.event.getVisibilityTrigger() !== false) {
 			var watchElements = [];
-			jQuery("[class*='watchitm-']").each(function(index) {
+			jQuery("[class*='watchitm-']").each(function (index) {
 				var el = jQuery(this);
 				var classes = el.attr("class").split(/\s+/);
 				for (const className of classes) {
@@ -151,9 +150,9 @@ class Wp_Sdtrk_Engine {
 	* Fetch Data and fill up the event object
 	 */
 	collect_eventData() {
-		
+
 		//UTMs
-		this.event.setUtm(this.helper.get_Params(this.helper.get_paramNames('utm')));		
+		this.event.setUtm(this.helper.get_Params(this.helper.get_paramNames('utm')));
 		this.helper.persist(this.event.getUtm());
 		this.event.setUtm(this.helper.get_Cookies(this.event.getUtm()));
 
@@ -184,7 +183,7 @@ class Wp_Sdtrk_Engine {
 		this.event.setUserLastName(this.helper.get_Params(this.helper.get_paramNames('lastname')));
 		this.event.setUserFP(this.fp.get_fp());
 		this.event.setUserEmail(this.helper.get_Params(this.helper.get_paramNames('email')));
-		
+
 		//Additional
 		//TimeTrigger
 		if (this.localizedData.timeTrigger) {
@@ -216,7 +215,6 @@ class Wp_Sdtrk_Engine {
 	*/
 	run() {
 		//init
-		var catcher_local = new Wp_Sdtrk_Catcher_Local(this.event, this.helper);
 		var catcher_fb = this.catcher_fb;
 		var catcher_ga = this.catcher_ga;
 		var catcher_tt = this.catcher_tt;
@@ -225,7 +223,6 @@ class Wp_Sdtrk_Engine {
 		var catcher_mtc = this.catcher_mtc;
 
 		//catchPageHit()
-		catcher_local.catchPageHit();
 		catcher_fb.catchPageHit(2);
 		catcher_ga.catchPageHit(2);
 		catcher_tt.catchPageHit(2);
@@ -240,9 +237,8 @@ class Wp_Sdtrk_Engine {
 				var time = parseInt(triggerTime);
 				if (!isNaN(time)) {
 					time = time * 1000;
-					jQuery(document).ready(function() {
-						setTimeout(function() {
-							catcher_local.catchTimeHit(triggerTime);
+					jQuery(document).ready(function () {
+						setTimeout(function () {
 							catcher_fb.catchTimeHit(triggerTime, 2);
 							catcher_ga.catchTimeHit(triggerTime, 2);
 							catcher_tt.catchTimeHit(triggerTime, 2);
@@ -260,10 +256,9 @@ class Wp_Sdtrk_Engine {
 		//catchClickHit(tag)	
 		if (this.event.getClickTrigger() !== false) {
 			this.clickBtns.forEach((el) => {
-				jQuery(el[0]).on('click', function() {
+				jQuery(el[0]).on('click', function () {
 					if (!window.wp_sdtrk_clickedBtns.includes(el[1])) {
 						window.wp_sdtrk_clickedBtns.push(el[1]);
-						catcher_local.catchClickHit(el[1]);
 						catcher_fb.catchClickHit(el[1], 2);
 						catcher_ga.catchClickHit(el[1], 2);
 						catcher_tt.catchClickHit(el[1], 2);
@@ -278,7 +273,7 @@ class Wp_Sdtrk_Engine {
 
 		//catchScrollHit(percent)
 		if (window.wp_sdtrk_scrollDepths !== false) {
-			window.addEventListener('scroll', function() {
+			window.addEventListener('scroll', function () {
 				if (window.wp_sdtrk_scrollDepths.length >= window.wp_sdtrk_catchedScrolls.length) {
 					window.wp_sdtrk_scrollDepths.forEach((depth) => {
 						if (!window.wp_sdtrk_catchedScrolls.includes(depth)) {
@@ -287,7 +282,6 @@ class Wp_Sdtrk_Engine {
 							var perc = Math.ceil((st * 100) / wh)
 							if (perc >= depth) {
 								window.wp_sdtrk_catchedScrolls.push(depth);
-								catcher_local.catchScrollHit(depth);
 								catcher_fb.catchScrollHit(depth, 2);
 								catcher_ga.catchScrollHit(depth, 2);
 								catcher_tt.catchScrollHit(depth, 2);
@@ -304,7 +298,7 @@ class Wp_Sdtrk_Engine {
 
 		//catchVisibilityHit(tag)
 		if (this.event.getVisibilityTrigger() !== false) {
-			window.addEventListener('scroll', function() {
+			window.addEventListener('scroll', function () {
 				window.wp_sdtrk_visibilityItems.forEach((el) => {
 					var docViewTop = jQuery(window).scrollTop();
 					var docViewBottom = docViewTop + jQuery(window).height();
@@ -312,7 +306,6 @@ class Wp_Sdtrk_Engine {
 					var elemBottom = elemTop + jQuery(el[0]).height();
 					if ((elemBottom <= docViewBottom) && (elemTop >= docViewTop) && !window.wp_sdtrk_visitedItems.includes(el[1])) {
 						window.wp_sdtrk_visitedItems.push(el[1]);
-						catcher_local.catchVisibilityHit(el[1]);
 						catcher_fb.catchVisibilityHit(el[1], 2);
 						catcher_ga.catchVisibilityHit(el[1], 2);
 						catcher_tt.catchVisibilityHit(el[1], 2);
@@ -332,7 +325,7 @@ class Wp_Sdtrk_Engine {
 * @param {Wp_Sdtrk_Decrypter} decrypter The decrypter which decrypted the data
 */
 function wp_sdtrk_startEngine(decrypter) {
-	jQuery(document).ready(function() {
+	jQuery(document).ready(function () {
 		//has to be global for access while backloading
 		window.wp_sdtrk_engine_class = new Wp_Sdtrk_Engine(decrypter.getDecryptedData());
 		window.wp_sdtrk_engine_class.run();

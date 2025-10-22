@@ -147,6 +147,7 @@ class Wp_Sdtrk
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/helpers/class-wp-sdtrk-helper-options.php';
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/helpers/class-wp-sdtrk-helper-base.php';
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/helpers/class-wp-sdtrk-helper-linkedin.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/helpers/class-wp-sdtrk-helper-event.php';
 
 		/**
 		 * Cronjob classes

@@ -101,7 +101,7 @@ class Wp_Sdtrk_Tracker_Event
     {
         return $this->grabFirstValue('userLastName');
     }
-    
+
     /**
      * Return the user-fingerprint
      *
@@ -129,7 +129,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getBrandName()
     {
-        $brandName = ($this->setAndFilled('brandName')) ? $this->eventData['brandName'] : Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "brandname");
+        $brandName = ($this->setAndFilled('brandName')) ? $this->eventData['brandName'] : WP_SDTRK_Helper_Event::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "brandname");
         return ($brandName && ! empty(trim($brandName))) ? $brandName : get_bloginfo('name');
     }
 
@@ -181,7 +181,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getEventIp()
     {
-        return ($this->setAndFilled('eventSourceAdress')) ? $this->eventData['eventSourceAdress'] : Wp_Sdtrk_Helper::wp_sdtrk_getClientIp();
+        return ($this->setAndFilled('eventSourceAdress')) ? $this->eventData['eventSourceAdress'] : WP_SDTRK_Helper_Event::getClientIp();
     }
 
     /**
@@ -207,7 +207,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getEventSource()
     {
-        return ($this->setAndFilled('eventSource')) ? $this->eventData['eventSource'] : Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL();
+        return ($this->setAndFilled('eventSource')) ? $this->eventData['eventSource'] : WP_SDTRK_Helper_Event::getCurrentURL();
     }
 
     /**
@@ -217,7 +217,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getEventReferer()
     {
-        return ($this->setAndFilled('eventSourceReferer')) ? $this->eventData['eventSourceReferer'] : Wp_Sdtrk_Helper::wp_sdtrk_getCurrentReferer();
+        return ($this->setAndFilled('eventSourceReferer')) ? $this->eventData['eventSourceReferer'] : WP_SDTRK_Helper_Event::getCurrentReferer();
     }
 
     /**
@@ -247,7 +247,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getEventUrl()
     {
-        return ($this->setAndFilled('eventUrl')) ? $this->eventData['eventUrl'] : Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL();
+        return ($this->setAndFilled('eventUrl')) ? $this->eventData['eventUrl'] : WP_SDTRK_Helper_Event::getCurrentURL();
     }
 
     /**
@@ -297,7 +297,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getTime()
     {
-        return ($this->setAndFilled('eventTime')) ? $this->eventData['eventTime'] : Wp_Sdtrk_Helper::wp_sdtrk_DateToTimestamp(false);
+        return ($this->setAndFilled('eventTime')) ? $this->eventData['eventTime'] : time();
     }
 
     /**
@@ -429,7 +429,7 @@ class Wp_Sdtrk_Tracker_Event
             'source' => $this->getEventSource()
         );
         //if fingerprint is set
-        if($this->getUserFingerprint() !== false){
+        if ($this->getUserFingerprint() !== false) {
             $data['user'] = array(
                 'id' => $this->getUserFingerprint()
             );
@@ -523,15 +523,16 @@ class Wp_Sdtrk_Tracker_Event
         }
         return false;
     }
-    
+
     /**
      * Gives an Event-Name for given type
      * @param string $type
      * @param string $data
      */
-    public function get_CustomEventName($type, $data = '0'){
-        $map = Wp_Sdtrk_Helper::wp_sdtrk_getDefaultEventMap();
-        if(isset($map[$type])){
+    public function get_CustomEventName($type, $data = '0')
+    {
+        $map = WP_SDTRK_Helper_Event::getDefaultEventMap();
+        if (isset($map[$type])) {
             return str_replace('%', $data, $map[$type]);
         }
         return $type;

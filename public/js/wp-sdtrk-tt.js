@@ -26,7 +26,7 @@ class Wp_Sdtrk_Catcher_Tt {
 		}
 		//Skip if admin
 		if (this.helper.isAdmin()) {
-			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (tt)');					
+			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (tt)');
 			return;
 		}
 		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {
@@ -177,19 +177,19 @@ class Wp_Sdtrk_Catcher_Tt {
 	loadPixel() {
 		if (this.isEnabled('b') && !this.pixelLoaded) {
 			//Base Pixel
-			! function(w, d, t, pixelid) {
+			! function (w, d, t, pixelid) {
 				w.TiktokAnalyticsObject = t;
 				var ttq = w[t] = w[t] || [];
-				ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie"], ttq.setAndDefer = function(t, e) {
-					t[e] = function() {
+				ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie"], ttq.setAndDefer = function (t, e) {
+					t[e] = function () {
 						t.push([e].concat(Array.prototype.slice.call(arguments, 0)))
 					}
 				};
 				for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
-				ttq.instance = function(t) {
+				ttq.instance = function (t) {
 					for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++) ttq.setAndDefer(e, ttq.methods[n]);
 					return e
-				}, ttq.load = function(e, n) {
+				}, ttq.load = function (e, n) {
 					var i = "https://analytics.tiktok.com/i18n/pixel/events.js";
 					ttq._i = ttq._i || {}, ttq._i[e] = [], ttq._i[e]._u = i, ttq._t = ttq._t || {}, ttq._t[e] = +new Date, ttq._o = ttq._o || {}, ttq._o[e] = n || {};
 					var o = document.createElement("script");
@@ -226,20 +226,20 @@ class Wp_Sdtrk_Catcher_Tt {
 					this.helper.debugLog(this.localizedData.dbg, { event: this.convert_eventname(this.event.grabEventName()), data: this.get_data_custom(), meta: { event_id: this.event.grabOrderId() + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
 					break;
 				case 'Time':
-					ttq.track(this.helper.get_EventName(handler,data.time), this.get_data_custom(['value', 'currency'], {}), { event_id: this.event.grabOrderId() + "-t" + data.time + "_" + this.get_hashId() })
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.time), data: this.get_data_custom(['value', 'currency'], {}), meta: { event_id: this.event.grabOrderId() + "-t" + data.time + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
+					ttq.track(this.helper.get_EventName(handler, data.time), this.get_data_custom(['value', 'currency'], {}), { event_id: this.event.grabOrderId() + "-t" + data.time + "_" + this.get_hashId() })
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.time), data: this.get_data_custom(['value', 'currency'], {}), meta: { event_id: this.event.grabOrderId() + "-t" + data.time + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
 					break;
 				case 'Scroll':
-					ttq.track(this.helper.get_EventName(handler,data.percent), this.get_data_custom(['value', 'currency'], {}), { event_id: this.event.grabOrderId() + "-s" + data.percent + "_" + this.get_hashId() })
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.percent), data: this.get_data_custom(['value', 'currency'], {}), meta: { event_id: this.event.grabOrderId() + "-s" + data.percent + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
+					ttq.track(this.helper.get_EventName(handler, data.percent), this.get_data_custom(['value', 'currency'], {}), { event_id: this.event.grabOrderId() + "-s" + data.percent + "_" + this.get_hashId() })
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.percent), data: this.get_data_custom(['value', 'currency'], {}), meta: { event_id: this.event.grabOrderId() + "-s" + data.percent + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
 					break;
 				case 'Click':
-					ttq.track(this.helper.get_EventName(handler,data.tag), this.get_data_custom(['value', 'currency'], { buttonTag: data.tag }), { event_id: this.event.grabOrderId() + "-b" + data.tag + "_" + this.get_hashId() })
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom(['value', 'currency'], { buttonTag: data.tag }), meta: { event_id: this.event.grabOrderId() + "-b" + data.tag + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
+					ttq.track(this.helper.get_EventName(handler, data.tag), this.get_data_custom(['value', 'currency'], { buttonTag: data.tag }), { event_id: this.event.grabOrderId() + "-b" + data.tag + "_" + this.get_hashId() })
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.tag), data: this.get_data_custom(['value', 'currency'], { buttonTag: data.tag }), meta: { event_id: this.event.grabOrderId() + "-b" + data.tag + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
 					break;
 				case 'Visibility':
-					ttq.track(this.helper.get_EventName(handler,data.tag), this.get_data_custom(['value', 'currency'], { itemTag: data.tag }), { event_id: this.event.grabOrderId() + "-v" + data.tag + "_" + this.get_hashId() })
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom(['value', 'currency'], { itemTag: data.tag }), meta: { event_id: this.event.grabOrderId() + "-v" + data.tag + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
+					ttq.track(this.helper.get_EventName(handler, data.tag), this.get_data_custom(['value', 'currency'], { itemTag: data.tag }), { event_id: this.event.grabOrderId() + "-v" + data.tag + "_" + this.get_hashId() })
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.tag), data: this.get_data_custom(['value', 'currency'], { itemTag: data.tag }), meta: { event_id: this.event.grabOrderId() + "-v" + data.tag + "_" + this.get_hashId() } }, 'Fired in Browser (tt-' + handler + ')');
 					break;
 			}
 		}

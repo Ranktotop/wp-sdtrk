@@ -24,7 +24,7 @@ class Wp_Sdtrk_Catcher_Lin {
 		}
 		//Skip if admin
 		if (this.helper.isAdmin()) {
-			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (lin)');					
+			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (lin)');
 			return;
 		}
 		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {
@@ -153,9 +153,9 @@ class Wp_Sdtrk_Catcher_Lin {
 			//Base Pixel
 			window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
 			window._linkedin_data_partner_ids.push(this.localizedData.pid);
-			(function(l) {
+			(function (l) {
 				if (!l) {
-					window.lintrk = function(a, b) { window.lintrk.q.push([a, b]) };
+					window.lintrk = function (a, b) { window.lintrk.q.push([a, b]) };
 					window.lintrk.q = []
 				}
 				var s = document.getElementsByTagName("script")[0];

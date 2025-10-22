@@ -49,10 +49,7 @@ class WP_SDTRK_Helper_Linkedin extends WP_SDTRK_Helper_Base
 
         $sql = "SELECT * FROM {$table} ORDER BY id ASC";
 
-        $rows = $wpdb->get_results(
-            $wpdb->prepare($sql),
-            ARRAY_A
-        ) ?: [];
+        $rows = $wpdb->get_results($sql, ARRAY_A) ?: [];
 
         return array_map(
             fn(array $row) => static::$model_class::load_by_row($row),

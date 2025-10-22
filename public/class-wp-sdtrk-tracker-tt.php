@@ -110,8 +110,8 @@ class Wp_Sdtrk_Tracker_Tt
             return false;
         }
         $response = $this->$functionName($event, $data);
-        Wp_Sdtrk_Helper::wp_sdtrk_write_log("Response:", $this->debugMode);
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($response, $this->debugMode);
+        sdtrk_log("Response:", "debug", !$this->debugMode);
+        sdtrk_log($response, "debug", !$this->debugMode);
         return ($this->setAndGetDebugMode_frontend($this->debugMode_frontend)) ? $response : true;
     }
 
@@ -344,14 +344,15 @@ class Wp_Sdtrk_Tracker_Tt
 
         // Create the Payload
         $fields = $requestData;
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($fields, $this->debugEnabled_Server());
+
+        sdtrk_log($fields, "debug", !$this->debugEnabled_Server());
         $payload = json_encode($fields);
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($payload, $this->debugEnabled_Server());
+        sdtrk_log($payload, "debug", !$this->debugEnabled_Server());
         $headers = array();
         array_push($headers, "Access-Token:" . $this->apiToken);
 
         // Send Request
-        return Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload, $headers, $this->debugMode);
+        return WP_SDTRK_Helper_Event::do_post($this->getApiUrl(), $payload, $headers, $this->debugMode);
     }
 
     /**
@@ -429,8 +430,8 @@ class Wp_Sdtrk_Tracker_Tt
             ),
             "test_event_code" => $this->debugCode
         );
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($fields);
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log(json_encode($fields));
+        sdtrk_log($fields, "debug", !$this->debugEnabled_Server());
+        sdtrk_log(json_encode($fields), "debug", !$this->debugEnabled_Server());
 
         curl_setopt_array($curl, array(
             CURLOPT_URL => 'https://business-api.tiktok.com/open_api/v1.2/pixel/track/',
@@ -450,7 +451,7 @@ class Wp_Sdtrk_Tracker_Tt
         ));
 
         $response = curl_exec($curl);
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($response);
+        sdtrk_log($response, "debug", !$this->debugMode);
 
         curl_close($curl);
         return;

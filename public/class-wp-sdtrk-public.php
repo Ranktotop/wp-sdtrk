@@ -587,15 +587,15 @@ class Wp_Sdtrk_Public
 		$localizedData['trkow'] = $trkOverwrite;
 		$localizedData['pageId'] = $postId;
 		$localizedData['pageTitle'] = $title;
-		$localizedData['rootDomain'] = Wp_Sdtrk_Helper::wp_sdtrk_getRootDomain();
+		$localizedData['rootDomain'] = WP_SDTRK_Helper_Event::getRootDomain();
 		$localizedData['currentDomain'] = rtrim(get_site_url(), "/") . '/';
 		$localizedData['brandName'] = $brandName;
-		$localizedData['addr'] = Wp_Sdtrk_Helper::wp_sdtrk_getClientIp();
+		$localizedData['addr'] = WP_SDTRK_Helper_Event::getClientIp();
 		$localizedData['agent'] = $_SERVER['HTTP_USER_AGENT'];
-		$localizedData['source'] = Wp_Sdtrk_Helper::wp_sdtrk_getCurrentURL(true);
-		$localizedData['referer'] = Wp_Sdtrk_Helper::wp_sdtrk_getCurrentReferer(true);
-		$localizedData['evmap'] = Wp_Sdtrk_Helper::wp_sdtrk_getDefaultEventMap(); //eventmap for keep the custom-event-names in sync with server
-		$localizedData['pmap'] = Wp_Sdtrk_Helper::wp_sdtrk_getParamNames(); // for stripping data from url before sending url to service (required by meta for example)
+		$localizedData['source'] = WP_SDTRK_Helper_Event::getCurrentURL(true);
+		$localizedData['referer'] = WP_SDTRK_Helper_Event::getCurrentReferer(true);
+		$localizedData['evmap'] = WP_SDTRK_Helper_Event::getDefaultEventMap(); //eventmap for keep the custom-event-names in sync with server
+		$localizedData['pmap'] = WP_SDTRK_Helper_Event::getParamNames(); // for stripping data from url before sending url to service (required by meta for example)
 
 		// Register additional scripts
 		wp_register_script($this->get_jsHandler('name', 'event'), plugins_url("js/" . $this->get_jsHandler('file', 'event') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
@@ -625,38 +625,7 @@ class Wp_Sdtrk_Public
 	 *  TRACKER FUNCTIONS
 	 ****************************/
 
-	/**
-	 * This function is called after Pageload (User-Browser)
-	 *
-	 * @param array $data
-	 * @param array $meta
-	 * @return array
-	 */
-	public function validateTracker($data, $debugMode = false)
-	{
-		// Base-Checks
-		if (! isset($data['event']) || ! isset($data['type']) || ! isset($data['handler']) || ! isset($data['data'])) {
-			return array(
-				'state' => false
-			);
-		}
-		// Check for handler and run it
-		$event = new Wp_Sdtrk_Tracker_Event($data['event']);
-		$className = 'Wp_Sdtrk_Tracker_' . ucfirst($data['type']);
-		if (class_exists($className)) {
-			$tracker = new $className();
-			if (method_exists($tracker, 'fireTracking_Server') && method_exists($tracker, 'setAndGetDebugMode_frontend')) {
-				return array(
-					'debug' => $tracker->setAndGetDebugMode_frontend($debugMode),
-					'state' => $tracker->fireTracking_Server($event, $data['handler'], $data['data'])
-				);
-			}
-		}
-		return array(
-			'state' => false,
-			'debug' => false
-		);
-	}
+
 
 	/**
 	 * Decrypt Data for given services
@@ -686,7 +655,7 @@ class Wp_Sdtrk_Public
 		foreach ($services as $service) {
 			// If service exists and a secret key has been saved
 			$className = 'Wp_Sdtrk_Decrypter_' . $service;
-			$key = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), $service . "_encrypt_data_key");
+			$key = WP_SDTRK_Helper_Options::get_string_option($service . "_encrypt_data_key");
 
 			// Create the decrypter and decrypt data
 			if (class_exists($className) && ($key !== false && ! empty($key))) {

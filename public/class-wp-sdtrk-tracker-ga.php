@@ -109,8 +109,8 @@ class Wp_Sdtrk_Tracker_Ga
         }
         $clientId = (isset($data['cid']) && ! empty($data['cid'])) ? $data['cid'] : false;
         $response = $this->$functionName($event, $data, $clientId);
-        Wp_Sdtrk_Helper::wp_sdtrk_write_log("Response:", $this->debugMode);
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($response, $this->debugMode);
+        sdtrk_log("Response:", "debug", !$this->debugMode);
+        sdtrk_log($response, "debug", !$this->debugMode);
         return ($this->setAndGetDebugMode_frontend($this->debugMode_frontend)) ? $response : true;
     }
 
@@ -357,7 +357,7 @@ class Wp_Sdtrk_Tracker_Ga
     private function payLoadServerRequest($requestData)
     {
         $payload = json_encode($requestData);
-        $res = Wp_Sdtrk_Helper::wp_sdtrk_httpPost($this->getApiUrl(), $payload, array(), $this->debugMode);
+        $res = WP_SDTRK_Helper_Event::do_post($this->getApiUrl(), $payload, array(), $this->debugMode);
         // Send Request
         return $res;
     }

@@ -24,7 +24,7 @@ class Wp_Sdtrk_Catcher_Mtc {
 		}
 		//Skip if admin
 		if (this.helper.isAdmin()) {
-			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (mtc)');					
+			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (mtc)');
 			return;
 		}
 		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {
@@ -158,9 +158,9 @@ class Wp_Sdtrk_Catcher_Mtc {
 			else {
 				mauticUrl = mauticUrl + "mtc.js";
 			}
-			(function(w, d, t, u, n, a, m) {
+			(function (w, d, t, u, n, a, m) {
 				w['MauticTrackingObject'] = n;
-				w[n] = w[n] || function() { (w[n].q = w[n].q || []).push(arguments) }, a = d.createElement(t),
+				w[n] = w[n] || function () { (w[n].q = w[n].q || []).push(arguments) }, a = d.createElement(t),
 					m = d.getElementsByTagName(t)[0]; a.async = 1; a.src = u; m.parentNode.insertBefore(a, m)
 			})(window, document, 'script', mauticUrl, 'mt');
 			this.pixelLoaded = true;
@@ -182,23 +182,23 @@ class Wp_Sdtrk_Catcher_Mtc {
 					break;
 				case 'Event':
 					mt('send', this.event.grabEventName(), this.get_data_custom(this.event.grabEventName()));
-					this.helper.debugLog(this.localizedData.dbg, { event: this.event.grabEventName(), data: this.get_data_custom(this.event.grabEventName()), meta: {}}, 'Fired in Browser (mtc-' + handler + ')');
+					this.helper.debugLog(this.localizedData.dbg, { event: this.event.grabEventName(), data: this.get_data_custom(this.event.grabEventName()), meta: {} }, 'Fired in Browser (mtc-' + handler + ')');
 					break;
 				case 'Time':
-					mt('send', this.helper.get_EventName(handler,data.time), this.get_data_custom(this.helper.get_EventName(handler,data.time), ['currency', 'value','transaction_id'], {transaction_id:this.event.grabOrderId() + "-t" + data.time}));
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.time), data: this.get_data_custom(this.helper.get_EventName(handler,data.time), ['currency', 'value','transaction_id'], {transaction_id:this.event.grabOrderId() + "-t" + data.time})}, 'Fired in Browser (mtc-' + handler + ')');
+					mt('send', this.helper.get_EventName(handler, data.time), this.get_data_custom(this.helper.get_EventName(handler, data.time), ['currency', 'value', 'transaction_id'], { transaction_id: this.event.grabOrderId() + "-t" + data.time }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.time), data: this.get_data_custom(this.helper.get_EventName(handler, data.time), ['currency', 'value', 'transaction_id'], { transaction_id: this.event.grabOrderId() + "-t" + data.time }) }, 'Fired in Browser (mtc-' + handler + ')');
 					break;
 				case 'Scroll':
-					mt('send', this.helper.get_EventName(handler,data.percent), this.get_data_custom(this.helper.get_EventName(handler,data.percent), ['currency', 'value','transaction_id'], {transaction_id:this.event.grabOrderId() + "-s" + data.percent}));
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.percent), data: this.get_data_custom(this.helper.get_EventName(handler,data.percent), ['currency', 'value','transaction_id'], {transaction_id:this.event.grabOrderId() + "-s" + data.percent})}, 'Fired in Browser (mtc-' + handler + ')');
+					mt('send', this.helper.get_EventName(handler, data.percent), this.get_data_custom(this.helper.get_EventName(handler, data.percent), ['currency', 'value', 'transaction_id'], { transaction_id: this.event.grabOrderId() + "-s" + data.percent }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.percent), data: this.get_data_custom(this.helper.get_EventName(handler, data.percent), ['currency', 'value', 'transaction_id'], { transaction_id: this.event.grabOrderId() + "-s" + data.percent }) }, 'Fired in Browser (mtc-' + handler + ')');
 					break;
 				case 'Click':
-					mt('send', this.helper.get_EventName(handler,data.tag), this.get_data_custom(this.helper.get_EventName(handler,data.tag), ['currency', 'value','transaction_id'], { buttonTag: data.tag,transaction_id: this.event.grabOrderId() + "-b" + data.tag}));
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom(this.helper.get_EventName(handler,data.tag), ['currency', 'value','transaction_id'], { buttonTag: data.tag,transaction_id: this.event.grabOrderId() + "-b" + data.tag})}, 'Fired in Browser (mtc-' + handler + ')');
+					mt('send', this.helper.get_EventName(handler, data.tag), this.get_data_custom(this.helper.get_EventName(handler, data.tag), ['currency', 'value', 'transaction_id'], { buttonTag: data.tag, transaction_id: this.event.grabOrderId() + "-b" + data.tag }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.tag), data: this.get_data_custom(this.helper.get_EventName(handler, data.tag), ['currency', 'value', 'transaction_id'], { buttonTag: data.tag, transaction_id: this.event.grabOrderId() + "-b" + data.tag }) }, 'Fired in Browser (mtc-' + handler + ')');
 					break;
 				case 'Visibility':
-					mt('send', this.helper.get_EventName(handler,data.tag), this.get_data_custom(this.helper.get_EventName(handler,data.tag), ['currency', 'value','transaction_id'], { itemTag: data.tag,transaction_id: this.event.grabOrderId() + "-v" + data.tag}));
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag), data: this.get_data_custom(this.helper.get_EventName(handler,data.tag), ['currency', 'value','transaction_id'], { itemTag: data.tag,transaction_id: this.event.grabOrderId() + "-v" + data.tag})}, 'Fired in Browser (mtc-' + handler + ')');
+					mt('send', this.helper.get_EventName(handler, data.tag), this.get_data_custom(this.helper.get_EventName(handler, data.tag), ['currency', 'value', 'transaction_id'], { itemTag: data.tag, transaction_id: this.event.grabOrderId() + "-v" + data.tag }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.tag), data: this.get_data_custom(this.helper.get_EventName(handler, data.tag), ['currency', 'value', 'transaction_id'], { itemTag: data.tag, transaction_id: this.event.grabOrderId() + "-v" + data.tag }) }, 'Fired in Browser (mtc-' + handler + ')');
 					break;
 			}
 		}

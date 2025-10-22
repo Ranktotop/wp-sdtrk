@@ -26,7 +26,7 @@ class Wp_Sdtrk_Catcher_Ga {
 		}
 		//Skip if admin
 		if (this.helper.isAdmin()) {
-			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (ga)');					
+			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (ga)');
 			return;
 		}
 		//This has to be fired first, because GA uses the cookie for identification
@@ -181,7 +181,7 @@ class Wp_Sdtrk_Catcher_Ga {
 			this.set_storedCampaign();
 
 			//Base Pixel
-			(function(window, document, src) {
+			(function (window, document, src) {
 				var a = document.createElement('script'),
 					m = document.getElementsByTagName('script')[0];
 				a.async = 1;
@@ -203,7 +203,7 @@ class Wp_Sdtrk_Catcher_Ga {
 			//init
 			gtag('js', new Date());
 			gtag('config', this.localizedData.pid, this.get_config());
-			this.helper.debugLog(this.localizedData.dbg, { event: 'page_view', data: this.get_config()}, 'Fired in Browser (ga-Page)');
+			this.helper.debugLog(this.localizedData.dbg, { event: 'page_view', data: this.get_config() }, 'Fired in Browser (ga-Page)');
 			this.pixelLoaded = true;
 		}
 	}
@@ -271,23 +271,23 @@ class Wp_Sdtrk_Catcher_Ga {
 			switch (handler) {
 				case 'Event':
 					gtag("event", this.event.grabEventName(), this.get_data_custom());
-					this.helper.debugLog(this.localizedData.dbg, { event: this.event.grabEventName(),data: this.get_data_custom() }, 'Fired in Browser (ga-' + handler + ')');
+					this.helper.debugLog(this.localizedData.dbg, { event: this.event.grabEventName(), data: this.get_data_custom() }, 'Fired in Browser (ga-' + handler + ')');
 					break;
 				case 'Time':
-					gtag("event", this.helper.get_EventName(handler,data.time), this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-t" + data.time }));
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.time),data: this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-t" + data.time }) }, 'Fired in Browser (ga-' + handler + ')');
+					gtag("event", this.helper.get_EventName(handler, data.time), this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-t" + data.time }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.time), data: this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-t" + data.time }) }, 'Fired in Browser (ga-' + handler + ')');
 					break;
 				case 'Scroll':
-					gtag("event", this.helper.get_EventName(handler,data.percent), this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-s" + data.percent }));
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.percent),data: this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-s" + data.percent }) }, 'Fired in Browser (ga-' + handler + ')');
+					gtag("event", this.helper.get_EventName(handler, data.percent), this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-s" + data.percent }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.percent), data: this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-s" + data.percent }) }, 'Fired in Browser (ga-' + handler + ')');
 					break;
 				case 'Click':
-					gtag("event", this.helper.get_EventName(handler,data.tag), this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-b" + data.tag, buttonTag: data.tag }));
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag),data: this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-b" + data.tag, buttonTag: data.tag }) }, 'Fired in Browser (ga-' + handler + ')');
+					gtag("event", this.helper.get_EventName(handler, data.tag), this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-b" + data.tag, buttonTag: data.tag }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.tag), data: this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-b" + data.tag, buttonTag: data.tag }) }, 'Fired in Browser (ga-' + handler + ')');
 					break;
 				case 'Visibility':
-					gtag("event", this.helper.get_EventName(handler,data.tag), this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-v" + data.tag, itemTag: data.tag }));
-					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler,data.tag),data: this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-v" + data.tag, itemTag: data.tag })}, 'Fired in Browser (ga-' + handler + ')');
+					gtag("event", this.helper.get_EventName(handler, data.tag), this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-v" + data.tag, itemTag: data.tag }));
+					this.helper.debugLog(this.localizedData.dbg, { event: this.helper.get_EventName(handler, data.tag), data: this.get_data_custom(['transaction_id'], { transaction_id: this.event.grabOrderId() + "-v" + data.tag, itemTag: data.tag }) }, 'Fired in Browser (ga-' + handler + ')');
 					break;
 			}
 		}
@@ -307,7 +307,7 @@ class Wp_Sdtrk_Catcher_Ga {
 			if (this.gclid !== false) {
 				data.gclid = this.gclid;
 			}
-			this.helper.send_ajax({ event: this.event, type: 'ga', handler: handler, data: data },this.localizedData.dbg);
+			this.helper.send_ajax({ event: this.event, type: 'ga', handler: handler, data: data }, this.localizedData.dbg);
 		}
 	}
 
@@ -443,9 +443,9 @@ class Wp_Sdtrk_Catcher_Ga {
 			var randomNo = parseInt(Math.random() * 10000000000);
 			var clientId = creationTime + '.' + randomNo;
 			//use fp if available			
-			if(this.event.getUserFP()){
-				clientId = this.event.getUserFP()+ '.' +this.event.getUserFP();
-			}			
+			if (this.event.getUserFP()) {
+				clientId = this.event.getUserFP() + '.' + this.event.getUserFP();
+			}
 			var cValue = version + '.' + subdomainIndex + '.' + clientId;
 			//var identifier = randomInteger(100000000, 999999999).toString() +'.'+ randomInteger(1000000000, 9999999999).toString()
 			//var userid = 'GA1.1.' + identifier;

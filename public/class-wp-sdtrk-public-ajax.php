@@ -35,4 +35,37 @@ class Wp_Sdtrk_Public_Ajax_Handler
         $result = $this->$functionName($_POST['data'], $_POST['meta']);
         die(json_encode($result));
     }
+
+    /**
+     * This function is called after Pageload (User-Browser)
+     *
+     * @param array $data
+     * @param array $meta
+     * @return array
+     */
+    public function validateTracker($data, $debugMode = false)
+    {
+        // Base-Checks
+        if (! isset($data['event']) || ! isset($data['type']) || ! isset($data['handler']) || ! isset($data['data'])) {
+            return array(
+                'state' => false
+            );
+        }
+        // Check for handler and run it
+        $event = new Wp_Sdtrk_Tracker_Event($data['event']);
+        $className = 'Wp_Sdtrk_Tracker_' . ucfirst($data['type']);
+        if (class_exists($className)) {
+            $tracker = new $className();
+            if (method_exists($tracker, 'fireTracking_Server') && method_exists($tracker, 'setAndGetDebugMode_frontend')) {
+                return array(
+                    'debug' => $tracker->setAndGetDebugMode_frontend($debugMode),
+                    'state' => $tracker->fireTracking_Server($event, $data['handler'], $data['data'])
+                );
+            }
+        }
+        return array(
+            'state' => false,
+            'debug' => false
+        );
+    }
 }

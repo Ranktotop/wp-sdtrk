@@ -8,9 +8,9 @@ class Wp_Sdtrk_Decrypter_ds24
     private $prefix;
 
     private $validationLength;
-    
+
     private $decryptedData;
-    
+
     private $encryptedData;
 
     /**
@@ -30,13 +30,13 @@ class Wp_Sdtrk_Decrypter_ds24
         //Decrypt Data
         $this->decrypt_all();
     }
-    
+
     /**
      * ****************************************************
      * *****************Validation*************************
      * ****************************************************
      */
-    
+
     /**
      * Calculate a new SHA String from given parameters
      * @param string $sha_passphrase the secret key
@@ -48,44 +48,44 @@ class Wp_Sdtrk_Decrypter_ds24
     {
         $algorythm = 'sha512';
         $sort_case_sensitive = true;
-        
+
         if (! $sha_passphrase) {
             return 'no_signature_passphrase_provided';
         }
-        
+
         unset($parameters['sha_sign']);
         unset($parameters['SHASIGN']);
-        
+
         if ($convert_keys_to_uppercase) {
             $sort_case_sensitive = false;
         }
-        
+
         $keys = array_keys($parameters);
         $keys_to_sort = array();
         foreach ($keys as $key) {
             $keys_to_sort[] = $sort_case_sensitive ? $key : strtoupper($key);
         }
-        
+
         array_multisort($keys_to_sort, SORT_STRING, $keys);
-        
+
         $sha_string = "";
         foreach ($keys as $key) {
             $value = $parameters[$key];
-            
+
             $is_empty = ! isset($value) || $value === "" || $value === false;
             if ($is_empty) {
                 continue;
             }
-            
+
             $upperkey = $convert_keys_to_uppercase ? strtoupper($key) : $key;
-            
+
             $sha_string .= "$upperkey=$value$sha_passphrase";
         }
-        
+
         $sha_sign = strtoupper(hash($algorythm, $sha_string));
-        
+
         return $sha_sign;
-    }    
+    }
 
     /**
      * Checks if a new calculated sha_sign matches the given one
@@ -93,19 +93,19 @@ class Wp_Sdtrk_Decrypter_ds24
      */
     private function validate()
     {
-        if(!isset($this->encryptedData["sha_sign"])){
+        if (!isset($this->encryptedData["sha_sign"])) {
             return false;
         }
         $expected_sha = $this->calculate_sha($this->key, $this->encryptedData);
         return $expected_sha == $this->encryptedData["sha_sign"];
     }
-    
+
     /**
      * ****************************************************
      * *****************Encryption*************************
      * ****************************************************
-     */    
-    
+     */
+
     /**
      * Encrypt an array of parameters
      * @param string $secret_key the saved key in backend
@@ -123,7 +123,7 @@ class Wp_Sdtrk_Decrypter_ds24
                 $encryptedData[$key] = $value;
                 continue;
             }
-            
+
             $must_encrypt = $keys_to_encrypt === 'all' || in_array($key, $keys_to_encrypt);
             if ($must_encrypt) {
                 $value = $this->encrypt_and_check_string($secret_key, $value);
@@ -132,7 +132,7 @@ class Wp_Sdtrk_Decrypter_ds24
         }
         return $encryptedData;
     }
-    
+
     /**
      * Encrypt an decrypted value and check if it is valid
      * @param string $secret_key the secret key
@@ -144,14 +144,14 @@ class Wp_Sdtrk_Decrypter_ds24
         if (empty($secret_key)) {
             $secret_key = $this->prefix;
         }
-        
+
         $len = $this->validationLength;
-        
+
         $validation_prefix = $secret_key ? mb_substr($secret_key, 0, $len) : '';
-        
+
         return $this->prefix . $this->encrypt_string($secret_key, $validation_prefix . $plaintext);
     }
-    
+
 
     /**
      * Encrypt a single decrypted string
@@ -186,12 +186,12 @@ class Wp_Sdtrk_Decrypter_ds24
 
         return $output;
     }
-    
+
     /**
      * ****************************************************
      * *****************Decryption*************************
      * ****************************************************
-     */  
+     */
 
     /**
      * Decrypt an array of parameters
@@ -200,19 +200,19 @@ class Wp_Sdtrk_Decrypter_ds24
      * @return array
      */
     private function decrypt_all()
-    {   
+    {
         //TODO implement this to work with custom parameters
         //Check for signed Data
         //if(!$this->validate()){
         //return $this->encryptedData;
         //}
-        
+
         //Iterate parameters and decrypt
         foreach ($this->encryptedData as $key => $value) {
             $value = $this->decrypt_and_check_string($this->key, $value);
             $this->decryptedData[$key] = $value;
         }
-    }    
+    }
 
     /**
      * Decrypt an encrypted value and check if it is valid
@@ -229,7 +229,7 @@ class Wp_Sdtrk_Decrypter_ds24
         }
 
         //Check if string is encrypted
-        $is_encrypted = Wp_Sdtrk_Helper::wp_sdtrk_strStartsWith($enrypted_string, $this->prefix);
+        $is_encrypted = str_starts_with($enrypted_string, $this->prefix);
         if (! $is_encrypted) {
             return $enrypted_string;
         }
@@ -247,18 +247,18 @@ class Wp_Sdtrk_Decrypter_ds24
         if (! $decryptedString) {
             return false;
         }
-        
+
         //Get the prefix with validation numbers included
         $len = $this->validationLength;
         $validation_prefix = $secret_key ? mb_substr($secret_key, 0, $len) : '';
-        
+
         //Check if decrypted string starts with prefix
-        $is_valid = $secret_key ? Wp_Sdtrk_Helper::wp_sdtrk_strStartsWith($decryptedString, $validation_prefix) : true;
+        $is_valid = $secret_key ? str_starts_with($decryptedString, $validation_prefix) : true;
 
         //Return the base-string without prefix if its valid
         return $is_valid ? mb_substr($decryptedString, mb_strlen($validation_prefix)) : false;
     }
-    
+
     /**
      * Decrypt a single encrypted string
      * @param string $secret_key
@@ -270,12 +270,12 @@ class Wp_Sdtrk_Decrypter_ds24
         if (empty($secret_key)) {
             $secret_key = $this->prefix;
         }
-        
+
         $encrypt_method = "AES-256-CBC";
-        
+
         $secret_iv = $secret_key;
         $key = hash('sha256', $secret_key);
-        
+
         $encrypted_string = str_replace(array(
             '_e',
             '_p'
@@ -283,30 +283,30 @@ class Wp_Sdtrk_Decrypter_ds24
             '=',
             '+'
         ), $encrypted_string);
-        
+
         $is_iv_appended = strlen($encrypted_string) > 33 && $encrypted_string[32] === '-';
-        
+
         if ($is_iv_appended) {
             $iv = @hex2bin(substr($encrypted_string, 0, 32));
             $encrypted_string = substr($encrypted_string, 33);
-            
+
             if (empty($iv)) {
                 return $encrypted_string;
             }
         } else {
             $iv = substr(hash('sha256', $secret_iv), 0, 16);
         }
-        
+
         $plain_text = openssl_decrypt(base64_decode($encrypted_string), $encrypt_method, $key, 0, $iv);
-        
+
         return $plain_text;
     }
-    
+
     /**
      * ****************************************************
      * **************Access Functions**********************
      * ****************************************************
-     */  
+     */
 
     /**
      * Decrypt given data
