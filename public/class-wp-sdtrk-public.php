@@ -104,12 +104,13 @@ class Wp_Sdtrk_Public
 		$loadMinified = false;
 		$minifySwitch = ($loadMinified) ? ".min" : "";
 
-		$this->registerScript_fbTracker($minifySwitch);
+		$this->registerScript_metaTracker($minifySwitch);
 		$this->registerScript_gaTracker($minifySwitch);
 		$this->registerScript_ttTracker($minifySwitch);
 		$this->registerScript_linTracker($minifySwitch);
 		$this->registerScript_flTracker($minifySwitch);
 		$this->registerScript_mtcTracker($minifySwitch);
+		$this->registerScript_mtmTracker($minifySwitch);
 		$this->registerScript_decrypter($minifySwitch);
 		$this->registerScript_fingerprinter($minifySwitch);
 		$this->registerScript_engine($minifySwitch);
@@ -173,7 +174,7 @@ class Wp_Sdtrk_Public
 	 *
 	 * @param string $loadMinified
 	 */
-	private function registerScript_fbTracker($loadMinified = "")
+	private function registerScript_metaTracker($loadMinified = "")
 	{
 		// Init
 		$localizedData = array();
@@ -316,9 +317,27 @@ class Wp_Sdtrk_Public
 		// LinkedIn Mappings
 		// Event Mappings
 		$linkedinEventMap = array();
+		$linkedinButtonMap = array();
+		$linkedinVisibilityMap = array();
 		$mappings = WP_SDTRK_Helper_Linkedin::get_all_mappings();
 
 		foreach ($mappings as $mapping) {
+			if ($mapping->is_button_click_event()) {
+				array_push($linkedinButtonMap, array(
+					'btnTag' => $mapping->get_tag_name(),
+					'convId' => $mapping->get_conversion_id()
+				));
+				continue;
+			}
+			if ($mapping->is_element_visibility_event()) {
+				array_push($linkedinVisibilityMap, array(
+					'ivTag' => $mapping->get_tag_name(),
+					'convId' => $mapping->get_conversion_id()
+				));
+				continue;
+			}
+
+			//is normal event mapping
 			$rules = array();
 			foreach ($mapping->get_rules() as $rule) {
 				$rules[$rule->get_key_name()] = $rule->get_value();
@@ -330,45 +349,18 @@ class Wp_Sdtrk_Public
 			));
 		}
 
-		// Button Mappings
-		$linMappingData = wp_sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_btnmap");
-		$linBtnMappings = array();
-		if ($linMappingData) {
-			foreach ($linMappingData as $dataSet) {
-				$btnTag = $dataSet['lin_trk_map_btnevent_lin_btnTag'];
-				$convId = $dataSet['lin_trk_map_btnevent_lin_convid'];
-				array_push($linBtnMappings, array(
-					'btnTag' => $btnTag,
-					'convId' => $convId
-				));
-			}
-		}
-		// LinkedIn Item-Visibility-Mappings
-		$linMappingData = wp_sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_ivmap");
-		$linIvMappings = array();
-		if ($linMappingData) {
-			foreach ($linMappingData as $dataSet) {
-				$ivTag = $dataSet['lin_trk_map_ivevent_lin_ivTag'];
-				$convId = $dataSet['lin_trk_map_ivevent_lin_convid'];
-				array_push($linIvMappings, array(
-					'ivTag' => $ivTag,
-					'convId' => $convId
-				));
-			}
-		}
-		// Debug
-		$debugmode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_debug"), "yes") == 0) ? true : false;
-
-
 		// Merge to array
 		$localizedData['map_ev'] = $linkedinEventMap;
-		$localizedData['map_btn'] = $linBtnMappings;
-		$localizedData['map_iv'] = $linIvMappings;
-		$localizedData['pid'] = $lin_pixelId;
-		$localizedData['b_e'] = $trkBrowser;
-		$localizedData['b_ci'] = $lin_trkBrowserCookieId;
-		$localizedData['b_cs'] = $lin_trkBrowserCookieService;
-		$localizedData['dbg'] = $debugmode;
+		$localizedData['map_btn'] = $linkedinButtonMap;
+		$localizedData['map_iv'] = $linkedinVisibilityMap;
+		$localizedData['pid'] = $linkedin_pixelId;
+		$localizedData['b_e'] = $browserEnabled;
+		$localizedData['b_cs'] = $browserCookieService;
+		$localizedData['b_ci'] = $browserCookieId;
+		$localizedData['s_e'] = $serverEnabled;
+		$localizedData['s_cs'] = $serverCookieService;
+		$localizedData['s_ci'] = $serverCookieId;
+		$localizedData['dbg'] = $debugEnabled;
 
 		// Register scripts
 		wp_register_script($this->get_jsHandler('name', 'lin'), plugins_url("js/" . $this->get_jsHandler('file', 'lin') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
@@ -383,30 +375,31 @@ class Wp_Sdtrk_Public
 		// Init
 		$localizedData = array();
 
-		// Mess ID
-		$trkId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fl_tracking_id");
-		$trkId = ($trkId && ! empty(trim($trkId))) ? $trkId : false;
+		// Tracking ID
+		$funnelytics_trackingId = WP_SDTRK_Helper_Options::get_string_option('fl_tracking_id');
 
-		// Track Browser Enabled
-		$trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fl_trk_browser"), "yes") == 0) ? true : false;
+		// Browser Settings
+		$browserEnabled = WP_SDTRK_Helper_Options::get_bool_option('fl_trk_browser', false);
+		$browserCookieService = WP_SDTRK_Helper_Options::get_string_option('fl_trk_browser_cookie_service');
+		$browserCookieId = WP_SDTRK_Helper_Options::get_string_option('fl_trk_browser_cookie_id');
 
-		// Funnelytics: Track Browser Cookie Service
-		$trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fl_trk_browser_cookie_service");
-		$trkBrowserCookieService = ($trkBrowserCookieService && ! empty(trim($trkBrowserCookieService))) ? $trkBrowserCookieService : false;
-
-		// Funnelytics: Track Browser Cookie ID
-		$trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fl_trk_browser_cookie_id");
-		$trkBrowserCookieId = ($trkBrowserCookieId && ! empty(trim($trkBrowserCookieId))) ? $trkBrowserCookieId : false;
+		// Server Settings (not available for LinkedIn yet)
+		$serverEnabled = false;
+		$serverCookieService = false;
+		$serverCookieId = false;
 
 		// Debug
-		$debugmode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fl_trk_debug"), "yes") == 0) ? true : false;
+		$debugEnabled = WP_SDTRK_Helper_Options::get_bool_option('fl_trk_debug', false);
 
 		// Merge to array
-		$localizedData['pid'] = $trkId;
-		$localizedData['b_e'] = $trkBrowser;
-		$localizedData['b_ci'] = $trkBrowserCookieId;
-		$localizedData['b_cs'] = $trkBrowserCookieService;
-		$localizedData['dbg'] = $debugmode;
+		$localizedData['pid'] = $funnelytics_trackingId;
+		$localizedData['b_e'] = $browserEnabled;
+		$localizedData['b_cs'] = $browserCookieService;
+		$localizedData['b_ci'] = $browserCookieId;
+		$localizedData['s_e'] = $serverEnabled;
+		$localizedData['s_cs'] = $serverCookieService;
+		$localizedData['s_ci'] = $serverCookieId;
+		$localizedData['dbg'] = $debugEnabled;
 
 		// Register scripts
 		wp_register_script($this->get_jsHandler('name', 'fl'), plugins_url("js/" . $this->get_jsHandler('file', 'fl') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
@@ -421,34 +414,77 @@ class Wp_Sdtrk_Public
 		// Init
 		$localizedData = array();
 
-		// Mess ID
-		$trkId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "mtc_tracking_id");
-		$trkId = ($trkId && ! empty(trim($trkId))) ? $trkId : false;
+		// Tracking ID
+		$mautic_trackingId = WP_SDTRK_Helper_Options::get_string_option('mtc_tracking_id');
 
-		// Track Browser Enabled
-		$trkBrowser = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "mtc_trk_browser"), "yes") == 0) ? true : false;
+		// Browser Settings
+		$browserEnabled = WP_SDTRK_Helper_Options::get_bool_option('mtc_trk_browser', false);
+		$browserCookieService = WP_SDTRK_Helper_Options::get_string_option('mtc_trk_browser_cookie_service');
+		$browserCookieId = WP_SDTRK_Helper_Options::get_string_option('mtc_trk_browser_cookie_id');
 
-		// Mautic: Track Browser Cookie Service
-		$trkBrowserCookieService = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "mtc_trk_browser_cookie_service");
-		$trkBrowserCookieService = ($trkBrowserCookieService && ! empty(trim($trkBrowserCookieService))) ? $trkBrowserCookieService : false;
-
-		// Mautic: Track Browser Cookie ID
-		$trkBrowserCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "mtc_trk_browser_cookie_id");
-		$trkBrowserCookieId = ($trkBrowserCookieId && ! empty(trim($trkBrowserCookieId))) ? $trkBrowserCookieId : false;
+		// Server Settings (not available for mautic yet)
+		$serverEnabled = false;
+		$serverCookieService = false;
+		$serverCookieId = false;
 
 		// Debug
-		$debugmode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "mtc_trk_debug"), "yes") == 0) ? true : false;
+		$debugEnabled = WP_SDTRK_Helper_Options::get_bool_option('mtc_trk_debug', false);
 
 		// Merge to array
-		$localizedData['pid'] = $trkId;
-		$localizedData['b_e'] = $trkBrowser;
-		$localizedData['b_ci'] = $trkBrowserCookieId;
-		$localizedData['b_cs'] = $trkBrowserCookieService;
-		$localizedData['dbg'] = $debugmode;
+		$localizedData['pid'] = $mautic_trackingId;
+		$localizedData['b_e'] = $browserEnabled;
+		$localizedData['b_cs'] = $browserCookieService;
+		$localizedData['b_ci'] = $browserCookieId;
+		$localizedData['s_e'] = $serverEnabled;
+		$localizedData['s_cs'] = $serverCookieService;
+		$localizedData['s_ci'] = $serverCookieId;
+		$localizedData['dbg'] = $debugEnabled;
 
 		// Register scripts
 		wp_register_script($this->get_jsHandler('name', 'mtc'), plugins_url("js/" . $this->get_jsHandler('file', 'mtc') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
 		wp_localize_script($this->get_jsHandler('name', 'mtc'), $this->get_jsHandler('var', 'mtc'), $localizedData);
+	}
+
+	/**
+	 * Collect all Matomo-Data and pass them to JS
+	 */
+	private function registerScript_mtmTracker($loadMinified = "")
+	{
+		// Init
+		$localizedData = array();
+
+		// Tracking ID
+		$matomo_base_domain = WP_SDTRK_Helper_Options::get_string_option('mtm_tracking_id');
+		$matomo_site_id = WP_SDTRK_Helper_Options::get_string_option('mtm_site_id');
+
+		// Browser Settings
+		$browserEnabled = WP_SDTRK_Helper_Options::get_bool_option('mtm_trk_browser', false);
+		$browserCookieService = WP_SDTRK_Helper_Options::get_string_option('mtm_trk_browser_cookie_service');
+		$browserCookieId = WP_SDTRK_Helper_Options::get_string_option('mtm_trk_browser_cookie_id');
+
+		// Server Settings
+		// TODO
+		$serverEnabled = false;
+		$serverCookieService = false;
+		$serverCookieId = false;
+
+		// Debug
+		$debugEnabled = WP_SDTRK_Helper_Options::get_bool_option('mtm_trk_debug', false);
+
+		// Merge to array
+		$localizedData['pid'] = $matomo_base_domain;
+		$localizedData['b_e'] = $browserEnabled;
+		$localizedData['b_cs'] = $browserCookieService;
+		$localizedData['b_ci'] = $browserCookieId;
+		$localizedData['s_e'] = $serverEnabled;
+		$localizedData['s_cs'] = $serverCookieService;
+		$localizedData['s_ci'] = $serverCookieId;
+		$localizedData['debug'] = $debugEnabled;
+		$localizedData['sid'] = $matomo_site_id;
+
+		// Register scripts
+		wp_register_script($this->get_jsHandler('name', 'mtm'), plugins_url("js/" . $this->get_jsHandler('file', 'mtm') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+		wp_localize_script($this->get_jsHandler('name', 'mtm'), $this->get_jsHandler('var', 'mtm'), $localizedData);
 	}
 
 	/**
@@ -463,12 +499,11 @@ class Wp_Sdtrk_Public
 		$services = array();
 
 		// Digistore24
-		$ds24_decrypt = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ds24_encrypt_data"), "yes") == 0) ? true : false;
-		$ds24_decryptKey = ($ds24_decrypt) ? Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ds24_encrypt_data_key") : false;
-		$ds24_decryptKey = (! empty($ds24_decryptKey) && $ds24_decryptKey) ? $ds24_decryptKey : false;
+		$ds24_decrypt = WP_SDTRK_Helper_Options::get_bool_option('ds24_encrypt_data', false);
+		$ds24_decryptKey = WP_SDTRK_Helper_Options::get_string_option('ds24_encrypt_data_key');
 
-		// If valid add to services
-		if ($ds24_decryptKey) {
+		// If valid ds24 add to services
+		if ($ds24_decrypt && $ds24_decryptKey) {
 			array_push($services, "ds24");
 		}
 
@@ -490,8 +525,8 @@ class Wp_Sdtrk_Public
 		// Init
 		$localizedData = array();
 
-		// Digistore24
-		$enabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_fp"), "yes") == 0) ? true : false;
+		// Enabled
+		$enabled = WP_SDTRK_Helper_Options::get_bool_option('trk_fp', false);
 
 		// Merge to array
 		$localizedData['enabled'] = $enabled;

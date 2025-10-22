@@ -161,7 +161,7 @@ class Wp_Sdtrk
 		/**
 		 * Tracker Facebook
 		 */
-		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-tracker-fb.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-tracker-meta.php';
 
 		/**
 		 * Tracker Google
@@ -177,11 +177,6 @@ class Wp_Sdtrk
 		 * Decrypter
 		 */
 		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-decryptor-ds24.php';
-
-		/**
-		 * Hit Manager
-		 */
-		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-hitContainer.php';
 
 		$this->loader = new Wp_Sdtrk_Loader();
 	}

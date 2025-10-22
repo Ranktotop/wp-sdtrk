@@ -31,22 +31,19 @@ class Wp_Sdtrk_Tracker_Fb
     private function init()
     {
         // Pixel ID
-        $fb_pixelId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_pixelid");
-        $this->pixelId = ($fb_pixelId && ! empty(trim($fb_pixelId))) ? $fb_pixelId : false;
+        $this->pixelId = WP_SDTRK_Helper_Options::get_string_option('meta_pixelid');
 
         // Srv Token
-        $fb_srvToken = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_token");
-        $this->apiToken = ($fb_srvToken && ! empty(trim($fb_srvToken))) ? $fb_srvToken : false;
+        $this->apiToken = WP_SDTRK_Helper_Options::get_string_option('meta_trk_server_token');
 
         // Test-Code
-        $fb_testCode = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server_debug_code");
-        $this->debugCode = ($fb_testCode && ! empty(trim($fb_testCode))) ? $fb_testCode : false;
+        $this->debugCode = WP_SDTRK_Helper_Options::get_string_option('meta_trk_server_debug_code');
 
         // Track Server
-        $this->trackServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_server"), "yes") == 0) ? true : false;
+        $this->trackServer = WP_SDTRK_Helper_Options::get_bool_option('meta_trk_server', false);
 
         // Debug Mode
-        $this->debugMode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_debug"), "yes") == 0) ? true : false;
+        $this->debugMode = WP_SDTRK_Helper_Options::get_bool_option('meta_trk_debug', false);
     }
 
     /**
@@ -81,12 +78,13 @@ class Wp_Sdtrk_Tracker_Fb
     {
         return ($this->debugMode && $this->debugCode);
     }
-    
+
     /**
      * Set and return the frontend debug mode
      * @param Boolean|String $debugMode
      */
-    public function setAndGetDebugMode_frontend($debugMode){
+    public function setAndGetDebugMode_frontend($debugMode)
+    {
         $this->debugMode_frontend = ($debugMode === true || $debugMode === '1') ? true : false;
         return ($this->debugMode_frontend === true && $this->debugMode === true);
     }
@@ -111,8 +109,8 @@ class Wp_Sdtrk_Tracker_Fb
             return false;
         }
         $response = $this->$functionName($event, $data);
-        Wp_Sdtrk_Helper::wp_sdtrk_write_log("Response:", $this->debugMode);
-        Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($response, $this->debugMode);
+        sdtrk_log("Response:", "debug", !$this->debugMode);
+        sdtrk_log($response, "debug", !$this->debugMode);
         return ($this->setAndGetDebugMode_frontend($this->debugMode_frontend)) ? $response : true;
     }
 
@@ -165,7 +163,7 @@ class Wp_Sdtrk_Tracker_Fb
     {
         // Update the event
         $scrollEventId = $event->getEventId() . "-s" . $data['percent'];
-        $scrollEventName = $event->get_CustomEventName('Scroll',$data['percent']);
+        $scrollEventName = $event->get_CustomEventName('Scroll', $data['percent']);
         $event->setScrollTriggerData($scrollEventName, $scrollEventId);
 
         $requestData = $this->getData_base($event);
@@ -187,7 +185,7 @@ class Wp_Sdtrk_Tracker_Fb
     {
         // Update the event
         $timeEventId = $event->getEventId() . "-t" . $data['time'];
-        $timeEventName = $event->get_CustomEventName('Time',$data['time']);
+        $timeEventName = $event->get_CustomEventName('Time', $data['time']);
         $event->setTimeTriggerData($timeEventName, $timeEventId);
 
         $requestData = $this->getData_base($event);
@@ -209,7 +207,7 @@ class Wp_Sdtrk_Tracker_Fb
     {
         // Update the event
         $clickEventId = $event->getEventId() . "-b" . $data['tag'];
-        $event->setClickTriggerData($event->get_CustomEventName('Click',$data['tag']), $clickEventId, $data['tag']);
+        $event->setClickTriggerData($event->get_CustomEventName('Click', $data['tag']), $clickEventId, $data['tag']);
 
         $requestData = $this->getData_base($event);
         $requestData['event_id'] = $event->getClickTriggerData()['id'];
@@ -231,7 +229,7 @@ class Wp_Sdtrk_Tracker_Fb
     {
         // Update the event
         $visitEventId = $event->getEventId() . "-v" . $data['tag'];
-        $event->setVisibilityTriggerData($event->get_CustomEventName('Visibility',$data['tag']), $visitEventId, $data['tag']);
+        $event->setVisibilityTriggerData($event->get_CustomEventName('Visibility', $data['tag']), $visitEventId, $data['tag']);
 
         $requestData = $this->getData_base($event);
         $requestData['event_id'] = $event->getVisibilityTriggerData()['id'];

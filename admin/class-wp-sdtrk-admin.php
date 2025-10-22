@@ -725,8 +725,8 @@ class Wp_Sdtrk_Admin
 				[
 					'id'    => 'mtm_tracking_id',
 					'type'  => 'text',
-					'title' => __('Matomo Base URL', 'wp-sdtrk'),
-					'subtitle'  => __('Insert the base-url of your Matomo installation', 'wp-sdtrk'),
+					'title' => __('Matomo Domain', 'wp-sdtrk'),
+					'subtitle'  => __('Insert the domain of your Matomo installation (Without protocol!)', 'wp-sdtrk'),
 				],
 				[
 					'id'    => 'mtm_site_id',

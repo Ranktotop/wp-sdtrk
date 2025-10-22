@@ -22,6 +22,10 @@ foreach ($scroll_triggers as $scroll_trigger) {
 foreach ($time_triggers as $time_trigger) {
     $available_events['time_' . $time_trigger . '_seconds'] = sprintf(__('Time %s seconds', 'wp-sdtrk'), esc_html($time_trigger));
 }
+
+//Add "button" and "visibility" events
+$available_events['button_click'] = __('Button Click', 'wp-sdtrk');
+$available_events['element_visible'] = __('Element Visible', 'wp-sdtrk');
 ?>
 <style>
     select.rule-param {
@@ -107,6 +111,7 @@ foreach ($time_triggers as $time_trigger) {
                 <td>
                     <select
                         name="sdtrk_new_mapping_event"
+                        id="sdtrk_new_mapping_event"
                         class="regular-text">
                         <?php
                         foreach ($available_events as $event_key => $event_label) :
@@ -124,18 +129,41 @@ foreach ($time_triggers as $time_trigger) {
             </tr>
         </table>
 
-        <h3><?php esc_html_e('Attribute Rules (AND Logic)', 'wp-sdtrk'); ?></h3>
-        <p class="description" style="margin-bottom: 15px;">
-            <?php esc_html_e('All rules must match for the event to trigger. Leave value empty to match any value.', 'wp-sdtrk'); ?>
-        </p>
+        <div class="rules-section">
+            <h3><?php esc_html_e('Attribute Rules (AND Logic)', 'wp-sdtrk'); ?></h3>
+            <p class="description" style="margin-bottom: 15px;">
+                <?php esc_html_e('All rules must match for the event to trigger. Leave value empty to match any value.', 'wp-sdtrk'); ?>
+            </p>
 
-        <div id="rules-container" style="margin-bottom: 15px;">
-            <!-- Rules werden hier dynamisch eingefügt -->
+            <div id="rules-container" style="margin-bottom: 15px;">
+                <!-- Rules werden hier dynamisch eingefügt -->
+            </div>
+
+            <button type="button" class="button button-secondary" id="add-rule-btn" style="margin-bottom: 20px;">
+                + <?php esc_html_e('Add Rule', 'wp-sdtrk'); ?>
+            </button>
         </div>
 
-        <button type="button" class="button button-secondary" id="add-rule-btn" style="margin-bottom: 20px;">
-            + <?php esc_html_e('Add Rule', 'wp-sdtrk'); ?>
-        </button>
+        <div class="tags-section" style="display: none;">
+            <h3><?php esc_html_e('Element Tag', 'wp-sdtrk'); ?></h3>
+            <p class="description" style="margin-bottom: 15px;">
+                <?php esc_html_e('The element tag to fire event on', 'wp-sdtrk'); ?>
+            </p>
+            <table class="form-table">
+                <tr>
+                    <th scope="row">
+                        <label for="sdtrk_new_mapping_element_tag"><?php esc_html_e('Tag Name', 'wp-sdtrk'); ?></label>
+                    </th>
+                    <td>
+                        <input name="sdtrk_new_mapping_element_tag" type="text" id="sdtrk_new_mapping_element_tag" class="regular-text" placeholder="<?php esc_attr_e('e.g., newsletter, buy-now', 'wp-sdtrk'); ?>">
+                        <p class="description">
+                            <?php esc_html_e('For button clicks, add class: trkbtn-TAGNAME-trkbtn', 'wp-sdtrk'); ?><br>
+                            <?php esc_html_e('For element visibility, add class: watchitm-TAGNAME-watchitm', 'wp-sdtrk'); ?>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
         <p>
             <button type="submit" class="button button-primary">
@@ -155,6 +183,7 @@ foreach ($time_triggers as $time_trigger) {
             <h4><?php esc_html_e('Event', 'wp-sdtrk'); ?></h4>
             <select
                 name="sdtrk_edit_mapping_event"
+                id="sdtrk_edit_mapping_event"
                 class="regular-text">
                 <?php
                 foreach ($available_events as $event_key => $event_label) :
@@ -167,18 +196,32 @@ foreach ($time_triggers as $time_trigger) {
             <h4><?php esc_html_e('Conversion ID', 'wp-sdtrk'); ?></h4>
             <input name="sdtrk_edit_mapping_convid" type="text" id="sdtrk_edit_mapping_convid" class="regular-text" style="margin-bottom: 20px;">
 
-            <h4><?php esc_html_e('Attribute Rules (AND Logic)', 'wp-sdtrk'); ?></h4>
-            <p class="description" style="margin-bottom: 15px;">
-                <?php esc_html_e('All rules must match for the event to trigger. Leave value empty to match any value.', 'wp-sdtrk'); ?>
-            </p>
+            <div class="edit-rules-section">
+                <h4><?php esc_html_e('Attribute Rules (AND Logic)', 'wp-sdtrk'); ?></h4>
+                <p class="description" style="margin-bottom: 15px;">
+                    <?php esc_html_e('All rules must match for the event to trigger. Leave value empty to match any value.', 'wp-sdtrk'); ?>
+                </p>
 
-            <div id="edit-rules-container" style="margin-bottom: 15px;">
-                <!-- Rules werden hier dynamisch eingefügt -->
+                <div id="edit-rules-container" style="margin-bottom: 15px;">
+                    <!-- Rules werden hier dynamisch eingefügt -->
+                </div>
+
+                <button type="button" class="button button-secondary" id="add-edit-rule-btn" style="margin-bottom: 20px;">
+                    + <?php esc_html_e('Add Rule', 'wp-sdtrk'); ?>
+                </button>
             </div>
 
-            <button type="button" class="button button-secondary" id="add-edit-rule-btn" style="margin-bottom: 20px;">
-                + <?php esc_html_e('Add Rule', 'wp-sdtrk'); ?>
-            </button>
+            <div class="edit-tag-section" style="display: none;">
+                <h4><?php esc_html_e('Element Tag', 'wp-sdtrk'); ?></h4>
+                <p class="description" style="margin-bottom: 15px;">
+                    <?php esc_html_e('The element tag to fire event on', 'wp-sdtrk'); ?>
+                </p>
+                <input name="sdtrk_edit_mapping_element_tag" type="text" id="sdtrk_edit_mapping_element_tag" class="regular-text" placeholder="<?php esc_attr_e('e.g., newsletter, buy-now', 'wp-sdtrk'); ?>" style="margin-bottom: 15px;">
+                <p class="description">
+                    <?php esc_html_e('For button clicks, add class: trkbtn-TAGNAME-trkbtn', 'wp-sdtrk'); ?><br>
+                    <?php esc_html_e('For element visibility, add class: watchitm-TAGNAME-watchitm', 'wp-sdtrk'); ?>
+                </p>
+            </div>
 
             <div class="wpsdtrk-modal-actions" style="margin-top: 20px;">
                 <button type="submit" class="button button-primary"><?php esc_html_e('Save', 'wp-sdtrk'); ?></button>

@@ -169,11 +169,11 @@ class Wp_Sdtrk_Public
         $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_debug"), "yes") == 0) ? true : false;
         Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("----Write CSV File-----", $debug);
         $hitContainer = new Wp_Sdtrk_hitContainer($debug);
-        $hits = $hitContainer->getHitsForCSV(); 
+        $hits = $hitContainer->getHitsForCSV();
         //order the header asc
         $header = array_keys($hits[0]);
         sort($header);
-        
+
         $filePath = plugin_dir_path(dirname(__FILE__)) . 'api/localHits.csv';
         Wp_Sdtrk_Helper::wp_sdtrk_vardump_log("Write " . sizeof($hits) . " lines to " . $filePath, $debug);
         try {
@@ -309,8 +309,8 @@ class Wp_Sdtrk_Public
 
         // Debug
         $debugmode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "local_trk_server_debug"), "yes") == 0) ? true : false;
-        
-        
+
+
         // Merge to array
         $localizedData['enabled'] = $enabled;
         $localizedData['dbg'] = $debugmode;
@@ -358,8 +358,8 @@ class Wp_Sdtrk_Public
 
         // Debug
         $debugmode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fb_trk_debug"), "yes") == 0) ? true : false;
-        
-        
+
+
         // Merge to array
         $localizedData['pid'] = $fb_pixelId;
         $localizedData['b_e'] = $trkBrowser;
@@ -411,7 +411,7 @@ class Wp_Sdtrk_Public
         // Google: Track Server Cookie ID
         $ga_trkServerCookieId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_server_cookie_id");
         $ga_trkServerCookieId = ($ga_trkServerCookieId && ! empty(trim($ga_trkServerCookieId))) ? $ga_trkServerCookieId : false;
-        
+
         // Merge to array
         $localizedData['pid'] = $messId;
         $localizedData['debug'] = $debug;
@@ -555,8 +555,8 @@ class Wp_Sdtrk_Public
         }
         // Debug
         $debugmode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "lin_trk_debug"), "yes") == 0) ? true : false;
-        
-        
+
+
         // Merge to array
         $localizedData['map_ev'] = $linMappings;
         $localizedData['map_btn'] = $linBtnMappings;
@@ -597,7 +597,7 @@ class Wp_Sdtrk_Public
 
         // Debug
         $debugmode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "fl_trk_debug"), "yes") == 0) ? true : false;
-                
+
         // Merge to array
         $localizedData['pid'] = $trkId;
         $localizedData['b_e'] = $trkBrowser;
@@ -635,7 +635,7 @@ class Wp_Sdtrk_Public
 
         // Debug
         $debugmode = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "mtc_trk_debug"), "yes") == 0) ? true : false;
-                
+
         // Merge to array
         $localizedData['pid'] = $trkId;
         $localizedData['b_e'] = $trkBrowser;
@@ -676,7 +676,7 @@ class Wp_Sdtrk_Public
         wp_register_script($this->get_jsHandler('name', 'decrypter'), plugins_url("js/" . $this->get_jsHandler('file', 'decrypter') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
         wp_localize_script($this->get_jsHandler('name', 'decrypter'), $this->get_jsHandler('var', 'decrypter'), $localizedData);
     }
-    
+
     /**
      * Register and localize fingerprinter
      *
@@ -686,13 +686,13 @@ class Wp_Sdtrk_Public
     {
         // Init
         $localizedData = array();
-        
+
         // Digistore24
         $enabled = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "trk_fp"), "yes") == 0) ? true : false;
-        
+
         // Merge to array
         $localizedData['enabled'] = $enabled;
-        
+
         // Register scripts
         wp_register_script($this->get_jsHandler('name', 'fp'), plugins_url("js/" . $this->get_jsHandler('file', 'fp') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
         wp_localize_script($this->get_jsHandler('name', 'fp'), $this->get_jsHandler('var', 'fp'), $localizedData);
@@ -770,9 +770,9 @@ class Wp_Sdtrk_Public
         global $post;
         $postId = ($post && $post->ID) ? $post->ID : false;
         $title = $postId ? get_the_title($post) : "";
-        
+
         //admin
-        $isAdmin = ( current_user_can( 'manage_options' ) ) ? true : false;
+        $isAdmin = (current_user_can('manage_options')) ? true : false;
 
         // Merge to array
         $localizedData['admin'] = $isAdmin;
@@ -947,10 +947,10 @@ class Wp_Sdtrk_Public
             switch ($wp->query_vars[$this->wp_sdtrk]) {
 
                 case 'gauth':
-                    include (WP_PLUGIN_DIR . '/' . $this->wp_sdtrk . '/api/gauth.php');
+                    include(WP_PLUGIN_DIR . '/' . $this->wp_sdtrk . '/api/gauth.php');
                     break;
                 case 'hitfeed':
-                    include (WP_PLUGIN_DIR . '/' . $this->wp_sdtrk . '/api/hitfeed.php');
+                    include(WP_PLUGIN_DIR . '/' . $this->wp_sdtrk . '/api/hitfeed.php');
                     break;
             }
 

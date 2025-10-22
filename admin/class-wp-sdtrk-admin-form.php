@@ -35,9 +35,23 @@ class Wp_Sdtrk_Admin_Form_Handler
             return;
         }
 
-        // Rules sammeln
+        // check if event is tag-based (e.g. button_click, element_visible)
+        $is_tag_based_event = in_array($event_name, ['button_click', 'element_visible']);
+        if ($is_tag_based_event) {
+            $tag = trim(sanitize_text_field($_POST['sdtrk_new_mapping_element_tag'] ?? ''));
+            if (empty($tag)) {
+                add_action('admin_notices', function () {
+                    echo '<div class="notice notice-error"><p>' . esc_html__('For tag-based events, the element tag is required', 'wp-sdtrk') . '</p></div>';
+                });
+                return;
+            }
+            // calc real event name. E.g.: button_click_<tag>
+            $event_name = $event_name . '_' . $tag;
+        }
+
+        // collect rules if not tag-based event
         $rules = [];
-        if (isset($_POST['rules']) && is_array($_POST['rules'])) {
+        if (isset($_POST['rules']) && is_array($_POST['rules']) && !$is_tag_based_event) {
             foreach ($_POST['rules'] as $rule) {
                 if (!empty($rule['param'])) {
                     $rules[] = [
@@ -87,9 +101,23 @@ class Wp_Sdtrk_Admin_Form_Handler
             return;
         }
 
+        // check if event is tag-based (e.g. button_click, element_visible)
+        $is_tag_based_event = in_array($event_name, ['button_click', 'element_visible']);
+        if ($is_tag_based_event) {
+            $tag = trim(sanitize_text_field($_POST['sdtrk_edit_mapping_element_tag'] ?? ''));
+            if (empty($tag)) {
+                add_action('admin_notices', function () {
+                    echo '<div class="notice notice-error"><p>' . esc_html__('For tag-based events, the element tag is required', 'wp-sdtrk') . '</p></div>';
+                });
+                return;
+            }
+            // calc real event name. E.g.: button_click_<tag>
+            $event_name = $event_name . '_' . $tag;
+        }
+
         // Rules sammeln
         $rules = [];
-        if (isset($_POST['rules']) && is_array($_POST['rules'])) {
+        if (isset($_POST['rules']) && is_array($_POST['rules']) && !$is_tag_based_event) {
             foreach ($_POST['rules'] as $rule) {
                 if (!empty($rule['param'])) {
                     $rules[] = [

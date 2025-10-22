@@ -49,10 +49,11 @@ if (! function_exists('sdtrk_log')) {
      *
      * @param mixed  $message String, Array oder Objekt.
      * @param string $level   Optional. Log-Level (info, warning, error).
+     * @param bool   $ignore  Optional. Wenn true, wird der Log-Eintrag auch bei aktiviertem WP_DEBUG nicht geschrieben.
      */
-    function sdtrk_log($message, string $level = 'info'): void
+    function sdtrk_log($message, string $level = 'info', bool $ignore = false): void
     {
-        if (defined('WP_DEBUG') && WP_DEBUG && defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+        if (defined('WP_DEBUG') && WP_DEBUG && defined('WP_DEBUG_LOG') && WP_DEBUG_LOG && ! $ignore) {
             // 1) Zeitstempel holen (WP-Lokalzeit)
             $timestamp = date_i18n('Y-m-d H:i:s');
             // 2) Prefix mit Datum, Plugin-Tag und Level

@@ -89,7 +89,7 @@ class Wp_Sdtrk_Helper
      * @param string $value
      * @return array
      */
-    public static function wp_sdtrk_getPagesByMeta($key, $value, $limit = - 1)
+    public static function wp_sdtrk_getPagesByMeta($key, $value, $limit = -1)
     {
         // Prepare query
         $args = array(
@@ -240,7 +240,7 @@ class Wp_Sdtrk_Helper
     public static function wp_sdtrk_array_keys_recursive($array, $MAXDEPTH = INF, $depth = 0, $arrayKeys = array())
     {
         if ($depth < $MAXDEPTH) {
-            $depth ++;
+            $depth++;
             $keys = array_keys($array);
             foreach ($keys as $key) {
                 if (is_array($array[$key])) {
@@ -303,11 +303,11 @@ class Wp_Sdtrk_Helper
                 'payload_decoded' => json_decode($payload),
                 'destination' => $url
             ];
-            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----', $debug);
-            self::wp_sdtrk_vardump_log($response, $debug);
-            self::wp_sdtrk_write_log('--> CURL Error-Info:', $debug);
-            self::wp_sdtrk_write_log(curl_getinfo($curl), $debug);
-            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----', $debug);
+            sdtrk_log('------ START CURL Error-Response: -----', 'error', !$debug);
+            sdtrk_log($response, 'error', !$debug);
+            sdtrk_log('--> CURL Error-Info:', 'error', !$debug);
+            sdtrk_log(curl_getinfo($curl), 'error', !$debug);
+            sdtrk_log('------ END CURL Error-Response: -----', 'error', !$debug);
             curl_close($curl);
             return $response;
         }
@@ -338,11 +338,11 @@ class Wp_Sdtrk_Helper
                 'payload_decoded' => json_decode($payload),
                 'destination' => $url
             ];
-            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----', $debug);
-            self::wp_sdtrk_vardump_log($response, $debug);
-            self::wp_sdtrk_write_log('--> CURL Error-Info:', $debug);
-            self::wp_sdtrk_write_log(curl_getinfo($curl), $debug);
-            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----', $debug);
+            sdtrk_log('------ START CURL Error-Response: -----', 'error', !$debug);
+            sdtrk_log($response, 'error', !$debug);
+            sdtrk_log('--> CURL Error-Info:', 'error', !$debug);
+            sdtrk_log(curl_getinfo($curl), 'error', !$debug);
+            sdtrk_log('------ END CURL Error-Response: -----', 'error', !$debug);
             curl_close($curl);
             return $response;
         }
@@ -357,11 +357,11 @@ class Wp_Sdtrk_Helper
                 'payload_decoded' => json_decode($payload),
                 'destination' => $url
             ];
-            self::wp_sdtrk_write_log('------ START CURL Error-Response: -----', $debug);
-            self::wp_sdtrk_vardump_log($response, $debug);
-            self::wp_sdtrk_write_log('--> CURL Error-Info:', $debug);
-            self::wp_sdtrk_write_log(curl_getinfo($curl), $debug);
-            self::wp_sdtrk_write_log('------ END CURL Error-Response: -----', $debug);
+            sdtrk_log('------ START CURL Error-Response: -----', 'error', !$debug);
+            sdtrk_log($response, 'error', !$debug);
+            sdtrk_log('--> CURL Error-Info:', 'error', !$debug);
+            sdtrk_log(curl_getinfo($curl), 'error', !$debug);
+            sdtrk_log('------ END CURL Error-Response: -----', 'error', !$debug);
             curl_close($curl);
             return $response;
         }
@@ -473,10 +473,10 @@ class Wp_Sdtrk_Helper
      * @param String $name
      * @param String $value
      * @param boolean $firstParty
-     * @param number $validDays
+     * @param int $validDays
      * @return boolean
      */
-    public static function wp_sdtrk_setCookie($name, $value, $firstParty = true, $validDays = 14)
+    public static function wp_sdtrk_setCookie(string $name, string $value, bool $firstParty = true, int $validDays = 14): bool
     {
         $partyName = ($firstParty) ? "wpsdtrk_" . $name : $name;
         $timestamp = time() + 24 * 60 * 60 * $validDays;
@@ -559,7 +559,7 @@ class Wp_Sdtrk_Helper
 
         // Check if the message still have to show up
         if ($amountLeft && $amountLeft > 0) {
-            $amountLeft --;
+            $amountLeft--;
             set_transient('wpsdtrk_notices_amount', $amountLeft);
         }
 
@@ -578,10 +578,10 @@ class Wp_Sdtrk_Helper
      * @param string $timezone
      * @return string
      */
-    public static function wp_sdtrk_TimestampToDate($format = 'd.m.Y H:i:s', $value = false, $timezone = 'Europe/Berlin')
+    public static function wp_sdtrk_TimestampToDate(string $format = 'd.m.Y H:i:s', int $value = -1, string $timezone = 'Europe/Berlin'): string
     {
-        // If value is false, use current-time
-        if (! $value) {
+        // If value is -1, use current-time
+        if ($value === -1) {
             $value = time();
         }
         try {
@@ -600,13 +600,13 @@ class Wp_Sdtrk_Helper
     /**
      * Converts a readable Date-String to timestamp
      *
-     * @param boolean $value
-     * @return number
+     * @param int $value
+     * @return int|bool
      */
-    public static function wp_sdtrk_DateToTimestamp($value = false)
+    public static function wp_sdtrk_DateToTimestamp(int $value = -1): int|bool
     {
-        // If value is false, use current-time
-        if (! $value) {
+        // If value is -1, use current-time
+        if ($value == -1) {
             return time();
         }
         try {
@@ -697,19 +697,19 @@ class Wp_Sdtrk_Helper
         );
         return $params;
     }
-    
-    public static function wp_sdtrk_get_timestamp($shift,$specific = false){
+
+    public static function wp_sdtrk_get_timestamp($shift, $specific = false)
+    {
         $timezone = 'Europe/Berlin';
         $date = new DateTime("now", new DateTimeZone($timezone));
-        
-        if($specific === false){
+
+        if ($specific === false) {
             $date->add(new DateInterval("PT{$shift}H"));
+        } else {
+
+            $date->setTime($shift + 1, 0, 0); // time is shifted by 1 hour back, thats why we need to add the value here
         }
-        else{
-            
-            $date->setTime($shift+1,0,0); // time is shifted by 1 hour back, thats why we need to add the value here
-        }
-        
+
         return $date->getTimestamp();
     }
 }

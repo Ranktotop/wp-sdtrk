@@ -56,7 +56,90 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
     public array $rules = [];
 
     /**********************************/
+    /**********************************/
+    /* CHECKER                        */
+    /**********************************/
+    /**********************************/
+
+    /**
+     * Checks if the current event is a scroll event.
+     *
+     * Determines whether the tracking event being processed is related to
+     * user scrolling behavior on LinkedIn content or pages.
+     *
+     * @return bool True if the event is a scroll event, false otherwise.
+     */
+    public function is_scroll_event(): bool
+    {
+        return str_starts_with($this->event, 'scroll_');
+    }
+
+    /**
+     * Checks if the current event is a time-based event.
+     *
+     * Determines whether the LinkedIn tracking event is triggered by time-based
+     * conditions rather than user interactions or other event types.
+     *
+     * @return bool True if this is a time-based event, false otherwise.
+     */
+    public function is_time_event(): bool
+    {
+        return str_starts_with($this->event, 'time_');
+    }
+
+    /**
+     * Checks if the current event is a button click event.
+     *
+     * @return bool True if this is a button click event, false otherwise.
+     */
+    public function is_button_click_event(): bool
+    {
+        return str_starts_with($this->event, 'button_click_');
+    }
+
+    /**
+     * Checks if the current event is a element visibility event.
+     *
+     * @return bool True if this is a element visibility event, false otherwise.
+     */
+    public function is_element_visibility_event(): bool
+    {
+        return str_starts_with($this->event, 'element_visible_');
+    }
+
+    /**
+     * Checks if the event is scroll or time based and the scroll or time value is still valid
+     *
+     * @return bool True if this is a valid custom event, false otherwise.
+     */
+    public function is_valid_event(): bool
+    {
+        if ($this->is_scroll_event()) {
+            $scroll_triggers = WP_SDTRK_Helper_Options::get_scroll_triggers();
+            if (!in_array($this->get_scroll_depth(), $scroll_triggers, true)) {
+                return false;
+            }
+        }
+        if ($this->is_time_event()) {
+            $time_triggers = WP_SDTRK_Helper_Options::get_time_triggers();
+            if (!in_array($this->get_time_seconds(), $time_triggers, true)) {
+                return false;
+            }
+        }
+
+        if ($this->is_button_click_event() || $this->is_element_visibility_event()) {
+            if (empty($this->get_tag_name())) {
+                return false;
+            }
+        }
+        //if not custom event, return true
+        return true;
+    }
+
+    /**********************************/
+    /**********************************/
     /* GETTER                         */
+    /**********************************/
     /**********************************/
 
     /**
@@ -99,6 +182,16 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
             return sprintf(__('Time %s seconds', 'wp-sdtrk'), esc_html($this->get_time_seconds()));
         }
 
+        //if is button click event, return label from button triggers
+        if ($this->is_button_click_event()) {
+            return sprintf(__('Button click on: %s', 'wp-sdtrk'), esc_html($this->get_tag_name()));
+        }
+
+        //if is element visibility event, return label from element triggers
+        if ($this->is_element_visibility_event()) {
+            return sprintf(__('Element visible: %s', 'wp-sdtrk'), esc_html($this->get_tag_name()));
+        }
+
         $events = WP_SDTRK_Helper_Linkedin::get_common_events();
 
         //if the name is in events, return its label
@@ -109,19 +202,6 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
     }
 
     /**
-     * Checks if the current event is a scroll event.
-     *
-     * Determines whether the tracking event being processed is related to
-     * user scrolling behavior on LinkedIn content or pages.
-     *
-     * @return bool True if the event is a scroll event, false otherwise.
-     */
-    public function is_scroll_event(): bool
-    {
-        return str_starts_with($this->event, 'scroll_');
-    }
-
-    /**
      * Get the scroll depth percentage for LinkedIn tracking.
      *
      * Retrieves the current scroll depth as an integer value representing
@@ -129,7 +209,7 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
      *
      * @since 1.0.0
      * 
-     * @return int The scroll depth percentage (0-100).
+     * @return int The scroll depth percentage (0-100) or -1 if not a scroll event.
      */
     public function get_scroll_depth(): int
     {
@@ -142,45 +222,9 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
     }
 
     /**
-     * Checks if the current event is a time-based event.
-     *
-     * Determines whether the LinkedIn tracking event is triggered by time-based
-     * conditions rather than user interactions or other event types.
-     *
-     * @return bool True if this is a time-based event, false otherwise.
-     */
-    public function is_time_event(): bool
-    {
-        return str_starts_with($this->event, 'time_');
-    }
-
-    /**
-     * Checks if the event is scroll or time based and the scroll or time value is still valid
-     *
-     * @return bool True if this is a valid custom event, false otherwise.
-     */
-    public function is_valid_event(): bool
-    {
-        if ($this->is_scroll_event()) {
-            $scroll_triggers = WP_SDTRK_Helper_Options::get_scroll_triggers();
-            if (!in_array($this->get_scroll_depth(), $scroll_triggers, true)) {
-                return false;
-            }
-        }
-        if ($this->is_time_event()) {
-            $time_triggers = WP_SDTRK_Helper_Options::get_time_triggers();
-            if (!in_array($this->get_time_seconds(), $time_triggers, true)) {
-                return false;
-            }
-        }
-        //if not custom event, return true
-        return true;
-    }
-
-    /**
      * Get the time duration in seconds.
      *
-     * @return int The time duration in seconds.
+     * @return int The time duration in seconds or -1 if not a time event.
      */
     public function get_time_seconds(): int
     {
@@ -190,6 +234,23 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
             return $seconds;
         }
         return -1;
+    }
+
+    /**
+     * Get the tag name of tag based event.
+     *
+     * @return string The plain tag or an empty string if not tag based.
+     */
+    public function get_tag_name(): string
+    {
+        $plain_tag = '';
+        if ($this->is_button_click_event()) {
+            $plain_tag = str_replace('button_click_', '', $this->event);
+        }
+        if ($this->is_element_visibility_event()) {
+            $plain_tag = str_replace('element_visible_', '', $this->event);
+        }
+        return trim($plain_tag);
     }
 
     /**
@@ -209,6 +270,12 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
         }
         return $rules;
     }
+
+    /**********************************/
+    /**********************************/
+    /* SETTER                         */
+    /**********************************/
+    /**********************************/
 
     public function set_conversion_id(string $convid): static
     {
@@ -241,6 +308,20 @@ class WP_SDTRK_Model_Linkedin extends WP_SDTRK_Model_Base
         $time_triggers = WP_SDTRK_Helper_Options::get_time_triggers();
         foreach ($time_triggers as $seconds) {
             $valid_events[] = 'time_' . $seconds . '_seconds';
+        }
+
+        // On tag based events we simply add the event if it starts with the correct prefix and has a valid tag
+        foreach (['button_click', 'element_visible'] as $prefix) {
+            //check if prefix matches
+            if (!str_starts_with($event, $prefix . '_')) {
+                continue;
+            }
+            //check if tag is valid
+            $tag = str_replace($prefix . '_', '', $event);
+            if (empty(trim($tag))) {
+                continue;
+            }
+            $valid_events[] = $event;
         }
 
         if (!in_array($event, $valid_events, true)) {

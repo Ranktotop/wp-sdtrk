@@ -28,24 +28,20 @@ class Wp_Sdtrk_Tracker_Ga
      */
     private function init()
     {
-        // ID
-        $messId = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_measurement_id");
-        $this->measurementId = ($messId && ! empty(trim($messId))) ? $messId : false;
+        // Pixel ID
+        $this->measurementId = WP_SDTRK_Helper_Options::get_string_option('ga_measurement_id');
 
         // Srv Token
-        $ga_srvToken = Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_server_token");
-        $this->apiToken = ($ga_srvToken && ! empty(trim($ga_srvToken))) ? $ga_srvToken : false;
+        $this->apiToken = WP_SDTRK_Helper_Options::get_string_option('ga_trk_server_token');
 
         // Track Server
-        $this->trackServer = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_server"), "yes") == 0) ? true : false;
+        $this->trackServer = WP_SDTRK_Helper_Options::get_bool_option('ga_trk_server', false);
 
         // Debug Mode
-        $debug = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_debug"), "yes") == 0) ? true : false;
-        $this->debugMode = ($debug && ! empty(trim($debug))) ? $debug : false;
+        $this->debugMode = WP_SDTRK_Helper_Options::get_bool_option('ga_trk_debug', false);
 
         // Debug Mode Live
-        $debugLive = (strcmp(Wp_Sdtrk_Helper::wp_sdtrk_recursiveFind(get_option("wp-sdtrk", false), "ga_trk_debug_live"), "yes") == 0) ? true : false;
-        $this->debugModeLive = ($debugLive && ! empty(trim($debugLive))) ? $debugLive : false;
+        $this->debugMode = WP_SDTRK_Helper_Options::get_bool_option('ga_trk_debug_live', false);
     }
 
     /**
@@ -81,12 +77,13 @@ class Wp_Sdtrk_Tracker_Ga
     {
         return ($this->debugMode);
     }
-    
+
     /**
      * Set and return the frontend debug mode
      * @param Boolean|String $debugMode
      */
-    public function setAndGetDebugMode_frontend($debugMode){
+    public function setAndGetDebugMode_frontend($debugMode)
+    {
         $this->debugMode_frontend = ($debugMode === true || $debugMode === '1') ? true : false;
         return ($this->debugMode_frontend === true && $this->debugMode === true);
     }
@@ -110,7 +107,7 @@ class Wp_Sdtrk_Tracker_Ga
         if (! method_exists($this, $functionName)) {
             return false;
         }
-        $clientId = (isset($data['cid']) && ! empty($data['cid'])) ? $data['cid'] : false;        
+        $clientId = (isset($data['cid']) && ! empty($data['cid'])) ? $data['cid'] : false;
         $response = $this->$functionName($event, $data, $clientId);
         Wp_Sdtrk_Helper::wp_sdtrk_write_log("Response:", $this->debugMode);
         Wp_Sdtrk_Helper::wp_sdtrk_vardump_log($response, $this->debugMode);
@@ -184,7 +181,7 @@ class Wp_Sdtrk_Tracker_Ga
     {
         // Update the event
         $scrollEventId = $event->getEventId() . "-s" . $data['percent'];
-        $scrollEventName = $event->get_CustomEventName('Scroll',$data['percent']);
+        $scrollEventName = $event->get_CustomEventName('Scroll', $data['percent']);
         $event->setScrollTriggerData($scrollEventName, $scrollEventId);
 
         $customData = $this->getData_custom($event);
@@ -212,7 +209,7 @@ class Wp_Sdtrk_Tracker_Ga
     {
         // Update the event
         $timeEventId = $event->getEventId() . "-t" . $data['time'];
-        $timeEventName = $event->get_CustomEventName('Time',$data['time']);
+        $timeEventName = $event->get_CustomEventName('Time', $data['time']);
         $event->setTimeTriggerData($timeEventName, $timeEventId);
 
         $customData = $this->getData_custom($event);
@@ -240,7 +237,7 @@ class Wp_Sdtrk_Tracker_Ga
     {
         // Update the event
         $clickEventId = $event->getEventId() . "-b" . $data['tag'];
-        $event->setClickTriggerData($event->get_CustomEventName('Click',$data['tag']), $clickEventId, $data['tag']);
+        $event->setClickTriggerData($event->get_CustomEventName('Click', $data['tag']), $clickEventId, $data['tag']);
 
         $customData = $this->getData_custom($event);
         $customData['transaction_id'] = $event->getClickTriggerData()['id'];
@@ -269,7 +266,7 @@ class Wp_Sdtrk_Tracker_Ga
     {
         // Update the event
         $visitEventId = $event->getEventId() . "-v" . $data['tag'];
-        $event->setVisibilityTriggerData($event->get_CustomEventName('Visibility',$data['tag']), $visitEventId, $data['tag']);
+        $event->setVisibilityTriggerData($event->get_CustomEventName('Visibility', $data['tag']), $visitEventId, $data['tag']);
 
         $customData = $this->getData_custom($event);
         $customData['transaction_id'] = $event->getVisibilityTriggerData()['id'];
