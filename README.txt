@@ -32,7 +32,7 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
-= 1.7.1 =
+= 1.7.2 =
 * Changed UI structure for decryption
 
 = 1.7.0 =

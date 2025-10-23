@@ -182,6 +182,14 @@ class Wp_Sdtrk_Catcher_Mtm {
 		}
 	}
 
+	getFocusEventName() {
+		// name: Produkt-ID > Produktname > Seitentitel
+		const prodName = this.event.grabProdName();
+		const prodId = this.event.grabProdId();
+		const pageName = this.event.getPageName();
+		return prodId || prodName || pageName;
+	}
+
 	/**
 	* Fire data in browser via Matomo — direkter Push & Log pro Case
 	*/
@@ -190,20 +198,12 @@ class Wp_Sdtrk_Catcher_Mtm {
 			switch (handler) {
 
 				case 'Event': {
-					// action: immer Event-Name
-					const action = this.event.grabEventName ? this.event.grabEventName() : 'event';
+					// action: immer Event-Name. E.g.: view_item
+					const action = this.event.grabEventName();
+					const name = this.getFocusEventName();
+					const value = this.event.grabValue();
 
-					// name: Produktname > Produkt-ID > Seitentitel
-					const prodName = this.event.grabProdName ? this.event.grabProdName() : '';
-					const prodId = this.event.grabProdId ? this.event.grabProdId() : '';
-					const pageName = this.event.getPageName ? this.event.getPageName() : document.title;
-					const name = prodName || prodId || pageName;
-
-					// value: wenn Produktwert vorhanden, sonst weglassen
-					let rawVal = (this.event.grabValue ? this.event.grabValue() : undefined);
-					let value = (rawVal === undefined || rawVal === null || rawVal === '') ? NaN : parseFloat(rawVal);
-
-					if (!isNaN(value)) {
+					if (value != 0) {
 						_paq.push(['trackEvent', 'Wp-Sdtrk', action, name, value]);
 					} else {
 						_paq.push(['trackEvent', 'Wp-Sdtrk', action, name]);
