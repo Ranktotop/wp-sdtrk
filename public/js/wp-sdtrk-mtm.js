@@ -183,11 +183,16 @@ class Wp_Sdtrk_Catcher_Mtm {
 	}
 
 	getFocusEventName() {
-		// name: Produkt-ID > Produktname > Seitentitel
+		// name: Produktname > Produkt-ID > Seitentitel
 		const prodName = this.event.grabProdName();
 		const prodId = this.event.grabProdId();
 		const pageName = this.event.getPageName();
-		return prodId || prodName || pageName;
+
+		//if prodName is "custom" switch order to prodId > pageName > prodName 
+		if (prodName === "custom") {
+			return prodId || pageName || prodName;
+		}
+		return prodName || prodId || pageName;
 	}
 
 	/**
@@ -199,43 +204,51 @@ class Wp_Sdtrk_Catcher_Mtm {
 
 				case 'Event': {
 					// action: immer Event-Name. E.g.: view_item
-					const action = this.event.grabEventName();
-					const name = this.getFocusEventName();
 					const value = this.event.grabValue();
-
-					if (value != 0) {
-						_paq.push(['trackEvent', 'Wp-Sdtrk', action, name, value]);
-					} else {
-						_paq.push(['trackEvent', 'Wp-Sdtrk', action, name]);
-					}
+					const payload = value != 0
+						? ['trackEvent', 'Wp-Sdtrk', this.event.grabEventName(), this.getFocusEventName(), value]
+						: ['trackEvent', 'Wp-Sdtrk', this.event.grabEventName(), this.getFocusEventName()];
+					_paq.push(payload);
 
 					this.helper.debugLog(
 						this.localizedData.debug,
-						{ event: action, data: { name, value: !isNaN(value) ? value : undefined } },
+						payload,
 						'Fired in Browser (mtm-' + handler + ')'
 					);
 					break;
 				}
 
 				case 'Time':
-					_paq.push(['trackEvent', 'Wp-Sdtrk', this.helper.get_EventName(handler, data.time), this.event.getPageName(), parseInt(data.time, 10)]);
-					this.helper.debugLog(this.localizedData.debug, { event: this.helper.get_EventName(handler, data.time), data: { time: data.time } }, 'Fired in Browser (mtm-' + handler + ')');
-					break;
+					{
+						const payload = ['trackEvent', 'Wp-Sdtrk', this.helper.get_EventName(handler, data.time), this.getFocusEventName()];
+						_paq.push(payload);
+						this.helper.debugLog(this.localizedData.debug, payload, 'Fired in Browser (mtm-' + handler + ')');
+						break;
+					}
 
 				case 'Scroll':
-					_paq.push(['trackEvent', 'Wp-Sdtrk', this.helper.get_EventName(handler, data.percent), this.event.getPageName(), parseInt(data.percent, 10)]);
-					this.helper.debugLog(this.localizedData.debug, { event: this.helper.get_EventName(handler, data.percent), data: { percent: data.percent } }, 'Fired in Browser (mtm-' + handler + ')');
-					break;
+					{
+						const payload = ['trackEvent', 'Wp-Sdtrk', this.helper.get_EventName(handler, data.percent), this.getFocusEventName()];
+						_paq.push(payload);
+						this.helper.debugLog(this.localizedData.debug, payload, 'Fired in Browser (mtm-' + handler + ')');
+						break;
+					}
 
 				case 'Click':
-					_paq.push(['trackEvent', 'Wp-Sdtrk', this.helper.get_EventName(handler, data.tag), data.tag]);
-					this.helper.debugLog(this.localizedData.debug, { event: this.helper.get_EventName(handler, data.tag), data: { tag: data.tag } }, 'Fired in Browser (mtm-' + handler + ')');
-					break;
+					{
+						const payload = ['trackEvent', 'Wp-Sdtrk', this.helper.get_EventName(handler, data.tag), data.tag];
+						_paq.push(payload);
+						this.helper.debugLog(this.localizedData.debug, payload, 'Fired in Browser (mtm-' + handler + ')');
+						break;
+					}
 
 				case 'Visibility':
-					_paq.push(['trackEvent', 'Wp-Sdtrk', this.helper.get_EventName(handler, data.tag), data.tag]);
-					this.helper.debugLog(this.localizedData.debug, { event: this.helper.get_EventName(handler, data.tag), data: { tag: data.tag } }, 'Fired in Browser (mtm-' + handler + ')');
-					break;
+					{
+						const payload = ['trackEvent', 'Wp-Sdtrk', this.helper.get_EventName(handler, data.tag), data.tag];
+						_paq.push(payload);
+						this.helper.debugLog(this.localizedData.debug, payload, 'Fired in Browser (mtm-' + handler + ')');
+						break;
+					}
 			}
 		}
 	}
