@@ -150,8 +150,7 @@ $available_events['element_visible'] = __('Element Visible', 'wp-sdtrk');
                     <td>
                         <input name="sdtrk_new_mapping_element_tag" type="text" id="sdtrk_new_mapping_element_tag" class="regular-text" placeholder="<?php esc_attr_e('e.g., newsletter, buy-now', 'wp-sdtrk'); ?>">
                         <p class="description">
-                            <?php esc_html_e('For button clicks, add class: trkbtn-TAGNAME-trkbtn', 'wp-sdtrk'); ?><br>
-                            <?php esc_html_e('For element visibility, add class: watchitm-TAGNAME-watchitm', 'wp-sdtrk'); ?>
+                            <?php esc_html_e('Note: You have to add the corresponding class to your element! See general options for more details.', 'wp-sdtrk'); ?>
                         </p>
                     </td>
                 </tr>
@@ -211,8 +210,7 @@ $available_events['element_visible'] = __('Element Visible', 'wp-sdtrk');
                 </p>
                 <input name="sdtrk_edit_mapping_element_tag" type="text" id="sdtrk_edit_mapping_element_tag" class="regular-text" placeholder="<?php esc_attr_e('e.g., newsletter, buy-now', 'wp-sdtrk'); ?>" style="margin-bottom: 15px;">
                 <p class="description">
-                    <?php esc_html_e('For button clicks, add class: trkbtn-TAGNAME-trkbtn', 'wp-sdtrk'); ?><br>
-                    <?php esc_html_e('For element visibility, add class: watchitm-TAGNAME-watchitm', 'wp-sdtrk'); ?>
+                    <?php esc_html_e('Note: You have to add the corresponding class to your element! See general options for more details.', 'wp-sdtrk'); ?>
                 </p>
             </div>
 
