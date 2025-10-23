@@ -21,11 +21,74 @@ jobs:
       - name: 📦 Install Composer Dependencies (no dev)
         run: composer install --no-dev --optimize-autoloader
 
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 📦 Install Terser for JS Minification
+        run: npm install -g terser
+
+      - name: 🗜️ Minify JavaScript Files
+        run: |
+          echo "Starting JavaScript minification..."
+          
+          # Prüfe ob public/js existiert
+          if [ -d "public/js" ]; then
+            # Finde alle .js Dateien (außer bereits minifizierte .min.js)
+            find public/js -type f -name "*.js" ! -name "*.min.js" | while read jsfile; do
+              # Extrahiere Dateiname ohne Erweiterung
+              filename="${jsfile%.js}"
+              minfile="${filename}.min.js"
+              
+              echo "Minifying: $jsfile -> $minfile"
+              
+              # Minifiziere mit Terser
+              terser "$jsfile" \
+                --compress \
+                --mangle \
+                --output "$minfile" \
+                --comments false
+              
+              if [ $? -eq 0 ]; then
+                echo "✅ Successfully minified: $minfile"
+              else
+                echo "❌ Error minifying: $jsfile"
+                exit 1
+              fi
+            done
+            
+            echo "✅ All JavaScript files minified successfully"
+          else
+            echo "⚠️ Directory public/js not found"
+            exit 1
+          fi
+
+      - name: 🔄 Update loadMinified Switch
+        run: |
+          echo "Updating \$loadMinified switch in public/class-wp-sdtrk-public.php..."
+          
+          if [ -f "public/class-wp-sdtrk-public.php" ]; then
+            # Ersetze $loadMinified = false; mit $loadMinified = true;
+            sed -i 's/\$loadMinified = false;/\$loadMinified = true;/g' public/class-wp-sdtrk-public.php
+            
+            # Prüfe ob die Änderung erfolgreich war
+            if grep -q '\$loadMinified = true;' public/class-wp-sdtrk-public.php; then
+              echo "✅ Successfully updated \$loadMinified to true"
+            else
+              echo "❌ Failed to update \$loadMinified switch"
+              exit 1
+            fi
+          else
+            echo "❌ File public/class-wp-sdtrk-public.php not found"
+            exit 1
+          fi
+
       - name: 🗜️ Create Plugin ZIP
         run: |
           mkdir -p release
           zip -r release/wp-sdtrk.zip . \
-            -x ".git*" ".github/*" "tests/*" "*.md" "composer.*" "phpunit.*"
+            -x ".git*" ".github/*" "temp/*" "tests/*" "*.md" "composer.*" "phpunit.*" "node_modules/*"
 
       - name: 🚀 Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -33,5 +96,12 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           files: release/wp-sdtrk.zip
+          body: |
+            ## Release ${{ github.ref_name }}
+            
+            ### 📦 Changes
+            - ✅ JavaScript files minified
+            - ✅ Production mode enabled
+            - 🎯 Ready for deployment
         env:
           GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}

@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.7.0 =
+* Switched to redux. Added matomo
+
 = 1.6.5 =
 * Added support for copecart
 
