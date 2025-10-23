@@ -2,8 +2,8 @@
 Contributors: (ranktotop2015)
 Donate link: https://marcmeese.de/
 Tags: CAPI, tracking, facebook, google
-Requires at least: 5.0.0
-Tested up to: 5.8
+Requires at least: 6.0.0
+Tested up to: 6.8.3
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -32,7 +32,7 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
-= 1.7.3 =
+= 1.7.4 =
 * Changed UI structure for decryption
 
 = 1.7.0 =
