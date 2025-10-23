@@ -286,7 +286,7 @@ class Wp_Sdtrk_Admin
 
 		// META TRACKING
 		Redux::set_section('wp_sdtrk_options', [
-			'title'      => __('Meta Tracking', 'wp-sdtrk'),
+			'title'      => __('Meta', 'wp-sdtrk'),
 			'id'         => 'meta_tracking_section',
 			'parent_id'  => 'tracking_services',
 			'icon'       => 'el el-facebook',
@@ -378,7 +378,7 @@ class Wp_Sdtrk_Admin
 
 		// GOOGLE ANALYTICS 4 TRACKING
 		Redux::set_section('wp_sdtrk_options', [
-			'title'      => __('Google Analytics 4', 'wp-sdtrk'),
+			'title'      => __('Google', 'wp-sdtrk'),
 			'id'         => 'google_tracking_section',
 			'parent_id'  => 'tracking_services',
 			'icon'       => 'el el-globe',
@@ -786,10 +786,22 @@ class Wp_Sdtrk_Admin
 		 * ============================================================
 		 */
 
+		// LOCAL TRACKING
 		Redux::set_section('wp_sdtrk_options', [
-			'title'  => __('Data Sources', 'wp-sdtrk'),
-			'id'     => 'data_sources_section',
-			'icon'   => 'el el-network',
+			'title'      => __('Data Sources', 'wp-sdtrk'),
+			'id'         => 'data_sources_section',
+			'icon'       => 'el el-network',
+			'subsection' => false,
+			'fields'     => [],
+		]);
+
+		// DIGISTORE24 TRACKING
+		Redux::set_section('wp_sdtrk_options', [
+			'title'      => __('Digistore24', 'wp-sdtrk'),
+			'id'         => 'ds24_data_source_section',
+			'icon'       => 'el el-credit-card',
+			'parent_id'  => 'data_sources_section',
+			'subsection' => true,
 			'fields' => [
 				[
 					'id'    => 'ds24_encrypt_data',

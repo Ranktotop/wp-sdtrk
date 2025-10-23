@@ -64,6 +64,16 @@
     opacity: 1 !important;
 }
 
+.redux-container .redux-sidebar .redux-group-menu li.activeChild.hasSubSections a {
+    background-color: #000 !important;
+    color: #fff !important;
+}
+
+.redux-container .redux-sidebar .redux-group-menu li.activeChild.hasSubSections .subsection li.active a {
+    background-color: #57b957 !important;
+    color: #fff !important;
+}
+
 /*======================
   Content Area Styling
 ======================*/
