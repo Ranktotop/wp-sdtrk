@@ -66,6 +66,12 @@
     box-shadow: none;
 }
 
+.wpsdtrk-modal-content .button:disabled,
+.wpsdtrk-modal-content .button-secondary:disabled {
+    color: #747474 !important;
+    background-color: #ffffff1c !important;
+}
+
 .wpsdtrk-modal-content .button:hover,
 .wpsdtrk-modal-content .button-secondary:hover {
     background-color: #ffffff4d;
@@ -99,7 +105,9 @@
 .wpsdtrk-modal-content input[type=email],
 .wpsdtrk-modal-content input[type=password],
 .wpsdtrk-modal-content input[type=text],
-.wpsdtrk-modal-content input[type=number] {
+.wpsdtrk-modal-content input[type=number],
+.wpsdtrk-modal-content input[type=datetime-local],
+.wpsdtrk-modal-content textarea {
     font-size: 14px !important;
     text-align: left !important;
     color: #fff !important;
@@ -110,10 +118,23 @@
     padding: 6px 10px 6px !important;
 }
 
+.wpsdtrk-modal-content input[type=email]:disabled,
+.wpsdtrk-modal-content input[type=password]:disabled,
+.wpsdtrk-modal-content input[type=text]:disabled,
+.wpsdtrk-modal-content input[type=number]:disabled,
+.wpsdtrk-modal-content input[type=datetime-local]:disabled,
+.wpsdtrk-modal-content textarea:disabled {
+    background: rgb(255 255 255 / 5%) !important;
+    border: 1px solid rgb(255 255 255 / 10%) !important;
+    color: #666 !important;
+}
+
 .wpsdtrk-modal-content input[type=email]:focus,
 .wpsdtrk-modal-content input[type=password]:focus,
 .wpsdtrk-modal-content input[type=text]:focus,
-.wpsdtrk-modal-content input[type=number]:focus {
+.wpsdtrk-modal-content input[type=number]:focus,
+.wpsdtrk-modal-content input[type=datetime-local]:focus,
+.wpsdtrk-modal-content textarea:focus {
     border-color: #57b957;
     box-shadow: 0 0 0 1px #57b957;
     outline: 1px solid transparent;
@@ -142,6 +163,74 @@
 
 .wpsdtrk-modal-content select option:checked {
     color: #fff !important;
+}
+
+/*======================
+  MODAL Switcher
+======================*/
+/* Checkbox Container */
+.wpsdtrk-modal-content label:has(input[type="checkbox"]) {
+    position: relative;
+    align-items: center;
+    padding-left: 55px;
+    min-height: 26px;
+    cursor: pointer;
+    margin-bottom: 12px !important;
+}
+
+/* Verstecke die originale Checkbox */
+.wpsdtrk-modal-content label input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Switch Container (erstellt über ::before) */
+.wpsdtrk-modal-content label:has(input[type="checkbox"])::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 26px;
+    border-radius: 50px;
+    border: 2px solid #b95757;
+    background: #b957574a;
+    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Switch Ball (erstellt über ::after) */
+.wpsdtrk-modal-content label:has(input[type="checkbox"])::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50px;
+    background-image: linear-gradient(234deg, #a5a5a5 0%, #ededed 16%, #a5a5a5 42%, #ededed 62%, #f2f2f2 71%, #a5a5a5 82%, #a5a5a5 91%);
+    box-shadow: 0px 8px 12px -4px rgb(0 0 0 / 30%);
+    transition: left 0.3s ease;
+}
+
+/* ON State - Container */
+.wpsdtrk-modal-content label:has(input[type="checkbox"]:checked)::before {
+    border: 2px solid #57b957;
+    background: #00ff0096;
+    box-shadow: 0px 0px 8px 0px #00ff00;
+}
+
+/* ON State - Ball Position */
+.wpsdtrk-modal-content label:has(input[type="checkbox"]:checked)::after {
+    left: 28px;
+}
+
+/* Hover Effekt */
+.wpsdtrk-modal-content label:has(input[type="checkbox"]):hover::before {
+    opacity: 0.9;
 }
 
 /********************

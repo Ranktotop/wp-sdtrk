@@ -95,6 +95,12 @@
     box-shadow: none;
 }
 
+#wpbody-content .wrap .button:disabled,
+#wpbody-content .wrap .button-secondary:disabled {
+    color: #747474 !important;
+    background-color: #ffffff1c !important;
+}
+
 #wpbody-content .wrap .button:hover,
 #wpbody-content .wrap .button-secondary:hover {
     background-color: #ffffff4d;
@@ -128,7 +134,9 @@
 #wpbody-content .wrap input[type=email],
 #wpbody-content .wrap input[type=password],
 #wpbody-content .wrap input[type=text],
-#wpbody-content .wrap input[type=number] {
+#wpbody-content .wrap input[type=number],
+#wpbody-content .wrap input[type=datetime-local],
+#wpbody-content .wrap textarea {
     font-size: 14px !important;
     text-align: left !important;
     color: #fff !important;
@@ -139,10 +147,23 @@
     padding: 6px 10px 6px !important;
 }
 
+#wpbody-content .wrap input[type=email]:disabled,
+#wpbody-content .wrap input[type=password]:disabled,
+#wpbody-content .wrap input[type=text]:disabled,
+#wpbody-content .wrap input[type=number]:disabled,
+#wpbody-content .wrap input[type=datetime-local]:disabled,
+#wpbody-content .wrap textarea:disabled {
+    background: rgb(255 255 255 / 5%) !important;
+    border: 1px solid rgb(255 255 255 / 10%) !important;
+    color: #666 !important;
+}
+
 #wpbody-content .wrap input[type=email]:focus,
 #wpbody-content .wrap input[type=password]:focus,
 #wpbody-content .wrap input[type=text]:focus,
-#wpbody-content .wrap input[type=number]:focus {
+#wpbody-content .wrap input[type=number]:focus,
+#wpbody-content .wrap textarea:focus,
+#wpbody-content .wrap input[type=datetime-local]:focus {
     border-color: #57b957;
     box-shadow: 0 0 0 1px #57b957;
     outline: 1px solid transparent;
@@ -171,6 +192,75 @@
 
 #wpbody-content .wrap select option:checked {
     color: #fff !important;
+}
+
+/*======================
+  Switch Styling
+======================*/
+
+/* Checkbox Container */
+#wpbody-content .wrap label:has(input[type="checkbox"]) {
+    position: relative;
+    align-items: center;
+    padding-left: 55px;
+    min-height: 26px;
+    cursor: pointer;
+    margin-bottom: 12px !important;
+}
+
+/* Verstecke die originale Checkbox */
+#wpbody-content .wrap label input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Switch Container (erstellt über ::before) */
+#wpbody-content .wrap label:has(input[type="checkbox"])::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 26px;
+    border-radius: 50px;
+    border: 2px solid #b95757;
+    background: #b957574a;
+    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Switch Ball (erstellt über ::after) */
+#wpbody-content .wrap label:has(input[type="checkbox"])::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50px;
+    background-image: linear-gradient(234deg, #a5a5a5 0%, #ededed 16%, #a5a5a5 42%, #ededed 62%, #f2f2f2 71%, #a5a5a5 82%, #a5a5a5 91%);
+    box-shadow: 0px 8px 12px -4px rgb(0 0 0 / 30%);
+    transition: left 0.3s ease;
+}
+
+/* ON State - Container */
+#wpbody-content .wrap label:has(input[type="checkbox"]:checked)::before {
+    border: 2px solid #57b957;
+    background: #00ff0096;
+    box-shadow: 0px 0px 8px 0px #00ff00;
+}
+
+/* ON State - Ball Position */
+#wpbody-content .wrap label:has(input[type="checkbox"]:checked)::after {
+    left: 28px;
+}
+
+/* Hover Effekt */
+#wpbody-content .wrap label:has(input[type="checkbox"]):hover::before {
+    opacity: 0.9;
 }
 
 /*======================

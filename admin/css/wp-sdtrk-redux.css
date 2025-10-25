@@ -175,6 +175,12 @@
     box-shadow: none;
 }
 
+.redux-container .button:disabled,
+.redux-container .button-secondary:disabled {
+    color: #747474 !important;
+    background-color: #ffffff1c !important;
+}
+
 .redux-container .button:hover,
 .redux-container .button-secondary:hover {
     background-color: #ffffff4d;
@@ -209,7 +215,8 @@
 .redux-main .redux-group-tab input[type=password],
 .redux-main .redux-group-tab input[type=text],
 .redux-main .redux-group-tab select,
-.redux-main .redux-group-tab input[type=number] {
+.redux-main .redux-group-tab input[type=number],
+.redux-main .redux-group-tab textarea {
     font-size: 14px !important;
     text-align: left !important;
     color: #fff !important;
@@ -220,10 +227,21 @@
     padding: 6px 10px 6px !important;
 }
 
+.redux-main .redux-group-tab input[type=email]:disabled,
+.redux-main .redux-group-tab input[type=password]:disabled,
+.redux-main .redux-group-tab input[type=text]:disabled,
+.redux-main .redux-group-tab input[type=number]:disabled,
+.redux-main .redux-group-tab textarea:disabled {
+    background: rgb(255 255 255 / 5%) !important;
+    border: 1px solid rgb(255 255 255 / 10%) !important;
+    color: #666 !important;
+}
+
 .redux-main .redux-group-tab input[type=email]:focus,
 .redux-main .redux-group-tab input[type=password]:focus,
 .redux-main .redux-group-tab input[type=text]:focus,
-.redux-main .redux-group-tab input[type=number]:focus {
+.redux-main .redux-group-tab input[type=number]:focus,
+.redux-main .redux-group-tab textarea:focus {
     border-color: #57b957;
     box-shadow: 0 0 0 1px #57b957;
     outline: 1px solid transparent;
