@@ -155,7 +155,14 @@ class Wp_Sdtrk_Helper {
 		switch (service) {
 			case 'borlabs':
 				if (typeof window.BorlabsCookie != "undefined") {
-					return window.BorlabsCookie.checkCookieConsent(id);
+					// borlabs v2
+					if (typeof window.BorlabsCookie.checkCookieConsent === "function") {
+						return window.BorlabsCookie.checkCookieConsent(id);
+					}
+					// borlabs v3
+					if (typeof window.BorlabsCookie.Consents?.hasConsent === "function") {
+						return window.BorlabsCookie.Consents.hasConsent(id);
+					}
 				}
 				return -1;
 			default:
