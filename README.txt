@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.7.6 =
+* Added compatibility to borlabs v3
+
 = 1.7.5 =
 * Changed UI structure for decryption
 
