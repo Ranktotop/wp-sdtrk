@@ -37,7 +37,7 @@ class Wp_Sdtrk_Engine {
 		this.collect_items();
 
 		//intantiate catcher
-		this.catcher_fb = new Wp_Sdtrk_Catcher_Meta(this.event, this.helper);
+		this.catcher_meta = new Wp_Sdtrk_Catcher_Meta(this.event, this.helper);
 		this.catcher_ga = new Wp_Sdtrk_Catcher_Ga(this.event, this.helper);
 		this.catcher_tt = new Wp_Sdtrk_Catcher_Tt(this.event, this.helper);
 		this.catcher_lin = new Wp_Sdtrk_Catcher_Lin(this.event, this.helper);
@@ -69,8 +69,8 @@ class Wp_Sdtrk_Engine {
 	* Get the fb catcher
 	* @return  {Wp_Sdtrk_Catcher_Meta} The catcher-object
 	 */
-	get_catcher_fb() {
-		return this.catcher_fb;
+	get_catcher_meta() {
+		return this.catcher_meta;
 	}
 
 	/**
@@ -224,7 +224,7 @@ class Wp_Sdtrk_Engine {
 	*/
 	run() {
 		//init
-		var catcher_fb = this.catcher_fb;
+		var catcher_meta = this.catcher_meta;
 		var catcher_ga = this.catcher_ga;
 		var catcher_tt = this.catcher_tt;
 		var catcher_lin = this.catcher_lin;
@@ -233,7 +233,7 @@ class Wp_Sdtrk_Engine {
 		var catcher_mtm = this.catcher_mtm;
 
 		//catchPageHit()
-		catcher_fb.catchPageHit(2);
+		catcher_meta.catchPageHit(2);
 		catcher_ga.catchPageHit(2);
 		catcher_tt.catchPageHit(2);
 		catcher_lin.catchPageHit(2);
@@ -250,7 +250,7 @@ class Wp_Sdtrk_Engine {
 					time = time * 1000;
 					jQuery(document).ready(function () {
 						setTimeout(function () {
-							catcher_fb.catchTimeHit(triggerTime, 2);
+							catcher_meta.catchTimeHit(triggerTime, 2);
 							catcher_ga.catchTimeHit(triggerTime, 2);
 							catcher_tt.catchTimeHit(triggerTime, 2);
 							catcher_lin.catchTimeHit(triggerTime, 2);
@@ -271,7 +271,7 @@ class Wp_Sdtrk_Engine {
 				jQuery(el[0]).on('click', function () {
 					if (!window.wp_sdtrk_clickedBtns.includes(el[1])) {
 						window.wp_sdtrk_clickedBtns.push(el[1]);
-						catcher_fb.catchClickHit(el[1], 2);
+						catcher_meta.catchClickHit(el[1], 2);
 						catcher_ga.catchClickHit(el[1], 2);
 						catcher_tt.catchClickHit(el[1], 2);
 						catcher_lin.catchClickHit(el[1], 2);
@@ -295,7 +295,7 @@ class Wp_Sdtrk_Engine {
 							var perc = Math.ceil((st * 100) / wh)
 							if (perc >= depth) {
 								window.wp_sdtrk_catchedScrolls.push(depth);
-								catcher_fb.catchScrollHit(depth, 2);
+								catcher_meta.catchScrollHit(depth, 2);
 								catcher_ga.catchScrollHit(depth, 2);
 								catcher_tt.catchScrollHit(depth, 2);
 								catcher_lin.catchScrollHit(depth, 2);
@@ -320,7 +320,7 @@ class Wp_Sdtrk_Engine {
 					var elemBottom = elemTop + jQuery(el[0]).height();
 					if ((elemBottom <= docViewBottom) && (elemTop >= docViewTop) && !window.wp_sdtrk_visitedItems.includes(el[1])) {
 						window.wp_sdtrk_visitedItems.push(el[1]);
-						catcher_fb.catchVisibilityHit(el[1], 2);
+						catcher_meta.catchVisibilityHit(el[1], 2);
 						catcher_ga.catchVisibilityHit(el[1], 2);
 						catcher_tt.catchVisibilityHit(el[1], 2);
 						catcher_lin.catchVisibilityHit(el[1], 2);
