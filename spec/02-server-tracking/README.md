@@ -19,7 +19,7 @@ Dies ist der Kern des Plugins: Conversion-Events werden **server-seitig** per cU
 |-----------|--------|----------|--------|
 | Meta CAPI | `Wp_Sdtrk_Tracker_Meta` | `graph.facebook.com/v23.0/{pixel}/events` | ✅ |
 | GA4 MP | `Wp_Sdtrk_Tracker_Ga` | `www.google-analytics.com/mp/collect` | ✅ |
-| TikTok | `Wp_Sdtrk_Tracker_Tt` | `business-api.tiktok.com/open_api/v1.2/pixel/track/` | ✅ |
+| TikTok | `Wp_Sdtrk_Tracker_Tt` | `business-api.tiktok.com/open_api/v1.3/event/track/` | ✅ |
 
 > LinkedIn, Funnelytics, Mautic, Matomo besitzen **keinen** Server-Tracker — sie laufen ausschließlich browser-seitig ([03](../03-browser-tracking/README.md)).
 

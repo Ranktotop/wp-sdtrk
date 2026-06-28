@@ -8,10 +8,12 @@
 ## Endpoint
 
 ```
-POST https://business-api.tiktok.com/open_api/v1.2/pixel/track/
+POST https://business-api.tiktok.com/open_api/v1.3/event/track/
 Header: Access-Token: {tt_trk_server_token}
         Content-Type: application/json
 ```
+
+Events API 2.0 (`v1.3/event/track`). Ein Request transportiert genau ein Event im `data`-Array.
 
 ## Relevante Optionen
 
@@ -41,30 +43,34 @@ TikTok kennt kein `PageView`; der Page-Handler sendet `ViewContent`.
 
 ```jsonc
 {
-  "pixel_code": "<tt_pixelid>",
-  "event_id": "<dedup-id>_<hash>",
-  "timestamp": "2024-01-15T10:30:00Z",   // ISO 8601 (nicht Unix!)
-  "event": "PlaceAnOrder",
-  "test_event_code": "<tt_trk_server_debug_code>",   // optional
-  "context": {
+  "event_source": "web",
+  "event_source_id": "<tt_pixelid>",
+  "test_event_code": "<tt_trk_server_debug_code>",   // optional, top-level
+  "data": [{
+    "event": "PlaceAnOrder",
+    "event_id": "<dedup-id>_<hash>",
+    "event_time": 1719424123,            // Unix-Sekunden (Integer)
     "page": { "url": "<url>", "referrer": "<referer>" },
-    "ip": "<ip>",
-    "user_agent": "<ua>",
-    "ad":   { "callback": "<ttc / ttclid>" },
-    "user": { "email": "<sha256(email)>", "external_id": "<ttc>" }
-  },
-  "properties": {
-    "contents": [{ "content_id": "<prodId>", "content_name": "<prodName>", "content_type": "product", "quantity": 1, "price": 49.0 }],
-    "currency": "EUR",
-    "value": 49.0
-  }
+    "user": {
+      "ip": "<ip>",
+      "user_agent": "<ua>",
+      "email": "<sha256(email)>",
+      "ttclid": "<ttc / ttclid>",
+      "ttp": "<_ttp>"
+    },
+    "properties": {
+      "contents": [{ "content_id": "<prodId>", "content_name": "<prodName>", "content_type": "product", "quantity": 1, "price": 49.0 }],
+      "currency": "EUR",
+      "value": 49.0
+    }
+  }]
 }
 ```
 
 ## Besonderheiten
 
-- **Timestamp** im ISO-8601-Format (Abweichung zu Meta = Unix).
+- **Envelope:** `event_source: "web"` + `event_source_id` (Pixel-Code); das eigentliche Event steckt im `data`-Array.
+- **`event_time`** als Unix-Sekunden (Integer) — wie bei Meta.
 - **`event_id`**: Basis-ID + `_<hash>` (Hash kommt vom Browser) zur Deduplizierung.
-- **Gehasht (SHA256):** `context.user.email`.
-- **Click-ID:** `ttc` (aus `ttclid`) landet in `context.ad.callback` und `context.user.external_id`.
+- **`user`** bündelt Identitäts-/Kontextdaten: `ip`, `user_agent`, gehashte `email` (SHA256), `ttclid` (aus `ttclid`-Param) und `ttp` (aus `_ttp`-Cookie).
 - **UTM:** laut Code-Kommentar von der TikTok-API **nicht unterstützt** → nicht im Payload.

@@ -54,7 +54,7 @@ class Wp_Sdtrk_Tracker_Tt
     private function getApiUrl()
     {
         if ($this->pixelId && $this->apiToken) {
-            return 'https://business-api.tiktok.com/open_api/v1.2/pixel/track/';
+            return 'https://business-api.tiktok.com/open_api/v1.3/event/track/';
         }
         return false;
     }
@@ -233,20 +233,22 @@ class Wp_Sdtrk_Tracker_Tt
     }
 
     /**
-     * Return the base data of event
+     * Return the base data of an event (one item of the v1.3 "data" array)
      *
      * @param Wp_Sdtrk_Tracker_Event $event
      * @return array
      */
     private function getData_base($event, $data)
     {
-        // Base-Data
+        // One event object inside the v1.3 "data" array
         $baseData = array(
-            "pixel_code" => $this->pixelId,
             "event_id" => $event->getEventId() . "_" . $data['hash'],
-            "timestamp" => date('c', $event->getTime()),
-            // "timestamp" => strval(intval($event->getTime())*1000),
-            "context" => $this->getData_context($event, $data),
+            "event_time" => intval($event->getTime()), // Unix timestamp in seconds
+            "page" => array(
+                "url" => $event->getEventSource(),
+                "referrer" => $event->getEventReferer()
+            ),
+            "user" => $this->getData_user($event, $data),
             "properties" => array(
                 "contents" => array($this->getData_contents($event)) // has to be an array of contents
                 // "description" => "ViewContent", // will be replaced later on events
@@ -257,7 +259,7 @@ class Wp_Sdtrk_Tracker_Tt
     }
 
     /**
-     * Return the user-data
+     * Return the user-data (v1.3: ip/user_agent live inside "user")
      *
      * @param Wp_Sdtrk_Tracker_Event $event
      * @param array $data
@@ -266,44 +268,22 @@ class Wp_Sdtrk_Tracker_Tt
     private function getData_user($event, $data)
     {
         // User-Data
-        $userData = array();
-        if ($event->getUserEmail()) {
-            $userData["email"] = hash('sha256', $event->getUserEmail());
-        }
-        if (isset($data['ttc'])) {
-            $userData["external_id"] = $data['ttc'];
-        }
-        return $userData;
-    }
-
-    /**
-     * Return the context data of event
-     *
-     * @param Wp_Sdtrk_Tracker_Event $event
-     * @return array
-     */
-    private function getData_context($event, $data)
-    {
-        $contextData = array(
-            "page" => array(
-                "url" => $event->getEventSource(),
-                "referrer" => $event->getEventReferer()
-            ),
+        $userData = array(
             "ip" => $event->getEventIp(),
             "user_agent" => $event->getEventAgent()
         );
-
-        // Add ttc if exists
+        if ($event->getUserEmail()) {
+            $userData["email"] = hash('sha256', $event->getUserEmail());
+        }
+        // ttclid: the click-id appended as the ttclid GET-param
         if (isset($data['ttc'])) {
-            $contextData['ad'] = array(
-                "callback" => $data['ttc'] // This should be the CLICKID which is appended as ttclid. See for more info: https://ads.tiktok.com/marketing_api/docs?id=1701890980108353
-            );
+            $userData["ttclid"] = $data['ttc'];
         }
-        // Add user-data if exists
-        if (! empty($this->getData_user($event, $data))) {
-            $contextData["user"] = $this->getData_user($event, $data);
+        // ttp: the _ttp first-party cookie
+        if (isset($data['ttp'])) {
+            $userData["ttp"] = $data['ttp'];
         }
-        return $contextData;
+        return $userData;
     }
 
     /**
@@ -338,12 +318,15 @@ class Wp_Sdtrk_Tracker_Tt
      */
     private function payLoadServerRequest($requestData)
     {
+        // Wrap the single event into the v1.3 envelope
+        $fields = array(
+            "event_source" => "web",
+            "event_source_id" => $this->pixelId,
+            "data" => array($requestData)
+        );
         if ($this->debugEnabled_Server()) {
-            $requestData["test_event_code"] = $this->debugCode;
+            $fields["test_event_code"] = $this->debugCode;
         }
-
-        // Create the Payload
-        $fields = $requestData;
 
         sdtrk_log($fields, "debug", !$this->debugEnabled_Server());
         $payload = json_encode($fields);
@@ -380,80 +363,5 @@ class Wp_Sdtrk_Tracker_Tt
             default:
                 return false;
         }
-    }
-
-    /**
-     * This example is 1:1 from Tik Tok Documentation
-     */
-    private function debugEvent()
-    {
-        $curl = curl_init();
-
-        $fields = array(
-            "pixel_code" => $this->pixelId,
-            "event" => "InitiateCheckout",
-            "event_id" => "1616318632825_357",
-            "timestamp" => "2020-09-17T19:49:27Z",
-            "context" => array(
-                "ad" => array(
-                    "callback" => "123ATXSfe"
-                ),
-                "page" => array(
-                    "url" => "http://demo.mywebsite.com/purchase",
-                    "referrer" => "http://demo.mywebsite.com"
-                ),
-                "user" => array(
-                    "external_id" => "f0e388f53921a51f0bb0fc8a2944109ec188b59172935d8f23020b1614cc44bc",
-                    "phone_number" => "2f9d2b4df907e5c9a7b3434351b55700167b998a83dc479b825096486ffcf4ea",
-                    "email" => "dd6ff77f54e2106661089bae4d40cdb600979bf7edc9eb65c0942ba55c7c2d7f"
-                ),
-                "user_agent" => "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 musical_ly_21.1.0 JsSdk/2.0 NetType/WIFI Channel/App Store ByteLocale/en Region/US RevealType/Dialog isDarkMode/0 WKWebView/1",
-                "ip" => "13.57.97.131"
-            ),
-            "properties" => array(
-                "contents" => [
-                    array(
-                        "price" => 8,
-                        "quantity" => 2,
-                        "content_type" => "product",
-                        "content_id" => "1077218"
-                    ),
-                    array(
-                        "price" => 30,
-                        "quantity" => 1,
-                        "content_type" => "product",
-                        "content_id" => "1197218"
-                    )
-                ],
-                "currency" => "USD",
-                "value" => 46.00
-            ),
-            "test_event_code" => $this->debugCode
-        );
-        sdtrk_log($fields, "debug", !$this->debugEnabled_Server());
-        sdtrk_log(json_encode($fields), "debug", !$this->debugEnabled_Server());
-
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://business-api.tiktok.com/open_api/v1.2/pixel/track/',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => json_encode($fields),
-            // CURLOPT_POSTFIELDS => '{"pixel_code":"'.$this->pixelId.'","event":"InitiateCheckout","event_id":"1616318632825_357","timestamp":"1645131187000","context":{"ad":{"callback":"123ATXSfe"},"page":{"url":"http://demo.mywebsite.com/purchase","referrer":"http://demo.mywebsite.com"},"user":{"external_id":"f0e388f53921a51f0bb0fc8a2944109ec188b59172935d8f23020b1614cc44bc","phone_number":"2f9d2b4df907e5c9a7b3434351b55700167b998a83dc479b825096486ffcf4ea","email":"dd6ff77f54e2106661089bae4d40cdb600979bf7edc9eb65c0942ba55c7c2d7f"},"user_agent":"Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion","ip":"13.57.97.131"},"properties":{"contents":[{"price":8,"quantity":2,"content_type":"product","content_id":"1077218"},{"price":30,"quantity":1,"content_type":"product","content_id":"1197218"}],"currency":"USD","value":46},"test_event_code":"'.$this->debugCode.'"}',
-            CURLOPT_HTTPHEADER => array(
-                'Access-Token: ' . $this->apiToken,
-                'Content-Type: application/json'
-            )
-        ));
-
-        $response = curl_exec($curl);
-        sdtrk_log($response, "debug", !$this->debugMode);
-
-        curl_close($curl);
-        return;
     }
 }
