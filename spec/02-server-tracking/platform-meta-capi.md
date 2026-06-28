@@ -8,7 +8,7 @@
 ## Endpoint
 
 ```
-POST https://graph.facebook.com/v11.0/{meta_pixelid}/events?access_token={meta_trk_server_token}
+POST https://graph.facebook.com/v23.0/{meta_pixelid}/events?access_token={meta_trk_server_token}
 ```
 
 ## Relevante Optionen

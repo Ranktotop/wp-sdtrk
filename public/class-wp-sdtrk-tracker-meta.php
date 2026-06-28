@@ -54,7 +54,7 @@ class Wp_Sdtrk_Tracker_Meta
     private function getApiUrl()
     {
         if ($this->pixelId && $this->apiToken) {
-            return 'https://graph.facebook.com/v11.0/' . $this->pixelId . '/events?access_token=' . $this->apiToken;
+            return 'https://graph.facebook.com/v23.0/' . $this->pixelId . '/events?access_token=' . $this->apiToken;
         }
         return false;
     }

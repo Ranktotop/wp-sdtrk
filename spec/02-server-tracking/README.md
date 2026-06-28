@@ -17,7 +17,7 @@ Dies ist der Kern des Plugins: Conversion-Events werden **server-seitig** per cU
 
 | Plattform | Klasse | Endpoint | Status |
 |-----------|--------|----------|--------|
-| Meta CAPI | `Wp_Sdtrk_Tracker_Meta` | `graph.facebook.com/v11.0/{pixel}/events` | ✅ |
+| Meta CAPI | `Wp_Sdtrk_Tracker_Meta` | `graph.facebook.com/v23.0/{pixel}/events` | ✅ |
 | GA4 MP | `Wp_Sdtrk_Tracker_Ga` | `www.google-analytics.com/mp/collect` | ✅ |
 | TikTok | `Wp_Sdtrk_Tracker_Tt` | `business-api.tiktok.com/open_api/v1.2/pixel/track/` | ✅ |
 
