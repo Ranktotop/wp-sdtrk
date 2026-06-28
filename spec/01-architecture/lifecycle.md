@@ -32,19 +32,19 @@ Ausgelöst über `register_activation_hook`. Schritte:
 
 ## 3. Cron — `WP_SDTRK_Cron` (`includes/class-wp-sdtrk-cron.php`)
 
-Infrastruktur ist vorbereitet, aber **ohne aktive Tasks**:
+Aktiv für die tägliche Produkt-Feed-Regenerierung der [WooCommerce-Integration](../07-woocommerce/README.md):
 
 ```php
-public const HOOKS = [];   // derzeit leer
+public const HOOKS = ['wp_sdtrk_cron_generate_feed'];
 ```
 
 | Methode | Aufruf | Funktion |
 |---------|--------|----------|
-| `register_cron_actions()` | in `define_public_hooks()` | würde Actions an Cron-Hooks binden |
-| `register_cronjobs()` | bei Aktivierung | plant je Hook ein **stündliches** Event (`wp_schedule_event(time(), 'hourly', …)`), wenn nicht vorhanden |
+| `register_cron_actions()` | in `define_public_hooks()` | bindet `wp_sdtrk_cron_generate_feed` an `Wp_Sdtrk_WC_Feed::cron_regenerate`; plant den Job nach (Self-Heal), wenn der Feed aktiv ist |
+| `register_cronjobs()` | bei Aktivierung | plant je Hook ein **tägliches** Event (`wp_schedule_event(time(), 'daily', …)`), wenn nicht vorhanden |
 | `unregister_cronjobs()` | bei Deaktivierung | `wp_clear_scheduled_hook()` je Hook |
 
-Da `HOOKS` leer ist, werden aktuell **keine** Cron-Jobs geplant. Das README erwähnt frühere Sync-Features (CSV/Google-Sheet/Live-Feed, „hourly") — diese Cron-Nutzung ist im aktuellen Code **nicht aktiv**. Siehe [99 Befunde](../99-findings.md).
+Der Cron-Callback regeneriert nur, wenn die WooCommerce-Integration **und** `wc_feed_enabled` aktiv sind ([07 › Produkt-Feed](../07-woocommerce/product-feed.md)). Ist der Feed deaktiviert, ist der geplante Job ein No-Op.
 
 ## 4. Deinstallation — `uninstall.php`
 

@@ -122,7 +122,7 @@ Status-Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` fertig
 - **AK:** Cron-Job ist nach Aktivierung geplant (`wp_get_scheduled_event`); Feed wird im Intervall neu generiert.
 - **V:** WP-Cron-Liste zeigt Job; manueller Trigger regeneriert Feed.
 
-### [ ] T3.4 — Spec nachführen (Feed + Cron)
+### [x] T3.4 — Spec nachführen (Feed + Cron)
 - **Tun:** Feed in WC-Spec-Sektion dokumentieren. [spec/01-architecture/lifecycle.md](../spec/01-architecture/lifecycle.md) (Cron jetzt aktiv) und Cron-Befund in [spec/99-findings.md](../spec/99-findings.md) (leere Cron) auf neuen Ist-Zustand.
 - **AK:** Spec beschreibt aktiven Cron + Feed; kein „Cron leer/no-op"-Befund mehr.
 - **V:** Lifecycle/Findings == Code.

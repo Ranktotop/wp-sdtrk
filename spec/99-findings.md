@@ -33,11 +33,10 @@ Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist v
 | `Wp_Sdtrk_Public::register_front_end_routes()` | leerer Stub; an `init` gebunden, tut nichts |
 | `Wp_Sdtrk_Public::load_custom_template()` | gibt Template unverändert zurück (No-Op) |
 | `Wp_Sdtrk_Public_Form_Handler::handle_public_form_callback()` | Stub (returnt früh, keine Verarbeitung) |
-| `WP_SDTRK_Cron::HOOKS` | leer → es werden **keine** Cron-Jobs geplant |
 | `flush_rewrite_rules()` bei Aktivierung | ohne eigene Routen aktuell unnötig |
 | `Wp_Sdtrk_Deactivator` Foreign-Key-Map | `$map = []` → wirkungslos |
 
-> README erwähnt frühere Sync-Features (CSV-/Google-Sheet-/Live-Feed-Sync, „hourly"). Eine entsprechende aktive Cron-Nutzung ist im aktuellen Code **nicht** vorhanden.
+> Hinweis: `WP_SDTRK_Cron` ist seit der WooCommerce-Produkt-Feed-Funktion **aktiv** (täglicher Hook `wp_sdtrk_cron_generate_feed`, siehe [07 › Produkt-Feed](07-woocommerce/product-feed.md)). Die im README erwähnten früheren Sync-Features (CSV/Google-Sheet/Live-Feed) sind davon unabhängig und nicht implementiert.
 
 ---
 
@@ -71,6 +70,6 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 |---|-------|---------|
 | 1 | Eingabe-Sanitisierung | 🟡 mittel |
 | 2 | Währung fest auf `EUR` (relevant für WooCommerce) | 🟡 mittel |
-| 3 | Tote Stubs / leere Cron | 🟡 niedrig |
+| 3 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
 | 4 | Keine Uninstall-Bereinigung | 🟡 niedrig |
 | 5 | Namens-Inkonsistenzen | 🟡 niedrig |
