@@ -49,9 +49,9 @@ return ['state' => false, 'debug' => false];
 |----------------------|------------------------|---------------------|----------|
 | `ga` | `Wp_Sdtrk_Tracker_Ga` | `Wp_Sdtrk_Tracker_Ga` | ✅ trifft |
 | `tt` | `Wp_Sdtrk_Tracker_Tt` | `Wp_Sdtrk_Tracker_Tt` | ✅ trifft |
-| `meta` | `Wp_Sdtrk_Tracker_Meta` | **`Wp_Sdtrk_Tracker_Fb`** | ❌ `class_exists` = false |
+| `meta` | `Wp_Sdtrk_Tracker_Meta` | `Wp_Sdtrk_Tracker_Meta` | ✅ trifft |
 
-> ⚠️ **Bestätigter Befund:** Der Meta-Catcher sendet `type: 'meta'` (`wp-sdtrk-meta.js`, `sendData()`), woraus `Wp_Sdtrk_Tracker_Meta` gebildet wird. Die Klasse heißt aber `Wp_Sdtrk_Tracker_Fb` und es existiert **kein** `class_alias`. Dadurch liefert `validateTracker` für Meta `state => false` und die **Meta-CAPI feuert serverseitig nie**. Vollständige Analyse: [99 Befunde › Meta-CAPI-Dispatch](../99-findings.md#meta-capi-dispatch).
+> Die Klasse liegt in `public/class-wp-sdtrk-tracker-meta.php` und heißt `Wp_Sdtrk_Tracker_Meta`. Ein `class_alias('Wp_Sdtrk_Tracker_Meta', 'Wp_Sdtrk_Tracker_Fb')` am Dateiende hält den historischen Namen `Wp_Sdtrk_Tracker_Fb` abwärtskompatibel.
 
 ## 3. Handler-Typen
 

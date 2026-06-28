@@ -1,9 +1,9 @@
 # 02 — Meta / Facebook Conversions API
 
-- **Klasse:** `Wp_Sdtrk_Tracker_Fb`
+- **Klasse:** `Wp_Sdtrk_Tracker_Meta` (Abwärtskompatibilitäts-Alias `Wp_Sdtrk_Tracker_Fb` per `class_alias`)
 - **Datei:** `public/class-wp-sdtrk-tracker-meta.php`
 - **`type`-Kürzel (Browser):** `meta`
-- **Status:** ⚠️ Server-seitig implementiert, feuert aber aktuell **nicht** — siehe [99 Befunde › Meta-CAPI-Dispatch](../99-findings.md#meta-capi-dispatch).
+- **Status:** ✅ Server-seitig aktiv — der Dispatch bildet aus `type: 'meta'` den Klassennamen `Wp_Sdtrk_Tracker_Meta`, der jetzt zutrifft.
 
 ## Endpoint
 

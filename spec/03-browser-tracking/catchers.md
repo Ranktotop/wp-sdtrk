@@ -16,15 +16,13 @@ Jede Plattform hat im Browser eine Catcher-Klasse `Wp_Sdtrk_Catcher_*`. Sie kaps
 
 | Catcher | Natives API | `type` (Server) | Server? | Besonderheit |
 |---------|-------------|-----------------|:------:|--------------|
-| `Meta` | `fbq()` | `meta` | ⚠️* | verwaltet `_fbp`/`_fbc`; Pixel-Version `fb` |
+| `Meta` | `fbq()` | `meta` | ✅ | verwaltet `_fbp`/`_fbc`; Pixel-Version `fb` |
 | `Ga` | `gtag()` | `ga` | ✅ | liefert `cid`/`gclid` |
 | `Tt` | `ttq()` | `tt` | ✅ | `ttc`/`ttp`; Hash aus UA+IP |
 | `Lin` | `lintrk()` | — | ❌ | Event→Conversion-ID-Mapping (siehe [05](../05-data-model/linkedin-mapping.md)) |
 | `Fl` | `funnelytics.events.trigger()` | — | ❌ | SKU/Label-basiert |
 | `Mtc` | `mt()` | — | ❌ | Mautic, Event-Name-basiert |
 | `Mtm` | `_paq.push()` | — | ❌ | Matomo, Site-ID-basiert |
-
-> \* Meta sendet zwar `type:'meta'`, der Server-Tracker wird aber wegen des Dispatch-Bugs nicht ausgelöst ([99 Befunde](../99-findings.md#meta-capi-dispatch)). Der **Browser-Pixel** funktioniert.
 
 ## 3. `sendData`-Beispiel (Meta)
 

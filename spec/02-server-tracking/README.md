@@ -8,7 +8,7 @@ Dies ist der Kern des Plugins: Conversion-Events werden **server-seitig** per cU
 |-------|-------|
 | [ajax-pipeline.md](ajax-pipeline.md) | Vom Browser-AJAX zum Server-Tracker: Nonce, Dispatch, `validateTracker()` |
 | [event-model.md](event-model.md) | `Wp_Sdtrk_Tracker_Event` und das Event-Datenmodell |
-| [platform-meta-capi.md](platform-meta-capi.md) | Meta/Facebook Conversions API (`Wp_Sdtrk_Tracker_Fb`) |
+| [platform-meta-capi.md](platform-meta-capi.md) | Meta/Facebook Conversions API (`Wp_Sdtrk_Tracker_Meta`) |
 | [platform-google-ga4.md](platform-google-ga4.md) | Google Analytics 4 Measurement Protocol (`Wp_Sdtrk_Tracker_Ga`) |
 | [platform-tiktok.md](platform-tiktok.md) | TikTok Events API (`Wp_Sdtrk_Tracker_Tt`) |
 | [user-data-deduplication.md](user-data-deduplication.md) | User-Daten-Erfassung, SHA256-Hashing, Event-Deduplizierung |
@@ -17,7 +17,7 @@ Dies ist der Kern des Plugins: Conversion-Events werden **server-seitig** per cU
 
 | Plattform | Klasse | Endpoint | Status |
 |-----------|--------|----------|--------|
-| Meta CAPI | `Wp_Sdtrk_Tracker_Fb` | `graph.facebook.com/v11.0/{pixel}/events` | ⚠️ feuert nicht (Dispatch-Bug) |
+| Meta CAPI | `Wp_Sdtrk_Tracker_Meta` | `graph.facebook.com/v11.0/{pixel}/events` | ✅ |
 | GA4 MP | `Wp_Sdtrk_Tracker_Ga` | `www.google-analytics.com/mp/collect` | ✅ |
 | TikTok | `Wp_Sdtrk_Tracker_Tt` | `business-api.tiktok.com/open_api/v1.2/pixel/track/` | ✅ |
 

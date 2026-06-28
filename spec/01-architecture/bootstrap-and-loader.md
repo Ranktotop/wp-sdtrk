@@ -31,7 +31,7 @@ __construct()
 - **Kern:** `Wp_Sdtrk_Loader`, `Wp_Sdtrk_i18n`, Redux-Framework (`vendor/redux/redux-core/framework.php`)
 - **Admin:** `Wp_Sdtrk_Admin`, `Wp_Sdtrk_Admin_Ajax_Handler`, `Wp_Sdtrk_Admin_Form_Handler`
 - **Public:** `Wp_Sdtrk_Public`, `Wp_Sdtrk_Public_Ajax_Handler`, `Wp_Sdtrk_Public_Form_Handler`
-- **Tracker:** `Wp_Sdtrk_Tracker_Event`, `Wp_Sdtrk_Tracker_Fb` (Datei `tracker-meta.php`), `Wp_Sdtrk_Tracker_Ga`, `Wp_Sdtrk_Tracker_Tt`
+- **Tracker:** `Wp_Sdtrk_Tracker_Event`, `Wp_Sdtrk_Tracker_Meta` (Datei `tracker-meta.php`, Alias `Wp_Sdtrk_Tracker_Fb`), `Wp_Sdtrk_Tracker_Ga`, `Wp_Sdtrk_Tracker_Tt`
 - **Decryptor:** `Wp_Sdtrk_Decrypter_ds24`
 - **Models:** `WP_SDTRK_Model_Base`, `WP_SDTRK_Model_Linkedin`, `WP_SDTRK_Model_Linkedin_Rule`
 - **Helpers:** `WP_SDTRK_Helper_Base`, `WP_SDTRK_Helper_Options`, `WP_SDTRK_Helper_Linkedin`, `WP_SDTRK_Helper_Event`

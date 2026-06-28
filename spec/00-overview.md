@@ -29,15 +29,13 @@ Welche Plattform wird **browser-seitig** (Pixel/Tag), welche zusätzlich **serve
 
 | Plattform | Kürzel (`type`) | Browser-Pixel | Server-API (S2S) | PHP-Tracker-Klasse |
 |-----------|------|:---:|:---:|--------------------|
-| Meta / Facebook | `meta` | ✅ | ⚠️ vorhanden, feuert aber nicht* | `Wp_Sdtrk_Tracker_Fb` |
+| Meta / Facebook | `meta` | ✅ | ✅ | `Wp_Sdtrk_Tracker_Meta` |
 | Google Analytics 4 | `ga` | ✅ | ✅ | `Wp_Sdtrk_Tracker_Ga` |
 | TikTok | `tt` | ✅ | ✅ | `Wp_Sdtrk_Tracker_Tt` |
 | LinkedIn | `lin` | ✅ | ❌ | – (nur Browser) |
 | Funnelytics | `fl` | ✅ | ❌ | – |
 | Mautic | `mtc` | ✅ | ❌ | – |
 | Matomo | `mtm` | ✅ | ❌ | – |
-
-> \* Meta-CAPI ist serverseitig implementiert (`Wp_Sdtrk_Tracker_Fb`), wird aber wegen einer Klassennamen-/Dispatch-Diskrepanz aktuell nicht ausgelöst. Details: [99 Befunde](99-findings.md#meta-capi-dispatch).
 
 **Weitere Funktionsbereiche:**
 

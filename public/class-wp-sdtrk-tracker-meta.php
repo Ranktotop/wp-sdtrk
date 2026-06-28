@@ -1,6 +1,6 @@
 <?php
 
-class Wp_Sdtrk_Tracker_Fb
+class Wp_Sdtrk_Tracker_Meta
 {
 
     private $pixelId;
@@ -367,3 +367,6 @@ class Wp_Sdtrk_Tracker_Fb
         }
     }
 }
+
+// Backward-compatibility alias: the class was historically named Wp_Sdtrk_Tracker_Fb.
+class_alias('Wp_Sdtrk_Tracker_Meta', 'Wp_Sdtrk_Tracker_Fb');
