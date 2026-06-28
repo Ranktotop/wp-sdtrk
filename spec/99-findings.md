@@ -6,29 +6,6 @@ Legende: 🔴 funktionaler Bug · 🟡 Auffälligkeit/Hygiene · 🔵 Hinweis/In
 
 ---
 
-## 🔴 Meta-CAPI feuert serverseitig nicht {#meta-capi-dispatch}
-
-**Verifiziert.** Der Browser-Meta-Catcher sendet `type: 'meta'` (`public/js/wp-sdtrk-meta.js`, `sendData()`):
-
-```js
-this.helper.send_ajax({ event: this.event, type: 'meta', handler, data }, …);
-```
-
-Der Server-Dispatch bildet daraus den Klassennamen (`public/class-wp-sdtrk-public-ajax.php`):
-
-```php
-$className = 'Wp_Sdtrk_Tracker_' . ucfirst($data['type']);   // → 'Wp_Sdtrk_Tracker_Meta'
-if (class_exists($className)) { … }
-```
-
-Die tatsächliche Klasse heißt aber **`Wp_Sdtrk_Tracker_Fb`** (`public/class-wp-sdtrk-tracker-meta.php`, Zeile 3), und es gibt **kein** `class_alias`. Damit ist `class_exists('Wp_Sdtrk_Tracker_Meta') === false` und `validateTracker` liefert für Meta `state => false`.
-
-**Folge:** Die Meta **Conversions API (Server-Tracking)** wird nie ausgelöst. GA4 (`Ga`) und TikTok (`Tt`) sind nicht betroffen, da dort Kürzel und Klassenname übereinstimmen. Der Meta-**Browser-Pixel** funktioniert unabhängig davon.
-
-**Mögliche Lösungen:** Klasse in `Wp_Sdtrk_Tracker_Meta` umbenennen, oder `class_alias('Wp_Sdtrk_Tracker_Fb', 'Wp_Sdtrk_Tracker_Meta')` ergänzen, oder im Catcher `type: 'fb'` senden (Vorsicht: muss zur Datei-/Ladelogik passen).
-
----
-
 ## 🟡 Eingabe-Sanitisierung in der AJAX-Pipeline
 
 **Verifiziert.** `validateTracker` übergibt `$_POST['data']` weitgehend ungefiltert an das Event-Modell:
@@ -44,7 +21,7 @@ Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist v
 ## 🟡 Namens-Inkonsistenzen
 
 - Klassen-Präfix wechselt zwischen `Wp_Sdtrk_*` und `WP_SDTRK_*` (funktional egal, da PHP-Klassennamen case-insensitiv sind).
-- Datei `class-wp-sdtrk-tracker-meta.php` enthält Klasse `Wp_Sdtrk_Tracker_Fb` (siehe Meta-Bug oben).
+- Datei `class-wp-sdtrk-tracker-meta.php` enthält Klasse `Wp_Sdtrk_Tracker_Meta`; der historische Name `Wp_Sdtrk_Tracker_Fb` bleibt als `class_alias` bestehen.
 - Decrypter-Klasse `Wp_Sdtrk_Decrypter_ds24` mischt CamelCase mit Kleinschreibung.
 
 ---
@@ -82,22 +59,11 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 
 ---
 
-## 🔵 API-Versionen sind fest verdrahtet
-
-- Meta: `graph.facebook.com/**v11.0**` (ältere Graph-API-Version).
-- TikTok: `open_api/**v1.2**`.
-
-Beide sind Kandidaten für ein Versions-Update; Payload-Strukturen sollten bei einer Anhebung gegen die aktuellen API-Verträge geprüft werden.
-
----
-
 ## Zusammenfassung (Priorität)
 
 | # | Punkt | Schwere |
 |---|-------|---------|
-| 1 | Meta-CAPI Dispatch (`Fb` vs. `Meta`) | 🔴 hoch — Kernfunktion betroffen |
-| 2 | Eingabe-Sanitisierung | 🟡 mittel |
-| 3 | Tote Stubs / leere Cron | 🟡 niedrig |
-| 4 | Keine Uninstall-Bereinigung | 🟡 niedrig |
-| 5 | Namens-Inkonsistenzen | 🟡 niedrig |
-| 6 | Veraltete API-Versionen | 🔵 beobachten |
+| 1 | Eingabe-Sanitisierung | 🟡 mittel |
+| 2 | Tote Stubs / leere Cron | 🟡 niedrig |
+| 3 | Keine Uninstall-Bereinigung | 🟡 niedrig |
+| 4 | Namens-Inkonsistenzen | 🟡 niedrig |

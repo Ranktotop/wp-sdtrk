@@ -4,38 +4,11 @@ Offene Aufgaben für `wp-sdtrk`. Bekannte Auffälligkeiten sind ausführlich in 
 
 ## Offen
 
-### 🔴 Meta-CAPI feuert serverseitig nicht (Dispatch-Bug)
+### 🟡 Funnelytics-Browser-Pixel live verifizieren
 
-**Gefunden bei:** Spec-Analyse v1.7.6.
+Der Code nutzt `cdn.funnelytics.io/track-v3.js` + `window.funnelytics.events.trigger()` ([public/js/wp-sdtrk-fl.js](public/js/wp-sdtrk-fl.js)). Die heute offiziell dokumentierte Basis ist `cdn.funnelytics.io/track.js` + `window.funnelytics.init()`. `track-v3.js` kann die neuere Variante sein — daher **nicht blind ändern**, sondern in einer Live-Umgebung prüfen, ob Events ankommen. Nur bei nachgewiesener Abweichung anpassen. Details: [tasks/api-audit.md](tasks/api-audit.md) (Abschnitt 4).
 
-**Problem:** Der Browser-Meta-Catcher sendet `type: 'meta'` ([public/js/wp-sdtrk-meta.js](public/js/wp-sdtrk-meta.js)). Der Dispatch in [public/class-wp-sdtrk-public-ajax.php](public/class-wp-sdtrk-public-ajax.php) bildet daraus `Wp_Sdtrk_Tracker_Meta`, die Klasse heißt aber `Wp_Sdtrk_Tracker_Fb` ([public/class-wp-sdtrk-tracker-meta.php](public/class-wp-sdtrk-tracker-meta.php)) — kein `class_alias`. Dadurch ist `class_exists()` false und `validateTracker` liefert für Meta `state => false`.
-
-**Auswirkung:** Die Meta Conversions API (Server-Tracking) wird **nie ausgelöst**. GA4 und TikTok sind nicht betroffen; der Meta-Browser-Pixel funktioniert.
-
-**Status:** offen — muss behoben werden.
-
-**Lösungsoptionen:** Klasse in `Wp_Sdtrk_Tracker_Meta` umbenennen · ODER `class_alias('Wp_Sdtrk_Tracker_Fb', 'Wp_Sdtrk_Tracker_Meta')` ergänzen · ODER im Catcher `type: 'fb'` senden (Lade-/Namenslogik beachten).
-
-**Nach dem Fix:** Eintrag aus [spec/99-findings.md](spec/99-findings.md) entfernen und [spec/02-server-tracking/platform-meta-capi.md](spec/02-server-tracking/platform-meta-capi.md) sowie die Feature-Matrix in [spec/00-overview.md](spec/00-overview.md) auf den neuen Ist-Zustand bringen (siehe [CLAUDE.md](CLAUDE.md)).
-
----
-
-### 🟡 Alle externen API-Integrationen auf aktuellen Stand prüfen & ggf. aktualisieren
-
-**Ziel:** Sämtliche Anbindungen an externe Tracking-Anbieter überprüfen, da sich die APIs seit der Implementierung geändert haben könnten. Wo nötig, auf den aktuellen Stand bringen (Endpoint-Versionen, Payload-Felder, Auth, Pflichtparameter).
-
-**Betroffene Integrationen:**
-
-- **Meta / Facebook Conversions API** — aktuell fest auf Graph-API `v11.0` ([public/class-wp-sdtrk-tracker-meta.php](public/class-wp-sdtrk-tracker-meta.php)). v11.0 ist veraltet → aktuelle Version prüfen.
-- **TikTok Events API** — aktuell `open_api/v1.2` ([public/class-wp-sdtrk-tracker-tt.php](public/class-wp-sdtrk-tracker-tt.php)). Neuere Events-API-Version (z. B. Events API 2.0 / `/event/track/`) prüfen.
-- **Google Analytics 4 Measurement Protocol** — Endpoint/Parameter gegen aktuelle Spec prüfen ([public/class-wp-sdtrk-tracker-ga.php](public/class-wp-sdtrk-tracker-ga.php)).
-- **LinkedIn, Funnelytics, Mautic, Matomo** (browser-seitig) — Pixel-/Tag-Snippets und Aufruf-APIs auf Aktualität prüfen.
-
-**Pro Integration zu prüfen:** Endpoint-URL & API-Version · Payload-/Feldstruktur · Authentifizierung (Token/Header) · neue Pflicht- oder empfohlene Parameter · Deprecation-Hinweise des Anbieters.
-
-**Status:** offen — Prüfung erforderlich, Aktualisierung nur wo tatsächlich nötig.
-
-**Nach Änderungen:** Die jeweiligen Plattform-Seiten unter [spec/02-server-tracking/](spec/02-server-tracking/) (und ggf. [spec/03-browser-tracking/](spec/03-browser-tracking/)) auf den neuen Ist-Zustand bringen; den Hinweis zu veralteten API-Versionen in [spec/99-findings.md](spec/99-findings.md) entsprechend anpassen (siehe [CLAUDE.md](CLAUDE.md)).
+> Die übrigen API-Integrationen wurden geprüft und auf den aktuellen Stand gebracht (Meta CAPI `v23.0`, TikTok Events API 2.0 `v1.3`, GA4 MP verifiziert, übrige Browser-Pixel verifiziert). Der Meta-CAPI-Dispatch-Bug ist behoben. Siehe [tasks/plan.md](tasks/plan.md) und [tasks/api-audit.md](tasks/api-audit.md).
 
 ## Geplante Features
 
