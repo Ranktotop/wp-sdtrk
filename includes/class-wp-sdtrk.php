@@ -269,6 +269,10 @@ class Wp_Sdtrk
 		$this->loader->add_action('wp_ajax_nopriv_wp_sdtrk_wc_persist', $plugin_wc, 'handle_persist_ajax');
 		$this->loader->add_action('woocommerce_order_status_processing', $plugin_wc, 'on_order_paid');
 		$this->loader->add_action('woocommerce_order_status_completed', $plugin_wc, 'on_order_paid');
+
+		//WooCommerce product feed endpoint (token-protected query var)
+		$plugin_wc_feed = new Wp_Sdtrk_WC_Feed();
+		$this->loader->add_action('template_redirect', $plugin_wc_feed, 'handle_feed_request');
 	}
 
 	/**

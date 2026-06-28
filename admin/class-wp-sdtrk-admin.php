@@ -154,6 +154,21 @@ class Wp_Sdtrk_Admin
 	}
 
 	/**
+	 * Build the read-only "feed URL" info block for the WooCommerce Redux section.
+	 *
+	 * @return string
+	 */
+	private function get_wc_feed_url_info(): string
+	{
+		if (!class_exists('Wp_Sdtrk_WC_Feed')) {
+			return '';
+		}
+		$url = (new Wp_Sdtrk_WC_Feed())->get_feed_url();
+		return '<p>' . esc_html__('Product feed URL (paste into Google Merchant Center / Meta Commerce Manager):', 'wp-sdtrk') . '</p>'
+			. '<code style="display:block;word-break:break-all;padding:8px;background:#f6f7f7">' . esc_url($url) . '</code>';
+	}
+
+	/**
 	 * Register options for Redux Admin Page
 	 *
 	 * @since 1.0.0
@@ -798,6 +813,20 @@ class Wp_Sdtrk_Admin
 						'title'    => __('Enable WooCommerce integration', 'wp-sdtrk'),
 						'subtitle' => __('Track WooCommerce purchases (browser pixel on the order-received page and server-side conversion APIs on order completion).', 'wp-sdtrk'),
 						'default'  => 0,
+					],
+					[
+						'id'       => 'wc_feed_enabled',
+						'type'     => 'switch',
+						'title'    => __('Enable product feed', 'wp-sdtrk'),
+						'subtitle' => __('Expose a token-protected RSS 2.0 product feed (Google Merchant Center / Meta Commerce Manager), refreshed daily.', 'wp-sdtrk'),
+						'default'  => 0,
+						'required' => ['wc_integration', '=', '1'],
+					],
+					[
+						'id'       => 'wc_feed_url_info',
+						'type'     => 'raw',
+						'content'  => $this->get_wc_feed_url_info(),
+						'required' => [['wc_integration', '=', '1'], ['wc_feed_enabled', '=', '1']],
 					],
 				],
 			]);

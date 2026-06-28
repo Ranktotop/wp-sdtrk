@@ -112,7 +112,7 @@ Status-Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` fertig
 - **AK:** Generator liefert für aktive Produkte valide Zeilen (Varianten/Preise/Bestand wie definiert).
 - **V:** Generierter Feed gegen eine Testproduktmenge geprüft.
 
-### [ ] T3.2 — Feed-URL + Zugriffsschutz
+### [x] T3.2 — Feed-URL + Zugriffsschutz — implementiert, Live-Verifikation offen
 - **Tun:** Abrufbarer Endpoint (Rewrite-Route oder Query-Var) liefert den Feed; Zugriffsschutz gemäß T3.0.
 - **AK:** URL liefert validen Feed; Schutz greift wie definiert; nur bei aktiver WC-Integration erreichbar.
 - **V:** Abruf der URL liefert erwartetes Format; Format-Validator (Meta/Google) akzeptiert.
