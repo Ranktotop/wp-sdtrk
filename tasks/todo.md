@@ -60,7 +60,7 @@ Status-Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` fertig
 
 ## Phase 2 — WooCommerce-Integration 🟢
 
-### [ ] T2.0 — Designklärung (blockierend)
+### [x] T2.0 — Designklärung (blockierend) → [wc-design.md](wc-design.md)
 - **Tun:** Memo `tasks/wc-design.md`: genaue Hooks (`woocommerce_thankyou` + Order-Status-Handling für async Zahlungen), Mapping WC-Order → Event-Array-Schema, Consent-Zusammenspiel (Borlabs + Bypass-Metabox), Verhalten bei mehreren/asynchronen Zahlungen, Dedup-Strategie (`event_id` aus Order-ID).
 - **AK:** Jede offene Designfrage aus TODO.md ist beantwortet und entschieden.
 - **V:** Memo vorhanden; T2.1–T2.5 referenzieren es.
