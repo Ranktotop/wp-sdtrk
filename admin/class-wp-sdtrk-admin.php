@@ -782,6 +782,29 @@ class Wp_Sdtrk_Admin
 
 		/**
 		 * ============================================================
+		 * SECTION: WooCommerce (only when WooCommerce is active)
+		 * ============================================================
+		 */
+		if (class_exists('WooCommerce')) {
+			Redux::set_section('wp_sdtrk_options', [
+				'title'      => __('WooCommerce', 'wp-sdtrk'),
+				'id'         => 'woocommerce_section',
+				'icon'       => 'el el-shopping-cart',
+				'subsection' => false,
+				'fields'     => [
+					[
+						'id'       => 'wc_integration',
+						'type'     => 'switch',
+						'title'    => __('Enable WooCommerce integration', 'wp-sdtrk'),
+						'subtitle' => __('Track WooCommerce purchases (browser pixel on the order-received page and server-side conversion APIs on order completion).', 'wp-sdtrk'),
+						'default'  => 0,
+					],
+				],
+			]);
+		}
+
+		/**
+		 * ============================================================
 		 * SECTION: Data Sources
 		 * ============================================================
 		 */

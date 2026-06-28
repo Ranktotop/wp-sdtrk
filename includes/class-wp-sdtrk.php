@@ -179,6 +179,11 @@ class Wp_Sdtrk
 		 */
 		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-decryptor-ds24.php';
 
+		/**
+		 * WooCommerce integration
+		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-wc-integration.php';
+
 		$this->loader = new Wp_Sdtrk_Loader();
 	}
 

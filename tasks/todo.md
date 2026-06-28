@@ -65,7 +65,7 @@ Status-Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` fertig
 - **AK:** Jede offene Designfrage aus TODO.md ist beantwortet und entschieden.
 - **V:** Memo vorhanden; T2.1–T2.5 referenzieren es.
 
-### [ ] T2.1 — WC-Erkennung + Redux-Switch
+### [x] T2.1 — WC-Erkennung + Redux-Switch
 - **Tun:** `class_exists('WooCommerce')`-Gate; neue Redux-Sektion/Switch (`wc_integration`-o.ä.) in [admin/class-wp-sdtrk-admin.php](../admin/class-wp-sdtrk-admin.php), nur sichtbar wenn WC aktiv.
 - **AK:** Ohne WC: Sektion unsichtbar/aus. Mit WC: Switch sichtbar, Zustand persistiert in `wp_sdtrk_options`.
 - **V:** Admin-UI mit/ohne aktives WooCommerce geprüft; Option via `get_bool_option` lesbar.
