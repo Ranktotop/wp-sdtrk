@@ -183,6 +183,7 @@ class Wp_Sdtrk
 		 * WooCommerce integration
 		 */
 		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-wc-integration.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-wc-order-mapper.php';
 
 		$this->loader = new Wp_Sdtrk_Loader();
 	}

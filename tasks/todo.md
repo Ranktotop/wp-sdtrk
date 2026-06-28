@@ -70,7 +70,7 @@ Status-Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` fertig
 - **AK:** Ohne WC: Sektion unsichtbar/aus. Mit WC: Switch sichtbar, Zustand persistiert in `wp_sdtrk_options`.
 - **V:** Admin-UI mit/ohne aktives WooCommerce geprüft; Option via `get_bool_option` lesbar.
 
-### [ ] T2.2 — Order → kanonisches Event-Mapping
+### [x] T2.2 — Order → kanonisches Event-Mapping
 - **Tun:** Klasse `Wp_Sdtrk_WC_Order_Mapper` (in `load_dependencies()` registrieren), die ein WC-Order-Objekt in das von [Wp_Sdtrk_Tracker_Event](../public/class-wp-sdtrk-tracker-event.php) erwartete Array übersetzt: Produkte→content_ids/contents/items, Summe→value, Währung, Käuferdaten (E-Mail/Name), `event_id` aus Order-ID.
 - **AK:** Mapper erzeugt für eine Testbestellung ein Array, aus dem `new Wp_Sdtrk_Tracker_Event($arr)` alle Getter korrekt befüllt.
 - **V:** Debug-Dump des gemappten Events stimmt mit Bestellung überein.
