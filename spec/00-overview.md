@@ -17,7 +17,7 @@
 
 ## Zweck & Zielgruppe
 
-Das Plugin ergänzt klassisches Browser-Pixel-Tracking um **serverseitiges Conversion-Tracking** (Conversion API / Measurement Protocol) für WordPress-Seiten, die **kein WooCommerce** einsetzen — typischerweise Landingpages, Funnels und Verkaufsseiten, die externe Zahlungsanbieter (z. B. Digistore24/CopeCart) nutzen.
+Das Plugin ergänzt klassisches Browser-Pixel-Tracking um **serverseitiges Conversion-Tracking** (Conversion API / Measurement Protocol). Kern-Zielgruppe sind WordPress-Seiten ohne eigenen Shop — typischerweise Landingpages, Funnels und Verkaufsseiten, die externe Zahlungsanbieter (z. B. Digistore24/CopeCart) nutzen. Ist **WooCommerce** aktiv, kann zusätzlich eine optionale **WooCommerce-Integration** eingeschaltet werden, die Käufe auf der Order-Received-Seite browser- **und** serverseitig trackt (siehe [07 WooCommerce](07-woocommerce/README.md)).
 
 Motivation laut README: Seit iOS-14/ITP und durch Adblocker geht browser-seitig ein erheblicher Teil der Conversion-Signale verloren. Server-to-Server-Tracking schließt diese Lücke.
 
@@ -45,6 +45,7 @@ Welche Plattform wird **browser-seitig** (Pixel/Tag), welche zusätzlich **serve
 - **Digistore24-Datenentschlüsselung** (verschlüsselte Thank-You-Page-Parameter).
 - **LinkedIn Conversion-Mapping** mit regelbasierter Zuordnung (eigene DB-Tabelle).
 - **Page-Level-Überschreibungen** via Redux-Metabox (Produkt-ID, Consent-Bypass).
+- **WooCommerce-Integration** (optional, nur bei aktivem WooCommerce): Purchase-Tracking auf der Order-Received-Seite — Browser-Pixel + serverseitige Conversion-APIs auf Order-Status-Übergang, consent-gated und dedupliziert. Siehe [07 WooCommerce](07-woocommerce/README.md).
 
 ## Tech-Stack
 

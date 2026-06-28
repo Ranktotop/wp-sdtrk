@@ -47,6 +47,12 @@ Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist v
 
 ---
 
+## 🟡 Währung fest auf `EUR` verdrahtet
+
+Die Server-Tracker (Meta `getData_custom`/`fireTracking_Server_Event`, GA4, TikTok) sowie der Meta-Browser-Pfad (`get_data_custom`) setzen die Währung hart auf `"EUR"`. Für die [WooCommerce-Integration](07-woocommerce/README.md) liefert der [Order-Mapper](../public/class-wp-sdtrk-wc-order-mapper.php) zwar die Order-Währung (`currency`), diese wird aber von den Trackern noch nicht verwendet. Bei abweichender Shop-Währung wird die Conversion mit falscher Währung gemeldet. **Empfehlung:** Währung über das Event-Modell durchreichen und in den Payloads statt `EUR` verwenden.
+
+---
+
 ## 🔵 SHA256-Hashing ohne Salt — by design
 
 E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bug**: Meta und TikTok verlangen exakt dieses Format, um die übermittelten Hashes mit ihren eigenen abzugleichen. Ein Salt würde das Matching verhindern. Dokumentiert wegen des Rainbow-Table-Themas bei E-Mail-Adressen.
@@ -64,6 +70,7 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 | # | Punkt | Schwere |
 |---|-------|---------|
 | 1 | Eingabe-Sanitisierung | 🟡 mittel |
-| 2 | Tote Stubs / leere Cron | 🟡 niedrig |
-| 3 | Keine Uninstall-Bereinigung | 🟡 niedrig |
-| 4 | Namens-Inkonsistenzen | 🟡 niedrig |
+| 2 | Währung fest auf `EUR` (relevant für WooCommerce) | 🟡 mittel |
+| 3 | Tote Stubs / leere Cron | 🟡 niedrig |
+| 4 | Keine Uninstall-Bereinigung | 🟡 niedrig |
+| 5 | Namens-Inkonsistenzen | 🟡 niedrig |

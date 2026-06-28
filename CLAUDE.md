@@ -39,6 +39,7 @@ Modular nach Themen, jede Ebene hat eine `README.md` als Index. Beim Anlegen neu
 | [04](spec/04-admin-and-options/README.md) | Admin & Optionen |
 | [05](spec/05-data-model/README.md) | Datenmodell |
 | [06](spec/06-integrations.md) | Integrationen & Abhängigkeiten |
+| [07](spec/07-woocommerce/README.md) | WooCommerce-Integration (optional) |
 | [99](spec/99-findings.md) | Befunde & offene Punkte |
 
 > Die Sektion [99 Befunde](spec/99-findings.md) ist die einzige Stelle für bekannte Bugs/offene Punkte. Wird ein dort gelisteter Punkt behoben, ist er aus den Befunden zu entfernen und der betroffene Bereich der Spec auf den neuen Ist-Zustand zu bringen.

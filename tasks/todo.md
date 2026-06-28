@@ -91,7 +91,7 @@ Status-Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` fertig
 - **AK:** Bei akzeptiertem Consent feuern Browser **und** Server mit identischer `event_id`; ohne Consent kein Server-Call (außer Bypass).
 - **V:** Events Manager je Plattform zeigt 1 deduplizierten Purchase; `debug.log` zeigt Server-Requests.
 
-### [ ] T2.6 — Spec nachführen (WooCommerce)
+### [x] T2.6 — Spec nachführen (WooCommerce)
 - **Tun:** Neue Sektion `spec/07-woocommerce/` mit `README.md`-Index + Querverweisen (Schema beibehalten). Feature-Matrix [spec/00-overview.md](../spec/00-overview.md) ergänzen. Ggf. Hinweis „kein WooCommerce" im Zweck-Abschnitt präzisieren.
 - **AK:** Sektion beschreibt Ist-Zustand (Erkennung, Switch, Hooks, Mapping, Dedup); Index/Querverweise konsistent.
 - **V:** Links auflösbar; Matrix == Code.

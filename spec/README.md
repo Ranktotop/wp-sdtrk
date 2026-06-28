@@ -2,7 +2,7 @@
 
 Diese Spec dokumentiert den **Ist-Zustand** des WordPress-Plugins *Smart Server Side Tracking Plugin* in Version **1.7.6**. Sie wurde durch Analyse des Quellcodes erstellt und dient als technische Referenz und Onboarding-Dokument.
 
-> **Zweck des Plugins (Kurzfassung):** Conversion-Tracking für WordPress-Seiten **ohne WooCommerce** — sowohl **browser-basiert** (Pixel/Tags) als auch **server-to-server** über die jeweiligen Conversion-APIs. Ziel ist verlässliches, (DSGVO-orientiertes) Tracking trotz Adblockern, ITP/iOS-14-Restriktionen und Cookie-Consent.
+> **Zweck des Plugins (Kurzfassung):** Conversion-Tracking für WordPress-Seiten — sowohl **browser-basiert** (Pixel/Tags) als auch **server-to-server** über die jeweiligen Conversion-APIs. Kern-Zielgruppe sind Seiten ohne eigenen Shop; bei aktivem WooCommerce ist zusätzlich eine optionale **WooCommerce-Integration** verfügbar ([07](07-woocommerce/README.md)). Ziel ist verlässliches, (DSGVO-orientiertes) Tracking trotz Adblockern, ITP/iOS-14-Restriktionen und Cookie-Consent.
 
 ---
 
@@ -17,6 +17,7 @@ Diese Spec dokumentiert den **Ist-Zustand** des WordPress-Plugins *Smart Server 
 | 04 | [Admin & Optionen](04-admin-and-options/README.md) | Redux-Settings, Menüstruktur, Options-Referenz, Metabox, Helper |
 | 05 | [Datenmodell](05-data-model/README.md) | Base-Model/ORM, DB-Schema, LinkedIn-Mapping |
 | 06 | [Integrationen](06-integrations.md) | Digistore24-Decryption, Update-Checker, externe Dependencies |
+| 07 | [WooCommerce](07-woocommerce/README.md) | Optionale WooCommerce-Integration: Aktivierung, Order-Mapping, Browser-/Server-Purchase, Dedup |
 | 99 | [Befunde & offene Punkte](99-findings.md) | Auffälligkeiten, mutmaßliche Bugs, ungenutzte Bausteine |
 
 ---
