@@ -184,6 +184,7 @@ class Wp_Sdtrk
 		 */
 		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-wc-integration.php';
 		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-wc-order-mapper.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-wc-feed.php';
 
 		$this->loader = new Wp_Sdtrk_Loader();
 	}

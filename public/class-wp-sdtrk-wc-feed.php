@@ -1,0 +1,306 @@
+<?php
+
+/**
+ * WooCommerce product feed (RSS 2.0 with the Google `g:` namespace).
+ *
+ * Readable by Google Merchant Center and Meta Commerce Manager. Available only
+ * when the WooCommerce integration is active and the wc_feed_enabled switch is
+ * on. Served from a token-protected query-var endpoint and refreshed daily by
+ * WP-Cron (cached output).
+ *
+ * Design: tasks/feed-design.md
+ */
+class Wp_Sdtrk_WC_Feed
+{
+    public const QUERY_VAR    = 'wp_sdtrk_feed';
+    public const TOKEN_OPTION = 'wp_sdtrk_feed_token';
+    public const CACHE_OPTION = 'wp_sdtrk_feed_cache';
+    public const CRON_HOOK    = 'wp_sdtrk_cron_generate_feed';
+
+    /* ---------------------------------------------------------------------
+     * Pure core (no WordPress/WooCommerce dependencies) — unit-tested
+     * ------------------------------------------------------------------- */
+
+    /**
+     * Normalise raw product rows into feed items.
+     *
+     * @param array<int, array> $rows Raw rows from collect().
+     * @return array<int, array>
+     */
+    public function feed_items(array $rows): array
+    {
+        $items = [];
+        foreach ($rows as $row) {
+            $sku   = isset($row['sku']) ? trim((string) $row['sku']) : '';
+            $price = isset($row['price']) ? trim((string) $row['price']) : '';
+
+            $item = [
+                'id'           => $sku !== '' ? $sku : (string) ($row['id'] ?? ''),
+                'title'        => (string) ($row['title'] ?? ''),
+                'description'  => trim(strip_tags((string) ($row['description'] ?? ''))),
+                'link'         => (string) ($row['link'] ?? ''),
+                'image'        => (string) ($row['image'] ?? ''),
+                'availability' => !empty($row['in_stock']) ? 'in_stock' : 'out_of_stock',
+                'price'        => trim($price . ' ' . (string) ($row['currency'] ?? '')),
+                'condition'    => 'new',
+                'brand'        => (string) ($row['brand'] ?? ''),
+            ];
+
+            $group = isset($row['group_id']) ? trim((string) $row['group_id']) : '';
+            if ($group !== '') {
+                $item['item_group_id'] = $group;
+            }
+
+            $items[] = $item;
+        }
+        return $items;
+    }
+
+    /**
+     * Render feed items as an RSS 2.0 / g: XML document.
+     *
+     * @param array<int, array> $items
+     * @param array{title?:string, link?:string, description?:string} $channel
+     * @return string
+     */
+    public function render_xml(array $items, array $channel = []): string
+    {
+        $title = $channel['title'] ?? 'Product Feed';
+        $link  = $channel['link'] ?? '';
+        $desc  = $channel['description'] ?? '';
+
+        $out  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $out .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . "\n";
+        $out .= "<channel>\n";
+        $out .= '<title>' . $this->esc($title) . "</title>\n";
+        $out .= '<link>' . $this->esc($link) . "</link>\n";
+        $out .= '<description>' . $this->esc($desc) . "</description>\n";
+
+        foreach ($items as $item) {
+            $out .= "<item>\n";
+            $out .= '<g:id>' . $this->esc($item['id'] ?? '') . "</g:id>\n";
+            $out .= '<title>' . $this->esc($item['title'] ?? '') . "</title>\n";
+            $out .= '<description>' . $this->esc($item['description'] ?? '') . "</description>\n";
+            $out .= '<link>' . $this->esc($item['link'] ?? '') . "</link>\n";
+            $out .= '<g:image_link>' . $this->esc($item['image'] ?? '') . "</g:image_link>\n";
+            $out .= '<g:availability>' . $this->esc($item['availability'] ?? '') . "</g:availability>\n";
+            $out .= '<g:price>' . $this->esc($item['price'] ?? '') . "</g:price>\n";
+            $out .= '<g:condition>' . $this->esc($item['condition'] ?? 'new') . "</g:condition>\n";
+            if (!empty($item['brand'])) {
+                $out .= '<g:brand>' . $this->esc($item['brand']) . "</g:brand>\n";
+            }
+            if (!empty($item['item_group_id'])) {
+                $out .= '<g:item_group_id>' . $this->esc($item['item_group_id']) . "</g:item_group_id>\n";
+            }
+            $out .= "</item>\n";
+        }
+
+        $out .= "</channel>\n</rss>\n";
+        return $out;
+    }
+
+    /**
+     * XML-escape a scalar value.
+     *
+     * @param mixed $value
+     * @return string
+     */
+    private function esc($value): string
+    {
+        return htmlspecialchars((string) $value, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+    }
+
+    /* ---------------------------------------------------------------------
+     * WooCommerce data collection
+     * ------------------------------------------------------------------- */
+
+    /**
+     * Collect raw product rows from WooCommerce (published products + variations).
+     *
+     * @return array<int, array>
+     */
+    public function collect(): array
+    {
+        if (!function_exists('wc_get_products')) {
+            return [];
+        }
+        $brand    = WP_SDTRK_Helper_Options::get_string_option('brandname');
+        $brand    = $brand ? $brand : get_bloginfo('name');
+        $currency = function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : '';
+
+        $products = wc_get_products(['status' => 'publish', 'limit' => -1]);
+        $rows     = [];
+        foreach ($products as $product) {
+            if ($product->is_type('variable')) {
+                foreach ($product->get_children() as $variation_id) {
+                    $variation = wc_get_product($variation_id);
+                    if ($variation) {
+                        $rows[] = $this->product_row($variation, $brand, $currency, (string) $product->get_id());
+                    }
+                }
+                continue;
+            }
+            $rows[] = $this->product_row($product, $brand, $currency, '');
+        }
+        return $rows;
+    }
+
+    /**
+     * Build a raw row from a WC product/variation.
+     *
+     * @param WC_Product $product
+     * @param string $brand
+     * @param string $currency
+     * @param string $group_id Parent id for variations, '' for simple products.
+     * @return array
+     */
+    private function product_row($product, string $brand, string $currency, string $group_id): array
+    {
+        $description = $product->get_short_description();
+        if ($description === '') {
+            $description = $product->get_description();
+        }
+        return [
+            'id'          => $product->get_id(),
+            'sku'         => $product->get_sku(),
+            'title'       => $product->get_name(),
+            'description' => $description,
+            'link'        => get_permalink($product->get_id()),
+            'image'       => (string) wp_get_attachment_url($product->get_image_id()),
+            'in_stock'    => $product->is_in_stock(),
+            'price'       => $product->get_price(),
+            'currency'    => $currency,
+            'brand'       => $brand,
+            'group_id'    => $group_id,
+        ];
+    }
+
+    /**
+     * Generate the full feed XML live.
+     *
+     * @return string
+     */
+    public function generate(): string
+    {
+        $channel = [
+            'title'       => get_bloginfo('name') . ' — Product Feed',
+            'link'        => rtrim(get_site_url(), '/') . '/',
+            'description' => get_bloginfo('description'),
+        ];
+        return $this->render_xml($this->feed_items($this->collect()), $channel);
+    }
+
+    /* ---------------------------------------------------------------------
+     * Token, cache, endpoint, cron
+     * ------------------------------------------------------------------- */
+
+    /**
+     * Get the feed token, generating + persisting one on first use.
+     *
+     * @return string
+     */
+    public function get_token(): string
+    {
+        $token = get_option(self::TOKEN_OPTION, '');
+        if (!is_string($token) || $token === '') {
+            $token = wp_generate_password(32, false);
+            update_option(self::TOKEN_OPTION, $token, false);
+        }
+        return $token;
+    }
+
+    /**
+     * Constant-time token check.
+     *
+     * @param string $token
+     * @return bool
+     */
+    public function verify_token(string $token): bool
+    {
+        return $token !== '' && hash_equals($this->get_token(), $token);
+    }
+
+    /**
+     * The public feed URL (incl. token).
+     *
+     * @return string
+     */
+    public function get_feed_url(): string
+    {
+        return add_query_arg(
+            [self::QUERY_VAR => '1', 'token' => $this->get_token()],
+            rtrim(get_site_url(), '/') . '/'
+        );
+    }
+
+    /**
+     * Whether the feed is enabled (integration active + switch on).
+     *
+     * @return bool
+     */
+    public static function is_enabled(): bool
+    {
+        return Wp_Sdtrk_WC_Integration::is_active()
+            && WP_SDTRK_Helper_Options::get_bool_option('wc_feed_enabled', false);
+    }
+
+    /**
+     * Regenerate and cache the feed XML.
+     *
+     * @return void
+     */
+    public function regenerate_cache(): void
+    {
+        update_option(self::CACHE_OPTION, $this->generate(), false);
+    }
+
+    /**
+     * Get the cached feed, falling back to a live generate.
+     *
+     * @return string
+     */
+    public function get_cached(): string
+    {
+        $cached = get_option(self::CACHE_OPTION, '');
+        return (is_string($cached) && $cached !== '') ? $cached : $this->generate();
+    }
+
+    /**
+     * template_redirect handler: serve the feed when requested with a valid token.
+     *
+     * @return void
+     */
+    public function handle_feed_request(): void
+    {
+        if (!isset($_GET[self::QUERY_VAR])) {
+            return;
+        }
+        if (!self::is_enabled()) {
+            status_header(404);
+            exit;
+        }
+        $token = isset($_GET['token']) ? sanitize_text_field(wp_unslash($_GET['token'])) : '';
+        if (!$this->verify_token($token)) {
+            status_header(403);
+            exit;
+        }
+        if (!headers_sent()) {
+            header('Content-Type: application/xml; charset=UTF-8');
+        }
+        echo $this->get_cached();
+        exit;
+    }
+
+    /**
+     * Cron callback: refresh the cached feed when enabled.
+     *
+     * @return void
+     */
+    public static function cron_regenerate(): void
+    {
+        if (!self::is_enabled()) {
+            return;
+        }
+        (new self())->regenerate_cache();
+    }
+}

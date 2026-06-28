@@ -107,7 +107,7 @@ Status-Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` fertig
 - **AK:** Alle offenen Designfragen aus TODO.md entschieden.
 - **V:** Memo vorhanden; T3.1–T3.3 referenzieren es.
 
-### [ ] T3.1 — Feed-Generator
+### [x] T3.1 — Feed-Generator
 - **Tun:** Generator: aktive WC-Produkte → Feed-Zeilen gemäß T3.0-Mapping. Nur aktiv wenn WC-Integration (T2.1) an.
 - **AK:** Generator liefert für aktive Produkte valide Zeilen (Varianten/Preise/Bestand wie definiert).
 - **V:** Generierter Feed gegen eine Testproduktmenge geprüft.
