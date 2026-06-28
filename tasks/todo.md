@@ -80,7 +80,8 @@ Status-Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` fertig
 - **AK:** Order-Received-Seite feuert Meta-Browser-Purchase mit Produkten/Wert/Währung und Order-`eventID`.
 - **V:** DevTools: `fbq('track','Purchase',…)` mit korrekten Daten + eventID.
 
-### [ ] T2.4 — Browser-Pixel auf alle Plattformen
+### [x] T2.4 — Browser-Pixel auf alle Plattformen — durch [wp-sdtrk-wc.js](../public/js/wp-sdtrk-wc.js) abgedeckt
+- **Ergebnis:** Das dedizierte WC-Skript ruft `catchEventHit(0)` für **alle** Catcher auf. Jeder Catcher feuert sein Purchase/Conversion-Event browser-seitig: Meta (`trackSingle Purchase`), TikTok (`ttq.track`), GA, Funnelytics, Mautic, Matomo (`_paq trackEvent`), LinkedIn (Conversion-Mapping). Kein zusätzlicher Code nötig. Live-Verifikation je Plattform offen.
 - **Tun:** T2.3 auf alle aktiven Plattformen (ga, tt, lin, fl, mtc, mtm) ausweiten.
 - **AK:** Jede aktivierte Plattform feuert das Purchase/Conversion-Event auf der Thankyou-Seite.
 - **V:** DevTools je Plattform geprüft.
