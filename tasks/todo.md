@@ -75,7 +75,7 @@ Status-Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` fertig
 - **AK:** Mapper erzeugt für eine Testbestellung ein Array, aus dem `new Wp_Sdtrk_Tracker_Event($arr)` alle Getter korrekt befüllt.
 - **V:** Debug-Dump des gemappten Events stimmt mit Bestellung überein.
 
-### [ ] T2.3 — thankyou Browser-Pixel (Meta, Proof of path)
+### [x] T2.3 — thankyou Browser-Pixel (Meta, Proof of path) — implementiert, Live-Verifikation offen
 - **Tun:** Auf `woocommerce_thankyou` Purchase-Event über die bestehende Catcher-/Engine-Architektur für Meta auslösen, gespeist aus T2.2-Daten.
 - **AK:** Order-Received-Seite feuert Meta-Browser-Purchase mit Produkten/Wert/Währung und Order-`eventID`.
 - **V:** DevTools: `fbq('track','Purchase',…)` mit korrekten Daten + eventID.

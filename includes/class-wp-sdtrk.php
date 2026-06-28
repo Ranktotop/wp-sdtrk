@@ -260,6 +260,10 @@ class Wp_Sdtrk
 
 		//Register Front-End Routes#
 		$this->loader->add_action('init', $plugin_public, 'register_front_end_routes');
+
+		//Register WooCommerce integration (inert unless WooCommerce + switch active)
+		$plugin_wc = new Wp_Sdtrk_WC_Integration();
+		$this->loader->add_action('wp_enqueue_scripts', $plugin_wc, 'enqueue_purchase_assets');
 	}
 
 	/**

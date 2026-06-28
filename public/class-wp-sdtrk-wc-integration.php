@@ -46,4 +46,81 @@ class Wp_Sdtrk_WC_Integration
             WP_SDTRK_Helper_Options::get_bool_option('wc_integration', false)
         );
     }
+
+    /**
+     * Build the localized purchase payload for the browser tracker from an order.
+     *
+     * @param WC_Order $order
+     * @return array
+     */
+    public function build_browser_payload($order): array
+    {
+        $mapper = new Wp_Sdtrk_WC_Order_Mapper();
+        $arr    = $mapper->toEventArray($order);
+
+        return [
+            'order' => [
+                'orderId'   => (string) $order->get_id(),
+                'value'     => (string) $order->get_total(),
+                'currency'  => $order->get_currency(),
+                'prodId'    => $arr['prodId'][0] ?? '',
+                'prodName'  => $arr['prodName'][0] ?? '',
+                'email'     => $order->get_billing_email(),
+                'firstName' => $order->get_billing_first_name(),
+                'lastName'  => $order->get_billing_last_name(),
+                'contents'  => $mapper->lineItems($order),
+                'source'    => $order->get_checkout_order_received_url(),
+                'ip'        => $order->get_customer_ip_address(),
+                'agent'     => $order->get_customer_user_agent(),
+                'utm'       => $arr['utm'],
+            ],
+        ];
+    }
+
+    /**
+     * Resolve the current order-received order, or null when not on that page.
+     *
+     * @return WC_Order|null
+     */
+    private function current_received_order()
+    {
+        if (!function_exists('is_order_received_page') || !is_order_received_page()) {
+            return null;
+        }
+        $order_id = absint(get_query_var('order-received'));
+        if (!$order_id) {
+            return null;
+        }
+        $order = wc_get_order($order_id);
+        return $order ? $order : null;
+    }
+
+    /**
+     * Enqueue + localize the browser purchase tracker on the order-received page.
+     *
+     * Hooked to `wp_enqueue_scripts`. Inert unless the integration is active and
+     * we are on the WooCommerce order-received page for a resolvable order.
+     *
+     * @return void
+     */
+    public function enqueue_purchase_assets(): void
+    {
+        if (!self::is_active()) {
+            return;
+        }
+        $order = $this->current_received_order();
+        if ($order === null) {
+            return;
+        }
+
+        $version = defined('WP_SDTRK_VERSION') ? WP_SDTRK_VERSION : false;
+        wp_enqueue_script(
+            'wp_sdtrk-wc',
+            plugin_dir_url(__FILE__) . 'js/wp-sdtrk-wc.js',
+            ['wp_sdtrk-engine'],
+            $version,
+            true
+        );
+        wp_localize_script('wp_sdtrk-wc', 'wp_sdtrk_wc', $this->build_browser_payload($order));
+    }
 }
