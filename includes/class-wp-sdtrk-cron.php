@@ -21,20 +21,45 @@ class WP_SDTRK_Cron
      */
     public const HOOKS = ['wp_sdtrk_cron_generate_feed'];
 
+    /**
+     * Bind the cron callback. Side-effect-free, so it is safe to call inline
+     * at plugin construction. The schedule reconciliation lives in
+     * self_heal_schedule(), which must run on a hook (not at file-include
+     * time) so WooCommerce is guaranteed loaded — see that method.
+     *
+     * @return void
+     */
     public static function register_cron_actions(): void
     {
         add_action('wp_sdtrk_cron_generate_feed', ['Wp_Sdtrk_WC_Feed', 'cron_regenerate']);
+    }
 
-        // Self-heal scheduling for already-active installs (Activator only runs
-        // on (re)activation). Schedule while the feed is enabled, and clear any
-        // dangling job once it is switched off (the toggle does not deactivate
-        // the plugin, so the Deactivator never fires on a mere disable).
-        if (class_exists('Wp_Sdtrk_WC_Feed')) {
-            if (Wp_Sdtrk_WC_Feed::is_enabled()) {
-                self::register_cronjobs();
-            } else {
-                self::unregister_cronjobs();
-            }
+    /**
+     * Reconcile the daily schedule with the feed switch (self-heal).
+     *
+     * The Activator only runs on (re)activation, so already-active installs —
+     * and installs where the feed switch is toggled without re-activating —
+     * need their schedule brought in line on a normal request. Schedule while
+     * the feed is enabled, and clear any dangling job once it is switched off
+     * (the toggle does not deactivate the plugin, so the Deactivator never
+     * fires on a mere disable).
+     *
+     * Must be hooked on `plugins_loaded` (or later), never called at
+     * file-include time: is_enabled() resolves WooCommerce via
+     * class_exists('WooCommerce'), which is only reliable once all plugins
+     * are loaded. Running it earlier could wrongly clear the schedule.
+     *
+     * @return void
+     */
+    public static function self_heal_schedule(): void
+    {
+        if (!class_exists('Wp_Sdtrk_WC_Feed')) {
+            return;
+        }
+        if (Wp_Sdtrk_WC_Feed::is_enabled()) {
+            self::register_cronjobs();
+        } else {
+            self::unregister_cronjobs();
         }
     }
 

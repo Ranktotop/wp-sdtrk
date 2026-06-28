@@ -28,6 +28,8 @@ Verfügbar nur, wenn `Wp_Sdtrk_WC_Feed::is_enabled()`: WooCommerce-Integration a
 
 **Währung:** direkt aus WooCommerce (`get_woocommerce_currency()`) — nicht von der `EUR`-Verdrahtung der Tracker betroffen.
 
+**XML-Escaping (`esc()`):** Jeder ausgegebene Wert wird über `esc()` geschrieben. Diese Methode entfernt zunächst in XML 1.0 unzulässige C0-Steuerzeichen (alle außer Tab/LF/CR; byteweise, da alle `< 0x80`) und escaped dann mit `htmlspecialchars(ENT_XML1 | ENT_QUOTES | ENT_SUBSTITUTE)`. `ENT_SUBSTITUTE` ersetzt ungültiges UTF-8 durch `U+FFFD`, statt dass `htmlspecialchars()` einen leeren String liefert und das Feld stillschweigend verschluckt. So bleibt der Feed auch bei Steuerzeichen oder defektem UTF-8 in Produktdaten wohlgeformt.
+
 ## Caching & Cron
 
 - Der Cron-Hook `wp_sdtrk_cron_generate_feed` (täglich, [Lebenszyklus › Cron](../01-architecture/lifecycle.md)) ruft `cron_regenerate()` → `regenerate_cache()` und schreibt das XML in die Option `wp_sdtrk_feed_cache`.

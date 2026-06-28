@@ -120,7 +120,15 @@ class Wp_Sdtrk_WC_Feed
      */
     private function esc($value): string
     {
-        return htmlspecialchars((string) $value, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        // Strip bytes illegal in XML 1.0 (C0 control chars except tab/LF/CR).
+        // They are all < 0x80, so a byte-wise strip (no /u) never corrupts a
+        // multi-byte UTF-8 sequence; leaving them in would make the feed
+        // non-well-formed and get it rejected by Merchant Center / Meta.
+        $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', (string) $value);
+
+        // ENT_SUBSTITUTE: replace any invalid UTF-8 with U+FFFD instead of
+        // letting htmlspecialchars() return '' and silently drop the field.
+        return htmlspecialchars((string) $value, ENT_XML1 | ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     /* ---------------------------------------------------------------------

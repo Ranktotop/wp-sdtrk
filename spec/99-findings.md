@@ -52,6 +52,18 @@ Die Server-Tracker (Meta `getData_custom`/`fireTracking_Server_Event`, GA4, TikT
 
 ---
 
+## 🟡 Produkt-Feed: Live-Generierung im Request-Pfad bei kaltem Cache
+
+`Wp_Sdtrk_WC_Feed::get_cached()` liefert bei fehlendem Cache (Cron noch nicht gelaufen, Cache geleert) **synchron** einen Live-Aufbau über alle veröffentlichten Produkte (`collect()` mit `wc_get_products(['limit' => -1])` plus `wc_get_product()` je Variation) im öffentlichen — wenn auch token-geschützten — Request. Ein Halter des Token oder wiederholte Kalt-Cache-Treffer können so CPU/Speicher belasten; es gibt kein Batching, kein Rate-Limit und keinen Stampede-Schutz. **Empfehlung:** bei Cache-Miss `503`/leeren Feed liefern und Cron befüllen lassen, oder `generate()` mit einem kurzlebigen Transient-Lock absichern; ggf. `collect()` paginieren.
+
+---
+
+## 🟡 Produkt-Feed: Token in der URL, keine Rotation
+
+Das Feed-Token wird als `?token=…`-Query-Parameter übertragen (von Google/Meta vorgegeben, die nur eine URL akzeptieren) und kann so in Server-/Proxy-/CDN-Logs landen. Es gibt aktuell **keine Rotations-Funktion**: `get_token()` erzeugt das Token einmalig; ein Reset ist nur durch Löschen der Option `wp_sdtrk_feed_token` in der DB möglich. **Empfehlung:** die Feed-URL als Geheimnis dokumentieren und einen Admin-Button zum Neu-Erzeugen des Tokens anbieten.
+
+---
+
 ## 🔵 SHA256-Hashing ohne Salt — by design
 
 E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bug**: Meta und TikTok verlangen exakt dieses Format, um die übermittelten Hashes mit ihren eigenen abzugleichen. Ein Salt würde das Matching verhindern. Dokumentiert wegen des Rainbow-Table-Themas bei E-Mail-Adressen.
@@ -70,6 +82,8 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 |---|-------|---------|
 | 1 | Eingabe-Sanitisierung | 🟡 mittel |
 | 2 | Währung fest auf `EUR` (relevant für WooCommerce) | 🟡 mittel |
-| 3 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
-| 4 | Keine Uninstall-Bereinigung | 🟡 niedrig |
-| 5 | Namens-Inkonsistenzen | 🟡 niedrig |
+| 3 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
+| 4 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
+| 5 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
+| 6 | Keine Uninstall-Bereinigung | 🟡 niedrig |
+| 7 | Namens-Inkonsistenzen | 🟡 niedrig |

@@ -79,6 +79,59 @@ $bareXml = $feed->render_xml($bare);
 check('no <g:price> when amount empty',   strpos($bareXml, '<g:price>') === false);
 check('no <g:image_link> when img empty', strpos($bareXml, '<g:image_link>') === false);
 
+echo "render_xml() is well-formed XML\n";
+// Parse via DOMDocument so a regression that breaks well-formedness fails loudly.
+$wellFormed = function (string $doc): bool {
+    $prev = libxml_use_internal_errors(true);
+    $dom  = new DOMDocument();
+    $ok   = $dom->loadXML($doc);
+    libxml_clear_errors();
+    libxml_use_internal_errors($prev);
+    return $ok !== false;
+};
+check('populated feed parses as XML',     $wellFormed($xml));
+check('bare feed parses as XML',          $wellFormed($bareXml));
+
+echo "render_xml() empty catalog\n";
+$emptyXml = $feed->render_xml([]);
+check('empty catalog is well-formed',     $wellFormed($emptyXml));
+check('empty catalog has zero <item>',    substr_count($emptyXml, '<item>') === 0);
+check('empty catalog keeps <channel>',    strpos($emptyXml, '<channel>') !== false);
+
+echo "esc() escapes special chars across all fields\n";
+$special = $feed->feed_items([
+    [
+        'id' => 'a<b>&"\'', 'sku' => 'a<b>&"\'', 'title' => 'A < B > "C" & \'D\'',
+        'description' => 'x & y < z', 'link' => 'http://shop/?a=1&b=2',
+        'image' => 'http://shop/img.jpg?x=1&y=2', 'in_stock' => true,
+        'price' => '9.99', 'currency' => 'EUR', 'brand' => 'Tea & Co', 'group_id' => '',
+    ],
+]);
+$specialXml = $feed->render_xml($special);
+check('special-char feed is well-formed', $wellFormed($specialXml));
+check('< escaped everywhere',             strpos($specialXml, '<b>') === false);
+check('& escaped in link query',          strpos($specialXml, 'a=1&b=2') === false);
+check('&amp; present',                    strpos($specialXml, '&amp;') !== false);
+check('&lt; present',                     strpos($specialXml, '&lt;') !== false);
+check('&gt; present',                     strpos($specialXml, '&gt;') !== false);
+check('&quot; present',                   strpos($specialXml, '&quot;') !== false);
+
+echo "esc() strips XML-illegal control chars and survives bad UTF-8\n";
+$dirty = $feed->feed_items([
+    [
+        'id' => "SKU\x0013", 'sku' => "SKU\x0013", 'title' => "A\x00B\x0BC\x1FD",
+        'description' => "tab\tkept\nnewline\rkept", 'link' => 'http://shop/p/13',
+        'image' => '', 'in_stock' => true,
+        'price' => '', 'currency' => 'EUR', 'brand' => "Bad\xC3\x28UTF8", 'group_id' => '',
+    ],
+]);
+$dirtyXml = $feed->render_xml($dirty);
+check('control chars stripped (title)',   strpos($dirtyXml, '<title>ABCD</title>') !== false);
+check('NUL stripped from g:id',           strpos($dirtyXml, '<g:id>SKU13</g:id>') !== false);
+check('tab/newline/CR preserved',         strpos($dirtyXml, "tab\tkept") !== false);
+check('dirty feed is well-formed',        $wellFormed($dirtyXml));
+check('bad UTF-8 did not drop the field', strpos($dirtyXml, '<g:brand>') !== false);
+
 if ($fails > 0) {
     echo "\n$fails assertion(s) failed.\n";
     exit(1);

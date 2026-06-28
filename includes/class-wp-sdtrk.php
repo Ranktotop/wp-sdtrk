@@ -256,8 +256,10 @@ class Wp_Sdtrk
 		$this->loader->add_action('wp_ajax_wp_sdtrk_handle_public_ajax_callback', $plugin_public, 'register_ajax_handler');
 		$this->loader->add_action('wp_ajax_nopriv_wp_sdtrk_handle_public_ajax_callback', $plugin_public, 'register_ajax_handler');
 
-		//Register cronjob
+		//Register cronjob: bind the daily-feed callback now (side-effect-free),
+		//and reconcile the schedule on plugins_loaded, once WooCommerce is loaded.
 		WP_SDTRK_Cron::register_cron_actions();
+		$this->loader->add_action('plugins_loaded', 'WP_SDTRK_Cron', 'self_heal_schedule');
 
 		//Register Front-End Routes#
 		$this->loader->add_action('init', $plugin_public, 'register_front_end_routes');
