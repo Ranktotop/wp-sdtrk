@@ -7,8 +7,8 @@
             "request": "launch",
             "port": 9003,
             "pathMappings": {
-                // Remote-Pfad in der Local-VM      : Lokaler Workspace
-                "C:\\Users\\rankt\\Local Sites\\fluentcommunity\\app\\public\\wp-content\\plugins\\wp-sdtrk": "${workspaceFolder}"
+                // Remote-Pfad (wie PHP ihn sieht)   : Lokaler Workspace
+                "C:\\Users\\rankt\\Local Sites\\trackingplugin\\app\\public\\wp-content\\plugins\\wp-sdtrk": "${workspaceFolder}"
             }
         }
     ]

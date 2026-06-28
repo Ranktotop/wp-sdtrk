@@ -39,3 +39,7 @@ intermediate
 cache
 
 /vendor/
+
+# Claude Code
+.claude/skills/
+.claude/commands/
