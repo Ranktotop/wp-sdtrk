@@ -264,6 +264,10 @@ class Wp_Sdtrk
 		//Register WooCommerce integration (inert unless WooCommerce + switch active)
 		$plugin_wc = new Wp_Sdtrk_WC_Integration();
 		$this->loader->add_action('wp_enqueue_scripts', $plugin_wc, 'enqueue_purchase_assets');
+		$this->loader->add_action('wp_ajax_wp_sdtrk_wc_persist', $plugin_wc, 'handle_persist_ajax');
+		$this->loader->add_action('wp_ajax_nopriv_wp_sdtrk_wc_persist', $plugin_wc, 'handle_persist_ajax');
+		$this->loader->add_action('woocommerce_order_status_processing', $plugin_wc, 'on_order_paid');
+		$this->loader->add_action('woocommerce_order_status_completed', $plugin_wc, 'on_order_paid');
 	}
 
 	/**

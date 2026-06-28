@@ -86,7 +86,7 @@ Status-Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` fertig
 - **AK:** Jede aktivierte Plattform feuert das Purchase/Conversion-Event auf der Thankyou-Seite.
 - **V:** DevTools je Plattform geprüft.
 
-### [ ] T2.5 — thankyou Server-APIs (consent-gated, dedup)
+### [x] T2.5 — thankyou Server-APIs (consent-gated, dedup) — implementiert, Live-Verifikation offen
 - **Tun:** Server-Tracker (Meta/GA4/TikTok) auf der Thankyou-Seite feuern, sofern aktiviert **und** Consent akzeptiert; gemeinsame `event_id` mit dem Browser-Event (Dedup).
 - **AK:** Bei akzeptiertem Consent feuern Browser **und** Server mit identischer `event_id`; ohne Consent kein Server-Call (außer Bypass).
 - **V:** Events Manager je Plattform zeigt 1 deduplizierten Purchase; `debug.log` zeigt Server-Requests.
