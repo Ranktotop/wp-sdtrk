@@ -117,7 +117,7 @@ Status-Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` fertig
 - **AK:** URL liefert validen Feed; Schutz greift wie definiert; nur bei aktiver WC-Integration erreichbar.
 - **V:** Abruf der URL liefert erwartetes Format; Format-Validator (Meta/Google) akzeptiert.
 
-### [ ] T3.3 — Cron reaktivieren
+### [x] T3.3 — Cron reaktivieren — implementiert, Live-Verifikation offen
 - **Tun:** `WP_SDTRK_Cron::HOOKS` ([includes/class-wp-sdtrk-cron.php:21](../includes/class-wp-sdtrk-cron.php#L21)) mit Feed-Hook füllen; `register_cron_actions()` aktivieren; Intervall gemäß T3.0; Re-/Deaktivierung über bestehenden Activator/Deactivator prüfen.
 - **AK:** Cron-Job ist nach Aktivierung geplant (`wp_get_scheduled_event`); Feed wird im Intervall neu generiert.
 - **V:** WP-Cron-Liste zeigt Job; manueller Trigger regeneriert Feed.

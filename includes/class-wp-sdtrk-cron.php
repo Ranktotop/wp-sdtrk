@@ -16,17 +16,24 @@ class WP_SDTRK_Cron
 {
 
     /**
-     * Name of the cron hook.
+     * Names of the cron hooks. Literal to avoid a load-order dependency on
+     * Wp_Sdtrk_WC_Feed; must match Wp_Sdtrk_WC_Feed::CRON_HOOK.
      */
-    public const HOOKS = [];
+    public const HOOKS = ['wp_sdtrk_cron_generate_feed'];
 
     public static function register_cron_actions(): void
     {
-        //add_action('wp_sdtrk_cron_check_expirations', [self::class, 'check_expirations']);
+        add_action('wp_sdtrk_cron_generate_feed', ['Wp_Sdtrk_WC_Feed', 'cron_regenerate']);
+
+        // Self-heal scheduling for already-active installs (Activator only runs
+        // on (re)activation). Only schedule while the feed is actually enabled.
+        if (class_exists('Wp_Sdtrk_WC_Feed') && Wp_Sdtrk_WC_Feed::is_enabled()) {
+            self::register_cronjobs();
+        }
     }
 
     /**
-     * Schedule the hourly event.
+     * Schedule the daily event(s).
      *
      * @return void
      */
@@ -34,7 +41,7 @@ class WP_SDTRK_Cron
     {
         foreach (self::HOOKS as $hook) {
             if (! wp_next_scheduled($hook)) {
-                wp_schedule_event(time(), 'hourly', $hook);
+                wp_schedule_event(time(), 'daily', $hook);
             }
         }
     }
