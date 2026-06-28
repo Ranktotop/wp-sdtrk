@@ -39,12 +39,21 @@ class Wp_Sdtrk_WC_Feed
                 'title'        => (string) ($row['title'] ?? ''),
                 'description'  => trim(strip_tags((string) ($row['description'] ?? ''))),
                 'link'         => (string) ($row['link'] ?? ''),
-                'image'        => (string) ($row['image'] ?? ''),
                 'availability' => !empty($row['in_stock']) ? 'in_stock' : 'out_of_stock',
-                'price'        => trim($price . ' ' . (string) ($row['currency'] ?? '')),
                 'condition'    => 'new',
                 'brand'        => (string) ($row['brand'] ?? ''),
             ];
+
+            // Optional g: fields are omitted entirely when empty, so a product
+            // without a price/image yields an absent element rather than a
+            // malformed one (e.g. "<g:price>EUR</g:price>").
+            $image = isset($row['image']) ? trim((string) $row['image']) : '';
+            if ($image !== '') {
+                $item['image'] = $image;
+            }
+            if ($price !== '') {
+                $item['price'] = trim($price . ' ' . (string) ($row['currency'] ?? ''));
+            }
 
             $group = isset($row['group_id']) ? trim((string) $row['group_id']) : '';
             if ($group !== '') {
@@ -82,9 +91,13 @@ class Wp_Sdtrk_WC_Feed
             $out .= '<title>' . $this->esc($item['title'] ?? '') . "</title>\n";
             $out .= '<description>' . $this->esc($item['description'] ?? '') . "</description>\n";
             $out .= '<link>' . $this->esc($item['link'] ?? '') . "</link>\n";
-            $out .= '<g:image_link>' . $this->esc($item['image'] ?? '') . "</g:image_link>\n";
+            if (!empty($item['image'])) {
+                $out .= '<g:image_link>' . $this->esc($item['image']) . "</g:image_link>\n";
+            }
             $out .= '<g:availability>' . $this->esc($item['availability'] ?? '') . "</g:availability>\n";
-            $out .= '<g:price>' . $this->esc($item['price'] ?? '') . "</g:price>\n";
+            if (!empty($item['price'])) {
+                $out .= '<g:price>' . $this->esc($item['price']) . "</g:price>\n";
+            }
             $out .= '<g:condition>' . $this->esc($item['condition'] ?? 'new') . "</g:condition>\n";
             if (!empty($item['brand'])) {
                 $out .= '<g:brand>' . $this->esc($item['brand']) . "</g:brand>\n";

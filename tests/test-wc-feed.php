@@ -49,6 +49,18 @@ check('condition defaults to new',       $items[0]['condition'] === 'new');
 check('no item_group_id for simple',     !isset($items[0]['item_group_id']));
 check('item_group_id for variation',     ($items[1]['item_group_id'] ?? null) === '10');
 
+echo "feed_items() omits empty optional fields\n";
+$bare = $feed->feed_items([
+    [
+        'id' => 12, 'sku' => 'SKU-12', 'title' => 'No price/image',
+        'description' => '', 'link' => 'http://shop/p/12',
+        'image' => '', 'in_stock' => true,
+        'price' => '', 'currency' => 'EUR', 'brand' => '', 'group_id' => '',
+    ],
+]);
+check('no price key when amount empty',   !isset($bare[0]['price']));
+check('no image key when image empty',    !isset($bare[0]['image']));
+
 echo "render_xml() output\n";
 $xml = $feed->render_xml($items, ['title' => 'My Shop', 'link' => 'http://shop', 'description' => 'Feed']);
 
@@ -62,6 +74,10 @@ check('g:availability present',           strpos($xml, '<g:availability>out_of_s
 check('g:item_group_id present',          strpos($xml, '<g:item_group_id>10</g:item_group_id>') !== false);
 check('ampersand escaped in title',       strpos($xml, 'Tea &amp; Coffee') !== false);
 check('two <item> blocks',                substr_count($xml, '<item>') === 2);
+
+$bareXml = $feed->render_xml($bare);
+check('no <g:price> when amount empty',   strpos($bareXml, '<g:price>') === false);
+check('no <g:image_link> when img empty', strpos($bareXml, '<g:image_link>') === false);
 
 if ($fails > 0) {
     echo "\n$fails assertion(s) failed.\n";

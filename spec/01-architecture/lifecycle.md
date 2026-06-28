@@ -40,7 +40,7 @@ public const HOOKS = ['wp_sdtrk_cron_generate_feed'];
 
 | Methode | Aufruf | Funktion |
 |---------|--------|----------|
-| `register_cron_actions()` | in `define_public_hooks()` | bindet `wp_sdtrk_cron_generate_feed` an `Wp_Sdtrk_WC_Feed::cron_regenerate`; plant den Job nach (Self-Heal), wenn der Feed aktiv ist |
+| `register_cron_actions()` | in `define_public_hooks()` | bindet `wp_sdtrk_cron_generate_feed` an `Wp_Sdtrk_WC_Feed::cron_regenerate`; plant den Job nach (Self-Heal), wenn der Feed aktiv ist, und löscht einen verbliebenen Job, wenn er deaktiviert ist (der Schalter deaktiviert nicht das Plugin, der Deactivator greift also nicht) |
 | `register_cronjobs()` | bei Aktivierung | plant je Hook ein **tägliches** Event (`wp_schedule_event(time(), 'daily', …)`), wenn nicht vorhanden |
 | `unregister_cronjobs()` | bei Deaktivierung | `wp_clear_scheduled_hook()` je Hook |
 

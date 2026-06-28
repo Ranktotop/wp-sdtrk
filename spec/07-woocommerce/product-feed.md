@@ -24,7 +24,7 @@ Verfügbar nur, wenn `Wp_Sdtrk_WC_Feed::is_enabled()`: WooCommerce-Integration a
 | `render_xml($items, $channel)` | RSS-2.0-/`g:`-Dokument (rein) |
 | `generate()` | `render_xml(feed_items(collect()))` |
 
-**Feld-Mapping (`g:`):** `g:id`, `title`, `description` (Tags entfernt), `link`, `g:image_link`, `g:availability` (`in_stock`/`out_of_stock`), `g:price`, `g:condition`, `g:brand`, `g:item_group_id` (Variationen).
+**Feld-Mapping (`g:`):** `g:id`, `title`, `description` (Tags entfernt), `link`, `g:image_link`, `g:availability` (`in_stock`/`out_of_stock`), `g:price`, `g:condition`, `g:brand`, `g:item_group_id` (Variationen). Die optionalen Felder `g:image_link`, `g:price`, `g:brand` und `g:item_group_id` werden bei leerem Wert **ganz weggelassen** — ein Produkt ohne Preis erzeugt also kein (fehlerhaftes) `<g:price>EUR</g:price>`, sondern gar kein Preis-Element.
 
 **Währung:** direkt aus WooCommerce (`get_woocommerce_currency()`) — nicht von der `EUR`-Verdrahtung der Tracker betroffen.
 
@@ -36,4 +36,4 @@ Verfügbar nur, wenn `Wp_Sdtrk_WC_Feed::is_enabled()`: WooCommerce-Integration a
 ## Einschränkungen
 
 - Sehr große Kataloge: `collect()` lädt alle Produkte ohne Batching.
-- Produkte ohne Bild/Preis werden mit-exportiert (kein Filter), können im Merchant Center beanstandet werden.
+- Produkte ohne Bild/Preis werden mit-exportiert (kein Filter); das jeweilige `g:`-Element fehlt dann, was das Merchant Center als fehlendes Pflichtfeld beanstanden kann.

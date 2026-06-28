@@ -160,7 +160,9 @@ class Wp_Sdtrk_Admin
 	 */
 	private function get_wc_feed_url_info(): string
 	{
-		if (!class_exists('Wp_Sdtrk_WC_Feed')) {
+		// Only render (and thereby mint the token via get_feed_url) once the
+		// feed is actually enabled — the field is hidden otherwise anyway.
+		if (!class_exists('Wp_Sdtrk_WC_Feed') || !Wp_Sdtrk_WC_Feed::is_enabled()) {
 			return '';
 		}
 		$url = (new Wp_Sdtrk_WC_Feed())->get_feed_url();

@@ -26,9 +26,15 @@ class WP_SDTRK_Cron
         add_action('wp_sdtrk_cron_generate_feed', ['Wp_Sdtrk_WC_Feed', 'cron_regenerate']);
 
         // Self-heal scheduling for already-active installs (Activator only runs
-        // on (re)activation). Only schedule while the feed is actually enabled.
-        if (class_exists('Wp_Sdtrk_WC_Feed') && Wp_Sdtrk_WC_Feed::is_enabled()) {
-            self::register_cronjobs();
+        // on (re)activation). Schedule while the feed is enabled, and clear any
+        // dangling job once it is switched off (the toggle does not deactivate
+        // the plugin, so the Deactivator never fires on a mere disable).
+        if (class_exists('Wp_Sdtrk_WC_Feed')) {
+            if (Wp_Sdtrk_WC_Feed::is_enabled()) {
+                self::register_cronjobs();
+            } else {
+                self::unregister_cronjobs();
+            }
         }
     }
 
