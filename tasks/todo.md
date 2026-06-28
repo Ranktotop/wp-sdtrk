@@ -102,7 +102,7 @@ Status-Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` fertig
 
 ## Phase 3 — Produkt-Feed 🟢
 
-### [ ] T3.0 — Designklärung (blockierend)
+### [x] T3.0 — Designklärung (blockierend) → [feed-design.md](feed-design.md)
 - **Tun:** Memo `tasks/feed-design.md`: Feld-Mapping je Plattform (Meta/Google), Format(e) (CSV, ggf. XML), Speicherort & URL, Zugriffsschutz (öffentlich vs. Token), Aktualisierungsintervall, Umgang mit Varianten/Beständen/Preisen.
 - **AK:** Alle offenen Designfragen aus TODO.md entschieden.
 - **V:** Memo vorhanden; T3.1–T3.3 referenzieren es.
