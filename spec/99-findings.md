@@ -18,6 +18,36 @@ Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist v
 
 ---
 
+## 🔴 Matomo: Tracker-Skript `matomo.js` wird nie geladen
+
+**Verifiziert gegen die offizielle Doku.** `Wp_Sdtrk_Catcher_Mtm::loadPixel()` ([public/js/wp-sdtrk-mtm.js](../public/js/wp-sdtrk-mtm.js)) füllt die `_paq`-Queue (`setTrackerUrl`, `setSiteId`, `trackPageView`), **injiziert aber nicht** das Tracker-Skript `matomo.js`. Der offizielle Matomo-Embed verlangt zwingend zusätzlich die Script-Injection (`g.src = u + 'matomo.js'`, siehe [Matomo JS-Tracking-Guide](https://developer.matomo.org/guides/tracking-javascript-guide)). Ohne sie bleibt die Queue liegen und es wird **nichts** an Matomo gesendet — das Browser-Tracking feuert faktisch nicht. **Empfehlung:** in `loadPixel()` das `matomo.js`-Skript asynchron nachladen (wie bei den anderen Catchern).
+
+---
+
+## 🟡 Mautic: `mt('send', '<event>')` mit Custom-Event-Namen wird vom Standard-Mautic nicht unterstützt
+
+**Verifiziert (Anbieter-Doku + Foren).** `Wp_Sdtrk_Catcher_Mtc::fireData()` sendet Events via `mt('send', '<eventName>', {…})`. Natives MauticJS ([mtc.js](https://devdocs.mautic.org/en/5.x/components/tracking_script.html)) dokumentiert nur `mt('send', 'pageview', {…})`; beliebige Event-Namen erfordern ein Zusatz-Plugin (z. B. „Mautic Custom Events"). Ohne dieses Plugin werden Nicht-`pageview`-Sends serverseitig vermutlich ignoriert. **Zu prüfen** an der echten Mautic-Instanz; ggf. dokumentieren, dass die Custom-Event-Erfassung das Plugin voraussetzt, oder auf `pageview` + Attribute umstellen.
+
+---
+
+## 🟡 Funnelytics: Commerce-Attribut-Keys (`__commerce_action__` etc.) in aktueller Doku nicht belegt
+
+`Wp_Sdtrk_Catcher_Fl::get_data_custom()` nutzt für Käufe die Keys `__commerce_action__`, `__currency__`, `__total_in_cents__`, `__order__`, `__sku__`, `__label__`. Die aktuelle Funnelytics-Doku ([Tracking JavaScript Actions](https://help.funnelytics.io/en/knowledge/tracking-javascript-actions)) beschreibt nur eine flache Key/Value-Struktur und reserviert ausdrücklich nur `name`/`email` (De-Anonymisierung). Die `__…__`-Commerce-Keys ließen sich nicht bestätigen und stammen vermutlich aus einer älteren Funnelytics-Version. **Zu prüfen** am echten Funnelytics-Konto, ob diese Keys noch ausgewertet werden.
+
+---
+
+## 🟡 LinkedIn-Catcher: vergessenes `console.log` im Produktionscode
+
+`Wp_Sdtrk_Catcher_Lin::get_triggeredConversions()` ([public/js/wp-sdtrk-lin.js](../public/js/wp-sdtrk-lin.js)) enthält ein unbedingtes `console.log(currentEventName)`, das bei jedem Event in die Browser-Konsole schreibt. (Die übrige LinkedIn-Integration — Insight-Tag-Snippet + `lintrk('track', { conversion_id })` — ist API-konform.) **Empfehlung:** entfernen.
+
+---
+
+## 🟡 Browser-only-Catcher: Währung hart `EUR`, single-product
+
+Die reinen Browser-Catcher **Mautic** und **Funnelytics** setzen die Währung weiterhin hart auf `"EUR"` und tragen nur ein Produkt (kein Mehr-Produkt-`items[]`). Der Mehr-Produkt-/Shop-Währungs-Umbau betrifft nur die Kauf-Catcher Meta/GA/TikTok (siehe [07 › Purchase-Tracking](07-woocommerce/purchase-tracking.md)). Für Mautic/Funnelytics ist das bislang nicht nachgezogen. **Bewerten**, ob für diese Plattformen relevant.
+
+---
+
 ## 🟡 Namens-Inkonsistenzen
 
 - Klassen-Präfix wechselt zwischen `Wp_Sdtrk_*` und `WP_SDTRK_*` (funktional egal, da PHP-Klassennamen case-insensitiv sind).
@@ -74,9 +104,14 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 
 | # | Punkt | Schwere |
 |---|-------|---------|
-| 1 | Eingabe-Sanitisierung | 🟡 mittel |
-| 2 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
-| 3 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
-| 4 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
-| 5 | Keine Uninstall-Bereinigung | 🟡 niedrig |
-| 6 | Namens-Inkonsistenzen | 🟡 niedrig |
+| 1 | Matomo: `matomo.js` wird nie geladen → Browser-Tracking feuert nicht | 🔴 hoch |
+| 2 | Eingabe-Sanitisierung | 🟡 mittel |
+| 3 | Mautic: Custom-Event-Sends ohne Plugin nicht unterstützt | 🟡 mittel |
+| 4 | Funnelytics: Commerce-Keys evtl. veraltet (unverifiziert) | 🟡 mittel |
+| 5 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
+| 6 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
+| 7 | LinkedIn: vergessenes `console.log` | 🟡 niedrig |
+| 8 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
+| 9 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
+| 10 | Keine Uninstall-Bereinigung | 🟡 niedrig |
+| 11 | Namens-Inkonsistenzen | 🟡 niedrig |
