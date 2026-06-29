@@ -9,6 +9,7 @@ Dieser Bereich beschreibt den strukturellen Aufbau des Plugins: wie es startet, 
 | [bootstrap-and-loader.md](bootstrap-and-loader.md) | Einstiegspunkt, `Wp_Sdtrk`-Orchestrator, Loader-Pattern, registrierte Hooks |
 | [directory-and-naming.md](directory-and-naming.md) | Verzeichnisstruktur, Datei-/Klassen-/Hook-Namenskonventionen |
 | [lifecycle.md](lifecycle.md) | Aktivierung, Deaktivierung, Cron-Infrastruktur, Deinstallation |
+| [build-and-release.md](build-and-release.md) | GitHub-Actions-Pipeline: JS-Minify, `$loadMinified`-Switch, ZIP, Release-Asset |
 
 ## Architektur in einem Satz
 

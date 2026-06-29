@@ -46,6 +46,7 @@ if (class_exists($className) && $key) {
 - **Paket:** `yahnis-elsts/plugin-update-checker` (v5), `vendor/yahnis-elsts`.
 - **Quelle:** GitHub `Ranktotop/wp-sdtrk` mit aktivierten Release-Assets (`enableReleaseAssets()`).
 - **Wirkung:** Updates erscheinen im WP-Dashboard wie bei wp.org-Plugins, Download aus GitHub-Releases.
+- **Erzeugung der Assets:** Das konsumierte Release-ZIP wird von der GitHub-Actions-Pipeline gebaut → [01 › Build & Release](01-architecture/build-and-release.md).
 
 ---
 

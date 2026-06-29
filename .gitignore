@@ -43,3 +43,6 @@ cache
 # Claude Code
 .claude/skills/
 .claude/commands/
+
+# Local build output (build-release.ps1)
+/release/

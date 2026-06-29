@@ -2,10 +2,16 @@
 
 # Ignore development files
 /.github export-ignore
+/.claude export-ignore
+/spec export-ignore
+/tasks export-ignore
+/.vscode export-ignore
+/.idea export-ignore
 /tests export-ignore
 /phpunit.* export-ignore
 /composer.* export-ignore
 /README.md export-ignore
+/CLAUDE.md export-ignore
 
 # Ignore version control
 .gitignore export-ignore
