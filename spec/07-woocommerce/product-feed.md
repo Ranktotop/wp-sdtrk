@@ -34,9 +34,12 @@ Verfügbar nur, wenn `Wp_Sdtrk_WC_Feed::is_enabled()`: WooCommerce-Integration a
 ## Caching & Cron
 
 - Der Cron-Hook `wp_sdtrk_cron_generate_feed` (täglich, [Lebenszyklus › Cron](../01-architecture/lifecycle.md)) ruft `cron_regenerate()` → `regenerate_cache()` und schreibt das XML in die Option `wp_sdtrk_feed_cache`.
-- Der Endpoint liefert den Cache (`get_cached()`); fehlt der Cache, wird live generiert.
+- Der Endpoint liefert den Cache über `get_or_build_cached()`:
+  - **Cache vorhanden:** wird direkt ausgegeben.
+  - **Kalter Cache** (Cron noch nicht gelaufen / Cache geleert): Es baut **nur ein** Request live auf, abgesichert durch einen kurzlebigen Transient-Lock (`wp_sdtrk_feed_lock`, TTL 300 s). Parallele Requests bekommen währenddessen `503` mit `Retry-After: 120` (kein paralleler Voll-Aufbau → Stampede-Schutz).
+- `get_cached()` ist ein **reiner** Getter (liefert Cache oder `''`, baut nie) — genutzt für Cron/Tests.
 
 ## Einschränkungen
 
-- Sehr große Kataloge: `collect()` lädt alle Produkte ohne Batching.
+- Sehr große Kataloge: `collect()` lädt alle Produkte ohne Batching/Pagination. Der Stampede-Lock verhindert parallele Voll-Aufbauten, nicht die Kosten eines einzelnen Aufbaus.
 - Produkte ohne Bild/Preis werden mit-exportiert (kein Filter); das jeweilige `g:`-Element fehlt dann, was das Merchant Center als fehlendes Pflichtfeld beanstanden kann.

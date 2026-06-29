@@ -52,12 +52,6 @@ Die reinen Browser-Catcher **Mautic** und **Funnelytics** setzen die Währung we
 
 ---
 
-## 🟡 Produkt-Feed: Live-Generierung im Request-Pfad bei kaltem Cache
-
-`Wp_Sdtrk_WC_Feed::get_cached()` liefert bei fehlendem Cache (Cron noch nicht gelaufen, Cache geleert) **synchron** einen Live-Aufbau über alle veröffentlichten Produkte (`collect()` mit `wc_get_products(['limit' => -1])` plus `wc_get_product()` je Variation) im öffentlichen — wenn auch token-geschützten — Request. Ein Halter des Token oder wiederholte Kalt-Cache-Treffer können so CPU/Speicher belasten; es gibt kein Batching, kein Rate-Limit und keinen Stampede-Schutz. **Empfehlung:** bei Cache-Miss `503`/leeren Feed liefern und Cron befüllen lassen, oder `generate()` mit einem kurzlebigen Transient-Lock absichern; ggf. `collect()` paginieren.
-
----
-
 ## 🔵 Produkt-Feed: Token in der URL — by design
 
 Das Feed-Token wird als `?token=…`-Query-Parameter übertragen (von Google/Meta vorgegeben, die nur **eine** URL akzeptieren) und kann so in Server-/Proxy-/CDN-Logs landen. Die Feed-URL ist daher als Geheimnis zu behandeln. Ein Admin-Button erlaubt die Token-Rotation ([07 › Produkt-Feed](07-woocommerce/product-feed.md)); eine Übertragung außerhalb der URL ist anbieterseitig nicht möglich.
@@ -81,6 +75,5 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 | # | Punkt | Schwere |
 |---|-------|---------|
 | 1 | Eingabe-Sanitisierung | 🟡 mittel |
-| 2 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
-| 3 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
-| 4 | Namens-Inkonsistenzen | 🟡 niedrig |
+| 2 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
+| 3 | Namens-Inkonsistenzen | 🟡 niedrig |

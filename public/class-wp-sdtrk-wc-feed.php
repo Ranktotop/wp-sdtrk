@@ -12,10 +12,12 @@
  */
 class Wp_Sdtrk_WC_Feed
 {
-    public const QUERY_VAR    = 'wp_sdtrk_feed';
-    public const TOKEN_OPTION = 'wp_sdtrk_feed_token';
-    public const CACHE_OPTION = 'wp_sdtrk_feed_cache';
-    public const CRON_HOOK    = 'wp_sdtrk_cron_generate_feed';
+    public const QUERY_VAR     = 'wp_sdtrk_feed';
+    public const TOKEN_OPTION  = 'wp_sdtrk_feed_token';
+    public const CACHE_OPTION  = 'wp_sdtrk_feed_cache';
+    public const CRON_HOOK     = 'wp_sdtrk_cron_generate_feed';
+    public const LOCK_TRANSIENT = 'wp_sdtrk_feed_lock';
+    public const LOCK_TTL       = 300; // seconds — short-lived stampede guard
 
     /* ---------------------------------------------------------------------
      * Pure core (no WordPress/WooCommerce dependencies) — unit-tested
@@ -289,14 +291,43 @@ class Wp_Sdtrk_WC_Feed
     }
 
     /**
-     * Get the cached feed, falling back to a live generate.
+     * Pure cache getter — returns the cached XML, or '' on a cold cache.
+     * Never builds (use get_or_build_cached() in the request path).
      *
      * @return string
      */
     public function get_cached(): string
     {
         $cached = get_option(self::CACHE_OPTION, '');
-        return (is_string($cached) && $cached !== '') ? $cached : $this->generate();
+        return is_string($cached) ? $cached : '';
+    }
+
+    /**
+     * Serve the cached feed, building it under a short-lived transient lock on
+     * a cold cache so concurrent requests don't all run the full live
+     * generation (collect() over all products) at once — stampede guard.
+     *
+     * @return array{code:int, body:string} 200 + XML, or 503 (with empty body)
+     *         when another request is already rebuilding the cache.
+     */
+    public function get_or_build_cached(): array
+    {
+        $cached = get_option(self::CACHE_OPTION, '');
+        if (is_string($cached) && $cached !== '') {
+            return ['code' => 200, 'body' => $cached];
+        }
+        // Cold cache: only the lock holder builds; everyone else backs off.
+        if (get_transient(self::LOCK_TRANSIENT)) {
+            return ['code' => 503, 'body' => ''];
+        }
+        set_transient(self::LOCK_TRANSIENT, 1, self::LOCK_TTL);
+        try {
+            $this->regenerate_cache();
+            $fresh = get_option(self::CACHE_OPTION, '');
+        } finally {
+            delete_transient(self::LOCK_TRANSIENT);
+        }
+        return ['code' => 200, 'body' => is_string($fresh) ? $fresh : ''];
     }
 
     /**
@@ -318,10 +349,18 @@ class Wp_Sdtrk_WC_Feed
             status_header(403);
             exit;
         }
+        $result = $this->get_or_build_cached();
+        if ($result['code'] !== 200) {
+            status_header(503);
+            if (!headers_sent()) {
+                header('Retry-After: 120');
+            }
+            exit;
+        }
         if (!headers_sent()) {
             header('Content-Type: application/xml; charset=UTF-8');
         }
-        echo $this->get_cached();
+        echo $result['body'];
         exit;
     }
 
