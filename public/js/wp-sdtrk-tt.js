@@ -339,7 +339,7 @@ class Wp_Sdtrk_Catcher_Tt {
 			userData.external_id = this.get_hashId();
 		}
 		if (this.event.getUserEmail() !== "") {
-			userData.email = email;
+			userData.email = this.event.getUserEmail();
 		}
 		return userData;
 	}
