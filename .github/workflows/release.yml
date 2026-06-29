@@ -84,11 +84,18 @@ jobs:
             exit 1
           fi
 
+      - name: 🧹 Remove dev-only files
+        run: |
+          echo "Removing dev-only files that must never ship in a package..."
+          rm -rf spec .claude tasks tests .vscode .idea CLAUDE.md
+          echo "✅ Removed: spec/ .claude/ tasks/ tests/ .vscode/ .idea/ CLAUDE.md"
+
       - name: 🗜️ Create Plugin ZIP
         run: |
           mkdir -p release
           zip -r release/wp-sdtrk.zip . \
-            -x ".git*" ".github/*" "temp/*" "tests/*" "*.md" "composer.*" "phpunit.*" "node_modules/*"
+            -x ".git*" ".github/*" "temp/*" "tests/*" "*.md" "composer.*" "phpunit.*" "node_modules/*" \
+               "spec/*" ".claude/*" "tasks/*" ".vscode/*" ".idea/*"
 
       - name: 🚀 Create GitHub Release
         uses: softprops/action-gh-release@v1
