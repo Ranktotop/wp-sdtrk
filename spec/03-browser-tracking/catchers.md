@@ -40,6 +40,17 @@ Jede Plattform hat im Browser eine Catcher-Klasse `Wp_Sdtrk_Catcher_*`. Sie kaps
 
 > **Mautic:** Der Catcher sendet Events als `mt('send', '<eventName>', {…})` mit echten Event-Namen. Natives MauticJS verarbeitet nur `pageview` (Core prüft `type === 'pageview'`); zusätzliche Event-Typen werden von Plugins/Bundles über `CoreEvents::BUILD_MAUTIC_JS` in `mtc.js` injiziert. Die Custom-Event-Erfassung setzt daher ein **Mautic-seitiges Plugin** voraus — der `pageview`-Hit funktioniert nativ.
 
+## 2b. Commerce-Payloads der Browser-only-Catcher (Währung & Mehr-Produkt)
+
+Mautic und Funnelytics ziehen die Währung aus dem Event (`getCurrency()`, Fallback `EUR`) — bei WooCommerce also die Shop-Währung, identisch zu Meta/GA/TikTok. Die Mehr-Produkt-Behandlung folgt dem jeweiligen Anbieter-Vertrag:
+
+| Catcher | Mehr-Produkt-Modell |
+|---------|---------------------|
+| `Fl` (Funnelytics) | **Ein `__commerce_action__`-Event pro Warenkorb-Position** (Doku-konform). Je Position eigene `__sku__`/`__label__` und `__total_in_cents__` (= `price*qty*100`), gemeinsam `__currency__`/`__order__`. Leere Positionsliste → Single-Product-Fallback. |
+| `Mtc` (Mautic) | Mautic-Custom-Events sind flach (kein Mehr-Produkt-Schema). Der ganze Warenkorb wird **verlustfrei** als JSON-String-Feld `items` (`[{id,name,qty,price}]`) mitgesendet; die repräsentativen `item_*`-Felder (erste Position) bleiben für Back-Compat. **Kein** Ein-Event-pro-Position (Doppelzählungs-Risiko auf Kontaktebene). |
+
+> Quelle der Positionsliste/Währung ist das Engine-Event (`getItems()`/`getCurrency()`), gespeist bei WooCommerce aus den Order-Daten ([07 › Purchase-Tracking](../07-woocommerce/purchase-tracking.md)).
+
 ## 3. `sendData`-Beispiel (Meta)
 
 ```js

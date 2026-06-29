@@ -213,10 +213,10 @@ class Wp_Sdtrk_Catcher_Mtc {
 		var customData = {};
 		//Value
 		if (this.event.grabValue() > 0 || this.event.grabEventName() === 'purchase') {
-			customData.currency = "EUR";
+			customData.currency = this.event.getCurrency() || "EUR";
 			customData.value = this.event.grabValue();
 		}
-		//Product
+		//Product (representative first item, kept for back-compat)
 		if (this.event.grabProdId() !== "") {
 			customData.item_id = this.event.grabProdId();
 			customData.item_name = this.event.grabProdName();
@@ -227,6 +227,12 @@ class Wp_Sdtrk_Catcher_Mtc {
 			if (eventname !== false) {
 				customData.tags = eventname + '_' + this.event.grabProdId();
 			}
+		}
+		//Full cart (lossless) for multi-product consumers — Mautic custom events
+		//are flat, so the whole basket is carried as a JSON string field.
+		var mtcItems = this.event.getItems();
+		if (mtcItems.length > 0) {
+			customData.items = JSON.stringify(mtcItems);
 		}
 		//Meta
 		customData.transaction_id = this.event.grabOrderId();

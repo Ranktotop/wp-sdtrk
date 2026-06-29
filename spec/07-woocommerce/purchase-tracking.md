@@ -45,6 +45,8 @@ Jeder Kauf-Catcher baut seine plattformspezifische Mehr-Produkt-Payload aus `get
 
 > Die Objekt-Platzierung dieser Felder (z. B. Meta `contents` in `custom_data`, GA4 `items[]` in den Event-`params`, TikTok `contents` in `properties`) folgt den offiziellen Anbieter-Verträgen. Vor Änderungen daran ist die [maßgebliche Anbieter-Doku](../02-server-tracking/README.md#maßgebliche-anbieter-dokumentation-immer-beachten) zu prüfen.
 
+Die reinen Browser-Catcher **Mautic** und **Funnelytics** tragen ebenfalls Shop-Währung und Warenkorb (Funnelytics: ein Revenue-Event je Position; Mautic: voller Warenkorb als JSON-`items`) — Details: [03 › Catcher › Commerce-Payloads](../03-browser-tracking/catchers.md#2b-commerce-payloads-der-browser-only-catcher-währung--mehr-produkt).
+
 ## 5. Währung
 
 Die Währung kommt aus dem Event (`getCurrency()`); `EUR` ist nur noch der Fallback, wenn keine gesetzt ist. Für WooCommerce ist das die Shop-Währung (`get_currency()`), für Nicht-WC-Events greift der `EUR`-Fallback (unverändertes Verhalten).

@@ -192,8 +192,20 @@ class Wp_Sdtrk_Catcher_Fl {
 					this.helper.debugLog(this.localizedData.dbg, { event: 'page_view', data: this.get_data_custom([], {}) }, 'Fired in Browser (fl-' + handler + ')');
 					break;
 				case 'Event':
-					window.funnelytics.events.trigger(this.convert_eventname(this.event.grabEventName()), this.get_data_custom());
-					this.helper.debugLog(this.localizedData.dbg, { event: this.convert_eventname(this.event.grabEventName()), data: this.get_data_custom() }, 'Fired in Browser (fl-' + handler + ')');
+					var flEventName = this.convert_eventname(this.event.grabEventName());
+					var flItems = this.event.getItems();
+					// Funnelytics revenue actions: one __commerce_action__ per cart
+					// line (per the official docs). Single event otherwise.
+					if (flEventName === '__commerce_action__' && flItems.length > 0) {
+						for (var fi = 0; fi < flItems.length; fi++) {
+							var lineData = this.get_data_item(flItems[fi]);
+							window.funnelytics.events.trigger(flEventName, lineData);
+							this.helper.debugLog(this.localizedData.dbg, { event: flEventName, data: lineData }, 'Fired in Browser (fl-' + handler + ')');
+						}
+					} else {
+						window.funnelytics.events.trigger(flEventName, this.get_data_custom());
+						this.helper.debugLog(this.localizedData.dbg, { event: flEventName, data: this.get_data_custom() }, 'Fired in Browser (fl-' + handler + ')');
+					}
 					break;
 				case 'Time':
 					window.funnelytics.events.trigger(this.helper.get_EventName(handler, data.time), this.get_data_custom(['__currency__', '__total_in_cents__', '__order__'], {}));
@@ -224,7 +236,7 @@ class Wp_Sdtrk_Catcher_Fl {
 		var customData = {};
 		//Value
 		if (this.event.grabValue() > 0 || this.convert_eventname(this.event.grabEventName()) === '__commerce_action__') {
-			customData.__currency__ = "EUR";
+			customData.__currency__ = this.event.getCurrency() || "EUR";
 			customData.__total_in_cents__ = this.event.grabValue() * 100; //has to be in cents
 			customData.__order__ = this.event.grabOrderId();
 		}
@@ -260,6 +272,20 @@ class Wp_Sdtrk_Catcher_Fl {
 			customData[key] = value;
 		}
 		return customData;
+	}
+
+	/**
+	* Build a single-line commerce payload for one cart item. Reuses the shared
+	* custom data (UTM, currency, order) and overrides the line-specific revenue
+	* fields: __sku__/__label__ from the item, __total_in_cents__ = line revenue.
+	* @param {Object} item One entry of event.getItems() ({id,name,qty,price})
+	 */
+	get_data_item(item) {
+		var data = this.get_data_custom();
+		data.__sku__ = String(item.id || '');
+		data.__label__ = String(item.name || '');
+		data.__total_in_cents__ = Math.round((Number(item.price) || 0) * (Number(item.qty) || 1) * 100);
+		return data;
 	}
 
 	/**

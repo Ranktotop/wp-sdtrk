@@ -20,12 +20,6 @@ Neuere Workspace-Snippets hängen ein viertes `init`-Argument an (`{"anonymiseUs
 
 ---
 
-## 🟡 Browser-only-Catcher: Währung hart `EUR`, single-product
-
-Die reinen Browser-Catcher **Mautic** und **Funnelytics** setzen die Währung weiterhin hart auf `"EUR"` und tragen nur ein Produkt (kein Mehr-Produkt). Der Mehr-Produkt-/Shop-Währungs-Umbau betrifft nur die Kauf-Catcher Meta/GA/TikTok (siehe [07 › Purchase-Tracking](07-woocommerce/purchase-tracking.md)). Für Funnelytics empfiehlt die Doku bei mehreren Artikeln ausdrücklich **ein Event pro Artikel** (iterieren); der Catcher feuert derzeit nur ein `__commerce_action__` für die erste Position. **Bewerten**, ob für diese Plattformen relevant.
-
----
-
 ## 🟡 Namens-Inkonsistenzen
 
 - Klassen-Präfix wechselt zwischen `Wp_Sdtrk_*` und `WP_SDTRK_*` (funktional egal, da PHP-Klassennamen case-insensitiv sind).
@@ -62,5 +56,4 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 
 | # | Punkt | Schwere |
 |---|-------|---------|
-| 1 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
-| 2 | Namens-Inkonsistenzen | 🟡 niedrig |
+| 1 | Namens-Inkonsistenzen | 🟡 niedrig |
