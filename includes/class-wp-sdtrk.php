@@ -259,11 +259,12 @@ class Wp_Sdtrk
 		WP_SDTRK_Cron::register_cron_actions();
 		$this->loader->add_action('plugins_loaded', 'WP_SDTRK_Cron', 'self_heal_schedule');
 
-		//WooCommerce purchase tracking: feed the order data into the engine on the
-		//order-received page (priority 20 = after the engine is enqueued). The engine
-		//fires the Purchase browser + server in one pass, deduplicated via the order id.
+		//WooCommerce commerce tracking: feed order / view-item / add-to-cart data into
+		//the engine (priority 20 = after the engine is enqueued). The engine fires the
+		//resulting event browser + server in one pass; exactly one commerce source is
+		//localized per page load (order > addToCart > viewItem).
 		$plugin_wc = new Wp_Sdtrk_WC_Integration();
-		$this->loader->add_action('wp_enqueue_scripts', $plugin_wc, 'localize_order_data', 20);
+		$this->loader->add_action('wp_enqueue_scripts', $plugin_wc, 'localize_commerce_data', 20);
 
 		//WooCommerce product feed endpoint (token-protected query var)
 		$plugin_wc_feed = new Wp_Sdtrk_WC_Feed();

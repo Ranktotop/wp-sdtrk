@@ -32,4 +32,30 @@ class Wp_Sdtrk_WC_Order_Mapper
         }
         return $lines;
     }
+
+    /**
+     * Single-product line for the ViewItem and AddToCart payloads.
+     *
+     * Mirrors the lineItems() shape ({id,name,qty,price}) so the engine and the
+     * platform catchers treat product-page / add-to-cart items exactly like
+     * order line items. `price` is the per-unit display price (tax handling per
+     * shop settings); falls back to the raw product price outside WooCommerce.
+     *
+     * @param WC_Product $product
+     * @param int        $qty
+     * @return array{id:string, name:string, qty:int, price:float}
+     */
+    public function productLine($product, int $qty = 1): array
+    {
+        $unit = function_exists('wc_get_price_to_display')
+            ? (float) wc_get_price_to_display($product)
+            : (float) $product->get_price();
+
+        return [
+            'id'    => (string) $product->get_id(),
+            'name'  => $product->get_name(),
+            'qty'   => $qty,
+            'price' => $unit,
+        ];
+    }
 }

@@ -102,23 +102,88 @@ class Wp_Sdtrk_WC_Integration
     }
 
     /**
-     * Localize the order data onto the engine script on the order-received page.
+     * Build the ViewItem data the engine consumes on a product page.
+     *
+     * Localized as wp_sdtrk_wc.viewItem; the engine seeds it as a view_item event
+     * that fires browser + server in one pass over all active catchers. Mirrors
+     * the order payload field names so the same engine + catcher paths apply.
+     *
+     * @param WC_Product $product
+     * @return array
+     */
+    public function build_view_item_payload($product): array
+    {
+        $mapper = new Wp_Sdtrk_WC_Order_Mapper();
+        $line   = $mapper->productLine($product, 1);
+
+        return [
+            'viewItem' => [
+                'prodId'   => $line['id'],
+                'name'     => $line['name'],
+                'value'    => (string) $line['price'],
+                'currency' => function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : '',
+                'items'    => [$line],
+            ],
+        ];
+    }
+
+    /**
+     * Pure precedence resolver: at most one commerce source seeds the engine per
+     * page load, in the order order > addToCart > viewItem. Keeps the localize
+     * method's branching unit-testable without WP/WC context.
+     *
+     * @param bool $order_received  On the order-received page for a resolvable order.
+     * @param bool $has_pending_atc A pending add-to-cart sits in the WC session.
+     * @param bool $is_product      On a single product page.
+     * @return string 'order' | 'addToCart' | 'viewItem' | 'none'
+     */
+    public static function resolve_commerce_source(bool $order_received, bool $has_pending_atc, bool $is_product): string
+    {
+        if ($order_received) {
+            return 'order';
+        }
+        if ($has_pending_atc) {
+            return 'addToCart';
+        }
+        if ($is_product) {
+            return 'viewItem';
+        }
+        return 'none';
+    }
+
+    /**
+     * Localize the appropriate commerce data onto the engine script.
      *
      * Hooked to `wp_enqueue_scripts` at a priority that runs after the engine is
-     * registered/enqueued. Inert unless the integration is active and we are on
-     * the order-received page for a resolvable order.
+     * registered/enqueued. Inert unless the integration is active. Exactly one
+     * source is localized per page load (order > addToCart > viewItem) so the
+     * engine seeds a single commerce event that fires browser + server in one
+     * pass.
      *
      * @return void
      */
-    public function localize_order_data(): void
+    public function localize_commerce_data(): void
     {
         if (!self::is_active()) {
             return;
         }
-        $order = $this->current_received_order();
-        if ($order === null) {
-            return;
+
+        $order      = $this->current_received_order();
+        $pending    = array();
+        $is_product = function_exists('is_product') && is_product();
+
+        $source = self::resolve_commerce_source($order !== null, count($pending) > 0, $is_product);
+
+        switch ($source) {
+            case 'order':
+                wp_localize_script('wp_sdtrk-engine', 'wp_sdtrk_wc', $this->build_order_payload($order));
+                break;
+            case 'viewItem':
+                $product = function_exists('wc_get_product') ? wc_get_product(get_the_ID()) : null;
+                if ($product) {
+                    wp_localize_script('wp_sdtrk-engine', 'wp_sdtrk_wc', $this->build_view_item_payload($product));
+                }
+                break;
         }
-        wp_localize_script('wp_sdtrk-engine', 'wp_sdtrk_wc', $this->build_order_payload($order));
     }
 }
