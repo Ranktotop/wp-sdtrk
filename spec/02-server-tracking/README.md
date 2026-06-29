@@ -37,7 +37,7 @@ Dies ist der Kern des Plugins: Conversion-Events werden **server-seitig** per cU
 | TikTok Events API 2.0 | `properties`: `contents[]` `{content_id,content_name,content_type,quantity,price}`, `currency`, `value`; Identifier in `user` | [About Events API](https://ads.tiktok.com/help/article/events-api) · [Parameter](https://ads.tiktok.com/help/article/about-parameters) · Endpoint `v1.3/event/track/` |
 | TikTok Pixel (Browser) | `ttq.track(event, properties)` mit `contents[]`/`currency`/`value` | [About Events API](https://ads.tiktok.com/help/article/events-api) |
 
-Browser-Pixel-Snippets/-APIs der reinen Browser-Plattformen siehe [03 › Catcher](../03-browser-tracking/catchers.md).
+Die nativen Browser-APIs **aller** Plattformen — inkl. der reinen Browser-Plattformen LinkedIn, Funnelytics, Mautic, Matomo (kein Server-Tracker) — sind mit offiziellen Doku-Links unter [03 › Catcher › Maßgebliche Anbieter-Dokumentation](../03-browser-tracking/catchers.md#2a-maßgebliche-anbieter-dokumentation-immer-beachten) erfasst.
 
 ## Datenfluss (Kurzform)
 

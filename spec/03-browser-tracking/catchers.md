@@ -24,6 +24,20 @@ Jede Plattform hat im Browser eine Catcher-Klasse `Wp_Sdtrk_Catcher_*`. Sie kaps
 | `Mtc` | `mt()` | — | ❌ | Mautic, Event-Name-basiert |
 | `Mtm` | `_paq.push()` | — | ❌ | Matomo, Site-ID-basiert |
 
+## 2a. Maßgebliche Anbieter-Dokumentation (immer beachten)
+
+> ⚠️ **Verbindlich:** Natives Pixel-/Tag-Snippet, globale API (`fbq`/`gtag`/`ttq`/`lintrk`/`funnelytics.events`/`mt`/`_paq`), Event-Namen und Payload-Felder folgen **ausschließlich** der offiziellen Anbieter-Doku. Vor **jeder** Änderung an einem Browser-Payload oder Snippet die hier verlinkten Quellen prüfen — nicht aus dem Gedächtnis oder aus Sekundärquellen arbeiten. Snippet-URLs und API-Signaturen ändern sich anbieterseitig; veraltete Snippets laden nicht oder verwerfen Events still. Die server-seitigen Payloads (Meta/GA/TikTok) haben ihren eigenen verbindlichen Block: [02 › Maßgebliche Anbieter-Dokumentation](../02-server-tracking/README.md#maßgebliche-anbieter-dokumentation-immer-beachten).
+
+| Catcher | Natives API | Offizielle Doku |
+|---------|-------------|-----------------|
+| `Meta` | `fbq()` | [Meta-Pixel-Referenz](https://developers.facebook.com/docs/meta-pixel/reference) · [Advanced Matching](https://developers.facebook.com/docs/meta-pixel/implementation/conversion-tracking#advanced-matching) |
+| `Ga` | `gtag()` | [GA4 E-Commerce (gtag)](https://developers.google.com/analytics/devguides/collection/ga4/ecommerce) · [gtag.js-Referenz](https://developers.google.com/tag-platform/gtagjs/reference) |
+| `Tt` | `ttq()` | [TikTok About Events API](https://ads.tiktok.com/help/article/events-api) · [Parameter](https://ads.tiktok.com/help/article/about-parameters) |
+| `Lin` | `lintrk('track', { conversion_id })` | [LinkedIn Insight-Tag Conversion-Tracking](https://learn.microsoft.com/en-us/linkedin/marketing/integrations/ads-reporting/conversion-tracking) · [Insight-Tag-Conversions einrichten](https://www.linkedin.com/help/lms/answer/a425606) |
+| `Fl` | `funnelytics.events.trigger(name, props)` | [Funnelytics — Tracking JavaScript Actions](https://help.funnelytics.io/en/knowledge/tracking-javascript-actions) |
+| `Mtc` | `mt('send', 'pageview', …)` (MauticJS `mtc.js`) | [Mautic — Tracking Script (mtc.js)](https://devdocs.mautic.org/en/5.x/components/tracking_script.html) |
+| `Mtm` | `_paq.push(['trackEvent'/'trackGoal', …])` | [Matomo JS-Tracking-API-Referenz](https://developer.matomo.org/api-reference/tracking-javascript) · [JS-Tracking-Guide](https://developer.matomo.org/guides/tracking-javascript-guide) |
+
 ## 3. `sendData`-Beispiel (Meta)
 
 ```js
