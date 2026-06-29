@@ -60,7 +60,17 @@ class Wp_Sdtrk_WC_Integration
             return null;
         }
         $order = wc_get_order($order_id);
-        return $order ? $order : null;
+        if (!$order) {
+            return null;
+        }
+        // Require a valid order key before exposing buyer PII (email/name/total/
+        // items) to the page. Without this, the order-received endpoint resolves
+        // by id alone and the localized data is harvestable by id enumeration.
+        $key = isset($_GET['key']) ? sanitize_text_field(wp_unslash($_GET['key'])) : '';
+        if (!hash_equals((string) $order->get_order_key(), $key)) {
+            return null;
+        }
+        return $order;
     }
 
     /**
