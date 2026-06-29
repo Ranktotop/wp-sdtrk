@@ -150,13 +150,12 @@ class Wp_Sdtrk_Tracker_Ga
         // Add value if given
         if ($event->getEventValue() > 0 || $event->getEventName() == 'purchase') {
             $customData['value'] = $event->getEventValue();
-            $customData['currency'] = "EUR";
+            $customData['currency'] = $event->getCurrency();
         }
-        // Add product if given
-        if (! empty($event->getProductId())) {
-            $customData['items'] = array(
-                $this->getData_products($event)
-            );
+        // Add products if given — whole cart when present, single-product fallback
+        $items = $this->getData_items($event);
+        if (! empty($items)) {
+            $customData['items'] = $items;
         }
         // ---Send Request
         $requestData = array(
@@ -334,7 +333,36 @@ class Wp_Sdtrk_Tracker_Ga
     }
 
     /**
-     * Return the product data of event
+     * Return the GA4 items[] list — the whole cart when per-line items are
+     * present, single-product fallback otherwise. Empty when neither is set.
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @return array
+     */
+    private function getData_items($event)
+    {
+        $items = $event->getItems();
+        if (! empty($items)) {
+            $list = array();
+            foreach ($items as $item) {
+                $list[] = array(
+                    'id'       => (string) ($item['id'] ?? ''),
+                    'name'     => (string) ($item['name'] ?? ''),
+                    'quantity' => (int) ($item['qty'] ?? 1),
+                    'price'    => (float) ($item['price'] ?? 0),
+                    'brand'    => $event->getBrandName(),
+                );
+            }
+            return $list;
+        }
+        if (! empty($event->getProductId())) {
+            return array($this->getData_products($event));
+        }
+        return array();
+    }
+
+    /**
+     * Return the single-product data of event (fallback for non-cart events).
      *
      * @param Wp_Sdtrk_Tracker_Event $event
      * @return array
