@@ -17,7 +17,7 @@
 
 ## Zweck & Zielgruppe
 
-Das Plugin ergänzt klassisches Browser-Pixel-Tracking um **serverseitiges Conversion-Tracking** (Conversion API / Measurement Protocol). Kern-Zielgruppe sind WordPress-Seiten ohne eigenen Shop — typischerweise Landingpages, Funnels und Verkaufsseiten, die externe Zahlungsanbieter (z. B. Digistore24/CopeCart) nutzen. Ist **WooCommerce** aktiv, kann zusätzlich eine optionale **WooCommerce-Integration** eingeschaltet werden, die Käufe auf der Order-Received-Seite browser- **und** serverseitig trackt (siehe [07 WooCommerce](07-woocommerce/README.md)).
+Das Plugin ergänzt klassisches Browser-Pixel-Tracking um **serverseitiges Conversion-Tracking** (Conversion API / Measurement Protocol). Kern-Zielgruppe sind WordPress-Seiten ohne eigenen Shop — typischerweise Landingpages, Funnels und Verkaufsseiten, die externe Zahlungsanbieter (z. B. Digistore24/CopeCart) nutzen. Ist **WooCommerce** aktiv, kann zusätzlich eine optionale **WooCommerce-Integration** eingeschaltet werden, die Käufe, Produktansichten und Warenkorb-Adds browser- **und** serverseitig trackt (siehe [07 WooCommerce](07-woocommerce/README.md)).
 
 Motivation laut README: Seit iOS-14/ITP und durch Adblocker geht browser-seitig ein erheblicher Teil der Conversion-Signale verloren. Server-to-Server-Tracking schließt diese Lücke.
 
@@ -45,7 +45,7 @@ Welche Plattform wird **browser-seitig** (Pixel/Tag), welche zusätzlich **serve
 - **Digistore24-Datenentschlüsselung** (verschlüsselte Thank-You-Page-Parameter).
 - **LinkedIn Conversion-Mapping** mit regelbasierter Zuordnung (eigene DB-Tabelle).
 - **Page-Level-Überschreibungen** via Redux-Metabox (Produkt-ID, Consent-Bypass).
-- **WooCommerce-Integration** (optional, nur bei aktivem WooCommerce): Purchase-Tracking auf der Order-Received-Seite — die Order-Daten werden in die Engine eingespeist, die das Purchase browser- **und** serverseitig in einem Durchlauf feuert (alle Positionen, Shop-Währung), consent-gated und über die Order-ID dedupliziert. Siehe [07 WooCommerce](07-woocommerce/README.md).
+- **WooCommerce-Integration** (optional, nur bei aktivem WooCommerce): Purchase (Order-Received-Seite), **ViewItem** (Produkt-Detailseite) und **AddToCart** (server-gepuffert, beim nächsten Seitenaufbau) — die jeweiligen Daten werden in die Engine eingespeist, die das Event browser- **und** serverseitig in einem Durchlauf feuert (alle Positionen, Shop-Währung), consent-gated. Purchase dedupliziert über die Order-ID. Siehe [07 WooCommerce](07-woocommerce/README.md).
 
 ## Tech-Stack
 

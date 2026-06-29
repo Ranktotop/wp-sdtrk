@@ -10,7 +10,7 @@ Datei: `public/js/wp-sdtrk-event.js`, Klasse `Wp_Sdtrk_Event` (Datencontainer) +
 | **Cookies (Erstpartei)** | `helper.get_Cookies()` | persistente UTM-Werte (`wpsdtrk_utm_*`) |
 | **Server-Localize** | `wp_sdtrk_engine.*` | `pageId`, `pageTitle`, `prodId`, `addr`, `agent` |
 | **Metabox** | über Localize gespiegelt | `wp_sdtrk_product_id`, `wp_sdtrk_bypass_consent` |
-| **WooCommerce-Order** | `wp_sdtrk_wc.order` (nur Order-Received-Seite) | `orderId`, `value`, `currency`, `email`/`firstName`/`lastName`, `items[]` — siehe [07 › Purchase-Tracking](../07-woocommerce/purchase-tracking.md) |
+| **WooCommerce-Commerce** | `wp_sdtrk_wc.{order\|addToCart\|viewItem}` (genau eine Quelle/Load, Präzedenz `order > addToCart > viewItem`) | Purchase: `orderId`/`value`/`currency`/Käuferdaten/`items[]` ([07 › Purchase](../07-woocommerce/purchase-tracking.md)); AddToCart/ViewItem: `value`/`currency`/`items[]` ([07 › ViewItem & AddToCart](../07-woocommerce/view-item-and-add-to-cart.md)) |
 | **DOM** | `collect_items()` | CSS-Klassen `.trkbtn-*`, `.watchitm-*` |
 
 > **Parameter-Aliase (`pmap`):** Mehrere URL-Schreibweisen werden auf ein kanonisches Feld gemappt (z. B. `type`/`eventtype` → Event-Typ). Das Mapping kommt aus PHP (`WP_SDTRK_Helper_Event`).
