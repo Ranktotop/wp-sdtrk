@@ -26,9 +26,8 @@ In [includes/class-wp-sdtrk.php](../../includes/class-wp-sdtrk.php) (`define_pub
 
 | Hook | Methode | Zweck |
 |------|---------|-------|
-| `wp_enqueue_scripts` | `enqueue_purchase_assets` | Browser-Purchase-Skript auf der Order-Received-Seite einbinden/lokalisieren |
-| `wp_ajax_wp_sdtrk_wc_persist` / `wp_ajax_nopriv_wp_sdtrk_wc_persist` | `handle_persist_ajax` | Consent-Snapshot + Identifier auf der Order speichern |
-| `woocommerce_order_status_processing` | `on_order_paid` | Server-Conversion-APIs feuern |
-| `woocommerce_order_status_completed` | `on_order_paid` | Server-Conversion-APIs feuern |
+| `wp_enqueue_scripts` (Priorität 20) | `localize_order_data` | Order-Daten (`wp_sdtrk_wc.order`) auf das Engine-Skript legen — nur auf der Order-Received-Seite |
+
+Die Priorität 20 stellt sicher, dass das Engine-Skript bereits registriert/enqueued ist (Standard-Priorität), wenn die Order-Daten daran lokalisiert werden. Das Purchase-Tracking selbst läuft anschließend in der Engine (siehe [purchase-tracking.md](purchase-tracking.md)) — es gibt keinen Order-Status-Hook und keinen AJAX-Persist mehr.
 
 Die Tracker-Klassen (`Wp_Sdtrk_Tracker_Meta/_Ga/_Tt`) sowie `Wp_Sdtrk_WC_Order_Mapper` sind über `load_dependencies()` geladen.

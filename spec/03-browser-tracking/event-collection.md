@@ -10,6 +10,7 @@ Datei: `public/js/wp-sdtrk-event.js`, Klasse `Wp_Sdtrk_Event` (Datencontainer) +
 | **Cookies (Erstpartei)** | `helper.get_Cookies()` | persistente UTM-Werte (`wpsdtrk_utm_*`) |
 | **Server-Localize** | `wp_sdtrk_engine.*` | `pageId`, `pageTitle`, `prodId`, `addr`, `agent` |
 | **Metabox** | über Localize gespiegelt | `wp_sdtrk_product_id`, `wp_sdtrk_bypass_consent` |
+| **WooCommerce-Order** | `wp_sdtrk_wc.order` (nur Order-Received-Seite) | `orderId`, `value`, `currency`, `email`/`firstName`/`lastName`, `items[]` — siehe [07 › Purchase-Tracking](../07-woocommerce/purchase-tracking.md) |
 | **DOM** | `collect_items()` | CSS-Klassen `.trkbtn-*`, `.watchitm-*` |
 
 > **Parameter-Aliase (`pmap`):** Mehrere URL-Schreibweisen werden auf ein kanonisches Feld gemappt (z. B. `type`/`eventtype` → Event-Typ). Das Mapping kommt aus PHP (`WP_SDTRK_Helper_Event`).
@@ -21,7 +22,8 @@ Datei: `public/js/wp-sdtrk-event.js`, Klasse `Wp_Sdtrk_Event` (Datencontainer) +
 eventId, eventTime, eventTimeHour, eventTimeDay, eventTimeMonth
 
 // Event
-eventName, orderId, prodId, prodName, value
+eventName, orderId, prodId, prodName, value, currency
+items: [ { id, name, qty, price }, … ]   // ganzer Warenkorb (WooCommerce-Purchase)
 
 // User (werden nach dem Auslesen aus der URL entfernt)
 userFirstName, userLastName, userEmail, userFP

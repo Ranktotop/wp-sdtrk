@@ -1,62 +1,19 @@
 <?php
 
 /**
- * Maps a WooCommerce order to the canonical event-data array consumed by
- * Wp_Sdtrk_Tracker_Event (and, via that, by the platform trackers).
+ * Maps a WooCommerce order's line items to the structured per-line list the
+ * engine consumes on the order-received page.
  *
- * Several keys are *lists* because Wp_Sdtrk_Tracker_Event reads them through
- * grabFirstValue() (eventName, value, prodId, prodName, userEmail, orderId,
- * userFirstName, userLastName). A few are single-valued (eventSource,
- * eventSourceAdress, eventSourceAgent) because they are read through
- * setAndFilled().
- *
- * The event_id is the WooCommerce order id (Wp_Sdtrk_Tracker_Event::getEventId()
- * returns the orderId when present), which is the shared id used to deduplicate
- * the browser and server Purchase events.
- *
- * Multi-product orders: the canonical event only carries the first product
- * (the event model is single-product). The full per-line list is available via
- * lineItems() and is fed to the platform payloads server-side.
- *
- * Design: tasks/wc-design.md
+ * The list is localized as wp_sdtrk_wc.order.items (see
+ * Wp_Sdtrk_WC_Integration::build_order_payload()) and seeded into the event by
+ * the engine's collect_eventData(). Each platform catcher turns it into its
+ * own multi-product payload (Meta contents[]/content_ids, GA items[], TikTok
+ * contents[]). The shared event_id (= order id) deduplicates browser + server.
  */
 class Wp_Sdtrk_WC_Order_Mapper
 {
     /**
-     * Translate a WC_Order into the canonical event-data array.
-     *
-     * @param WC_Order $order
-     * @return array
-     */
-    public function toEventArray($order): array
-    {
-        $lines = $this->lineItems($order);
-        $first = $lines[0] ?? null;
-
-        $data = [
-            'eventName'         => ['purchase'],
-            'value'             => [(string) $order->get_total()],
-            'orderId'           => [(string) $order->get_id()],
-            'userEmail'         => [$order->get_billing_email()],
-            'userFirstName'     => [$order->get_billing_first_name()],
-            'userLastName'      => [$order->get_billing_last_name()],
-            'eventSource'       => $order->get_checkout_order_received_url(),
-            'eventSourceAdress' => $order->get_customer_ip_address(),
-            'eventSourceAgent'  => $order->get_customer_user_agent(),
-            'currency'          => $order->get_currency(),
-            'utm'               => $this->utm($order),
-        ];
-
-        if ($first !== null) {
-            $data['prodId']   = [$first['id']];
-            $data['prodName'] = [$first['name']];
-        }
-
-        return $data;
-    }
-
-    /**
-     * Structured per-line list for multi-product payloads (contents[]/items[]).
+     * Structured per-line list for multi-product payloads.
      *
      * @param WC_Order $order
      * @return array<int, array{id:string, name:string, qty:int, price:float}>
@@ -74,20 +31,5 @@ class Wp_Sdtrk_WC_Order_Mapper
             ];
         }
         return $lines;
-    }
-
-    /**
-     * UTM parameters captured on the order (if any were persisted as order meta).
-     *
-     * @param WC_Order $order
-     * @return array<string, string>
-     */
-    private function utm($order): array
-    {
-        if (!method_exists($order, 'get_meta')) {
-            return [];
-        }
-        $utm = $order->get_meta('_wp_sdtrk_utm', true);
-        return is_array($utm) ? $utm : [];
     }
 }

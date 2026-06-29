@@ -45,7 +45,7 @@ Welche Plattform wird **browser-seitig** (Pixel/Tag), welche zusätzlich **serve
 - **Digistore24-Datenentschlüsselung** (verschlüsselte Thank-You-Page-Parameter).
 - **LinkedIn Conversion-Mapping** mit regelbasierter Zuordnung (eigene DB-Tabelle).
 - **Page-Level-Überschreibungen** via Redux-Metabox (Produkt-ID, Consent-Bypass).
-- **WooCommerce-Integration** (optional, nur bei aktivem WooCommerce): Purchase-Tracking auf der Order-Received-Seite — Browser-Pixel + serverseitige Conversion-APIs auf Order-Status-Übergang, consent-gated und dedupliziert. Siehe [07 WooCommerce](07-woocommerce/README.md).
+- **WooCommerce-Integration** (optional, nur bei aktivem WooCommerce): Purchase-Tracking auf der Order-Received-Seite — die Order-Daten werden in die Engine eingespeist, die das Purchase browser- **und** serverseitig in einem Durchlauf feuert (alle Positionen, Shop-Währung), consent-gated und über die Order-ID dedupliziert. Siehe [07 WooCommerce](07-woocommerce/README.md).
 
 ## Tech-Stack
 

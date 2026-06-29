@@ -1,35 +1,30 @@
-# 07 — Order → Event-Mapping
+# 07 — Order → Datenquelle für die Engine
 
-`Wp_Sdtrk_WC_Order_Mapper` ([public/class-wp-sdtrk-wc-order-mapper.php](../../public/class-wp-sdtrk-wc-order-mapper.php)) übersetzt eine `WC_Order` in das Array-Schema, das [`Wp_Sdtrk_Tracker_Event`](../../public/class-wp-sdtrk-tracker-event.php) erwartet.
+Die WooCommerce-Order wird nicht in das Server-Event-Array übersetzt, sondern als **Datenquelle** auf der Order-Received-Seite bereitgestellt und von der Engine übernommen (siehe [purchase-tracking.md](purchase-tracking.md)).
 
-## `toEventArray($order): array`
+## `Wp_Sdtrk_WC_Integration::build_order_payload($order): array`
 
-| Schlüssel | Form | Quelle | Hinweis |
-|-----------|------|--------|---------|
-| `eventName` | Liste | `['purchase']` | → `getEventName()` = `purchase` |
-| `value` | Liste | `[ (string) $order->get_total() ]` | → `getEventValue()` (float) |
-| `orderId` | Liste | `[ (string) $order->get_id() ]` | → `getTransactionId()` **und** `getEventId()` (Dedup) |
-| `prodId` | Liste | erste Position | → `getProductId()` |
-| `prodName` | Liste | erste Position | → `getProductName()` |
-| `userEmail` | Liste | `get_billing_email()` | |
-| `userFirstName` | Liste | `get_billing_first_name()` | |
-| `userLastName` | Liste | `get_billing_last_name()` | |
-| `eventSource` | Einzelwert | `get_checkout_order_received_url()` | → `getEventSource()` (`setAndFilled`) |
-| `eventSourceAdress` | Einzelwert | `get_customer_ip_address()` | → `getEventIp()` |
-| `eventSourceAgent` | Einzelwert | `get_customer_user_agent()` | → `getEventAgent()` |
-| `currency` | Einzelwert | `get_currency()` | s. [99 Befunde](../99-findings.md) — Tracker hardcoden derzeit `EUR` |
-| `utm` | assoziativ | Order-Meta `_wp_sdtrk_utm` (falls vorhanden) | → `getUtmData()` |
+Baut das an das Engine-Skript lokalisierte Objekt `wp_sdtrk_wc.order`:
 
-Listenförmige Schlüssel werden vom Event-Modell über `grabFirstValue()` gelesen, Einzelwerte über `setAndFilled()`.
+| Schlüssel | Quelle |
+|-----------|--------|
+| `orderId` | `$order->get_id()` |
+| `value` | `$order->get_total()` (Order-Gesamtwert) |
+| `currency` | `$order->get_currency()` |
+| `email` | `$order->get_billing_email()` |
+| `firstName` | `$order->get_billing_first_name()` |
+| `lastName` | `$order->get_billing_last_name()` |
+| `items` | `Wp_Sdtrk_WC_Order_Mapper::lineItems($order)` |
 
-**Dedup:** `getEventId()` liefert die Order-ID (da `orderId` gesetzt). Browser- und Server-Event verwenden damit dieselbe `event_id`.
+## `Wp_Sdtrk_WC_Order_Mapper::lineItems($order): array`
 
-## `lineItems($order): array`
-
-Strukturierte Positionsliste für Mehr-Produkt-Payloads:
+Strukturierte Positionsliste über **alle** Warenkorb-Positionen:
 
 ```php
 [ ['id' => string, 'name' => string, 'qty' => int, 'price' => float], … ]
 ```
 
-`price` ist der Stückpreis (`get_total()` der Position / Menge). Das kanonische Event trägt nur die **erste** Position (Event-Modell ist single-product); die vollständige Liste steht für plattformspezifische `contents[]`/`items[]`-Payloads zur Verfügung.
+`price` ist der Stückpreis (`get_total()` der Position / Menge). Diese Liste wird von der Engine als `items[]` ins Event übernommen und von jedem Kauf-Catcher in seine plattformspezifische Mehr-Produkt-Payload (`contents[]`/`items[]`) umgesetzt.
+
+**Dedup:** Der Gesamtwert (`value`) und die Order-ID (`orderId`) führen im Event dazu, dass JS `grabOrderId()` und PHP `getEventId()` die Order-ID als gemeinsame `event_id` liefern.
+</content>

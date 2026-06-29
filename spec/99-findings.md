@@ -46,12 +46,6 @@ Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist v
 
 ---
 
-## 🟡 Währung fest auf `EUR` verdrahtet
-
-Die Server-Tracker (Meta `getData_custom`/`fireTracking_Server_Event`, GA4, TikTok) sowie der Meta-Browser-Pfad (`get_data_custom`) setzen die Währung hart auf `"EUR"`. Für die [WooCommerce-Integration](07-woocommerce/README.md) liefert der [Order-Mapper](../public/class-wp-sdtrk-wc-order-mapper.php) zwar die Order-Währung (`currency`), diese wird aber von den Trackern noch nicht verwendet. Bei abweichender Shop-Währung wird die Conversion mit falscher Währung gemeldet. **Empfehlung:** Währung über das Event-Modell durchreichen und in den Payloads statt `EUR` verwenden.
-
----
-
 ## 🟡 Produkt-Feed: Live-Generierung im Request-Pfad bei kaltem Cache
 
 `Wp_Sdtrk_WC_Feed::get_cached()` liefert bei fehlendem Cache (Cron noch nicht gelaufen, Cache geleert) **synchron** einen Live-Aufbau über alle veröffentlichten Produkte (`collect()` mit `wc_get_products(['limit' => -1])` plus `wc_get_product()` je Variation) im öffentlichen — wenn auch token-geschützten — Request. Ein Halter des Token oder wiederholte Kalt-Cache-Treffer können so CPU/Speicher belasten; es gibt kein Batching, kein Rate-Limit und keinen Stampede-Schutz. **Empfehlung:** bei Cache-Miss `503`/leeren Feed liefern und Cron befüllen lassen, oder `generate()` mit einem kurzlebigen Transient-Lock absichern; ggf. `collect()` paginieren.
@@ -81,9 +75,8 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 | # | Punkt | Schwere |
 |---|-------|---------|
 | 1 | Eingabe-Sanitisierung | 🟡 mittel |
-| 2 | Währung fest auf `EUR` (relevant für WooCommerce) | 🟡 mittel |
-| 3 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
-| 4 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
-| 5 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
-| 6 | Keine Uninstall-Bereinigung | 🟡 niedrig |
-| 7 | Namens-Inkonsistenzen | 🟡 niedrig |
+| 2 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
+| 3 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
+| 4 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
+| 5 | Keine Uninstall-Bereinigung | 🟡 niedrig |
+| 6 | Namens-Inkonsistenzen | 🟡 niedrig |

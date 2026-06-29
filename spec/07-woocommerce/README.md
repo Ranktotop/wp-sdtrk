@@ -1,22 +1,21 @@
 # 07 — WooCommerce-Integration
 
-Optionale Integration, die **nur** greift, wenn WooCommerce installiert/aktiv ist **und** der Redux-Schalter `wc_integration` eingeschaltet ist. Sie trackt Käufe auf der WooCommerce-Order-Received-Seite — browser-seitig (Pixel/Tags aller aktiven Plattformen) und serverseitig (Conversion-APIs auf Order-Status-Übergang), consent-gated und über eine gemeinsame `event_id` (= Order-ID) dedupliziert.
+Optionale Integration, die **nur** greift, wenn WooCommerce installiert/aktiv ist **und** der Redux-Schalter `wc_integration` eingeschaltet ist. Sie trackt Käufe auf der WooCommerce-Order-Received-Seite, indem sie die Order-Daten in die **bestehende Engine-Mechanik** einspeist: Die Engine feuert das Purchase-Event darüber wie jedes andere Event browser- **und** serverseitig in einem Durchlauf — über alle aktiven Plattformen, consent-gated und über eine gemeinsame `event_id` (= Order-ID) dedupliziert. Es gibt **keinen** Order-Status-Hook, **keinen** Consent-Snapshot und **kein** dediziertes Purchase-Skript.
 
 | Datei | Inhalt |
 |-------|--------|
 | [activation.md](activation.md) | Aktivierungs-Gate (`Wp_Sdtrk_WC_Integration`), Redux-Schalter, Hook-Registrierung |
-| [order-mapping.md](order-mapping.md) | `Wp_Sdtrk_WC_Order_Mapper`: Order → kanonisches Event-Array + Positionsliste |
-| [browser-purchase.md](browser-purchase.md) | Browser-Purchase auf der Order-Received-Seite (`wp-sdtrk-wc.js`) |
-| [server-purchase.md](server-purchase.md) | Server-Conversion-APIs auf Order-Status, Consent-Snapshot, Dedup, Idempotenz |
+| [order-mapping.md](order-mapping.md) | Order → Datenquelle für die Engine (`build_order_payload` + `lineItems`) |
+| [purchase-tracking.md](purchase-tracking.md) | Danke-Seiten-Injection: Engine-Ingestion, Browser + Server, Mehr-Produkt, Währung, Dedup, Consent |
 | [product-feed.md](product-feed.md) | RSS-2.0/`g:`-Produkt-Feed, Token-Endpoint, täglicher Cron |
 
 ## Klassen / Dateien
 
 | Artefakt | Pfad |
 |----------|------|
-| Integration (Gate + Hooks + AJAX + Server-Firing) | [public/class-wp-sdtrk-wc-integration.php](../../public/class-wp-sdtrk-wc-integration.php) |
-| Order-Mapper | [public/class-wp-sdtrk-wc-order-mapper.php](../../public/class-wp-sdtrk-wc-order-mapper.php) |
-| Browser-Purchase-Skript | [public/js/wp-sdtrk-wc.js](../../public/js/wp-sdtrk-wc.js) |
+| Integration (Gate + Order-Daten-Localize) | [public/class-wp-sdtrk-wc-integration.php](../../public/class-wp-sdtrk-wc-integration.php) |
+| Order-Mapper (`lineItems`) | [public/class-wp-sdtrk-wc-order-mapper.php](../../public/class-wp-sdtrk-wc-order-mapper.php) |
+| Engine (Ingestion in `collect_eventData`) | [public/js/wp-sdtrk-engine.js](../../public/js/wp-sdtrk-engine.js) |
 | Produkt-Feed | [public/class-wp-sdtrk-wc-feed.php](../../public/class-wp-sdtrk-wc-feed.php) |
 | Cron (täglich) | [includes/class-wp-sdtrk-cron.php](../../includes/class-wp-sdtrk-cron.php) |
 | Redux-Sektion `WooCommerce` / Schalter `wc_integration` | [admin/class-wp-sdtrk-admin.php](../../admin/class-wp-sdtrk-admin.php) |
@@ -24,9 +23,14 @@ Optionale Integration, die **nur** greift, wenn WooCommerce installiert/aktiv is
 
 ## Feuer-Modell (Überblick)
 
-| Seite/Ereignis | Was feuert | Ziel |
-|----------------|------------|------|
-| `woocommerce_thankyou` / Order-Received-Seite | Browser-Purchase aller aktiven Catcher + Persistenz des Consent-Snapshots/Identifier auf der Order | Browser |
-| `woocommerce_order_status_processing` / `…_completed` | Server-Conversion-APIs (Meta/GA4/TikTok), consent-gated, idempotent | Server (S2S) |
+| Seite/Ereignis | Was passiert | Ziel |
+|----------------|--------------|------|
+| Order-Received-Seite (`wp_enqueue_scripts`) | `Wp_Sdtrk_WC_Integration::localize_order_data()` legt die Order-Daten (`wp_sdtrk_wc.order`) auf das Engine-Skript. Die Engine seedet daraus ein Purchase-Event und feuert es über alle aktiven Catcher | Browser **und** Server (S2S) in einem Durchlauf |
 
-Begründung der Trennung: Sofort-Zahlungen springen direkt auf `processing`/`completed`; asynchrone/Offline-Zahlungen wechseln den Status erst später. Browser-Pixel benötigt die Order-Received-Seite, der Server-Pfad läuft unabhängig (und ggf. später) über den Status-Hook.
+Die Engine sendet pro aktivem Catcher den Browser-Hit (`fireData`) **und** den Server-Call (`sendData` → AJAX `validateTracker`). Browser- und Server-Event teilen dieselbe `event_id` (= Order-ID), weil JS `grabOrderId()` und PHP `getEventId()` beide die Order-ID bevorzugen.
+
+## Bewusste Trade-offs
+
+- **Server hängt am Browser:** Läuft das Engine-JS nicht (Tab vor dem Laden geschlossen, JS deaktiviert, AdBlocker blockt `admin-ajax`), wird auch der Server-Call nicht gesendet — dieselbe Abhängigkeit wie auf jeder anderen Trackingseite.
+- **Zahlungszeitpunkt:** Gefeuert wird beim Erreichen der Danke-Seite (Bestellung abgeschlossen), unabhängig davon, ob die Zahlung bei asynchronen Methoden (Vorkasse/Rechnung) bereits eingegangen ist.
+</content>
