@@ -230,7 +230,6 @@ class Wp_Sdtrk_Catcher_Lin {
 	* @return  {Array} The conversion ids of the mapped events whose conditions are met.
 	*/
 	get_triggeredConversions(currentEventName) {
-		console.log(currentEventName);
 		var triggeredConversionIds = [];
 		//iterate all given events
 		for (var i = 0; i < this.localizedData.map_ev.length; i++) {
