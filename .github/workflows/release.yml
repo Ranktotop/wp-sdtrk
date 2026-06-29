@@ -95,7 +95,7 @@ jobs:
           mkdir -p release
           zip -r release/wp-sdtrk.zip . \
             -x ".git*" ".github/*" "temp/*" "tests/*" "*.md" "composer.*" "phpunit.*" "node_modules/*" \
-               "spec/*" ".claude/*" "tasks/*" ".vscode/*" ".idea/*"
+               "spec/*" ".claude/*" "tasks/*" ".vscode/*" ".idea/*" "release/*"
 
       - name: 🚀 Create GitHub Release
         uses: softprops/action-gh-release@v1

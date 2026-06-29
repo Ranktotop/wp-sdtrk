@@ -33,4 +33,5 @@ Die Engine sendet pro aktivem Catcher den Browser-Hit (`fireData`) **und** den S
 
 - **Server hängt am Browser:** Läuft das Engine-JS nicht (Tab vor dem Laden geschlossen, JS deaktiviert, AdBlocker blockt `admin-ajax`), wird auch der Server-Call nicht gesendet — dieselbe Abhängigkeit wie auf jeder anderen Trackingseite.
 - **Zahlungszeitpunkt:** Gefeuert wird beim Erreichen der Danke-Seite (Bestellung abgeschlossen), unabhängig davon, ob die Zahlung bei asynchronen Methoden (Vorkasse/Rechnung) bereits eingegangen ist.
+- **Nicht DB-autoritativ:** Der Server-Purchase wird über den Browser-AJAX (`validateTracker`) gefeuert; `value`/`items`/`currency`/`orderId` kommen also client-geliefert und sind — wie alle anderen Events des Plugins — manipulierbar. Der frühere Order-Status-Pfad las diese Werte serverseitig aus der `WC_Order` (DB-autoritativ). Für Conversion-Tracking akzeptiert (betrifft nur die eigenen Kampagnendaten); eine serverseitige Re-Validierung gegen die Order ist bewusst nicht implementiert.
 </content>

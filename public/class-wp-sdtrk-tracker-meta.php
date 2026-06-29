@@ -269,7 +269,7 @@ class Wp_Sdtrk_Tracker_Meta
         $customData = $event->getUtmData();
 
         // Product(s) — the whole cart when present, single-product fallback otherwise
-        $products = $this->getData_products($event);
+        $products = $this->getData_contents($event);
         if (! empty($products)) {
             $ids = array();
             foreach ($products as $p) {
@@ -292,7 +292,7 @@ class Wp_Sdtrk_Tracker_Meta
      * @param Wp_Sdtrk_Tracker_Event $event
      * @return array
      */
-    private function getData_products($event)
+    private function getData_contents($event)
     {
         $products = array();
         $items = $event->getItems();
