@@ -41,7 +41,6 @@ class Wp_Sdtrk_Public
 	 */
 	private $version;
 	private Wp_Sdtrk_Public_Ajax_Handler $public_ajax_handler;
-	private Wp_Sdtrk_Public_Form_Handler $public_form_handler;
 
 	/**
 	 * Initialize the class and set its properties.
@@ -114,36 +113,6 @@ class Wp_Sdtrk_Public
 		$this->registerScript_decrypter($minifySwitch);
 		$this->registerScript_fingerprinter($minifySwitch);
 		$this->registerScript_engine($minifySwitch);
-	}
-
-	public function register_front_end_routes(): void {}
-
-
-	/**
-	 * Liefert das Template für unsere Bestellseite
-	 */
-	public function load_custom_template($template)
-	{
-		return $template;
-	}
-
-	/**
-	 * Registers the form handler for the public area.
-	 *
-	 * This function ensures that the Wp_Sdtrk_Public_Form_Handler class is initialized
-	 * and calls the handle_public_form_callback method of that class to register the
-	 * form processing callback functions.
-	 *
-	 * @since 1.0.0
-	 */
-	public function register_form_handler(): void
-	{
-		//Make sure its initialized
-		if (!isset($this->public_form_handler)) {
-			$this->public_form_handler = new Wp_Sdtrk_Public_Form_Handler();
-		}
-
-		$this->public_form_handler->handle_public_form_callback();
 	}
 
 	/**

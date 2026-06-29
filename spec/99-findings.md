@@ -46,17 +46,9 @@ Die reinen Browser-Catcher **Mautic** und **Funnelytics** setzen die Währung we
 
 ---
 
-## 🟡 Tote / leere Bausteine
+## 🔵 Cron seit Produkt-Feed aktiv
 
-| Element | Beobachtung |
-|---------|-------------|
-| `Wp_Sdtrk_Public::register_front_end_routes()` | leerer Stub; an `init` gebunden, tut nichts |
-| `Wp_Sdtrk_Public::load_custom_template()` | gibt Template unverändert zurück (No-Op) |
-| `Wp_Sdtrk_Public_Form_Handler::handle_public_form_callback()` | Stub (returnt früh, keine Verarbeitung) |
-| `flush_rewrite_rules()` bei Aktivierung | ohne eigene Routen aktuell unnötig |
-| `Wp_Sdtrk_Deactivator` Foreign-Key-Map | `$map = []` → wirkungslos |
-
-> Hinweis: `WP_SDTRK_Cron` ist seit der WooCommerce-Produkt-Feed-Funktion **aktiv** (täglicher Hook `wp_sdtrk_cron_generate_feed`, siehe [07 › Produkt-Feed](07-woocommerce/product-feed.md)). Die im README erwähnten früheren Sync-Features (CSV/Google-Sheet/Live-Feed) sind davon unabhängig und nicht implementiert.
+`WP_SDTRK_Cron` ist seit der WooCommerce-Produkt-Feed-Funktion **aktiv** (täglicher Hook `wp_sdtrk_cron_generate_feed`, siehe [07 › Produkt-Feed](07-woocommerce/product-feed.md)). Die im README erwähnten früheren Sync-Features (CSV/Google-Sheet/Live-Feed) sind davon unabhängig und nicht implementiert.
 
 ---
 
@@ -98,6 +90,5 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 | 2 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
 | 3 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
 | 4 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
-| 5 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
-| 6 | Keine Uninstall-Bereinigung | 🟡 niedrig |
-| 7 | Namens-Inkonsistenzen | 🟡 niedrig |
+| 5 | Keine Uninstall-Bereinigung | 🟡 niedrig |
+| 6 | Namens-Inkonsistenzen | 🟡 niedrig |

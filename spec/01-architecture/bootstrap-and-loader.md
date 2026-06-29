@@ -30,7 +30,7 @@ __construct()
 
 - **Kern:** `Wp_Sdtrk_Loader`, `Wp_Sdtrk_i18n`, Redux-Framework (`vendor/redux/redux-core/framework.php`)
 - **Admin:** `Wp_Sdtrk_Admin`, `Wp_Sdtrk_Admin_Ajax_Handler`, `Wp_Sdtrk_Admin_Form_Handler`
-- **Public:** `Wp_Sdtrk_Public`, `Wp_Sdtrk_Public_Ajax_Handler`, `Wp_Sdtrk_Public_Form_Handler`
+- **Public:** `Wp_Sdtrk_Public`, `Wp_Sdtrk_Public_Ajax_Handler`
 - **Tracker:** `Wp_Sdtrk_Tracker_Event`, `Wp_Sdtrk_Tracker_Meta` (Datei `tracker-meta.php`, Alias `Wp_Sdtrk_Tracker_Fb`), `Wp_Sdtrk_Tracker_Ga`, `Wp_Sdtrk_Tracker_Tt`
 - **Decryptor:** `Wp_Sdtrk_Decrypter_ds24`
 - **Models:** `WP_SDTRK_Model_Base`, `WP_SDTRK_Model_Linkedin`, `WP_SDTRK_Model_Linkedin_Rule`
@@ -92,7 +92,6 @@ Jeder Eintrag ist ein Array `['hook','component','callback','priority','accepted
 | `wp_enqueue_scripts` | `enqueue_scripts` | Frontend-JS (Engine + Catcher) + Localize |
 | `wp_ajax_wp_sdtrk_handle_public_ajax_callback` | `register_ajax_handler` | Public-AJAX (eingeloggt) |
 | `wp_ajax_nopriv_wp_sdtrk_handle_public_ajax_callback` | `register_ajax_handler` | Public-AJAX (anonym) — Kern des Server-Trackings |
-| `init` | `register_front_end_routes` | **leerer Stub** (siehe [99 Befunde](../99-findings.md)) |
 
 Zusätzlich registriert `define_public_hooks()` die Cron-Actions über `WP_SDTRK_Cron` (siehe [lifecycle.md](lifecycle.md)).
 

@@ -32,19 +32,7 @@ class Wp_Sdtrk_Deactivator
 	 */
 	public static function deactivate()
 	{
-
-		global $wpdb;
-		$p = $wpdb->prefix;
-
-		// 1) Alle alten FOREIGN KEYS entfernen
-		$map = [];
-		foreach ($map as $table => $keys) {
-			foreach ($keys as $fk) {
-				$wpdb->query("ALTER TABLE `{$table}` DROP FOREIGN KEY `{$fk}`");
-			}
-		}
-
-		// 2) Cron‐Event löschen
+		// Cron‐Event löschen
 		WP_SDTRK_Cron::unregister_cronjobs();
 	}
 }

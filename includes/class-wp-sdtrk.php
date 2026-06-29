@@ -132,7 +132,6 @@ class Wp_Sdtrk
 		 */
 		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-public.php';
 		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-public-ajax.php';
-		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-public-form.php';
 
 		/**
 		 * The model classes
@@ -260,9 +259,6 @@ class Wp_Sdtrk
 		//and reconcile the schedule on plugins_loaded, once WooCommerce is loaded.
 		WP_SDTRK_Cron::register_cron_actions();
 		$this->loader->add_action('plugins_loaded', 'WP_SDTRK_Cron', 'self_heal_schedule');
-
-		//Register Front-End Routes#
-		$this->loader->add_action('init', $plugin_public, 'register_front_end_routes');
 
 		//WooCommerce purchase tracking: feed the order data into the engine on the
 		//order-received page (priority 20 = after the engine is enqueued). The engine

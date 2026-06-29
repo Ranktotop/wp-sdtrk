@@ -19,16 +19,13 @@ Ausgelöst über `register_activation_hook`. Schritte:
 
    Details: [05 › ORM & Schema](../05-data-model/orm-and-schema.md).
 
-2. **`flush_rewrite_rules()`** — obwohl aktuell keine eigenen Routen registriert werden (siehe [99 Befunde](../99-findings.md)).
-
-3. **Cron registrieren** via `WP_SDTRK_Cron::register_cronjobs()`.
+2. **Cron registrieren** via `WP_SDTRK_Cron::register_cronjobs()`.
 
 ## 2. Deaktivierung — `Wp_Sdtrk_Deactivator::deactivate()`
 
-1. Foreign-Key-Aufräumlogik vorhanden, aber **leeres Mapping** (`$map = []`) → derzeit ohne Wirkung.
-2. **Cron deregistrieren** via `WP_SDTRK_Cron::unregister_cronjobs()`.
+**Cron deregistrieren** via `WP_SDTRK_Cron::unregister_cronjobs()`.
 
-> Die DB-Tabelle bleibt bei Deaktivierung **erhalten** (kein Drop).
+> Die DB-Tabelle bleibt bei Deaktivierung **erhalten** (kein Drop) — sie wird erst bei der Deinstallation entfernt (Abschnitt 4).
 
 ## 3. Cron — `WP_SDTRK_Cron` (`includes/class-wp-sdtrk-cron.php`)
 

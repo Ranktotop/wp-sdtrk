@@ -33,13 +33,10 @@ class Wp_Sdtrk_Activator
 	public static function activate()
 	{
 
-		// 1) Tabellen (ohne FK) anlegen
+		// 1) Tabellen anlegen
 		self::create_db_linkedin_mapping();
 
-		// 2) FOREIGN KEY Constraints einmalig hinzufügen
-
-		// 3) Rewrite-Regeln flushen & Cron schedule
-		flush_rewrite_rules();
+		// 2) Cron schedule
 		WP_SDTRK_Cron::register_cronjobs();
 	}
 

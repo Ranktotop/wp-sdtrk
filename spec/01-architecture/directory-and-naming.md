@@ -36,7 +36,6 @@ wp-sdtrk/
 ├── public/                    # Frontend + Server-Tracker
 │   ├── class-wp-sdtrk-public.php        # Enqueue/Localize, Decryption, AJAX-Bind
 │   ├── class-wp-sdtrk-public-ajax.php   # validateTracker()-Dispatch
-│   ├── class-wp-sdtrk-public-form.php   # Public-Form-Handler (Stub)
 │   ├── class-wp-sdtrk-tracker-event.php # Event-Wrapper (Getter)
 │   ├── class-wp-sdtrk-tracker-meta.php  # Klasse Wp_Sdtrk_Tracker_Meta (Meta CAPI)
 │   ├── class-wp-sdtrk-tracker-ga.php    # GA4 Measurement Protocol
