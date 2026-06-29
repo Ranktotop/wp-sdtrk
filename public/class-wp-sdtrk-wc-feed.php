@@ -231,6 +231,19 @@ class Wp_Sdtrk_WC_Feed
     }
 
     /**
+     * Mint a fresh token, persist it, and return it. Invalidates the old
+     * feed URL — used by the admin "regenerate token" action.
+     *
+     * @return string
+     */
+    public function rotate_token(): string
+    {
+        $token = wp_generate_password(32, false);
+        update_option(self::TOKEN_OPTION, $token, false);
+        return $token;
+    }
+
+    /**
      * Constant-time token check.
      *
      * @param string $token

@@ -142,6 +142,7 @@ class Wp_Sdtrk_Admin
 			'notice_success' => __('Saved successfully!', 'wp-sdtrk'),
 			'notice_error' => __('Error occurred!', 'wp-sdtrk'),
 			'msg_confirm_delete_mapping' => __('Do you really want to delete the mapping? This action cannot be undone!', 'wp-sdtrk'),
+			'msg_confirm_regen_token' => __('Regenerate the feed token? The current feed URL stops working immediately and must be updated everywhere it is used.', 'wp-sdtrk'),
 			'label_dropdown_select' => __('Select an option...', 'wp-sdtrk'),
 			'label_product_id' => __('Product ID', 'wp-sdtrk'),
 			'label_product_name' => __('Product Name', 'wp-sdtrk'),
@@ -167,7 +168,9 @@ class Wp_Sdtrk_Admin
 		}
 		$url = (new Wp_Sdtrk_WC_Feed())->get_feed_url();
 		return '<p>' . esc_html__('Product feed URL (paste into Google Merchant Center / Meta Commerce Manager):', 'wp-sdtrk') . '</p>'
-			. '<code style="display:block;word-break:break-all;padding:8px;background:#f6f7f7">' . esc_url($url) . '</code>';
+			. '<code id="wpsdtrk-feed-url" style="display:block;word-break:break-all;padding:8px;background:#f6f7f7">' . esc_url($url) . '</code>'
+			. '<p><button type="button" class="button" id="wpsdtrk-regenerate-feed-token">' . esc_html__('Regenerate feed token', 'wp-sdtrk') . '</button>'
+			. ' <span class="description">' . esc_html__('Invalidates the current URL — update it wherever you pasted it.', 'wp-sdtrk') . '</span></p>';
 	}
 
 	/**

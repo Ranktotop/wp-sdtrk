@@ -58,9 +58,9 @@ Die reinen Browser-Catcher **Mautic** und **Funnelytics** setzen die Währung we
 
 ---
 
-## 🟡 Produkt-Feed: Token in der URL, keine Rotation
+## 🔵 Produkt-Feed: Token in der URL — by design
 
-Das Feed-Token wird als `?token=…`-Query-Parameter übertragen (von Google/Meta vorgegeben, die nur eine URL akzeptieren) und kann so in Server-/Proxy-/CDN-Logs landen. Es gibt aktuell **keine Rotations-Funktion**: `get_token()` erzeugt das Token einmalig; ein Reset ist nur durch Löschen der Option `wp_sdtrk_feed_token` in der DB möglich. **Empfehlung:** die Feed-URL als Geheimnis dokumentieren und einen Admin-Button zum Neu-Erzeugen des Tokens anbieten.
+Das Feed-Token wird als `?token=…`-Query-Parameter übertragen (von Google/Meta vorgegeben, die nur **eine** URL akzeptieren) und kann so in Server-/Proxy-/CDN-Logs landen. Die Feed-URL ist daher als Geheimnis zu behandeln. Ein Admin-Button erlaubt die Token-Rotation ([07 › Produkt-Feed](07-woocommerce/product-feed.md)); eine Übertragung außerhalb der URL ist anbieterseitig nicht möglich.
 
 ---
 
@@ -82,6 +82,5 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 |---|-------|---------|
 | 1 | Eingabe-Sanitisierung | 🟡 mittel |
 | 2 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
-| 3 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
-| 4 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
-| 5 | Namens-Inkonsistenzen | 🟡 niedrig |
+| 3 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
+| 4 | Namens-Inkonsistenzen | 🟡 niedrig |

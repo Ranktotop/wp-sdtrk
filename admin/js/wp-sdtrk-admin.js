@@ -35,6 +35,33 @@
 
 	// Load Listener
 	$(document).ready(function () {
+
+		// WooCommerce product feed: regenerate token button (Redux settings page)
+		$(document).on('click', '#wpsdtrk-regenerate-feed-token', function (e) {
+			e.preventDefault();
+			if (!window.confirm(wp_sdtrk.msg_confirm_regen_token)) {
+				return;
+			}
+			var $btn = $(this);
+			$btn.prop('disabled', true);
+			$.post(wp_sdtrk.ajax_url, {
+				action: 'wp_sdtrk_handle_admin_ajax_callback',
+				func: 'regenerate_feed_token',
+				_nonce: wp_sdtrk._nonce
+			}, function (response) {
+				var r = (typeof response === 'string') ? JSON.parse(response) : response;
+				if (r && r.state) {
+					$('#wpsdtrk-feed-url').text(r.url);
+					wpsdtrk_show_notice(r.message || wp_sdtrk.notice_success, 'success');
+				} else {
+					wpsdtrk_show_notice((r && r.message) || wp_sdtrk.notice_error, 'error');
+				}
+			}).fail(function () {
+				wpsdtrk_show_notice(wp_sdtrk.notice_error, 'error');
+			}).always(function () {
+				$btn.prop('disabled', false);
+			});
+		});
 	});
 })(jQuery);
 

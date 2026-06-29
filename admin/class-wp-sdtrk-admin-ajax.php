@@ -79,6 +79,29 @@ class Wp_Sdtrk_Admin_Ajax_Handler
     }
 
     /**
+     * Regenerates the WooCommerce product-feed token and returns the new URL.
+     *
+     * @param array $data Ignored.
+     * @param array $meta Ignored.
+     * @return array JSON response (state => bool, url => string, message => string)
+     */
+    private function regenerate_feed_token(array $data, array $meta): array
+    {
+        if (!class_exists('Wp_Sdtrk_WC_Feed')) {
+            return ['state' => false, 'message' => __('Product feed is not available', 'wp-sdtrk')];
+        }
+
+        $feed = new Wp_Sdtrk_WC_Feed();
+        $feed->rotate_token();
+
+        return [
+            'state'   => true,
+            'url'     => $feed->get_feed_url(),
+            'message' => __('Feed token regenerated', 'wp-sdtrk'),
+        ];
+    }
+
+    /**
      * Returns the linkedin mapping for a given mapping ID.
      *
      * @param array $data Must contain the key 'mapping_id'.

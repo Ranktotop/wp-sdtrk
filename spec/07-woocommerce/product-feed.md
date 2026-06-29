@@ -13,7 +13,8 @@ Verfügbar nur, wenn `Wp_Sdtrk_WC_Feed::is_enabled()`: WooCommerce-Integration a
   - nicht aktiv → `404`;
   - falscher/fehlender Token (`hash_equals`) → `403`;
   - sonst `Content-Type: application/xml`, Ausgabe des gecachten Feeds, `exit`.
-- **Token:** Option `wp_sdtrk_feed_token`, bei Bedarf via `wp_generate_password(32, false)` erzeugt. Die fertige Feed-URL inkl. Token zeigt ein Info-Feld in der WooCommerce-Redux-Sektion.
+- **Token:** Option `wp_sdtrk_feed_token`, bei Bedarf via `wp_generate_password(32, false)` erzeugt (lazy, `get_token()`). Die fertige Feed-URL inkl. Token zeigt ein Info-Feld in der WooCommerce-Redux-Sektion.
+- **Rotation:** Ein Button „Regenerate feed token" im selben Info-Feld ruft per Admin-AJAX (`func=regenerate_feed_token`, Nonce `security_wp-sdtrk`) `Wp_Sdtrk_WC_Feed::rotate_token()` (`wp_generate_password(32, false)` → `update_option`) und ersetzt die angezeigte URL. Die alte URL wird sofort ungültig (`403`) und muss überall neu hinterlegt werden. Dass das Token als `?token=`-Query-Parameter übertragen wird, ist von Google/Meta vorgegeben (nur eine URL) — die Feed-URL ist daher als Geheimnis zu behandeln.
 
 ## Generierung
 
