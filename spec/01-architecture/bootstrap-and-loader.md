@@ -75,8 +75,7 @@ Jeder Eintrag ist ein Array `['hook','component','callback','priority','accepted
 |------|----------|-------|
 | `admin_enqueue_scripts` | `enqueue_styles` | Admin-CSS |
 | `admin_enqueue_scripts` | `enqueue_scripts` | Admin-JS + Localize |
-| `wp_ajax_wp_sdtrk_handle_admin_ajax_callback` | `register_ajax_handler` | Admin-AJAX (eingeloggt) |
-| `wp_ajax_nopriv_wp_sdtrk_handle_admin_ajax_callback` | `register_ajax_handler` | Admin-AJAX (anonym) |
+| `wp_ajax_wp_sdtrk_handle_admin_ajax_callback` | `register_ajax_handler` | Admin-AJAX (nur eingeloggt; Capability `manage_options`) |
 | `after_setup_theme` | `wp_sdtrk_register_redux_options` | Redux-Optionspanel |
 | `after_setup_theme` | `register_redux_metabox` | Redux-Metabox (Page-Level) |
 | `redux/options/wp_sdtrk_options/saved` | `after_redux_save` | Nachbearbeitung nach Speichern |

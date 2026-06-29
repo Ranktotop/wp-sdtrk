@@ -221,9 +221,8 @@ class Wp_Sdtrk
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
 
-		//Register ajax handler
+		//Register ajax handler (logged-in only — admin actions are never nopriv)
 		$this->loader->add_action('wp_ajax_wp_sdtrk_handle_admin_ajax_callback', $plugin_admin, 'register_ajax_handler');
-		$this->loader->add_action('wp_ajax_nopriv_wp_sdtrk_handle_admin_ajax_callback', $plugin_admin, 'register_ajax_handler');
 
 		//Register Redux
 		$this->loader->add_action('after_setup_theme', $plugin_admin, 'wp_sdtrk_register_redux_options');

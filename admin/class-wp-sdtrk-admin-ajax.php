@@ -18,10 +18,13 @@ class Wp_Sdtrk_Admin_Ajax_Handler
             die();
         }
 
-        // Admin check
-        if (!is_admin()) {
-            wp_send_json_error('User is not admin');
-            return ['state' => false, 'message' => __('User is not admin', 'wp-sdtrk')];
+        // Capability check — these are administrative mutations (LinkedIn
+        // mappings, feed token). is_admin() is NOT a gate (it is true for any
+        // admin-ajax request, including unauthenticated ones), so verify the
+        // actual capability.
+        if (! current_user_can('manage_options')) {
+            wp_send_json_error();
+            die();
         }
 
         // Check if given function exists

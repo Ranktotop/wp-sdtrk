@@ -71,7 +71,7 @@ wp-sdtrk/
 | Typ | Muster | Beispiel |
 |-----|--------|----------|
 | AJAX (eingeloggt) | `wp_ajax_wp_sdtrk_handle_{area}_ajax_callback` | `wp_ajax_wp_sdtrk_handle_public_ajax_callback` |
-| AJAX (anonym) | `wp_ajax_nopriv_wp_sdtrk_handle_{area}_ajax_callback` | `wp_ajax_nopriv_wp_sdtrk_handle_public_ajax_callback` |
+| AJAX (anonym) | `wp_ajax_nopriv_wp_sdtrk_handle_{area}_ajax_callback` | `wp_ajax_nopriv_wp_sdtrk_handle_public_ajax_callback` (nur Public; Admin-AJAX ist eingeloggt-only) |
 | Redux-Save | `redux/options/wp_sdtrk_options/saved` | – |
 | Nonce-Action | `security_wp-sdtrk` | (für Public- und Admin-AJAX gemeinsam) |
 

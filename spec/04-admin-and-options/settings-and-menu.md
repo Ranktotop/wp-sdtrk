@@ -56,14 +56,17 @@ Für die LinkedIn-Mapping-Seite zusätzlich `SDTRK_Linkedin = { ajaxUrl, nonce }
 
 ## 6. Admin-AJAX — `Wp_Sdtrk_Admin_Ajax_Handler`
 
-Gleiches `func`-Dispatch-Muster wie Public (Action `wp_sdtrk_handle_admin_ajax_callback`, Nonce `security_wp-sdtrk`):
+Gleiches `func`-Dispatch-Muster wie Public (Action `wp_sdtrk_handle_admin_ajax_callback`, Nonce `security_wp-sdtrk`), aber **nur eingeloggt** registriert (`wp_ajax_…`, **kein** `nopriv`).
+
+**Zugriffsschutz:** Der Sammel-Handler prüft zuerst den Nonce und dann die **Capability** `current_user_can('manage_options')` — `is_admin()` ist hier bewusst **keine** Schranke (es ist in jedem `admin-ajax.php`-Request `true`). Erst danach wird `func` gegen die Handler-Methoden aufgelöst.
 
 | `func` | Aufgabe |
 |--------|---------|
 | `get_linkedin_mapping` | Mapping-Details laden (id, event, convid, rules) |
 | `delete_linkedin_mapping` | Mapping löschen |
+| `regenerate_feed_token` | Produkt-Feed-Token rotieren, neue Feed-URL zurückgeben ([07 › Produkt-Feed](../07-woocommerce/product-feed.md)) |
 
-Antwort: JSON `{ state, message, mapping? }`.
+Antwort: JSON `{ state, message, … }` (z. B. `mapping` bzw. `url`).
 
 ## 7. Admin-Formulare — `Wp_Sdtrk_Admin_Form_Handler`
 
