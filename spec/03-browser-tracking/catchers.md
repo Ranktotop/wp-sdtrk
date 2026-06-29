@@ -38,6 +38,8 @@ Jede Plattform hat im Browser eine Catcher-Klasse `Wp_Sdtrk_Catcher_*`. Sie kaps
 | `Mtc` | `mt('send', 'pageview', …)` (MauticJS `mtc.js`) | [Mautic — Tracking Script (mtc.js)](https://devdocs.mautic.org/en/5.x/components/tracking_script.html) |
 | `Mtm` | `_paq.push(['trackEvent'/'trackGoal', …])` | [Matomo JS-Tracking-API-Referenz](https://developer.matomo.org/api-reference/tracking-javascript) · [JS-Tracking-Guide](https://developer.matomo.org/guides/tracking-javascript-guide) |
 
+> **Mautic:** Der Catcher sendet Events als `mt('send', '<eventName>', {…})` mit echten Event-Namen. Natives MauticJS verarbeitet nur `pageview` (Core prüft `type === 'pageview'`); zusätzliche Event-Typen werden von Plugins/Bundles über `CoreEvents::BUILD_MAUTIC_JS` in `mtc.js` injiziert. Die Custom-Event-Erfassung setzt daher ein **Mautic-seitiges Plugin** voraus — der `pageview`-Hit funktioniert nativ.
+
 ## 3. `sendData`-Beispiel (Meta)
 
 ```js

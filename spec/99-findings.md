@@ -18,15 +18,9 @@ Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist v
 
 ---
 
-## 🔴 Matomo: Tracker-Skript `matomo.js` wird nie geladen
+## 🔵 Mautic: Custom-Event-Erfassung setzt ein Mautic-Plugin voraus (by design)
 
-**Verifiziert gegen die offizielle Doku.** `Wp_Sdtrk_Catcher_Mtm::loadPixel()` ([public/js/wp-sdtrk-mtm.js](../public/js/wp-sdtrk-mtm.js)) füllt die `_paq`-Queue (`setTrackerUrl`, `setSiteId`, `trackPageView`), **injiziert aber nicht** das Tracker-Skript `matomo.js`. Der offizielle Matomo-Embed verlangt zwingend zusätzlich die Script-Injection (`g.src = u + 'matomo.js'`, siehe [Matomo JS-Tracking-Guide](https://developer.matomo.org/guides/tracking-javascript-guide)). Ohne sie bleibt die Queue liegen und es wird **nichts** an Matomo gesendet — das Browser-Tracking feuert faktisch nicht. **Empfehlung:** in `loadPixel()` das `matomo.js`-Skript asynchron nachladen (wie bei den anderen Catchern).
-
----
-
-## 🟡 Mautic: `mt('send', '<event>')` mit Custom-Event-Namen wird vom Standard-Mautic nicht unterstützt
-
-**Verifiziert (Anbieter-Doku + Foren).** `Wp_Sdtrk_Catcher_Mtc::fireData()` sendet Events via `mt('send', '<eventName>', {…})`. Natives MauticJS ([mtc.js](https://devdocs.mautic.org/en/5.x/components/tracking_script.html)) dokumentiert nur `mt('send', 'pageview', {…})`; beliebige Event-Namen erfordern ein Zusatz-Plugin (z. B. „Mautic Custom Events"). Ohne dieses Plugin werden Nicht-`pageview`-Sends serverseitig vermutlich ignoriert. **Zu prüfen** an der echten Mautic-Instanz; ggf. dokumentieren, dass die Custom-Event-Erfassung das Plugin voraussetzt, oder auf `pageview` + Attribute umstellen.
+**Verifiziert.** `Wp_Sdtrk_Catcher_Mtc::fireData()` sendet Events via `mt('send', '<eventName>', {…})` mit echten Event-Namen (`purchase`, `view_item`, …). Natives MauticJS verarbeitet nur `mt('send', 'pageview', {…})` (Core prüft `type === 'pageview'`); zusätzliche Event-Typen werden von Plugins/Bundles über `CoreEvents::BUILD_MAUTIC_JS` (`appendJs`) in `mtc.js` injiziert (Mautic-Core-PR-Hinweis: „plugins/bundles can implement more tracking events"). Die Custom-Event-Erfassung des Catchers setzt daher ein entsprechendes **Mautic-seitiges Plugin** (z. B. „Mautic Custom Events") voraus. Bewusst **nicht** auf `pageview` umgebaut — Käufe/Events als PageView zu tracken wäre semantisch falsch. **Voraussetzung dokumentieren** (Mautic-Plugin nötig); der `pageview`-Hit selbst funktioniert nativ.
 
 ---
 
@@ -35,12 +29,6 @@ Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist v
 Der Funnelytics-Catcher (`Wp_Sdtrk_Catcher_Fl`) ist **verifiziert API-konform**: Base-Snippet (CDN `https://cdn.funnelytics.io/track-v3.js`, Deferred-Queue, `funnelytics.init(funnel, false, deferredEvents)`) und Commerce-Keys (`__commerce_action__`, `__total_in_cents__` in Cent, `__sku__`, `__order__`, `__currency__`, `__label__`) entsprechen dem offiziellen Snippet bzw. der [Revenue-Actions-Doku](https://hub.funnelytics.io/c/tracking-setup/base-script-install). Die als „Funnelytics Tracking ID" hinterlegte `fl_tracking_id` muss die **Workspace-UUID** sein (wird als `funnel` durchgereicht).
 
 Neuere Workspace-Snippets hängen ein viertes `init`-Argument an (`{"anonymiseUsers": false}`); der Catcher übergibt es nicht. Ohne Wirkung auf den aktuellen Payload, da der Catcher **keine** `name`/`email`-Keys sendet — relevant erst, falls De-Anonymisierung über Funnelytics genutzt werden soll.
-
----
-
-## 🟡 LinkedIn-Catcher: vergessenes `console.log` im Produktionscode
-
-`Wp_Sdtrk_Catcher_Lin::get_triggeredConversions()` ([public/js/wp-sdtrk-lin.js](../public/js/wp-sdtrk-lin.js)) enthält ein unbedingtes `console.log(currentEventName)`, das bei jedem Event in die Browser-Konsole schreibt. (Die übrige LinkedIn-Integration — Insight-Tag-Snippet + `lintrk('track', { conversion_id })` — ist API-konform.) **Empfehlung:** entfernen.
 
 ---
 
@@ -106,13 +94,10 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 
 | # | Punkt | Schwere |
 |---|-------|---------|
-| 1 | Matomo: `matomo.js` wird nie geladen → Browser-Tracking feuert nicht | 🔴 hoch |
-| 2 | Eingabe-Sanitisierung | 🟡 mittel |
-| 3 | Mautic: Custom-Event-Sends ohne Plugin nicht unterstützt | 🟡 mittel |
-| 4 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
-| 5 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
-| 6 | LinkedIn: vergessenes `console.log` | 🟡 niedrig |
-| 7 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
-| 8 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
-| 9 | Keine Uninstall-Bereinigung | 🟡 niedrig |
-| 10 | Namens-Inkonsistenzen | 🟡 niedrig |
+| 1 | Eingabe-Sanitisierung | 🟡 mittel |
+| 2 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
+| 3 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
+| 4 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
+| 5 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
+| 6 | Keine Uninstall-Bereinigung | 🟡 niedrig |
+| 7 | Namens-Inkonsistenzen | 🟡 niedrig |
