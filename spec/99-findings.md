@@ -30,9 +30,9 @@ Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist v
 
 ---
 
-## 🟡 Funnelytics: Commerce-Attribut-Keys (`__commerce_action__` etc.) in aktueller Doku nicht belegt
+## 🟡 Funnelytics: Base-Script (`track-v3.js` + `funnelytics.init`) nicht gegen die Anbieter-Doku verifiziert
 
-`Wp_Sdtrk_Catcher_Fl::get_data_custom()` nutzt für Käufe die Keys `__commerce_action__`, `__currency__`, `__total_in_cents__`, `__order__`, `__sku__`, `__label__`. Die aktuelle Funnelytics-Doku ([Tracking JavaScript Actions](https://help.funnelytics.io/en/knowledge/tracking-javascript-actions)) beschreibt nur eine flache Key/Value-Struktur und reserviert ausdrücklich nur `name`/`email` (De-Anonymisierung). Die `__…__`-Commerce-Keys ließen sich nicht bestätigen und stammen vermutlich aus einer älteren Funnelytics-Version. **Zu prüfen** am echten Funnelytics-Konto, ob diese Keys noch ausgewertet werden.
+Die Commerce-Implementierung von `Wp_Sdtrk_Catcher_Fl` ist **verifiziert korrekt**: Event-Name `__commerce_action__` und die Keys `__total_in_cents__` (in Cent), `__sku__`, `__order__`, `__currency__`, `__label__` entsprechen exakt dem offiziellen Vertrag ([Funnelytics — Base-Script + Revenue Actions](https://hub.funnelytics.io/c/tracking-setup/base-script-install)). Offen bleibt nur das **Base-Snippet**: `loadPixel()` lädt hartkodiert `https://cdn.funnelytics.io/track-v3.js` und ruft `funnelytics.init(funnel, false, deferredEvents)`; die Anbieter-Doku zeigt das Base-Script nicht (es wird account-spezifisch aus den Workspace-Settings kopiert). **Zu prüfen**, ob CDN-URL/`init`-Signatur noch dem aktuellen Workspace-Snippet entsprechen.
 
 ---
 
@@ -44,7 +44,7 @@ Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist v
 
 ## 🟡 Browser-only-Catcher: Währung hart `EUR`, single-product
 
-Die reinen Browser-Catcher **Mautic** und **Funnelytics** setzen die Währung weiterhin hart auf `"EUR"` und tragen nur ein Produkt (kein Mehr-Produkt-`items[]`). Der Mehr-Produkt-/Shop-Währungs-Umbau betrifft nur die Kauf-Catcher Meta/GA/TikTok (siehe [07 › Purchase-Tracking](07-woocommerce/purchase-tracking.md)). Für Mautic/Funnelytics ist das bislang nicht nachgezogen. **Bewerten**, ob für diese Plattformen relevant.
+Die reinen Browser-Catcher **Mautic** und **Funnelytics** setzen die Währung weiterhin hart auf `"EUR"` und tragen nur ein Produkt (kein Mehr-Produkt). Der Mehr-Produkt-/Shop-Währungs-Umbau betrifft nur die Kauf-Catcher Meta/GA/TikTok (siehe [07 › Purchase-Tracking](07-woocommerce/purchase-tracking.md)). Für Funnelytics empfiehlt die Doku bei mehreren Artikeln ausdrücklich **ein Event pro Artikel** (iterieren); der Catcher feuert derzeit nur ein `__commerce_action__` für die erste Position. **Bewerten**, ob für diese Plattformen relevant.
 
 ---
 
@@ -107,7 +107,7 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 | 1 | Matomo: `matomo.js` wird nie geladen → Browser-Tracking feuert nicht | 🔴 hoch |
 | 2 | Eingabe-Sanitisierung | 🟡 mittel |
 | 3 | Mautic: Custom-Event-Sends ohne Plugin nicht unterstützt | 🟡 mittel |
-| 4 | Funnelytics: Commerce-Keys evtl. veraltet (unverifiziert) | 🟡 mittel |
+| 4 | Funnelytics: Base-Script (`track-v3.js`/`init`) nicht verifiziert | 🟡 niedrig |
 | 5 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
 | 6 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
 | 7 | LinkedIn: vergessenes `console.log` | 🟡 niedrig |

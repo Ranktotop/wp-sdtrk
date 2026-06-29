@@ -34,7 +34,7 @@ Jede Plattform hat im Browser eine Catcher-Klasse `Wp_Sdtrk_Catcher_*`. Sie kaps
 | `Ga` | `gtag()` | [GA4 E-Commerce (gtag)](https://developers.google.com/analytics/devguides/collection/ga4/ecommerce) · [gtag.js-Referenz](https://developers.google.com/tag-platform/gtagjs/reference) |
 | `Tt` | `ttq()` | [TikTok About Events API](https://ads.tiktok.com/help/article/events-api) · [Parameter](https://ads.tiktok.com/help/article/about-parameters) |
 | `Lin` | `lintrk('track', { conversion_id })` | [LinkedIn Insight-Tag Conversion-Tracking](https://learn.microsoft.com/en-us/linkedin/marketing/integrations/ads-reporting/conversion-tracking) · [Insight-Tag-Conversions einrichten](https://www.linkedin.com/help/lms/answer/a425606) |
-| `Fl` | `funnelytics.events.trigger(name, props)` | [Funnelytics — Tracking JavaScript Actions](https://help.funnelytics.io/en/knowledge/tracking-javascript-actions) |
+| `Fl` | `funnelytics.events.trigger(name, props)` | [Funnelytics — Base-Script + Custom/Revenue Actions](https://hub.funnelytics.io/c/tracking-setup/base-script-install) · [Tracking JavaScript Actions](https://help.funnelytics.io/en/knowledge/tracking-javascript-actions) |
 | `Mtc` | `mt('send', 'pageview', …)` (MauticJS `mtc.js`) | [Mautic — Tracking Script (mtc.js)](https://devdocs.mautic.org/en/5.x/components/tracking_script.html) |
 | `Mtm` | `_paq.push(['trackEvent'/'trackGoal', …])` | [Matomo JS-Tracking-API-Referenz](https://developer.matomo.org/api-reference/tracking-javascript) · [JS-Tracking-Guide](https://developer.matomo.org/guides/tracking-javascript-guide) |
 
