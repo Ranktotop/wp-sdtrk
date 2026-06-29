@@ -36,6 +36,13 @@ ev.setCurrency('USD');
 check('setItems/getItems', ev.getItems() === items && ev.getItems().length === 1);
 check('setCurrency/getCurrency', ev.getCurrency() === 'USD');
 
+// Non-array items must degrade to [] (guards the engine seeding + catcher loops)
+const bad = new Wp_Sdtrk_Event();
+bad.setItems(null);
+check('setItems(null) => []', Array.isArray(bad.getItems()) && bad.getItems().length === 0);
+bad.setItems('nope');
+check('setItems("nope") => []', Array.isArray(bad.getItems()) && bad.getItems().length === 0);
+
 if (fails > 0) {
 	console.log('\n' + fails + ' assertion(s) failed.');
 	process.exit(1);
