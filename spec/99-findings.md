@@ -20,14 +20,6 @@ Neuere Workspace-Snippets hängen ein viertes `init`-Argument an (`{"anonymiseUs
 
 ---
 
-## 🟡 Namens-Inkonsistenzen
-
-- Klassen-Präfix wechselt zwischen `Wp_Sdtrk_*` und `WP_SDTRK_*` (funktional egal, da PHP-Klassennamen case-insensitiv sind).
-- Datei `class-wp-sdtrk-tracker-meta.php` enthält Klasse `Wp_Sdtrk_Tracker_Meta`; der historische Name `Wp_Sdtrk_Tracker_Fb` bleibt als `class_alias` bestehen.
-- Decrypter-Klasse `Wp_Sdtrk_Decrypter_ds24` mischt CamelCase mit Kleinschreibung.
-
----
-
 ## 🔵 Cron seit Produkt-Feed aktiv
 
 `WP_SDTRK_Cron` ist seit der WooCommerce-Produkt-Feed-Funktion **aktiv** (täglicher Hook `wp_sdtrk_cron_generate_feed`, siehe [07 › Produkt-Feed](07-woocommerce/product-feed.md)). Die im README erwähnten früheren Sync-Features (CSV/Google-Sheet/Live-Feed) sind davon unabhängig und nicht implementiert.
@@ -52,8 +44,4 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 
 ---
 
-## Zusammenfassung (Priorität)
-
-| # | Punkt | Schwere |
-|---|-------|---------|
-| 1 | Namens-Inkonsistenzen | 🟡 niedrig |
+> Aktuell sind keine offenen 🟡/🔴-Punkte verzeichnet — die verbleibenden Einträge sind 🔵-Hinweise (by design / Information).
