@@ -146,7 +146,7 @@ class Wp_Sdtrk_Tracker_Meta
         $requestData['custom_data'] = $this->getData_custom($event);
         // Add value if given
         if ($event->getEventValue() > 0 || $this->convert_eventname($event) === 'Purchase') {
-            $requestData['custom_data']['currency'] = "EUR";
+            $requestData['custom_data']['currency'] = $event->getCurrency();
             $requestData['custom_data']['value'] = $event->getEventValue();
         }
         return $this->payLoadServerRequest($requestData);
@@ -254,16 +254,6 @@ class Wp_Sdtrk_Tracker_Meta
             "event_source_url" => $event->getEventSource(),
             "action_source" => "website"
         );
-
-        // Product
-        if (! empty($event->getProductId())) {
-            $baseData['contents'] = array(
-                array(
-                    "id" => $event->getProductId(),
-                    "quantity" => 1
-                )
-            );
-        }
         return $baseData;
     }
 
@@ -278,13 +268,47 @@ class Wp_Sdtrk_Tracker_Meta
         // Collect the Custom-Data
         $customData = $event->getUtmData();
 
-        // Product
-        if (! empty($event->getProductId())) {
-            $customData['content_ids'] = '["' . $event->getProductId() . '"]';
+        // Product(s) — the whole cart when present, single-product fallback otherwise
+        $products = $this->getData_products($event);
+        if (! empty($products)) {
+            $ids = array();
+            foreach ($products as $p) {
+                $ids[] = $p['id'];
+            }
+            $customData['content_ids'] = json_encode($ids);
             $customData['content_type'] = "product";
             $customData['content_name'] = $event->getProductName();
+            $customData['contents'] = $products;
         }
         return $customData;
+    }
+
+    /**
+     * Return the cart contents as Meta [{id, quantity}] entries.
+     *
+     * Uses the full per-line item list when present, otherwise the single
+     * product id (back-compat). Empty when neither is set.
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @return array
+     */
+    private function getData_products($event)
+    {
+        $products = array();
+        $items = $event->getItems();
+        if (! empty($items)) {
+            foreach ($items as $item) {
+                $products[] = array(
+                    "id" => (string) ($item['id'] ?? ''),
+                    "quantity" => (int) ($item['qty'] ?? 1)
+                );
+            }
+            return $products;
+        }
+        if (! empty($event->getProductId())) {
+            $products[] = array("id" => $event->getProductId(), "quantity" => 1);
+        }
+        return $products;
     }
 
     /**
