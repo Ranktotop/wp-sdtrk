@@ -52,12 +52,6 @@ Die reinen Browser-Catcher **Mautic** und **Funnelytics** setzen die Währung we
 
 ---
 
-## 🟡 Keine Daten-Bereinigung bei Deinstallation
-
-`uninstall.php` enthält nur den Standard-Guard. Weder die Tabelle `{prefix}sdtrk_linkedin` noch die Option `wp_sdtrk_options` werden entfernt. Bei sauberer Deinstallation bleiben Daten dauerhaft zurück.
-
----
-
 ## 🟡 Produkt-Feed: Live-Generierung im Request-Pfad bei kaltem Cache
 
 `Wp_Sdtrk_WC_Feed::get_cached()` liefert bei fehlendem Cache (Cron noch nicht gelaufen, Cache geleert) **synchron** einen Live-Aufbau über alle veröffentlichten Produkte (`collect()` mit `wc_get_products(['limit' => -1])` plus `wc_get_product()` je Variation) im öffentlichen — wenn auch token-geschützten — Request. Ein Halter des Token oder wiederholte Kalt-Cache-Treffer können so CPU/Speicher belasten; es gibt kein Batching, kein Rate-Limit und keinen Stampede-Schutz. **Empfehlung:** bei Cache-Miss `503`/leeren Feed liefern und Cron befüllen lassen, oder `generate()` mit einem kurzlebigen Transient-Lock absichern; ggf. `collect()` paginieren.
@@ -90,5 +84,4 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 | 2 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
 | 3 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
 | 4 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
-| 5 | Keine Uninstall-Bereinigung | 🟡 niedrig |
-| 6 | Namens-Inkonsistenzen | 🟡 niedrig |
+| 5 | Namens-Inkonsistenzen | 🟡 niedrig |

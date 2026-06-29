@@ -46,10 +46,15 @@ Der Cron-Callback regeneriert nur, wenn die WooCommerce-Integration **und** `wc_
 
 ## 4. Deinstallation — `uninstall.php`
 
-Enthält nur den Standard-Guard:
+Nach dem Standard-Guard (`WP_UNINSTALL_PLUGIN`) entfernt `wp_sdtrk_uninstall_cleanup()` **alle** persistenten Artefakte des Plugins:
 
-```php
-if (! defined('WP_UNINSTALL_PLUGIN')) exit;
-```
+| Artefakt | Entfernung |
+|----------|-----------|
+| Tabelle `{prefix}sdtrk_linkedin` | `DROP TABLE IF EXISTS` |
+| Option `wp_sdtrk_options` (+ `wp_sdtrk_options-transients`) | `delete_option()` |
+| Option `wp_sdtrk_feed_token` | `delete_option()` |
+| Option `wp_sdtrk_feed_cache` | `delete_option()` |
+| Post-Meta `wp_sdtrk_options` (Metabox: `wp_sdtrk_product_id`, `wp_sdtrk_bypass_consent`) | `delete_post_meta_by_key()` |
+| Cron-Event `wp_sdtrk_cron_generate_feed` | `wp_clear_scheduled_hook()` |
 
-**Keine Datenlöschung**: Weder die Tabelle `{prefix}sdtrk_linkedin` noch die Option `wp_sdtrk_options` werden bei Deinstallation entfernt. Daten bleiben dauerhaft bestehen. Siehe [99 Befunde](../99-findings.md).
+**Multisite-fähig:** Bei `is_multisite()` läuft die Bereinigung je Site (`get_sites()` → `switch_to_blog()`/`restore_current_blog()`), sonst einmalig.
