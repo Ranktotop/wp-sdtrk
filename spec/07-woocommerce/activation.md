@@ -26,7 +26,8 @@ In [includes/class-wp-sdtrk.php](../../includes/class-wp-sdtrk.php) (`define_pub
 
 | Hook | Methode | Zweck |
 |------|---------|-------|
-| `wp_enqueue_scripts` (Priorität 20) | `localize_commerce_data` | Genau eine Commerce-Datenquelle (`wp_sdtrk_wc.order` auf der Order-Received-Seite **oder** `wp_sdtrk_wc.viewItem` auf einer Produktseite) auf das Engine-Skript legen. Präzedenz: siehe [view-item-and-add-to-cart.md](view-item-and-add-to-cart.md). |
+| `wp_enqueue_scripts` (Priorität 20) | `localize_commerce_data` | Genau eine Commerce-Datenquelle (`wp_sdtrk_wc.order` / `.addToCart` / `.viewItem`) auf das Engine-Skript legen; verbraucht dabei den AddToCart-Session-Puffer. Präzedenz **order > addToCart > viewItem**: siehe [view-item-and-add-to-cart.md](view-item-and-add-to-cart.md). |
+| `woocommerce_add_to_cart` (6 Argumente) | `capture_add_to_cart` | Hinzugefügtes Produkt in die WC-Session (`wp_sdtrk_atc`) puffern (AJAX- **und** Formular-Adds), zum Seeden beim nächsten Seitenaufbau. |
 
 Die Priorität 20 stellt sicher, dass das Engine-Skript bereits registriert/enqueued ist (Standard-Priorität), wenn die Commerce-Daten daran lokalisiert werden. Das Tracking selbst läuft anschließend in der Engine (siehe [purchase-tracking.md](purchase-tracking.md) bzw. [view-item-and-add-to-cart.md](view-item-and-add-to-cart.md)) — es gibt keinen Order-Status-Hook und keinen AJAX-Persist mehr.
 

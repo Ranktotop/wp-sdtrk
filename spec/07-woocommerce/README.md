@@ -28,6 +28,7 @@ Optionale Integration, die **nur** greift, wenn WooCommerce installiert/aktiv is
 |----------------|--------------|------|
 | Order-Received-Seite (`wp_enqueue_scripts`) | `Wp_Sdtrk_WC_Integration::localize_commerce_data()` legt die Order-Daten (`wp_sdtrk_wc.order`) auf das Engine-Skript. Die Engine seedet daraus ein Purchase-Event und feuert es über alle aktiven Catcher | Browser **und** Server (S2S) in einem Durchlauf |
 | Produkt-Detailseite (`wp_enqueue_scripts`) | `localize_commerce_data()` legt bei `is_product()` die Produktdaten (`wp_sdtrk_wc.viewItem`) auf das Engine-Skript. Die Engine seedet ein `view_item`-Event ([view-item-and-add-to-cart.md](view-item-and-add-to-cart.md)) | Browser **und** Server (S2S) in einem Durchlauf |
+| Add-to-Cart (`woocommerce_add_to_cart`) | `capture_add_to_cart()` puffert das Produkt in der WC-Session (`wp_sdtrk_atc`). Beim **nächsten** Seitenaufbau legt `localize_commerce_data()` es als `wp_sdtrk_wc.addToCart` auf das Engine-Skript und leert den Puffer; die Engine seedet ein `add_to_cart`-Event ([view-item-and-add-to-cart.md](view-item-and-add-to-cart.md)) | Browser **und** Server (S2S) in einem Durchlauf |
 
 Die Engine sendet pro aktivem Catcher den Browser-Hit (`fireData`) **und** den Server-Call (`sendData` → AJAX `validateTracker`). Browser- und Server-Event teilen dieselbe `event_id` (= Order-ID), weil JS `grabOrderId()` und PHP `getEventId()` beide die Order-ID bevorzugen.
 

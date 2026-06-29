@@ -242,6 +242,21 @@ class Wp_Sdtrk_Engine {
 				try { window.localStorage.setItem(wc_orderKey, '1'); } catch (e) { }
 			}
 		}
+		//WooCommerce AddToCart data (server-buffered, seeded on the next page load).
+		//Provided by Wp_Sdtrk_WC_Integration::localize_commerce_data() from the WC
+		//session, which clears the buffer on localize (server-side once-guard), so
+		//no localStorage guard is needed here. Mutually exclusive with .order/.viewItem.
+		else if (typeof wp_sdtrk_wc !== 'undefined' && wp_sdtrk_wc.addToCart) {
+			var atc = wp_sdtrk_wc.addToCart;
+			this.event.setEventName({ wc: 'add_to_cart' });
+			this.event.setValue({ wc: String(atc.value || '') });
+			this.event.setCurrency(atc.currency || '');
+			this.event.setItems(Array.isArray(atc.items) ? atc.items : []);
+			if (Array.isArray(atc.items) && atc.items.length > 0) {
+				this.event.setProdId({ wc: String(atc.items[0].id || '') });
+				this.event.setProdName({ wc: String(atc.items[0].name || '') });
+			}
+		}
 		//WooCommerce ViewItem data (product detail page). Provided by
 		//Wp_Sdtrk_WC_Integration::localize_commerce_data(). Seeds the event as a
 		//view_item carrying the product, so the engine fires it browser + server in

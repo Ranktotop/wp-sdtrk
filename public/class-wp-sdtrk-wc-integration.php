@@ -170,6 +170,50 @@ class Wp_Sdtrk_WC_Integration
     }
 
     /**
+     * Build the AddToCart data the engine consumes from the session buffer.
+     *
+     * Localized as wp_sdtrk_wc.addToCart; the engine seeds it as an add_to_cart
+     * event. `value` is the summed line total (price*qty) across all buffered
+     * lines; `items` carries the whole buffer — multiple adds before a page load
+     * merge into a single add_to_cart event (a consequence of the one-event-per-
+     * load seed model; see view-item-and-add-to-cart.md).
+     *
+     * @param array $pending Buffered productLine entries.
+     * @return array
+     */
+    public function build_add_to_cart_payload(array $pending): array
+    {
+        $value = 0.0;
+        foreach ($pending as $line) {
+            $qty   = isset($line['qty']) ? (float) $line['qty'] : 0.0;
+            $price = isset($line['price']) ? (float) $line['price'] : 0.0;
+            $value += $price * $qty;
+        }
+
+        return [
+            'addToCart' => [
+                'value'    => (string) $value,
+                'currency' => function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : '',
+                'items'    => array_values($pending),
+            ],
+        ];
+    }
+
+    /**
+     * The add-to-cart buffer pending in the WC session (empty when none/no session).
+     *
+     * @return array
+     */
+    private function pending_add_to_cart(): array
+    {
+        if (!function_exists('WC') || !WC()->session) {
+            return array();
+        }
+        $pending = WC()->session->get('wp_sdtrk_atc', array());
+        return is_array($pending) ? $pending : array();
+    }
+
+    /**
      * Pure precedence resolver: at most one commerce source seeds the engine per
      * page load, in the order order > addToCart > viewItem. Keeps the localize
      * method's branching unit-testable without WP/WC context.
@@ -211,7 +255,7 @@ class Wp_Sdtrk_WC_Integration
         }
 
         $order      = $this->current_received_order();
-        $pending    = array();
+        $pending    = $this->pending_add_to_cart();
         $is_product = function_exists('is_product') && is_product();
 
         $source = self::resolve_commerce_source($order !== null, count($pending) > 0, $is_product);
@@ -219,6 +263,12 @@ class Wp_Sdtrk_WC_Integration
         switch ($source) {
             case 'order':
                 wp_localize_script('wp_sdtrk-engine', 'wp_sdtrk_wc', $this->build_order_payload($order));
+                break;
+            case 'addToCart':
+                // Consume the buffer once: clear it before localizing so a reload
+                // of this page does not seed a second add_to_cart event.
+                WC()->session->set('wp_sdtrk_atc', array());
+                wp_localize_script('wp_sdtrk-engine', 'wp_sdtrk_wc', $this->build_add_to_cart_payload($pending));
                 break;
             case 'viewItem':
                 $product = function_exists('wc_get_product') ? wc_get_product(get_the_ID()) : null;
