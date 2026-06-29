@@ -128,6 +128,48 @@ class Wp_Sdtrk_WC_Integration
     }
 
     /**
+     * Buffer an added product in the WC session for the next page load.
+     *
+     * Hooked to `woocommerce_add_to_cart` (fires for both AJAX and form add-to-cart).
+     * Single product pages add via a form submit that navigates away, so there is
+     * no reliable client-side event; instead the added line is stored server-side
+     * and seeded as an add_to_cart event by localize_commerce_data() on the next
+     * page render (see view-item-and-add-to-cart.md).
+     *
+     * @param string $cart_item_key
+     * @param int    $product_id
+     * @param int    $quantity
+     * @param int    $variation_id
+     * @param array  $variation
+     * @param array  $cart_item_data
+     * @return void
+     */
+    public function capture_add_to_cart($cart_item_key, $product_id, $quantity, $variation_id = 0, $variation = array(), $cart_item_data = array()): void
+    {
+        if (!self::is_active()) {
+            return;
+        }
+        if (!function_exists('WC') || !WC()->session) {
+            return;
+        }
+        $pid = $variation_id ? $variation_id : $product_id;
+        $product = function_exists('wc_get_product') ? wc_get_product($pid) : null;
+        if (!$product) {
+            return;
+        }
+
+        $mapper = new Wp_Sdtrk_WC_Order_Mapper();
+        $line   = $mapper->productLine($product, (int) $quantity);
+
+        $pending = WC()->session->get('wp_sdtrk_atc', array());
+        if (!is_array($pending)) {
+            $pending = array();
+        }
+        $pending[] = $line;
+        WC()->session->set('wp_sdtrk_atc', $pending);
+    }
+
+    /**
      * Pure precedence resolver: at most one commerce source seeds the engine per
      * page load, in the order order > addToCart > viewItem. Keeps the localize
      * method's branching unit-testable without WP/WC context.

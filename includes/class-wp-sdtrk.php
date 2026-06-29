@@ -265,6 +265,8 @@ class Wp_Sdtrk
 		//localized per page load (order > addToCart > viewItem).
 		$plugin_wc = new Wp_Sdtrk_WC_Integration();
 		$this->loader->add_action('wp_enqueue_scripts', $plugin_wc, 'localize_commerce_data', 20);
+		//Buffer add-to-cart events server-side (AJAX + form); seeded on the next page load.
+		$this->loader->add_action('woocommerce_add_to_cart', $plugin_wc, 'capture_add_to_cart', 10, 6);
 
 		//WooCommerce product feed endpoint (token-protected query var)
 		$plugin_wc_feed = new Wp_Sdtrk_WC_Feed();
