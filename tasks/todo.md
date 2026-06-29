@@ -2,7 +2,7 @@
 
 > Reihenfolge nach [plan.md](plan.md). Jeder Task = ein vollständiger vertikaler Pfad. **Definition of Done je Task:** Code geändert **und** betroffene Spec auf Ist-Zustand gebracht (siehe [CLAUDE.md](../CLAUDE.md)).
 
-Legende: ☑ offen · ☑ erledigt
+Legende: ☑ erledigt · `[ ]`-Boxen = offene manuelle Live-Verifikation
 
 ---
 
