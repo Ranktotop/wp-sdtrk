@@ -213,6 +213,26 @@ class Wp_Sdtrk_Engine {
 			this.event.setVisibilityTrigger(this.localizedData.visibilityTrigger);
 		}
 
+		//WooCommerce order-received data (authoritative on the thankyou page).
+		//Provided by Wp_Sdtrk_WC_Integration::localize_order_data(). Seeds the event
+		//as a Purchase carrying the whole cart, so the engine fires it browser +
+		//server in one pass, deduplicated via the order id.
+		if (typeof wp_sdtrk_wc !== 'undefined' && wp_sdtrk_wc.order) {
+			var wc = wp_sdtrk_wc.order;
+			this.event.setOrderId({ wc: String(wc.orderId || '') });
+			this.event.setEventName({ wc: 'purchase' });
+			this.event.setValue({ wc: String(wc.value || '') });
+			this.event.setCurrency(wc.currency || '');
+			this.event.setUserEmail({ wc: String(wc.email || '') });
+			this.event.setUserFirstName({ wc: String(wc.firstName || '') });
+			this.event.setUserLastName({ wc: String(wc.lastName || '') });
+			this.event.setItems(Array.isArray(wc.items) ? wc.items : []);
+			if (Array.isArray(wc.items) && wc.items.length > 0) {
+				this.event.setProdId({ wc: String(wc.items[0].id || '') });
+				this.event.setProdName({ wc: String(wc.items[0].name || '') });
+			}
+		}
+
 		//Remove sensible queries from url
 		window.history.replaceState({}, document.title, this.helper.get_privacyUrl([this.event.getUserFirstName_all(), this.event.getUserLastName_all(), this.event.getUserEmail_all()]));
 	}
