@@ -30,9 +30,11 @@ Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist v
 
 ---
 
-## 🟡 Funnelytics: Base-Script (`track-v3.js` + `funnelytics.init`) nicht gegen die Anbieter-Doku verifiziert
+## 🔵 Funnelytics: optionales `init`-Argument `anonymiseUsers` wird nicht übergeben
 
-Die Commerce-Implementierung von `Wp_Sdtrk_Catcher_Fl` ist **verifiziert korrekt**: Event-Name `__commerce_action__` und die Keys `__total_in_cents__` (in Cent), `__sku__`, `__order__`, `__currency__`, `__label__` entsprechen exakt dem offiziellen Vertrag ([Funnelytics — Base-Script + Revenue Actions](https://hub.funnelytics.io/c/tracking-setup/base-script-install)). Offen bleibt nur das **Base-Snippet**: `loadPixel()` lädt hartkodiert `https://cdn.funnelytics.io/track-v3.js` und ruft `funnelytics.init(funnel, false, deferredEvents)`; die Anbieter-Doku zeigt das Base-Script nicht (es wird account-spezifisch aus den Workspace-Settings kopiert). **Zu prüfen**, ob CDN-URL/`init`-Signatur noch dem aktuellen Workspace-Snippet entsprechen.
+Der Funnelytics-Catcher (`Wp_Sdtrk_Catcher_Fl`) ist **verifiziert API-konform**: Base-Snippet (CDN `https://cdn.funnelytics.io/track-v3.js`, Deferred-Queue, `funnelytics.init(funnel, false, deferredEvents)`) und Commerce-Keys (`__commerce_action__`, `__total_in_cents__` in Cent, `__sku__`, `__order__`, `__currency__`, `__label__`) entsprechen dem offiziellen Snippet bzw. der [Revenue-Actions-Doku](https://hub.funnelytics.io/c/tracking-setup/base-script-install). Die als „Funnelytics Tracking ID" hinterlegte `fl_tracking_id` muss die **Workspace-UUID** sein (wird als `funnel` durchgereicht).
+
+Neuere Workspace-Snippets hängen ein viertes `init`-Argument an (`{"anonymiseUsers": false}`); der Catcher übergibt es nicht. Ohne Wirkung auf den aktuellen Payload, da der Catcher **keine** `name`/`email`-Keys sendet — relevant erst, falls De-Anonymisierung über Funnelytics genutzt werden soll.
 
 ---
 
@@ -107,11 +109,10 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 | 1 | Matomo: `matomo.js` wird nie geladen → Browser-Tracking feuert nicht | 🔴 hoch |
 | 2 | Eingabe-Sanitisierung | 🟡 mittel |
 | 3 | Mautic: Custom-Event-Sends ohne Plugin nicht unterstützt | 🟡 mittel |
-| 4 | Funnelytics: Base-Script (`track-v3.js`/`init`) nicht verifiziert | 🟡 niedrig |
-| 5 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
-| 6 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
-| 7 | LinkedIn: vergessenes `console.log` | 🟡 niedrig |
-| 8 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
-| 9 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
-| 10 | Keine Uninstall-Bereinigung | 🟡 niedrig |
-| 11 | Namens-Inkonsistenzen | 🟡 niedrig |
+| 4 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
+| 5 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
+| 6 | LinkedIn: vergessenes `console.log` | 🟡 niedrig |
+| 7 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
+| 8 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
+| 9 | Keine Uninstall-Bereinigung | 🟡 niedrig |
+| 10 | Namens-Inkonsistenzen | 🟡 niedrig |
