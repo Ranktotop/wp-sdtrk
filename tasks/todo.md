@@ -1,4 +1,4 @@
-# Task-Liste — WooCommerce-Tracking neu aufbauen
+# Task-Liste — WooCommerce: ViewItem + AddToCart
 
 > Reihenfolge nach [plan.md](plan.md). Jeder Task = ein vollständiger vertikaler Pfad. **Definition of Done je Task:** Code geändert **und** betroffene Spec auf Ist-Zustand gebracht (siehe [CLAUDE.md](../CLAUDE.md)).
 
@@ -6,101 +6,101 @@ Legende: ☐ offen · ☑ erledigt
 
 ---
 
-## Phase 0 — Rückbau des Sonderwegs
+## Phase 1 — ViewItem (Produktseiten)
 
-### ☐ T0.1 — Browser-Sonderweg entfernen
-- **Tun:** [public/js/wp-sdtrk-wc.js](../public/js/wp-sdtrk-wc.js) löschen. In [class-wp-sdtrk-wc-integration.php](../public/class-wp-sdtrk-wc-integration.php) den Browser-Purchase-Pfad entfernen: `enqueue_purchase_assets` (alte Form), `build_browser_payload`. Loader-Registrierung [class-wp-sdtrk.php:269](../includes/class-wp-sdtrk.php#L269) für das WC-Skript bereinigen.
-- **Abhängig von:** —
-- **Akzeptanz:** Order-Received-Seite lädt ohne `wp-sdtrk-wc.js`; keine JS-Fehler; kein Purchase mehr über den alten Pfad.
-- **Verifikation:** DevTools Network/Console auf der Order-Received-Seite.
-
-### ☐ T0.2 — Server-Sonderweg + Order-Metas entfernen
-- **Tun:** In [class-wp-sdtrk-wc-integration.php](../public/class-wp-sdtrk-wc-integration.php) entfernen: `on_order_paid`, `handle_persist_ajax`, `should_fire_server`, `server_platforms`. Loader-Hooks `woocommerce_order_status_processing/_completed` und `wp_ajax(_nopriv)_wp_sdtrk_wc_persist` ([class-wp-sdtrk.php:270-273](../includes/class-wp-sdtrk.php#L270-L273)) abmelden. Order-Meta-Nutzung (`_wp_sdtrk_consent`, `_wp_sdtrk_ids`, `_wp_sdtrk_server_sent_*`, `_wp_sdtrk_bypass`) entfernen. `Wp_Sdtrk_WC_Order_Mapper` bleibt (für die Datenquelle).
-- **Abhängig von:** —
-- **Akzeptanz:** Keine WC-Server-/Persist-Hooks mehr registriert; kein PHP-Fehler bei Statuswechsel; Feed/Cron unberührt.
-- **Verifikation:** Testbestellung durchführen → keine `_wp_sdtrk_*`-Metas geschrieben; `debug.log` ohne WC-Server-Calls.
-
-**⇒ Checkpoint C0** (Site stabil ohne Sonderweg; Käufe bewusst vorübergehend ungetrackt).
-
----
-
-## Phase 1 — Gemeinsame Basis
-
-### ☐ T1.1 — Event-Modell: `items[]` + `currency` (JS + PHP)
+### ☐ T1 — Single-Product-Mapper + ViewItem-Payload + Localize-Verallgemeinerung (PHP)
 - **Tun:**
-  - JS [event.js](../public/js/wp-sdtrk-event.js): `setItems/getItems` (Default `[]`), `setCurrency/getCurrency` (Default `""`).
-  - PHP [class-wp-sdtrk-tracker-event.php](../public/class-wp-sdtrk-tracker-event.php): `getItems()` (aus `eventData['items']`, sonst `[]`), `getCurrency()` (aus `eventData['currency']`, **Fallback `'EUR'`**).
+  - `Wp_Sdtrk_WC_Order_Mapper::productLine($product, int $qty = 1): array` ergänzen → ein `{id,name,qty,price}` (Einzelpreis = Anzeigepreis `wc_get_price_to_display`). Wird von ViewItem **und** AddToCart-Capture genutzt.
+  - `Wp_Sdtrk_WC_Integration::build_view_item_payload($product): array` → `['viewItem' => ['prodId','name','value','currency','items'=>[productLine]]]`.
+  - `localize_order_data()` → **`localize_commerce_data()`** verallgemeinern. Reihenfolge **order > addToCart > viewItem**; in dieser Phase nur `order` (bestehend) + `viewItem` (neu auf `is_product()`). Genau **eine** Quelle lokalisieren.
+  - Hook-Registrierung in [includes/class-wp-sdtrk.php:266](../includes/class-wp-sdtrk.php#L266) auf neuen Methodennamen anpassen (Hook/Priorität unverändert: `wp_enqueue_scripts`, 20).
 - **Abhängig von:** —
-- **Akzeptanz:** Beide Getter existieren mit sicheren Defaults; **kein** Verhaltenswechsel für bestehende Flows (leere `items` ⇒ Catcher nutzen weiter den single-product-Pfad; fehlende currency ⇒ `EUR`).
-- **Verifikation:** Bestehende Lead-/Value-Seite feuert byte-gleich wie zuvor (Console-Log-Vergleich).
+- **Dateien:** [public/class-wp-sdtrk-wc-order-mapper.php](../public/class-wp-sdtrk-wc-order-mapper.php), [public/class-wp-sdtrk-wc-integration.php](../public/class-wp-sdtrk-wc-integration.php), [includes/class-wp-sdtrk.php](../includes/class-wp-sdtrk.php) · Scope: S–M
+- **Akzeptanz:**
+  - [ ] Auf einer Produktseite wird `wp_sdtrk_wc.viewItem` mit `prodId/name/value/currency/items[1]` lokalisiert.
+  - [ ] Order-Received-Pfad (`wp_sdtrk_wc.order`) bleibt unverändert.
+  - [ ] Auf Nicht-Produkt-/Nicht-Order-Seiten wird `wp_sdtrk_wc` gar nicht lokalisiert.
+- **Verifikation:**
+  - [ ] DevTools/View-Source: Produktseite zeigt `var wp_sdtrk_wc = {"viewItem":…}`; Order-Received zeigt weiterhin `{"order":…}`.
+  - [ ] Keine PHP-Notices (Produkt ohne Preis → `value` leer/`0`, kein Fatal).
 
-### ☐ T1.2 — Danke-Seiten-Datenquelle + Engine-Ingestion
+### ☐ T2 — Engine seedet `view_item` + Spec
 - **Tun:**
-  - WC-Integration: auf `wp_enqueue_scripts` (Priorität **nach** Engine-Registrierung) auf der Order-Received-Seite ein `wp_localize_script` an den Engine-Handle hängen: Objekt `wp_sdtrk_wc.order` mit `orderId`, `value` (= `get_total()`), `currency` (= `get_currency()`), `email/firstName/lastName` (Billing), `items` (= `lineItems()`), optional `source/ip/agent`.
-  - [engine.js `collect_eventData`](../public/js/wp-sdtrk-engine.js#L161): nach der Param-Sammlung, falls `wp_sdtrk_wc.order` vorhanden, Event-Felder seeden — `setOrderId({wc:…})`, `setValue({wc:…})`, `setEventName({wc:'purchase'})`, `setUserEmail/FirstName/LastName({wc:…})`, `setCurrency(…)`, `setItems(…)`, sowie `setProdId/setProdName` aus der **ersten** Position (Abwärtskompat-Fallback der single-product-Getter).
-- **Abhängig von:** T1.1
-- **Akzeptanz:** Auf der Order-Received-Seite trägt das Engine-Event `eventName=purchase`, korrekte `orderId/value/currency`, Käuferdaten und `items[]` aller Positionen. Außerhalb der Danke-Seite kein Effekt.
-- **Verifikation:** `window.wp_sdtrk_engine_class.get_event()` in der Console inspizieren.
+  - [public/js/wp-sdtrk-engine.js](../public/js/wp-sdtrk-engine.js) `collect_eventData()`: nach dem `.order`-Block einen `.viewItem`-Zweig (else-if, Präzedenz beachten) ergänzen → `setEventName({wc:'view_item'})`, `setValue`, `setCurrency`, `setItems`, `setProdId/Name` aus `items[0]`. **Kein** localStorage-Once-Guard.
+  - Spec: [spec/07-woocommerce/README.md](../spec/07-woocommerce/README.md) (Feuermodell-Tabelle), neue Datei `spec/07-woocommerce/view-item-and-add-to-cart.md` (ViewItem-Teil) + Index-Verlinkung, [spec/03-browser-tracking/event-collection.md](../spec/03-browser-tracking/event-collection.md) bzw. engine-Beschreibung um den Seed-Zweig.
+- **Abhängig von:** T1
+- **Dateien:** `public/js/wp-sdtrk-engine.js`, 2–3 Spec-Dateien · Scope: S–M
+- **Akzeptanz:**
+  - [ ] Produktseite feuert **Meta ViewContent** + **GA4 view_item** im Browser, jeweils mit `value`+`currency`+`content_ids`/`items`.
+  - [ ] Identisches Event geht serverseitig per `admin-ajax validateTracker` raus (S2S), gleiche `event_id`.
+  - [ ] Spec beschreibt ViewItem exakt nach Ist-Zustand (kein Changelog-Stil).
+- **Verifikation:**
+  - [ ] DevTools Network: `fbevents` `ViewContent`, GA `view_item`; parallel `admin-ajax.php?action=…validateTracker` (meta/ga).
+  - [ ] Browser-only-Catcher (Mautic/Funnelytics) tragen Shop-Währung + Position.
 
-**⇒ Checkpoint C1.**
-
----
-
-## Phase 2 — Meta end-to-end (kritischer Pfad)
-
-### ☐ T2.1 — Meta Browser: Advanced Matching + alle Produkte + Währung
-- **Tun:** [meta.js](../public/js/wp-sdtrk-meta.js): `get_data_custom` baut `content_ids`/`contents` aus **allen** `getItems()` (Fallback: single-product aus `grabProdId`, wenn `items` leer); `currency` aus `event.getCurrency()` statt hartkodiert `"EUR"` ([meta.js:262](../public/js/wp-sdtrk-meta.js#L262)). Advanced Matching für den Purchase sicherstellen: Userdaten (em/fn/ln) müssen für das Purchase-Event an Meta gehen (Pixel-Init bzw. Re-Init mit `get_data_user()` aus dem WC-getragenen Event).
-- **Abhängig von:** T1.2
-- **Akzeptanz:** Browser-Purchase enthält alle gekauften Produkte und die Shop-Währung; Advanced Matching (em/fn/ln) wird gesendet.
-- **Verifikation:** Meta Pixel Helper / Events Manager (Test-Event); Console-Log.
-
-### ☐ T2.2 — Meta Server (CAPI): alle Produkte + Währung + Userdaten
-- **Tun:** [tracker-meta.php](../public/class-wp-sdtrk-tracker-meta.php): `getData_base`/`getData_custom` bauen `contents[]`/`content_ids` aus `getItems()` (Fallback single-product); `currency` aus `getCurrency()` statt `"EUR"` ([tracker-meta.php:149](../public/class-wp-sdtrk-tracker-meta.php#L149)). `getData_user` (em/fn/ln-Hashes) ist bereits vorhanden — Fluss über die neue Datenquelle bestätigen.
-- **Abhängig von:** T1.2
-- **Akzeptanz:** CAPI-Purchase mit allen `contents[]`, Shop-Währung, gehashten Userdaten, `event_id` = Order-ID.
-- **Verifikation:** Meta Events Manager (Test-Event-Code); `debug.log` Payload.
-
-**⇒ Checkpoint C2** (live auf HTTPS-Dev-Shop).
+### ☑/☐ Checkpoint A — ViewItem end-to-end
+- [ ] ViewItem feuert Browser **und** Server auf Produktseiten.
+- [ ] Purchase + Nicht-WC-Seiten unverändert (Regression sichtprüfen).
+- [ ] Spec der Sektion 07 konsistent. → **Review mit Mensch vor Phase 2.**
 
 ---
 
-## Phase 3 — GA4 end-to-end
+## Phase 2 — AddToCart (server-deferred)
 
-### ☐ T3.1 — GA4 Browser + Measurement Protocol: alle Produkte + Währung
-- **Tun:** [ga.js](../public/js/wp-sdtrk-ga.js) `get_data_custom`: `items[]` aus **allen** `getItems()` (Fallback single-product, [ga.js:329](../public/js/wp-sdtrk-ga.js#L329)); `currency` aus `getCurrency()` ([ga.js:326](../public/js/wp-sdtrk-ga.js#L326)). [tracker-ga.php](../public/class-wp-sdtrk-tracker-ga.php) `getData_products`: Array aus allen Items; `currency` aus `getCurrency()` ([tracker-ga.php:153](../public/class-wp-sdtrk-tracker-ga.php#L153)).
-- **Abhängig von:** T1.2
-- **Akzeptanz:** GA4-Purchase mit `items[]` aller Produkte, Shop-Währung, `transaction_id` = Order-ID — Browser **und** MP.
-- **Verifikation:** GA4 DebugView; `debug.log`.
+### ☐ T3 — Capture `woocommerce_add_to_cart` → WC-Session (PHP)
+- **Tun:**
+  - `Wp_Sdtrk_WC_Integration::capture_add_to_cart($cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data): void` — `is_active()`-Gate; Produkt via `wc_get_product($variation_id ?: $product_id)`; `productLine($product, (int)$quantity)` an Session-Liste `wp_sdtrk_atc` anhängen (`WC()->session`-Existenz prüfen).
+  - Hook-Registrierung in [includes/class-wp-sdtrk.php](../includes/class-wp-sdtrk.php): `woocommerce_add_to_cart` → `capture_add_to_cart`, accepted args **6**.
+- **Abhängig von:** T1 (nutzt `productLine`)
+- **Dateien:** `public/class-wp-sdtrk-wc-integration.php`, `includes/class-wp-sdtrk.php` · Scope: S
+- **Akzeptanz:**
+  - [ ] Add-to-Cart (AJAX-Archiv **und** Single-Product-Formular) schreibt einen Eintrag in `WC()->session['wp_sdtrk_atc']`.
+  - [ ] Inaktiv, wenn `is_active()` false oder keine Session.
+- **Verifikation:**
+  - [ ] Debug-Ausgabe/Session-Inspektion nach Add zeigt korrekte `{id,name,qty,price}`.
 
-**⇒ Checkpoint C3.**
+### ☐ T4 — Consume + Engine seedet `add_to_cart` + Präzedenz + Spec
+- **Tun:**
+  - `localize_commerce_data()`: `addToCart`-Zweig zwischen `order` und `viewItem` einsortieren (Präzedenz **order > addToCart > viewItem**). Pending-Session → `build_add_to_cart_payload()` (`value`=Σ`price*qty`, `currency`, `items[]`) lokalisieren **und Session leeren** (Once-Guard).
+  - [public/js/wp-sdtrk-engine.js](../public/js/wp-sdtrk-engine.js): `.addToCart`-Zweig (else-if vor `.viewItem`) → `setEventName({wc:'add_to_cart'})` + `value/currency/items` + `prodId/Name` aus `items[0]`. Kein localStorage-Guard nötig.
+  - Spec: `view-item-and-add-to-cart.md` (AddToCart-Teil: server-deferred, Session, Präzedenz, Once-Guard, Multi-Item-Merge-Trade-off), README-Feuermodell + Trade-off-Liste, [activation.md](../spec/07-woocommerce/activation.md) (Hook-Tabelle: `woocommerce_add_to_cart` + Umbenennung `localize_commerce_data`), [order-mapping.md](../spec/07-woocommerce/order-mapping.md) (`productLine`).
+- **Abhängig von:** T2, T3
+- **Dateien:** `public/class-wp-sdtrk-wc-integration.php`, `public/js/wp-sdtrk-engine.js`, 3–4 Spec-Dateien · Scope: M
+- **Akzeptanz:**
+  - [ ] Nach Add feuert beim **nächsten** Seitenaufbau **Meta AddToCart** + **GA4 add_to_cart** (Browser + Server), `value`+`currency`+`items`.
+  - [ ] Session wird beim Lokalisieren geleert → **Reload feuert AddToCart nicht erneut**.
+  - [ ] Präzedenz: Seite mit pending Add **und** `is_product()` feuert **AddToCart**, nicht ViewContent.
+  - [ ] Mehrere Adds vor einem Load → ein AddToCart mit allen Positionen in `items[]`.
+- **Verifikation:**
+  - [ ] DevTools: Add → Navigation → AddToCart Browser+Server; danach Reload → kein zweites AddToCart.
+  - [ ] Single-Product-Formular-Add (Redirect zur Cart-Seite) feuert AddToCart auf der Cart-Seite.
+
+### ☐ Checkpoint B — AddToCart end-to-end
+- [ ] AddToCart feuert Browser **und** Server, deckt AJAX- **und** Formular-Adds ab.
+- [ ] Reload feuert nicht erneut; Präzedenz korrekt.
+- [ ] ViewItem/Purchase unverändert. → **Review mit Mensch vor Phase 3.**
 
 ---
 
-## Phase 4 — TikTok end-to-end
+## Phase 3 — Tests & Spec-Konsolidierung
 
-### ☐ T4.1 — TikTok Browser + Events-API 2.0: alle Produkte + Währung
-- **Tun:** [tt.js](../public/js/wp-sdtrk-tt.js) und [tracker-tt.php](../public/class-wp-sdtrk-tracker-tt.php) `getData_contents`: `contents[]` aus **allen** `getItems()` (Fallback single-product, [tracker-tt.php:295](../public/class-wp-sdtrk-tracker-tt.php#L295)); `currency` aus `getCurrency()` statt `"EUR"` ([tracker-tt.php:148](../public/class-wp-sdtrk-tracker-tt.php#L148)).
-- **Abhängig von:** T1.2
-- **Akzeptanz:** `PlaceAnOrder` mit `contents[]` aller Produkte, Shop-Währung, `event_id` = `<Order-ID>_<hash>` — Browser **und** Server.
-- **Verifikation:** TikTok Events Manager (Test-Event-Code); `debug.log`.
+### ☐ T5 — Automatisierte Tests
+- **Tun:** (bestehende Harness-Muster spiegeln — [tests/](../tests/))
+  - JS (`.mjs`): Engine-Seed-Fixtures — `wp_sdtrk_wc.viewItem` → Event `view_item` mit value/currency/items; `wp_sdtrk_wc.addToCart` → `add_to_cart`; Präzedenz `order > addToCart > viewItem`.
+  - PHP: `productLine()`, `build_view_item_payload()`, `build_add_to_cart_payload()` (Σ-value), Session-Consume-leert-Flag.
+  - Regression: Nicht-WC-Seite + Purchase unverändert ([tests/test-nowc-regression.mjs](../tests/test-nowc-regression.mjs), [tests/test-nowc-server-regression.php](../tests/test-nowc-server-regression.php) als Vorlage).
+- **Abhängig von:** T2, T4
+- **Dateien:** `tests/*` · Scope: M
+- **Akzeptanz:** [ ] neue Tests grün · [ ] bestehende Tests grün.
+- **Verifikation:** [ ] Test-Runner lokal ausführen.
 
-**⇒ Checkpoint C4.**
+### ☐ T6 — Spec-Konsolidierung & Findings
+- **Tun:** [spec/07-woocommerce/README.md](../spec/07-woocommerce/README.md) Datei-/Klassentabellen + Feuermodell vollständig; [spec/00-overview.md](../spec/00-overview.md) Feature-Matrix; Querverweise/Indizes prüfen; in [spec/99-findings.md](../spec/99-findings.md) prüfen, ob „fehlende WC-Events" gelistet ist → falls ja, entfernen.
+- **Abhängig von:** T2, T4
+- **Dateien:** Spec · Scope: S
+- **Akzeptanz:** [ ] alle relativen Links auflösbar · [ ] Spec spiegelt Code 1:1 · [ ] kein Changelog-Stil.
 
----
-
-## Phase 5 — Regression & Spec/Tests
-
-### ☐ T5.1 — Nicht-WC-Regression
-- **Tun:** Bestehende Flows gegenprüfen: Lead-/Value-Seite, View-Item (single product), Scroll/Time/Click/Visibility. Sicherstellen: leere `items` ⇒ single-product-Pfad unverändert; fehlende currency ⇒ `EUR`.
-- **Abhängig von:** T2.x, T3.1, T4.1
-- **Akzeptanz:** Kein Verhaltenswechsel gegenüber vor dem Umbau.
-- **Verifikation:** Console-Log-Vergleich je Catcher; Test-Events.
-
-### ☐ T5.2 — Spec + Tests nachführen
-- **Tun:** Spec-Sektion [07-woocommerce](../spec/07-woocommerce/README.md) neu fassen: Order-Status-Server-Pfad, Consent-Snapshot, Idempotenz, `wp-sdtrk-wc.js` entfernen; das Danke-Seiten-Injection-Modell + Mehr-Produkt + Shop-Währung dokumentieren. [order-mapping.md](../spec/07-woocommerce/order-mapping.md) auf die neue Datenquellen-Rolle bringen; `server-purchase.md`/`browser-purchase.md` zusammenführen/ersetzen. Datenmodell ([05](../spec/05-data-model/README.md)) und Browser-Tracking ([03](../spec/03-browser-tracking/README.md), `event-collection`/`engine-and-lifecycle`) um `items[]`/`currency` ergänzen. [99-findings.md](../spec/99-findings.md): Währungs-Hardcode-Befund + „kein Thankyou-Besuch"-Einschränkung entfernen. Tests: `test-wc-server-decision.php` entfernen, `test-wc-order-mapper.php` anpassen, `test-wc-integration-gate.php`/`test-wc-feed.php` prüfen.
-- **Abhängig von:** alle vorherigen
-- **Akzeptanz:** Spec spiegelt den Ist-Zustand exakt; keine Verweise mehr auf den Sonderweg; Tests grün/aktuell.
-- **Verifikation:** Spec-Quervergleich gegen Code; Testlauf.
-
-**⇒ Checkpoint C5.**
-</content>
+### ☐ Checkpoint C — Komplett
+- [ ] Alle Akzeptanzkriterien erfüllt.
+- [ ] Spec = Ist-Zustand, Tests grün.
+- [ ] Bereit für Commit/Review (Live-Smoke-Test der Browser-Pfade wie bei den übrigen offenen WC-Punkten).
