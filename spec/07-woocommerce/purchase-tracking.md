@@ -4,7 +4,7 @@ Käufe werden nicht über einen Sonderweg, sondern über die reguläre Engine ge
 
 ## 1. Bereitstellung der Order-Daten
 
-`Wp_Sdtrk_WC_Integration::localize_order_data()` ist an `wp_enqueue_scripts` (Priorität **20**, also nach dem Enqueue des Engine-Skripts) gehängt. Inaktiv, außer `is_active()` und es lässt sich über `is_order_received_page()` + `get_query_var('order-received')` eine Order auflösen.
+`Wp_Sdtrk_WC_Integration::localize_order_data()` ist an `wp_enqueue_scripts` (Priorität **20**, also nach dem Enqueue des Engine-Skripts) gehängt. Inaktiv, außer `is_active()` und es lässt sich über `is_order_received_page()` + `get_query_var('order-received')` eine Order auflösen. `current_received_order()` gibt die Order **nur** zurück, wenn der Order-Key passt (`hash_equals` gegen `$_GET['key']`) — sonst `null`. Damit werden die Käufer-Daten (E-Mail/Name/Summe/Positionen) nicht per ID-Enumeration der Order-Received-URL abgreifbar.
 
 Per `wp_localize_script('wp_sdtrk-engine', 'wp_sdtrk_wc', …)` wird das Objekt `wp_sdtrk_wc.order` auf das Engine-Skript gelegt (Aufbau in `build_order_payload()`):
 
@@ -59,7 +59,7 @@ Gemeinsame `event_id` = Order-ID:
 | GA4 | `transaction_id` = Order-ID | `transaction_id` = Order-ID | GA4 dedupliziert per `transaction_id` |
 | TikTok | `event_id = "<Order-ID>_<hash>"` | `event_id = "<Order-ID>_<hash>"` | identischer `hash` |
 
-Mehrfaches Laden der Danke-Seite ist unkritisch: gleiche `event_id` → Plattform-Dedup.
+Mehrfaches Laden der Danke-Seite ist unkritisch: Die Engine seedet das Purchase pro Order **nur einmal je Browser** (`localStorage`-Marke `wp_sdtrk_wc_<orderId>`) und feuert es bei einem Reload gar nicht erneut. Das ist nötig, weil GA4 (Browser **und** Measurement Protocol) Käufe **nicht** zuverlässig per `transaction_id` dedupliziert — ohne den Guard würde ein Reload die GA4-Käufe doppelt zählen. Meta/TikTok würden über die gemeinsame `event_id` ohnehin deduplizieren.
 
 ## 7. Consent
 
