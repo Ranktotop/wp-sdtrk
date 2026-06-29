@@ -242,6 +242,22 @@ class Wp_Sdtrk_Engine {
 				try { window.localStorage.setItem(wc_orderKey, '1'); } catch (e) { }
 			}
 		}
+		//WooCommerce ViewItem data (product detail page). Provided by
+		//Wp_Sdtrk_WC_Integration::localize_commerce_data(). Seeds the event as a
+		//view_item carrying the product, so the engine fires it browser + server in
+		//one pass. No once-guard: a view_item fires on every product page view.
+		//Mutually exclusive with .order/.addToCart (PHP localizes only one source).
+		else if (typeof wp_sdtrk_wc !== 'undefined' && wp_sdtrk_wc.viewItem) {
+			var vi = wp_sdtrk_wc.viewItem;
+			this.event.setEventName({ wc: 'view_item' });
+			this.event.setValue({ wc: String(vi.value || '') });
+			this.event.setCurrency(vi.currency || '');
+			this.event.setItems(Array.isArray(vi.items) ? vi.items : []);
+			if (Array.isArray(vi.items) && vi.items.length > 0) {
+				this.event.setProdId({ wc: String(vi.items[0].id || '') });
+				this.event.setProdName({ wc: String(vi.items[0].name || '') });
+			}
+		}
 
 		//Remove sensible queries from url
 		window.history.replaceState({}, document.title, this.helper.get_privacyUrl([this.event.getUserFirstName_all(), this.event.getUserLastName_all(), this.event.getUserEmail_all()]));

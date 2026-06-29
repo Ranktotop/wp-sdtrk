@@ -26,5 +26,15 @@ Strukturierte Positionsliste über **alle** Warenkorb-Positionen:
 
 `price` ist der Stückpreis (`get_total()` der Position / Menge). Diese Liste wird von der Engine als `items[]` ins Event übernommen und von jedem Kauf-Catcher in seine plattformspezifische Mehr-Produkt-Payload (`contents[]`/`items[]`) umgesetzt.
 
+## `Wp_Sdtrk_WC_Order_Mapper::productLine($product, int $qty = 1): array`
+
+Eine einzelne Position für die **ViewItem**- und **AddToCart**-Payloads (statt einer Order ein `WC_Product`), in derselben Form wie `lineItems`:
+
+```php
+[ 'id' => string, 'name' => string, 'qty' => int, 'price' => float ]
+```
+
+`price` ist der Einzel-Anzeigepreis (`wc_get_price_to_display($product)`; außerhalb WooCommerce Fallback `$product->get_price()`). Verwendung: [view-item-and-add-to-cart.md](view-item-and-add-to-cart.md).
+
 **Dedup:** Der Gesamtwert (`value`) und die Order-ID (`orderId`) führen im Event dazu, dass JS `grabOrderId()` und PHP `getEventId()` die Order-ID als gemeinsame `event_id` liefern.
 </content>

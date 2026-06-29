@@ -26,8 +26,8 @@ In [includes/class-wp-sdtrk.php](../../includes/class-wp-sdtrk.php) (`define_pub
 
 | Hook | Methode | Zweck |
 |------|---------|-------|
-| `wp_enqueue_scripts` (Priorität 20) | `localize_order_data` | Order-Daten (`wp_sdtrk_wc.order`) auf das Engine-Skript legen — nur auf der Order-Received-Seite |
+| `wp_enqueue_scripts` (Priorität 20) | `localize_commerce_data` | Genau eine Commerce-Datenquelle (`wp_sdtrk_wc.order` auf der Order-Received-Seite **oder** `wp_sdtrk_wc.viewItem` auf einer Produktseite) auf das Engine-Skript legen. Präzedenz: siehe [view-item-and-add-to-cart.md](view-item-and-add-to-cart.md). |
 
-Die Priorität 20 stellt sicher, dass das Engine-Skript bereits registriert/enqueued ist (Standard-Priorität), wenn die Order-Daten daran lokalisiert werden. Das Purchase-Tracking selbst läuft anschließend in der Engine (siehe [purchase-tracking.md](purchase-tracking.md)) — es gibt keinen Order-Status-Hook und keinen AJAX-Persist mehr.
+Die Priorität 20 stellt sicher, dass das Engine-Skript bereits registriert/enqueued ist (Standard-Priorität), wenn die Commerce-Daten daran lokalisiert werden. Das Tracking selbst läuft anschließend in der Engine (siehe [purchase-tracking.md](purchase-tracking.md) bzw. [view-item-and-add-to-cart.md](view-item-and-add-to-cart.md)) — es gibt keinen Order-Status-Hook und keinen AJAX-Persist mehr.
 
 Die Tracker-Klassen (`Wp_Sdtrk_Tracker_Meta/_Ga/_Tt`) sowie `Wp_Sdtrk_WC_Order_Mapper` sind über `load_dependencies()` geladen.

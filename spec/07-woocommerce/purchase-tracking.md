@@ -4,7 +4,7 @@ Käufe werden nicht über einen Sonderweg, sondern über die reguläre Engine ge
 
 ## 1. Bereitstellung der Order-Daten
 
-`Wp_Sdtrk_WC_Integration::localize_order_data()` ist an `wp_enqueue_scripts` (Priorität **20**, also nach dem Enqueue des Engine-Skripts) gehängt. Inaktiv, außer `is_active()` und es lässt sich über `is_order_received_page()` + `get_query_var('order-received')` eine Order auflösen. `current_received_order()` gibt die Order **nur** zurück, wenn der Order-Key passt (`hash_equals` gegen `$_GET['key']`) — sonst `null`. Damit werden die Käufer-Daten (E-Mail/Name/Summe/Positionen) nicht per ID-Enumeration der Order-Received-URL abgreifbar.
+`Wp_Sdtrk_WC_Integration::localize_commerce_data()` ist an `wp_enqueue_scripts` (Priorität **20**, also nach dem Enqueue des Engine-Skripts) gehängt und wählt die Order-Quelle, wenn sie Vorrang hat ([view-item-and-add-to-cart.md](view-item-and-add-to-cart.md)). Inaktiv, außer `is_active()` und es lässt sich über `is_order_received_page()` + `get_query_var('order-received')` eine Order auflösen. `current_received_order()` gibt die Order **nur** zurück, wenn der Order-Key passt (`hash_equals` gegen `$_GET['key']`) — sonst `null`. Damit werden die Käufer-Daten (E-Mail/Name/Summe/Positionen) nicht per ID-Enumeration der Order-Received-URL abgreifbar.
 
 Per `wp_localize_script('wp_sdtrk-engine', 'wp_sdtrk_wc', …)` wird das Objekt `wp_sdtrk_wc.order` auf das Engine-Skript gelegt (Aufbau in `build_order_payload()`):
 
