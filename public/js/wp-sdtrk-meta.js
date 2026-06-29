@@ -259,11 +259,25 @@ class Wp_Sdtrk_Catcher_Meta {
 		var customData = {};
 		//Value
 		if (this.event.grabValue() > 0 || this.convert_eventname(this.event.grabEventName()) === 'Purchase') {
-			customData.currency = "EUR";
+			customData.currency = this.event.getCurrency() || "EUR";
 			customData.value = this.event.grabValue();
 		}
-		//Product
-		if (this.event.grabProdId() !== "") {
+		//Product — all cart items when present, single-product fallback otherwise
+		var items = this.event.getItems();
+		if (items.length > 0) {
+			var ids = [];
+			var contents = [];
+			for (var i = 0; i < items.length; i++) {
+				var id = String(items[i].id || '');
+				ids.push(id);
+				contents.push({ id: id, quantity: Number(items[i].qty) || 1 });
+			}
+			customData.content_ids = JSON.stringify(ids);
+			customData.content_type = "product";
+			customData.content_name = String(items[0].name || '');
+			customData.contents = JSON.stringify(contents);
+		}
+		else if (this.event.grabProdId() !== "") {
 			customData.content_ids = '["' + this.event.grabProdId() + '"]';
 			customData.content_type = "product";
 			customData.content_name = this.event.grabProdName();

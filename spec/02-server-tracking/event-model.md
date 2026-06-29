@@ -12,7 +12,9 @@ Das Event-Objekt kapselt die vom Browser übergebenen Rohdaten (`$data['event']`
 | `getEventValue()` | float | Monetärer Wert (0 wenn leer) |
 | `getEventId()` | string | Eindeutige ID für Deduplizierung (Fallback: orderId / generiert) |
 | `getTransactionId()` | string | Order-/Transaktions-ID |
-| `getProductId()` / `getProductName()` | string | Produktdaten |
+| `getProductId()` / `getProductName()` | string | Produktdaten (erste Position) |
+| `getItems()` | array | Strukturierte Positionsliste `[{id,name,qty,price}]` für Mehr-Produkt-Payloads; `[]` wenn nicht gesetzt |
+| `getCurrency()` | string | Währung; Fallback `EUR` wenn leer |
 | `getUserEmail()` | string | E-Mail (Klartext; Hashing erst im Tracker) |
 | `getUserFirstName()` / `getUserLastName()` | string | Namensdaten (Klartext) |
 | `getUserFingerprint()` | string\|false | Browser-Fingerprint |
@@ -55,7 +57,8 @@ Diese fließen u. a. in die plattformspezifische `event_id`-Bildung ein (siehe [
 Das Roh-Event (`data.event`) enthält u. a. folgende Felder (gesammelt in `wp-sdtrk-event.js`):
 
 ```
-eventId, orderId, eventName, prodId, prodName, value,
+eventId, orderId, eventName, prodId, prodName, value, currency,
+items: [ { id, name, qty, price }, … ],   // ganzer Warenkorb (Mehr-Produkt)
 userEmail, userFirstName, userLastName, userFP,
 pageId, pageName, pageUrl,
 utm: { utm_source, utm_medium, utm_term, utm_content, utm_campaign },

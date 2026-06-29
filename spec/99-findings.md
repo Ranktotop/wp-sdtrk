@@ -18,6 +18,26 @@ Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist v
 
 ---
 
+## 🔵 Mautic: Custom-Event-Erfassung setzt ein Mautic-Plugin voraus (by design)
+
+**Verifiziert.** `Wp_Sdtrk_Catcher_Mtc::fireData()` sendet Events via `mt('send', '<eventName>', {…})` mit echten Event-Namen (`purchase`, `view_item`, …). Natives MauticJS verarbeitet nur `mt('send', 'pageview', {…})` (Core prüft `type === 'pageview'`); zusätzliche Event-Typen werden von Plugins/Bundles über `CoreEvents::BUILD_MAUTIC_JS` (`appendJs`) in `mtc.js` injiziert (Mautic-Core-PR-Hinweis: „plugins/bundles can implement more tracking events"). Die Custom-Event-Erfassung des Catchers setzt daher ein entsprechendes **Mautic-seitiges Plugin** (z. B. „Mautic Custom Events") voraus. Bewusst **nicht** auf `pageview` umgebaut — Käufe/Events als PageView zu tracken wäre semantisch falsch. **Voraussetzung dokumentieren** (Mautic-Plugin nötig); der `pageview`-Hit selbst funktioniert nativ.
+
+---
+
+## 🔵 Funnelytics: optionales `init`-Argument `anonymiseUsers` wird nicht übergeben
+
+Der Funnelytics-Catcher (`Wp_Sdtrk_Catcher_Fl`) ist **verifiziert API-konform**: Base-Snippet (CDN `https://cdn.funnelytics.io/track-v3.js`, Deferred-Queue, `funnelytics.init(funnel, false, deferredEvents)`) und Commerce-Keys (`__commerce_action__`, `__total_in_cents__` in Cent, `__sku__`, `__order__`, `__currency__`, `__label__`) entsprechen dem offiziellen Snippet bzw. der [Revenue-Actions-Doku](https://hub.funnelytics.io/c/tracking-setup/base-script-install). Die als „Funnelytics Tracking ID" hinterlegte `fl_tracking_id` muss die **Workspace-UUID** sein (wird als `funnel` durchgereicht).
+
+Neuere Workspace-Snippets hängen ein viertes `init`-Argument an (`{"anonymiseUsers": false}`); der Catcher übergibt es nicht. Ohne Wirkung auf den aktuellen Payload, da der Catcher **keine** `name`/`email`-Keys sendet — relevant erst, falls De-Anonymisierung über Funnelytics genutzt werden soll.
+
+---
+
+## 🟡 Browser-only-Catcher: Währung hart `EUR`, single-product
+
+Die reinen Browser-Catcher **Mautic** und **Funnelytics** setzen die Währung weiterhin hart auf `"EUR"` und tragen nur ein Produkt (kein Mehr-Produkt). Der Mehr-Produkt-/Shop-Währungs-Umbau betrifft nur die Kauf-Catcher Meta/GA/TikTok (siehe [07 › Purchase-Tracking](07-woocommerce/purchase-tracking.md)). Für Funnelytics empfiehlt die Doku bei mehreren Artikeln ausdrücklich **ein Event pro Artikel** (iterieren); der Catcher feuert derzeit nur ein `__commerce_action__` für die erste Position. **Bewerten**, ob für diese Plattformen relevant.
+
+---
+
 ## 🟡 Namens-Inkonsistenzen
 
 - Klassen-Präfix wechselt zwischen `Wp_Sdtrk_*` und `WP_SDTRK_*` (funktional egal, da PHP-Klassennamen case-insensitiv sind).
@@ -43,12 +63,6 @@ Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist v
 ## 🟡 Keine Daten-Bereinigung bei Deinstallation
 
 `uninstall.php` enthält nur den Standard-Guard. Weder die Tabelle `{prefix}sdtrk_linkedin` noch die Option `wp_sdtrk_options` werden entfernt. Bei sauberer Deinstallation bleiben Daten dauerhaft zurück.
-
----
-
-## 🟡 Währung fest auf `EUR` verdrahtet
-
-Die Server-Tracker (Meta `getData_custom`/`fireTracking_Server_Event`, GA4, TikTok) sowie der Meta-Browser-Pfad (`get_data_custom`) setzen die Währung hart auf `"EUR"`. Für die [WooCommerce-Integration](07-woocommerce/README.md) liefert der [Order-Mapper](../public/class-wp-sdtrk-wc-order-mapper.php) zwar die Order-Währung (`currency`), diese wird aber von den Trackern noch nicht verwendet. Bei abweichender Shop-Währung wird die Conversion mit falscher Währung gemeldet. **Empfehlung:** Währung über das Event-Modell durchreichen und in den Payloads statt `EUR` verwenden.
 
 ---
 
@@ -81,9 +95,9 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 | # | Punkt | Schwere |
 |---|-------|---------|
 | 1 | Eingabe-Sanitisierung | 🟡 mittel |
-| 2 | Währung fest auf `EUR` (relevant für WooCommerce) | 🟡 mittel |
-| 3 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
-| 4 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
+| 2 | Feed: Live-Generierung im Request-Pfad bei kaltem Cache | 🟡 mittel |
+| 3 | Feed: Token in der URL, keine Rotation | 🟡 niedrig |
+| 4 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
 | 5 | Tote Stubs (Form-Handler etc.) | 🟡 niedrig |
 | 6 | Keine Uninstall-Bereinigung | 🟡 niedrig |
 | 7 | Namens-Inkonsistenzen | 🟡 niedrig |

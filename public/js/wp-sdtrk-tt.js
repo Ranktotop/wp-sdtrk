@@ -274,11 +274,25 @@ class Wp_Sdtrk_Catcher_Tt {
 		var customData = {};
 		//Value
 		if (this.event.grabValue() > 0 || this.convert_eventname(this.event.grabEventName()) === 'PlaceAnOrder') {
-			customData.currency = "EUR";
+			customData.currency = this.event.getCurrency() || "EUR";
 			customData.value = this.event.grabValue();
 		}
-		//Product
-		if (this.event.grabProdId() !== "") {
+		//Product(s) — the whole cart as a contents[] array when present
+		var items = this.event.getItems();
+		if (items.length > 0) {
+			customData.content_type = "product";
+			customData.contents = [];
+			for (var i = 0; i < items.length; i++) {
+				customData.contents.push({
+					content_id: String(items[i].id || ''),
+					content_name: String(items[i].name || ''),
+					content_type: "product",
+					quantity: Number(items[i].qty) || 1,
+					price: Number(items[i].price) || 0,
+				});
+			}
+		}
+		else if (this.event.grabProdId() !== "") {
 			customData.content_id = this.event.grabProdId();
 			customData.content_type = "product";
 			customData.content_name = this.event.grabProdName();
@@ -325,7 +339,7 @@ class Wp_Sdtrk_Catcher_Tt {
 			userData.external_id = this.get_hashId();
 		}
 		if (this.event.getUserEmail() !== "") {
-			userData.email = email;
+			userData.email = this.event.getUserEmail();
 		}
 		return userData;
 	}

@@ -145,7 +145,7 @@ class Wp_Sdtrk_Tracker_Tt
 
         // Add value if given
         if ($event->getEventValue() > 0 || $this->convert_eventname($event) === 'PlaceAnOrder') {
-            $requestData["properties"]["currency"] = "EUR";
+            $requestData["properties"]["currency"] = $event->getCurrency();
             $requestData["properties"]["value"] = $event->getEventValue();
         }
         return $this->payLoadServerRequest($requestData);
@@ -250,7 +250,7 @@ class Wp_Sdtrk_Tracker_Tt
             ),
             "user" => $this->getData_user($event, $data),
             "properties" => array(
-                "contents" => array($this->getData_contents($event)) // has to be an array of contents
+                "contents" => $this->getData_contents_list($event) // array of contents (whole cart)
                 // "description" => "ViewContent", // will be replaced later on events
                 // "query" => "" // you can pass a keyword from on-page-search here
             )
@@ -272,8 +272,9 @@ class Wp_Sdtrk_Tracker_Tt
             "ip" => $event->getEventIp(),
             "user_agent" => $event->getEventAgent()
         );
+        // TikTok requires normalized (lowercased + trimmed) email before SHA-256.
         if ($event->getUserEmail()) {
-            $userData["email"] = hash('sha256', $event->getUserEmail());
+            $userData["email"] = hash('sha256', strtolower(trim($event->getUserEmail())));
         }
         // ttclid: the click-id appended as the ttclid GET-param
         if (isset($data['ttc'])) {
@@ -287,7 +288,37 @@ class Wp_Sdtrk_Tracker_Tt
     }
 
     /**
-     * Return the content data of event
+     * Return the cart contents as a list — the whole cart when per-line items are
+     * present, single-product fallback otherwise. Always at least one entry.
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @return array
+     */
+    private function getData_contents_list($event)
+    {
+        $items = $event->getItems();
+        if (! empty($items)) {
+            $list = array();
+            foreach ($items as $item) {
+                $content = array(
+                    'content_id'   => (string) ($item['id'] ?? ''),
+                    'content_name' => (string) ($item['name'] ?? ''),
+                    'content_type' => "product",
+                    'quantity'     => (int) ($item['qty'] ?? 1),
+                );
+                $price = (float) ($item['price'] ?? 0);
+                if ($price > 0) {
+                    $content['price'] = $price;
+                }
+                $list[] = $content;
+            }
+            return $list;
+        }
+        return array($this->getData_contents($event));
+    }
+
+    /**
+     * Return the single content object (fallback for non-cart events).
      *
      * @param Wp_Sdtrk_Tracker_Event $event
      * @return array

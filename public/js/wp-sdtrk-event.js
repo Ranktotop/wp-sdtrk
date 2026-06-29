@@ -160,6 +160,26 @@ class Wp_Sdtrk_Event {
 		return (!isNaN(+(value) + 0.0)) ? (+(value) + 0.0) : 0;
 	}
 
+	//Sets the structured per-line item list (multi-product payloads)
+	setItems(value) {
+		this.items = value;
+	}
+
+	//Gets the item list, defaulting to an empty list (single-product back-compat)
+	getItems() {
+		return Array.isArray(this.items) ? this.items : [];
+	}
+
+	//Sets the event currency
+	setCurrency(value) {
+		this.currency = value;
+	}
+
+	//Gets the event currency (empty string when unset; catchers fall back to EUR)
+	getCurrency() {
+		return (this.currency) ? this.currency : "";
+	}
+
 	//Sets the Event-Name
 	setEventName(value) {
 		this.eventName = value;

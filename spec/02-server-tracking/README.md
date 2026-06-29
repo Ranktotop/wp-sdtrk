@@ -23,6 +23,22 @@ Dies ist der Kern des Plugins: Conversion-Events werden **server-seitig** per cU
 
 > LinkedIn, Funnelytics, Mautic, Matomo besitzen **keinen** Server-Tracker — sie laufen ausschließlich browser-seitig ([03](../03-browser-tracking/README.md)).
 
+## Maßgebliche Anbieter-Dokumentation (immer beachten)
+
+> ⚠️ **Verbindlich:** Die Payload-Struktur jeder Plattform (welches Feld in welchem Objekt liegt, Pflichtfelder, erlaubte Werte, Endpoint-Version) wird **ausschließlich** von der offiziellen Anbieter-Doku bestimmt. Vor **jeder** Änderung an einem Server- oder Browser-Payload sind die hier verlinkten Quellen zu prüfen — nicht aus dem Gedächtnis oder aus Sekundärquellen arbeiten. Diese Doku ändert sich (Versionen, Feldnamen, Objekt-Verschachtelung); Abweichungen führen zu still verworfenen oder falsch zugeordneten Events.
+
+**Feld-Platzierung (verifizierter Ist-Stand der Anbieter-Verträge):**
+
+| Plattform | Produkt-/Wert-Felder gehören in … | Referenz |
+|-----------|-----------------------------------|----------|
+| Meta CAPI | `custom_data`: `content_ids`, `contents` `[{id,quantity}]`, `content_type`, `currency`, `value` | [custom_data-Parameter](https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/custom-data/) · [Parameter-Übersicht](https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/) · [CAPI](https://developers.facebook.com/docs/marketing-api/conversions-api/) |
+| Meta Pixel (Browser) | `fbq('track', …, custom_data)`; Advanced Matching (`em`/`fn`/`ln`) bei `fbq('init', pixelId, user_data)` | [Meta-Pixel-Referenz](https://developers.facebook.com/docs/meta-pixel/reference) · [Advanced Matching](https://developers.facebook.com/docs/meta-pixel/implementation/conversion-tracking#advanced-matching) |
+| GA4 MP | Event-`params`: `items[]` `{item_id,item_name,price,quantity}`, `currency`, `value`, `transaction_id` | [MP-Events-Referenz](https://developers.google.com/analytics/devguides/collection/protocol/ga4/reference/events) · [E-Commerce-Events](https://developers.google.com/analytics/devguides/collection/ga4/ecommerce) |
+| TikTok Events API 2.0 | `properties`: `contents[]` `{content_id,content_name,content_type,quantity,price}`, `currency`, `value`; Identifier in `user` | [About Events API](https://ads.tiktok.com/help/article/events-api) · [Parameter](https://ads.tiktok.com/help/article/about-parameters) · Endpoint `v1.3/event/track/` |
+| TikTok Pixel (Browser) | `ttq.track(event, properties)` mit `contents[]`/`currency`/`value` | [About Events API](https://ads.tiktok.com/help/article/events-api) |
+
+Die nativen Browser-APIs **aller** Plattformen — inkl. der reinen Browser-Plattformen LinkedIn, Funnelytics, Mautic, Matomo (kein Server-Tracker) — sind mit offiziellen Doku-Links unter [03 › Catcher › Maßgebliche Anbieter-Dokumentation](../03-browser-tracking/catchers.md#2a-maßgebliche-anbieter-dokumentation-immer-beachten) erfasst.
+
 ## Datenfluss (Kurzform)
 
 ```

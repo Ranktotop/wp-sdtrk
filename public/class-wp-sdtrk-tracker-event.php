@@ -134,6 +134,30 @@ class Wp_Sdtrk_Tracker_Event
     }
 
     /**
+     * Return the structured per-line item list (multi-product payloads).
+     *
+     * Each entry: ['id' => string, 'name' => string, 'qty' => int, 'price' => float].
+     * Empty list when no items were provided (single-product back-compat path).
+     *
+     * @return array
+     */
+    public function getItems()
+    {
+        return (isset($this->eventData['items']) && is_array($this->eventData['items'])) ? $this->eventData['items'] : array();
+    }
+
+    /**
+     * Return the event currency, falling back to EUR when none was provided.
+     *
+     * @return string
+     */
+    public function getCurrency()
+    {
+        $currency = ($this->setAndFilled('currency')) ? $this->eventData['currency'] : '';
+        return (! empty($currency)) ? $currency : 'EUR';
+    }
+
+    /**
      * Return UTM-Data
      *
      * @return string[]

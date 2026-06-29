@@ -323,14 +323,27 @@ class Wp_Sdtrk_Catcher_Ga {
 		if (this.event.grabValue() > 0 || this.event.grabEventName() === 'purchase') {
 			//Transaction id was here and value/currency was ever sent before and ga4 worked. Testing this combination
 			customData['value'] = this.event.grabValue();
-			customData['currency'] = "EUR";
+			customData['currency'] = this.event.getCurrency() || "EUR";
 		}
-		//Product
-		if (this.event.grabProdId() !== "") {
+		//Product — all cart items when present, single-product fallback otherwise
+		var items = this.event.getItems();
+		if (items.length > 0) {
+			customData['items'] = [];
+			for (var i = 0; i < items.length; i++) {
+				customData['items'].push({
+					'id': String(items[i].id || ''),
+					'name': String(items[i].name || ''),
+					'quantity': Number(items[i].qty) || 1,
+					'price': Number(items[i].price) || 0,
+					'brand': this.event.getBrandName(),
+				});
+			}
+		}
+		else if (this.event.grabProdId() !== "") {
 			customData['items'] = [{
 				'id': this.event.grabProdId(),
 				'name': this.event.grabProdName(),
-				//'category': "SomeCategory",			
+				//'category': "SomeCategory",
 				'quantity': 1,
 				'price': this.event.grabValue(),
 				'brand': this.event.getBrandName(),
