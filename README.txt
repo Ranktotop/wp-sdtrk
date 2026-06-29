@@ -32,6 +32,12 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.8.0 =
+* Rebuilt WooCommerce purchase tracking: fires on the order-received page, browser and server in one pass, deduplicated via the order id
+* Multi-product carts and shop currency for Meta, GA4 and TikTok purchases (single-product and EUR fallbacks unchanged)
+* Fixed Matomo tracking (matomo.js was never loaded), a TikTok identify crash, and a stray LinkedIn debug log
+* Order-received page now validates the order key before exposing buyer data; per-order reload guard to avoid double-counting
+
 = 1.7.6 =
 * Added compatibility to borlabs v3
 
