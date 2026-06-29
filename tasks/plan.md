@@ -1,133 +1,112 @@
-# Umsetzungsplan — offene Aufgaben aus TODO.md
+# Umsetzungsplan — WooCommerce-Tracking neu aufbauen
 
 > Ist-Stand-Grundlage: Spec v1.7.6. Quelle der Wahrheit ist [`spec/`](../spec/README.md).
 > **Pflicht je Aufgabe:** Code-Änderung ist erst fertig, wenn die betroffene Spec den neuen Ist-Zustand widerspiegelt (siehe [CLAUDE.md](../CLAUDE.md)). Die Spec ist **kein** Changelog — veraltete Beschreibungen ersetzen, nicht ergänzen.
 
-Dieser Plan deckt alle vier TODO-Punkte ab, in vier Phasen mit Checkpoints. Arbeitsweise: **vertikale Slices** (ein vollständiger Pfad pro Task), nicht horizontale Schichten.
+## Ziel & Leitentscheidung
+
+Die bestehende WC-Integration trackt Käufe über einen **eigenen Sonderweg**: Browser-Purchase per dediziertem Skript ([wp-sdtrk-wc.js](../public/js/wp-sdtrk-wc.js)), Server-Purchase über einen **Order-Status-Hook** (`woocommerce_order_status_processing/_completed`) mit Consent-Snapshot-AJAX und Idempotenz-Metas ([class-wp-sdtrk-wc-integration.php](../public/class-wp-sdtrk-wc-integration.php)).
+
+Dieser Sonderweg hat zwei reale Bugs:
+1. **Server feuert bei Sofort-Zahlung nie.** Der Status-Hook läuft beim Checkout, *bevor* die Danke-Seite den Consent-Snapshot per AJAX schreibt → fail-closed → kein Server-Call. Der Hook feuert nicht erneut.
+2. **Keine Käuferdaten im Browser-Purchase.** Meta Advanced Matching wird nur beim `fbq('init', …)` aus dem (leeren) Page-Event gesetzt; das Purchase-Event reicht `em/fn/ln` nicht durch.
+
+**Leitentscheidung:** Den Sonderweg ersatzlos zurückbauen. Stattdessen auf der Order-Received-Seite die Order-Daten als **zusätzliche Datenquelle** in die bestehende Engine-Mechanik ([collect_eventData](../public/js/wp-sdtrk-engine.js#L161)) einspeisen. Die Engine feuert dann Purchase **Browser und Server in einem Durchlauf** — exakt wie bei jeder Lead-/Value-Seite. Dedup läuft automatisch über die Order-ID (PHP `getEventId` → `getTransactionId`, JS `grabOrderId`).
+
+**Akzeptierte Trade-offs** (mit dem Auftraggeber abgestimmt):
+- Server-Feuerung hängt am Browser-Lauf (Tab zu / JS aus / AdBlocker → kein Server-Event). Gleiche Abhängigkeit wie auf jeder anderen Trackingseite.
+- Bei Vorkasse/Rechnung wird der „Kauf" beim Erreichen der Danke-Seite gemeldet, auch wenn die Zahlung erst später eingeht. Gewünscht: „Kunde hat bestellt → feuern."
+
+## Anforderungen
+
+1. **Alle Produkte** des Warenkorbs tracken (Mehr-Produkt-`contents[]`/`items[]`), nicht nur die erste Position. Erfordert Erweiterung des heute single-product Event-Modells (JS + PHP) und aller kaufrelevanten Catcher (Meta/GA/TikTok, je Browser + Server).
+2. **Währung** aus dem Shop liefern; `EUR` nur noch als Fallback (heute hartkodiert in [meta.js:262](../public/js/wp-sdtrk-meta.js#L262), [ga.js:326](../public/js/wp-sdtrk-ga.js#L326), [tracker-meta.php:149](../public/class-wp-sdtrk-tracker-meta.php#L149), [tracker-ga.php:153](../public/class-wp-sdtrk-tracker-ga.php#L153), [tracker-tt.php:148](../public/class-wp-sdtrk-tracker-tt.php#L148) und [tt.js]).
+3. Bereitstellung der Daten ausschließlich über **ein** `wp_enqueue_scripts`/`wp_localize_script` auf der Order-Received-Seite. **Kein** Order-Status-Hook, kein Snapshot, keine Idempotenz-Metas.
 
 ---
 
-## Scope
+## Architektur-Fixpunkte (verifiziert)
 
-| # | Aufgabe | Typ | Phase |
-|---|---------|-----|-------|
-| 1 | Meta-CAPI Dispatch-Bug (`Fb` vs. `Meta`) | 🔴 Bugfix | P0 |
-| 2 | Externe API-Integrationen prüfen & aktualisieren | 🟡 Wartung | P1 |
-| 3 | WooCommerce-Integration | 🟢 Feature | P2 |
-| 4 | Produkt-Feed (nur mit aktiver WooCommerce-Integration) | 🟢 Feature | P3 |
+- **Engine-Pfad feuert beides:** [engine.js:236](../public/js/wp-sdtrk-engine.js#L236) `catchPageHit(2)` → pro Catcher `fireData` (Browser) **und** `sendData` (Server via `send_ajax` → `func=validateTracker`).
+- **Event-Auto-Erkennung:** [event.js:397](../public/js/wp-sdtrk-event.js#L397) `parseEventName` liefert automatisch `purchase`, sobald `orderId` gesetzt ist.
+- **Dedup über Order-ID:** JS `grabOrderId()` ([event.js:132](../public/js/wp-sdtrk-event.js#L132)) und PHP `getEventId()` ([class-wp-sdtrk-tracker-event.php:169](../public/class-wp-sdtrk-tracker-event.php#L169)) bevorzugen beide die Order-ID. Browser- und Server-Event teilen damit dieselbe `event_id`.
+- **Datenquelle der Engine:** scalar-Felder aus GET-Params (`helper.get_Params(get_paramNames(...))`, gespeist aus `this.data`), einige Felder aus `wp_sdtrk_engine` (prodId/Quelle/IP/Agent). Injection-Punkt = [collect_eventData](../public/js/wp-sdtrk-engine.js#L161).
+- **Server-Event-Transport:** `send_ajax` schickt das komplette JS-Event-Objekt; PHP baut daraus `new Wp_Sdtrk_Tracker_Event($data['event'])` ([class-wp-sdtrk-public-ajax.php:55](../public/class-wp-sdtrk-public-ajax.php#L55)). Ein neues `items`-Feld am JS-Event erreicht damit ohne weiteren Kanal die Server-Tracker.
+- **Catcher-Konsum heute (single-product):** Meta `content_ids`/`contents` aus `grabProdId` ([meta.js:266](../public/js/wp-sdtrk-meta.js#L266)); GA `items:[{…}]` ([ga.js:329](../public/js/wp-sdtrk-ga.js#L329)); TT `contents` ([tt.js], PHP [tracker-tt.php:295](../public/class-wp-sdtrk-tracker-tt.php#L295)); GA-Server `getData_products` ([tracker-ga.php:342](../public/class-wp-sdtrk-tracker-ga.php#L342)); Meta-Server `contents`/`content_ids` ([tracker-meta.php:259](../public/class-wp-sdtrk-tracker-meta.php#L259)).
+- **Loader:** Klassen via `require_once` in [includes/class-wp-sdtrk.php](../includes/class-wp-sdtrk.php). WC-Hooks aktuell [class-wp-sdtrk.php:269-273](../includes/class-wp-sdtrk.php#L269-L273).
+- **Mapper:** `Wp_Sdtrk_WC_Order_Mapper::lineItems()` liefert bereits `[{id,name,qty,price}]` — Basis für die Mehr-Produkt-Payload.
 
 ---
 
 ## Abhängigkeitsgraph
 
 ```
-P0  Meta-CAPI-Bugfix ─────────────┐
-        │ (Meta-Server-Pfad muss feuern,                 
-        │  damit P1-Meta & P2-Server testbar sind)        
-        ▼                                                 
-P1  API-Audit & Updates ──────────┤
-   (Meta v11→aktuell, TikTok v1.2→Events 2.0, GA4 verify, Browser-Pixel verify)
-        │                                                 
-        ▼                                                 
-P2  WooCommerce-Integration ──────┐ (baut auf funktionierender Browser+Server-Pipeline auf)
-   ├─ WC-Erkennung + Settings-Switch                      
-   ├─ Order → kanonisches Event-Mapping                   
-   ├─ thankyou: Browser-Pixel                             
-   └─ thankyou: Server-APIs (consent-gated, dedup)        
-        │                                                 
-        ▼                                                 
-P3  Produkt-Feed (benötigt P2 WooCommerce-Datenschicht + Cron-Reaktivierung)
+P0  Rückbau Sonderweg ───────────────┐  (sauberer Ausgangszustand, Site stabil)
+        ▼
+P1  Shared Foundation ───────────────┤
+   ├─ Event-Modell: items[] + currency (JS + PHP), abwärtskompatibel
+   └─ Danke-Seiten-Datenquelle + Engine-Ingestion (collect_eventData)
+        ▼
+P2  Meta end-to-end ─────────────────┐  (Kritischer Pfad / Proof)
+   (Browser Advanced Matching + alle Produkte + Shop-Währung; Server CAPI dito; event_id = Order-ID)
+        ▼
+P3  GA4 end-to-end ──────────────────┤
+        ▼
+P4  TikTok end-to-end ───────────────┤
+        ▼
+P5  Regression + Spec/Tests
 ```
 
-**Kritische Reihenfolge-Begründung:**
-- **P0 vor P1-Meta:** Solange die Meta-CAPI serverseitig nicht feuert, lässt sich ein Versions-Update (v11→aktuell) nicht real verifizieren. Bugfix zuerst.
-- **P0/P1 vor P2:** WooCommerce renutzt exakt die Tracker/Event-Architektur. Erst wenn alle Server-Pfade nachweislich feuern, lohnt der WC-Aufsatz.
-- **P2 vor P3:** Der Feed liest aus der WooCommerce-Produktschicht — ohne aktive WC-Integration kein Feed.
+**Reihenfolge-Begründung:** P1 ist die gemeinsame Basis (Event-Modell + Datenfluss), die alle Plattformen brauchen. P2 (Meta) ist der vom Auftraggeber genutzte kritische Pfad → zuerst end-to-end beweisen. GA/TT bauen identisch auf der Basis auf. Währung wird **je Plattform-Slice** miterledigt (sie ist quer, aber pro Catcher zu ändern); P5 sichert die Nicht-WC-Regression (EUR-Fallback unverändert).
 
 ---
 
-## Architektur-Fixpunkte (verifiziert)
+## Phasen & Checkpoints
 
-- **Dispatch:** [public/class-wp-sdtrk-public-ajax.php:56](../public/class-wp-sdtrk-public-ajax.php#L56) bildet `Wp_Sdtrk_Tracker_` + `ucfirst(type)`. Klasse heißt aber `Wp_Sdtrk_Tracker_Fb` ([public/class-wp-sdtrk-tracker-meta.php:3](../public/class-wp-sdtrk-tracker-meta.php#L3)). `Wp_Sdtrk_Tracker_Fb` wird **nirgends sonst im Code** referenziert (nur Datei selbst + Spec) → Umbenennung ist kollisionsfrei.
-- **Loader:** Klassen werden per `require_once` in [includes/class-wp-sdtrk.php](../includes/class-wp-sdtrk.php) (`load_dependencies()`) geladen — kein PSR-4-Autoload aktiv. Neue Klassen dort registrieren.
-- **Event-Modell:** `Wp_Sdtrk_Tracker_Event` ([public/class-wp-sdtrk-tracker-event.php](../public/class-wp-sdtrk-tracker-event.php)) wird aus einem assoziativen Array gebaut. Getter: `getProductId/Name`, `getEventValue`, `getEventName`, `getUserEmail/FirstName/LastName`, `getUtmData`, `getEventId/TransactionId`, `getEventIp/Agent/Source`. → WC-Mapping muss genau dieses Array-Schema erzeugen.
-- **API-Endpoints (Ist):** Meta `graph.facebook.com/v11.0/{pixel}/events`; TikTok `business-api.tiktok.com/open_api/v1.2/pixel/track/`; GA4 `google-analytics.com/mp/collect`.
-- **HTTP-Layer:** `WP_SDTRK_Helper_Event::do_post($url,$payload,$headers,$debug)` ([includes/helpers/class-wp-sdtrk-helper-event.php](../includes/helpers/class-wp-sdtrk-helper-event.php)) — zentral, cURL, JSON-Validierung, `sdtrk_log()`.
-- **Cron:** `WP_SDTRK_Cron::HOOKS = []` ([includes/class-wp-sdtrk-cron.php:21](../includes/class-wp-sdtrk-cron.php#L21)) → no-op. Aktivierung/Deaktivierung bereits verdrahtet (Activator/Deactivator). `register_cron_actions()` auskommentiert.
-- **Redux-Settings:** zentral in [admin/class-wp-sdtrk-admin.php](../admin/class-wp-sdtrk-admin.php) (`wp_sdtrk_register_redux_options()`). Bedingte Sichtbarkeit via `required`-Regeln. Metabox dort ebenfalls.
-- **Consent:** JS `helper.has_consent(id, service, event)` ([public/js/wp-sdtrk-helper.js](../public/js/wp-sdtrk-helper.js)) — Borlabs v2/v3; Bypass via Metabox `wp_sdtrk_bypass_consent`.
+### Phase 0 — Rückbau des Sonderwegs
+Ziel: Der alte WC-Purchase-Sonderweg ist vollständig entfernt; die Site läuft stabil ohne ihn (Käufe werden vorübergehend nicht getrackt — bewusster Zwischenzustand).
+→ Tasks **T0.1–T0.2**.
+**Checkpoint C0:** Order-Received-Seite lädt fehlerfrei, kein `wp-sdtrk-wc.js`, keine Order-Status-/Persist-Hooks mehr registriert; übrige Seiten unverändert. Feed/Cron unberührt.
 
----
+### Phase 1 — Gemeinsame Basis
+Ziel: Event-Modell trägt `items[]` + `currency` (mit sicheren Fallbacks, kein Verhaltenswechsel für bestehende Flows); die Danke-Seite stellt die Order-Daten bereit und die Engine übernimmt sie.
+→ Tasks **T1.1–T1.2**.
+**Checkpoint C1:** Auf der Order-Received-Seite trägt das Engine-Event (Console/Debug) `eventName=purchase`, `orderId`, Gesamtwert, `email/firstName/lastName`, `currency` und eine `items[]`-Liste aller Positionen. Bestehende Nicht-WC-Seiten feuern unverändert (kein `items`, EUR-Fallback).
 
-## Phase 0 — Meta-CAPI Dispatch-Bugfix 🔴
+### Phase 2 — Meta end-to-end (kritischer Pfad)
+→ Tasks **T2.1–T2.2**.
+**Checkpoint C2:** Testbestellung (Meta): Browser-Purchase mit Advanced Matching (em/fn/ln) **und** allen Produkten in `contents[]` + Shop-Währung; CAPI-Server-Purchase mit gehashten Userdaten, allen `contents[]`, Shop-Währung, `event_id` = Order-ID; Meta dedupliziert Browser/Server. Verifiziert auf dem HTTPS-Dev-Shop.
 
-**Ziel:** Die Meta Conversions API feuert serverseitig.
-**Entscheidung:** Klasse umbenennen `Wp_Sdtrk_Tracker_Fb` → `Wp_Sdtrk_Tracker_Meta` **plus** `class_alias('Wp_Sdtrk_Tracker_Meta', 'Wp_Sdtrk_Tracker_Fb')` für Abwärtskompatibilität. (Bevorzugt gegenüber Catcher-`type:'fb'`, weil Dateiname `…-meta.php` und Optionspräfix `meta_*` schon „meta" sind — konsistenteste Lösung.)
+### Phase 3 — GA4 end-to-end
+→ Task **T3.1**.
+**Checkpoint C3:** `items[]` aller Produkte, Shop-Währung, `transaction_id` = Order-ID, Browser-gtag **und** Measurement Protocol.
 
-→ Siehe Tasks **T0.1–T0.2** in [todo.md](todo.md).
+### Phase 4 — TikTok end-to-end
+→ Task **T4.1**.
+**Checkpoint C4:** `contents[]` aller Produkte, Shop-Währung, `PlaceAnOrder`, Browser-Pixel **und** Events-API 2.0, `event_id` = `<Order-ID>_<hash>`.
 
-**Checkpoint C0:** Meta-Server-Event erscheint im Meta Events Manager (Test-Event-Code); `validateTracker` liefert für `type:'meta'` `state !== false`. GA4/TikTok unverändert lauffähig. Spec-Befund entfernt.
-
----
-
-## Phase 1 — Externe API-Integrationen prüfen & aktualisieren 🟡
-
-**Ziel:** Jede Integration gegen den aktuellen Anbieter-Vertrag prüfen; nur wo nötig aktualisieren. Quellen-getrieben (offizielle Doku zitieren), nichts aus dem Gedächtnis ändern.
-
-**Erwartete Befunde (zu verifizieren, nicht blind anwenden):**
-- **Meta:** Graph-API `v11.0` veraltet → aktuelle Version. Payload weitgehend stabil; `action_source`/`event_source_url`/`user_data`-Pflichtfelder gegen aktuelle Doku prüfen.
-- **TikTok:** `open_api/v1.2/pixel/track/` → **Events API 2.0** (`v1.3/event/track/`) mit geänderter Payload-Struktur (`event_source`, `event_source_id`, `data[]`, Unix-`event_time`). Das ist der größte Eingriff.
-- **GA4:** Measurement Protocol stabil → primär Verifikation.
-- **Browser-Pixel (LinkedIn, Funnelytics, Mautic, Matomo):** Snippet-/Script-URLs & globale APIs gegen aktuelle Anbieter-Snippets prüfen.
-
-→ Tasks **T1.0–T1.5**. T1.0 ist ein reiner Audit-Task (read-only, erzeugt eine Befundliste), die folgenden Tasks setzen nur die tatsächlich nötigen Updates um.
-
-**Checkpoint C1:** Audit-Dokument liegt vor; jede umgesetzte Änderung per Test-Event/Debug-Endpoint verifiziert; Spec-Plattformseiten + Befund „Veraltete API-Versionen" nachgeführt.
-
----
-
-## Phase 2 — WooCommerce-Integration 🟢
-
-**Vorab-Designklärung (Task T2.0, blockierend):** Hooks, Daten-Mapping, Consent-Zusammenspiel, asynchrone Zahlungen. Ergebnis = kurzes Design-Memo, das die folgenden Tasks fixiert.
-
-**Vertikale Slices (jeder Task = ein vollständiger Pfad):**
-- **T2.1** WC-Erkennung + Redux-Switch (nur sichtbar/aktiv wenn WC aktiv).
-- **T2.2** WC-Order → kanonisches Event-Array (eine `Wp_Sdtrk_WC_Order_Mapper`-Klasse, die exakt das von `Wp_Sdtrk_Tracker_Event` erwartete Schema liefert; gemeinsame `event_id` aus Order).
-- **T2.3** `woocommerce_thankyou`: **Browser-Pixel** (Purchase) end-to-end für **eine** Plattform (Meta) — Proof of path.
-- **T2.4** Browser-Pixel auf alle aktiven Plattformen ausweiten.
-- **T2.5** `woocommerce_thankyou`: **Server-APIs** (CAPI/MP/Events) — consent-gated, Dedup über gemeinsame `event_id`.
-
-**Checkpoint C2:** Testbestellung auf Order-Received-Seite löst Browser-Pixel **und** Server-APIs aus (bei akzeptiertem Consent), mit Produkten/Wert/Währung; Plattformen erkennen Dedup (kein Doppelzählen). Neue Spec-Sektion `spec/07-woocommerce/` + Feature-Matrix [00](../spec/00-overview.md) ergänzt.
-
----
-
-## Phase 3 — Produkt-Feed 🟢
-
-**Vorab-Designklärung (Task T3.0, blockierend):** Feld-Mapping je Plattform, Format(e) (CSV, ggf. XML), Speicherort/URL & Zugriffsschutz, Intervall, Varianten/Bestände/Preise.
-
-**Vertikale Slices:**
-- **T3.1** Feed-Generator: aktive WC-Produkte → kanonische Feed-Zeilen.
-- **T3.2** Abrufbare Feed-URL (Endpoint) + Zugriffsschutz; gekoppelt an aktive WC-Integration.
-- **T3.3** Cron reaktivieren: `WP_SDTRK_Cron::HOOKS` füllen, `register_cron_actions()` aktivieren, periodische Feed-Aktualisierung.
-
-**Checkpoint C3:** Feed-URL liefert validen Feed der aktiven Produkte; Cron aktualisiert im konfigurierten Intervall; in Meta Commerce Manager / Google Merchant Center einlesbar (Format-Validierung). Spec (WC-Sektion + [lifecycle.md](../spec/01-architecture/lifecycle.md) + Cron-Befund in [99](../spec/99-findings.md)) nachgeführt.
+### Phase 5 — Regression & Spec/Tests
+→ Tasks **T5.1–T5.2**.
+**Checkpoint C5:** Nicht-WC-Seiten (Lead/Value, View-Item) verhalten sich exakt wie vorher (EUR-Fallback, single-product). Spec-Sektion 07 + betroffene Datenmodell-/Browser-Tracking-Seiten + Befunde sind auf den neuen Ist-Zustand gebracht; Tests grün/angepasst.
 
 ---
 
 ## Übergreifende Verifikationsmittel
 
-- **WP_DEBUG/WP_DEBUG_LOG** an → `wp-content/debug.log` zeigt `sdtrk_log()`-Ausgaben (Request/Response).
-- **Test-Event-Codes:** Meta `meta_trk_server_debug_code`, TikTok `tt_trk_server_debug_code`; GA4 Debug-Endpoint `ga_trk_debug`.
-- **Browser:** DevTools Network → `admin-ajax.php` (`func=validateTracker`) Antwort `state`/`debug`; Pixel-Requests an die jeweiligen Endpunkte.
-- Kein automatisiertes Test-Setup im Repo vorhanden → Verifikation manuell über die genannten Debug-Pfade.
+- **Browser-Debug-Log** je Catcher (`dbg`-Flag) → Console-Ausgaben „Fired in Browser (…)" / „Sent Data to Server (…)".
+- **Test-Event-Codes:** Meta `meta_trk_server_debug_code`, TikTok `tt_trk_server_debug_code`; GA4 Debug via `ga_trk_debug`.
+- **WP_DEBUG_LOG** → `sdtrk_log()` (Request/Response der Server-Calls).
+- **DevTools Network:** `admin-ajax.php?func=validateTracker` Antwort `state`; Pixel-/CAPI-Requests an die Endpunkte.
+- **Live-Shop:** `dev.eia-akademie.de` (HTTPS) für echte Testbestellungen.
 
 ---
 
 ## Risiken & offene Punkte
 
-- **TikTok Events 2.0** ist ein struktureller Payload-Umbau, nicht nur ein Versionssprung — eigener Verifikationsaufwand.
-- **Consent bei WC-Thankyou:** Zusammenspiel von Borlabs-Consent und Server-Feuerung muss explizit definiert werden (T2.0).
-- **Asynchrone Zahlungen** (Vorkasse/Überweisung): `woocommerce_thankyou` feuert ggf. vor `processing`/`completed` → Status-Handling klären (T2.0).
-- **Feed-Zugriffsschutz:** öffentliche Feed-URL vs. Token — in T3.0 entscheiden.
+- **Reihenfolge des Localize:** Das WC-`wp_localize_script` muss **nach** der Engine-Registrierung an den Engine-Handle gehängt werden (sonst fehlt das Objekt zur Engine-Laufzeit). WC-Hook mit späterer Priorität als `enqueue_scripts`.
+- **IP/User-Agent auf der Danke-Seite:** Es zählen die Live-Werte der Seite (konsistent mit dem „fire on thankyou"-Modell), nicht die auf der Order gespeicherten.
+- **Backload:** Wird Consent erst nach Seitenaufbau erteilt, wird Purchase nicht nachgefeuert (gleiche Einschränkung wie für alle Events; keine Sonderlogik).
+- **Mehr-Produkt-Wert:** Gesamtwert = `order->get_total()` (Scalar); `items[]` tragen Stückpreis × Menge. Konsistenz zwischen Summe und Positionssummen beachten (Versand/Steuer).
 - Jede Phase schließt mit Spec-Nachführung; ohne sie gilt der Task als **nicht** abgeschlossen.
 </content>
+</invoke>
