@@ -43,6 +43,8 @@ Jeder Kauf-Catcher baut seine plattformspezifische Mehr-Produkt-Payload aus `get
 | GA4 | `items[]` `{id,name,quantity,price,brand}` | MP `items[]` |
 | TikTok | `properties.contents[]` `{content_id,content_name,content_type,quantity,price}` | Events-API `properties.contents[]` |
 
+> Die Objekt-Platzierung dieser Felder (z. B. Meta `contents` in `custom_data`, GA4 `items[]` in den Event-`params`, TikTok `contents` in `properties`) folgt den offiziellen Anbieter-Verträgen. Vor Änderungen daran ist die [maßgebliche Anbieter-Doku](../02-server-tracking/README.md#maßgebliche-anbieter-dokumentation-immer-beachten) zu prüfen.
+
 ## 5. Währung
 
 Die Währung kommt aus dem Event (`getCurrency()`); `EUR` ist nur noch der Fallback, wenn keine gesetzt ist. Für WooCommerce ist das die Shop-Währung (`get_currency()`), für Nicht-WC-Events greift der `EUR`-Fallback (unverändertes Verhalten).

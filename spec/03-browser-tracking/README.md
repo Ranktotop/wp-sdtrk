@@ -38,3 +38,5 @@ Jeder Catcher hat zwei Ausgabewege:
 - **`sendData(handler, data)`** → AJAX an `wp_sdtrk_handle_public_ajax_callback` (→ Server-Tracker).
 
 Konfiguration kommt per `wp_localize_script` als JS-Globals (`wp_sdtrk_engine`, `wp_sdtrk_meta`, `wp_sdtrk_ga`, …). Siehe [04 › Settings & Localize](../04-admin-and-options/settings-and-menu.md) und [engine-and-lifecycle.md](engine-and-lifecycle.md).
+
+> ⚠️ Pixel-Snippets, globale APIs (`fbq`/`gtag`/`ttq`/…), Event-Namen und Payload-Felder folgen den offiziellen Anbieter-Verträgen. Vor Änderungen an einem Browser-Payload die [maßgebliche Anbieter-Doku](../02-server-tracking/README.md#maßgebliche-anbieter-dokumentation-immer-beachten) prüfen.
