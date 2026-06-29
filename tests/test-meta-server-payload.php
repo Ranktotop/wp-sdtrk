@@ -91,9 +91,9 @@ check('content_type product',            ($custom['content_type'] ?? null) === '
 check('contents has both w/ quantity',   isset($custom['contents']) && count($custom['contents']) === 2
                                           && $custom['contents'][1]['id'] === '777'
                                           && (int) $custom['contents'][1]['quantity'] === 2);
-check('email hashed (sha256)',           ($user['em'] ?? null) === hash('sha256', 'buyer@example.com'));
-check('first name hashed',               ($user['fn'] ?? null) === hash('sha256', 'Ada'));
-check('last name hashed',                ($user['ln'] ?? null) === hash('sha256', 'Lovelace'));
+check('email hashed (sha256, normalized)', ($user['em'] ?? null) === hash('sha256', 'buyer@example.com'));
+check('first name hashed (normalized)',  ($user['fn'] ?? null) === hash('sha256', 'ada'));
+check('last name hashed (normalized)',   ($user['ln'] ?? null) === hash('sha256', 'lovelace'));
 check('fbp/fbc passed through',          ($user['fbp'] ?? null) === 'fb.1.x' && ($user['fbc'] ?? null) === 'fb.1.y');
 
 if ($fails > 0) {

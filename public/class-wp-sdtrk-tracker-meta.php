@@ -330,14 +330,16 @@ class Wp_Sdtrk_Tracker_Meta
         if (isset($data["fbc"])) {
             $userData["fbc"] = $data["fbc"];
         }
+        // Meta requires normalized (lowercased + trimmed) values before SHA-256,
+        // otherwise mixed-case/whitespace variants hash differently and miss matches.
         if ($event->getUserFirstName()) {
-            $userData["fn"] = hash('sha256', $event->getUserFirstName());
+            $userData["fn"] = hash('sha256', strtolower(trim($event->getUserFirstName())));
         }
         if ($event->getUserLastName()) {
-            $userData["ln"] = hash('sha256', $event->getUserLastName());
+            $userData["ln"] = hash('sha256', strtolower(trim($event->getUserLastName())));
         }
         if ($event->getUserEmail()) {
-            $userData["em"] = hash('sha256', $event->getUserEmail());
+            $userData["em"] = hash('sha256', strtolower(trim($event->getUserEmail())));
         }
         return $userData;
     }

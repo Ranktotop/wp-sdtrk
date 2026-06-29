@@ -272,8 +272,9 @@ class Wp_Sdtrk_Tracker_Tt
             "ip" => $event->getEventIp(),
             "user_agent" => $event->getEventAgent()
         );
+        // TikTok requires normalized (lowercased + trimmed) email before SHA-256.
         if ($event->getUserEmail()) {
-            $userData["email"] = hash('sha256', $event->getUserEmail());
+            $userData["email"] = hash('sha256', strtolower(trim($event->getUserEmail())));
         }
         // ttclid: the click-id appended as the ttclid GET-param
         if (isset($data['ttc'])) {
