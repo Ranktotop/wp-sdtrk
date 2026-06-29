@@ -48,7 +48,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getProductId()
     {
-        return $this->grabFirstValue('prodId');
+        return sanitize_text_field($this->grabFirstValue('prodId'));
     }
 
     /**
@@ -58,7 +58,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getPageId()
     {
-        return ($this->setAndFilled('pageId')) ? $this->eventData['pageId'] : "";
+        return ($this->setAndFilled('pageId')) ? sanitize_text_field($this->eventData['pageId']) : "";
     }
 
     /**
@@ -68,7 +68,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getPageName()
     {
-        return ($this->setAndFilled('pageName')) ? $this->eventData['pageName'] : "";
+        return ($this->setAndFilled('pageName')) ? sanitize_text_field($this->eventData['pageName']) : "";
     }
 
     /**
@@ -78,7 +78,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getProductName()
     {
-        $prodName = $this->grabFirstValue('prodName');
+        $prodName = sanitize_text_field($this->grabFirstValue('prodName'));
         return (! empty($prodName)) ? $prodName : "custom";
     }
 
@@ -89,7 +89,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getUserFirstName()
     {
-        return $this->grabFirstValue('userFirstName');
+        return sanitize_text_field($this->grabFirstValue('userFirstName'));
     }
 
     /**
@@ -99,7 +99,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getUserLastName()
     {
-        return $this->grabFirstValue('userLastName');
+        return sanitize_text_field($this->grabFirstValue('userLastName'));
     }
 
     /**
@@ -119,7 +119,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getUserEmail()
     {
-        return $this->grabFirstValue('userEmail');
+        return sanitize_email($this->grabFirstValue('userEmail'));
     }
 
     /**
@@ -130,7 +130,8 @@ class Wp_Sdtrk_Tracker_Event
     public function getBrandName()
     {
         $brandName = ($this->setAndFilled('brandName')) ? $this->eventData['brandName'] : WP_SDTRK_Helper_Options::get_string_option('brandname');
-        return ($brandName && ! empty(trim($brandName))) ? $brandName : get_bloginfo('name');
+        $brandName = ($brandName && ! empty(trim($brandName))) ? $brandName : get_bloginfo('name');
+        return sanitize_text_field($brandName);
     }
 
     /**
@@ -143,7 +144,22 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getItems()
     {
-        return (isset($this->eventData['items']) && is_array($this->eventData['items'])) ? $this->eventData['items'] : array();
+        if (! isset($this->eventData['items']) || ! is_array($this->eventData['items'])) {
+            return array();
+        }
+        $items = array();
+        foreach ($this->eventData['items'] as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $items[] = array(
+                'id'    => isset($item['id']) ? sanitize_text_field($item['id']) : '',
+                'name'  => isset($item['name']) ? sanitize_text_field($item['name']) : '',
+                'qty'   => isset($item['qty']) ? (int) $item['qty'] : 1,
+                'price' => isset($item['price']) ? (float) $item['price'] : 0.0,
+            );
+        }
+        return $items;
     }
 
     /**
@@ -182,7 +198,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getTransactionId()
     {
-        return $this->grabFirstValue('orderId');
+        return sanitize_text_field($this->grabFirstValue('orderId'));
     }
 
     /**
@@ -195,7 +211,7 @@ class Wp_Sdtrk_Tracker_Event
         if (! empty($this->getTransactionId())) {
             return $this->getTransactionId();
         }
-        return ($this->setAndFilled('eventId')) ? $this->eventData['eventId'] : substr(str_shuffle(MD5(microtime())), 0, 10);
+        return ($this->setAndFilled('eventId')) ? sanitize_text_field($this->eventData['eventId']) : substr(str_shuffle(MD5(microtime())), 0, 10);
     }
 
     /**
@@ -216,10 +232,10 @@ class Wp_Sdtrk_Tracker_Event
     public function getEventAgent()
     {
         if ($this->setAndFilled('eventSourceAgent')) {
-            return $this->eventData['eventSourceAgent'];
+            return sanitize_text_field($this->eventData['eventSourceAgent']);
         }
         if (isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT']) {
-            return $_SERVER['HTTP_USER_AGENT'];
+            return sanitize_text_field($_SERVER['HTTP_USER_AGENT']);
         }
         return "";
     }
@@ -231,7 +247,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getEventSource()
     {
-        return ($this->setAndFilled('eventSource')) ? $this->eventData['eventSource'] : WP_SDTRK_Helper_Event::getCurrentURL();
+        return ($this->setAndFilled('eventSource')) ? esc_url_raw($this->eventData['eventSource']) : WP_SDTRK_Helper_Event::getCurrentURL();
     }
 
     /**
@@ -241,7 +257,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getEventReferer()
     {
-        return ($this->setAndFilled('eventSourceReferer')) ? $this->eventData['eventSourceReferer'] : WP_SDTRK_Helper_Event::getCurrentReferer();
+        return ($this->setAndFilled('eventSourceReferer')) ? esc_url_raw($this->eventData['eventSourceReferer']) : WP_SDTRK_Helper_Event::getCurrentReferer();
     }
 
     /**
@@ -271,7 +287,7 @@ class Wp_Sdtrk_Tracker_Event
      */
     public function getEventUrl()
     {
-        return ($this->setAndFilled('eventUrl')) ? $this->eventData['eventUrl'] : WP_SDTRK_Helper_Event::getCurrentURL();
+        return ($this->setAndFilled('eventUrl')) ? esc_url_raw($this->eventData['eventUrl']) : WP_SDTRK_Helper_Event::getCurrentURL();
     }
 
     /**

@@ -6,18 +6,6 @@ Legende: 🔴 funktionaler Bug · 🟡 Auffälligkeit/Hygiene · 🔵 Hinweis/In
 
 ---
 
-## 🟡 Eingabe-Sanitisierung in der AJAX-Pipeline
-
-**Verifiziert.** `validateTracker` übergibt `$_POST['data']` weitgehend ungefiltert an das Event-Modell:
-
-```php
-$event = new Wp_Sdtrk_Tracker_Event($data['event']);
-```
-
-Es findet keine durchgehende `sanitize_*()`-Behandlung statt. Nonce-Schutz ist vorhanden, eine Capability-Prüfung bewusst nicht (öffentliches Tracking). Werte fließen in Server-API-Payloads (cURL) und teils in `wp_localize_script` (dort JSON-encodiert → kein direktes XSS). **Empfehlung:** gezielte Sanitisierung (`sanitize_email`, `sanitize_text_field`, `floatval`) pro Feld; User-Agent vor Weiterverwendung escapen.
-
----
-
 ## 🔵 Mautic: Custom-Event-Erfassung setzt ein Mautic-Plugin voraus (by design)
 
 **Verifiziert.** `Wp_Sdtrk_Catcher_Mtc::fireData()` sendet Events via `mt('send', '<eventName>', {…})` mit echten Event-Namen (`purchase`, `view_item`, …). Natives MauticJS verarbeitet nur `mt('send', 'pageview', {…})` (Core prüft `type === 'pageview'`); zusätzliche Event-Typen werden von Plugins/Bundles über `CoreEvents::BUILD_MAUTIC_JS` (`appendJs`) in `mtc.js` injiziert (Mautic-Core-PR-Hinweis: „plugins/bundles can implement more tracking events"). Die Custom-Event-Erfassung des Catchers setzt daher ein entsprechendes **Mautic-seitiges Plugin** (z. B. „Mautic Custom Events") voraus. Bewusst **nicht** auf `pageview` umgebaut — Käufe/Events als PageView zu tracken wäre semantisch falsch. **Voraussetzung dokumentieren** (Mautic-Plugin nötig); der `pageview`-Hit selbst funktioniert nativ.
@@ -74,6 +62,5 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 
 | # | Punkt | Schwere |
 |---|-------|---------|
-| 1 | Eingabe-Sanitisierung | 🟡 mittel |
-| 2 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
-| 3 | Namens-Inkonsistenzen | 🟡 niedrig |
+| 1 | Browser-only-Catcher (Mautic/Funnelytics): Währung hart `EUR`, single-product | 🟡 niedrig |
+| 2 | Namens-Inkonsistenzen | 🟡 niedrig |

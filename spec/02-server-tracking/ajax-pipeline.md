@@ -21,7 +21,7 @@ Ablauf:
    → Es sind nur Methoden aufrufbar, die auf dem Handler existieren. Aktuell relevant: **`validateTracker`**.
 3. Ergebnis wird als JSON zurückgegeben.
 
-> **Design-Hinweis:** Das `func`-Dispatch ist ein generisches „RPC"-Muster. Sicherheit hängt allein an `method_exists` + Nonce; es gibt keine Capability-Prüfung (per Design, da Tracking öffentlich ist). Siehe [99 Befunde](../99-findings.md) zur Eingabe-Sanitisierung.
+> **Design-Hinweis:** Das `func`-Dispatch ist ein generisches „RPC"-Muster. Sicherheit hängt an `method_exists` + Nonce; es gibt keine Capability-Prüfung (per Design, da Tracking öffentlich ist). Die Eingaben sind nicht vertrauenswürdig und werden daher gesäubert (siehe unten + [event-model.md › Sanitisierung](event-model.md#0-eingabe-sanitisierung-in-den-gettern)).
 
 ## 2. `validateTracker($data, $debugMode = false)`
 
@@ -29,14 +29,20 @@ Ablauf:
 // Pflichtfelder
 if (! isset($data['event'], $data['type'], $data['handler'], $data['data'])) return ['state' => false];
 
-$event     = new Wp_Sdtrk_Tracker_Event($data['event']);
-$className  = 'Wp_Sdtrk_Tracker_' . ucfirst($data['type']);   // 'meta' → 'Wp_Sdtrk_Tracker_Meta'
+// Dispatch härten: type auf [a-z], handler-Whitelist, Seitendaten säubern
+$type    = preg_replace('/[^a-z]/', '', strtolower($data['type']));
+$handler = $data['handler'];
+if (! in_array($handler, ['Page','Event','Scroll','Time','Click','Visibility'], true)) return ['state' => false, 'debug' => false];
+$sideData = is_array($data['data']) ? $this->sanitize_side_data($data['data']) : [];
+
+$event     = new Wp_Sdtrk_Tracker_Event($data['event']);   // Feld-Sanitisierung in den Gettern
+$className  = 'Wp_Sdtrk_Tracker_' . ucfirst($type);          // 'meta' → 'Wp_Sdtrk_Tracker_Meta'
 if (class_exists($className)) {
     $tracker = new $className();
     if (method_exists($tracker, 'fireTracking_Server') && method_exists($tracker, 'setAndGetDebugMode_frontend')) {
         return [
             'debug' => $tracker->setAndGetDebugMode_frontend($debugMode),
-            'state' => $tracker->fireTracking_Server($event, $data['handler'], $data['data']),
+            'state' => $tracker->fireTracking_Server($event, $handler, $sideData),
         ];
     }
 }

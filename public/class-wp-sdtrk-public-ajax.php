@@ -51,15 +51,28 @@ class Wp_Sdtrk_Public_Ajax_Handler
                 'state' => false
             );
         }
-        // Check for handler and run it
+        // Harden the dispatch inputs (untrusted, public AJAX):
+        //  - type: only [a-z] before building the class name
+        //  - handler: restrict to the known event categories
+        //  - data: sanitize the scalar side-channel values (fbp/fbc/cid/…)
+        $type    = preg_replace('/[^a-z]/', '', strtolower((string) $data['type']));
+        $handler = (string) $data['handler'];
+        $allowedHandlers = array('Page', 'Event', 'Scroll', 'Time', 'Click', 'Visibility');
+        if (! in_array($handler, $allowedHandlers, true)) {
+            return array('state' => false, 'debug' => false);
+        }
+        $sideData = is_array($data['data']) ? $this->sanitize_side_data($data['data']) : array();
+
+        // Check for handler and run it. Event-field sanitization happens in the
+        // Wp_Sdtrk_Tracker_Event getters (see class-wp-sdtrk-tracker-event.php).
         $event = new Wp_Sdtrk_Tracker_Event($data['event']);
-        $className = 'Wp_Sdtrk_Tracker_' . ucfirst($data['type']);
+        $className = 'Wp_Sdtrk_Tracker_' . ucfirst($type);
         if (class_exists($className)) {
             $tracker = new $className();
             if (method_exists($tracker, 'fireTracking_Server') && method_exists($tracker, 'setAndGetDebugMode_frontend')) {
                 return array(
                     'debug' => $tracker->setAndGetDebugMode_frontend($debugMode),
-                    'state' => $tracker->fireTracking_Server($event, $data['handler'], $data['data'])
+                    'state' => $tracker->fireTracking_Server($event, $handler, $sideData)
                 );
             }
         }
@@ -67,5 +80,28 @@ class Wp_Sdtrk_Public_Ajax_Handler
             'state' => false,
             'debug' => false
         );
+    }
+
+    /**
+     * Sanitize the scalar values of the handler side-channel data (fbp, fbc,
+     * cid, gclid, ttc, ttp, hash, tag, …). Bools/ints/floats are kept as-is;
+     * strings get sanitize_text_field; nested arrays are sanitized recursively.
+     *
+     * @param array $data
+     * @return array
+     */
+    private function sanitize_side_data(array $data): array
+    {
+        $clean = array();
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $clean[$key] = $this->sanitize_side_data($value);
+            } elseif (is_string($value)) {
+                $clean[$key] = sanitize_text_field($value);
+            } else {
+                $clean[$key] = $value;
+            }
+        }
+        return $clean;
     }
 }
