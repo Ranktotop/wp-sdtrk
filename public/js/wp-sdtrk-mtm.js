@@ -177,6 +177,13 @@ class Wp_Sdtrk_Catcher_Mtm {
 			_paq.push(['setSiteId', String(this.localizedData.sid)]);
 			_paq.push(['trackPageView']);
 
+			// Load the Matomo tracker script — without it the _paq queue never flushes.
+			var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+			g.type = 'text/javascript';
+			g.async = true;
+			g.src = u + 'matomo.js';
+			s.parentNode.insertBefore(g, s);
+
 			this.helper.debugLog(this.localizedData.debug, { event: 'page_view' }, 'Fired in Browser (mtm-Page)');
 			this.pixelLoaded = true;
 		}
