@@ -32,6 +32,11 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.11.0 =
+* Added a product-feed management page (WooCommerce section -> "Manage feed"): control which published products are included in or excluded from the product feed without editing each product
+* Server-side paginated, searchable product list with a per-row in-feed/excluded toggle and bulk include/exclude; excluding a variable product also removes its variations
+* Exclusions persist in the wp_sdtrk_feed_excluded option and invalidate the feed cache so changes apply on the next refresh
+
 = 1.10.0 =
 * Added WooCommerce InitiateCheckout tracking on the checkout page (Meta InitiateCheckout, GA4 begin_checkout, TikTok InitiateCheckout), browser and server in one pass
 * Fires on every checkout page load for a non-empty cart; takes precedence over a pending add-to-cart (order > beginCheckout > addToCart > viewItem)
