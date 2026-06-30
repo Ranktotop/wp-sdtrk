@@ -98,6 +98,45 @@
         $rows.html(rows.map(rowHtml).join(''));
     }
 
+    function notice(message, type) {
+        if (typeof window.wpsdtrk_show_notice === 'function') {
+            window.wpsdtrk_show_notice(message, type);
+        }
+    }
+
+    // Reflect a product's feed status in its row (label + class + toggle).
+    function applyRowState($tr, excluded) {
+        $tr.toggleClass('is-excluded', excluded).toggleClass('is-in-feed', !excluded);
+        $tr.find('.wpsdtrk-feed-status').prop('checked', !excluded);
+        $tr.find('.wpsdtrk-feed-status-label')
+            .text(excluded ? (i18n.excluded || 'Excluded') : (i18n.inFeed || 'In feed'));
+    }
+
+    function updateBulkButtons() {
+        var any = $rows.find('.wpsdtrk-feed-select:checked').length > 0;
+        $bulkExclude.prop('disabled', !any);
+        $bulkInclude.prop('disabled', !any);
+    }
+
+    // Persist a set of {id, excluded} changes; reconcile counters from the
+    // authoritative response. onFail rolls the optimistic UI back.
+    function save(changes, onFail) {
+        ajax('save_feed_exclusion', { changes: changes }).then(function (r) {
+            if (!r || !r.state) {
+                if (onFail) { onFail(); }
+                notice((r && r.message) || i18n.saveError || 'Could not save the change.', 'error');
+                return;
+            }
+            state.totalProducts = parseInt(r.totalProducts, 10) || state.totalProducts;
+            state.excludedCount = parseInt(r.excludedCount, 10) || 0;
+            renderCounter();
+            notice(r.message || i18n.saved || 'Saved.', 'success');
+        }, function () {
+            if (onFail) { onFail(); }
+            notice(i18n.saveError || 'Could not save the change.', 'error');
+        });
+    }
+
     function load() {
         state.loading = true;
         renderPagination();
@@ -172,11 +211,49 @@
             if (state.page < state.totalPages) { state.page++; load(); }
         });
 
+        // Per-row status toggle — optimistic, rolls back on failure.
+        $rows.on('change', '.wpsdtrk-feed-status', function () {
+            var $tr = $(this).closest('tr');
+            var id = parseInt($tr.data('product-id'), 10);
+            var excluded = !$(this).prop('checked'); // checked = in feed
+            applyRowState($tr, excluded);
+            save([{ id: id, excluded: excluded }], function () {
+                applyRowState($tr, !excluded); // rollback
+            });
+        });
+
+        // Selection → bulk button availability.
+        $rows.on('change', '.wpsdtrk-feed-select', updateBulkButtons);
+        $selectAll.on('change', function () {
+            $rows.find('.wpsdtrk-feed-select').prop('checked', $(this).prop('checked'));
+            updateBulkButtons();
+        });
+
+        function bulk(excluded) {
+            var $sel = $rows.find('.wpsdtrk-feed-select:checked');
+            if (!$sel.length) { return; }
+            var changes = [];
+            var rollback = [];
+            $sel.each(function () {
+                var $tr = $(this).closest('tr');
+                var id = parseInt($tr.data('product-id'), 10);
+                var was = $tr.hasClass('is-excluded');
+                changes.push({ id: id, excluded: excluded });
+                rollback.push({ $tr: $tr, was: was });
+                applyRowState($tr, excluded);
+            });
+            $selectAll.prop('checked', false);
+            $sel.prop('checked', false);
+            updateBulkButtons();
+            save(changes, function () {
+                rollback.forEach(function (r) { applyRowState(r.$tr, r.was); });
+            });
+        }
+
+        $bulkExclude.on('click', function () { bulk(true); });
+        $bulkInclude.on('click', function () { bulk(false); });
+
         load();
     });
-
-    // Expose for the mutating handlers (toggle/bulk), added below.
-    window.__sdtrkFeed = { state: state, ajax: ajax, load: load,
-        renderCounter: renderCounter, esc: esc, i18n: i18n };
 
 })(jQuery);
