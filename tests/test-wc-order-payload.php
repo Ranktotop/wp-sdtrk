@@ -16,8 +16,9 @@ require_once dirname(__DIR__) . '/public/class-wp-sdtrk-wc-integration.php';
 
 class FakeWC_Item
 {
-    public function __construct(private $pid, private $name, private $qty, private $total) {}
+    public function __construct(private $pid, private $name, private $qty, private $total, private $vid = 0) {}
     public function get_product_id() { return $this->pid; }
+    public function get_variation_id() { return $this->vid; }
     public function get_name() { return $this->name; }
     public function get_quantity() { return $this->qty; }
     public function get_total() { return $this->total; }

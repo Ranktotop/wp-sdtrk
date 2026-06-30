@@ -16,8 +16,9 @@ require_once dirname(__DIR__) . '/public/class-wp-sdtrk-wc-order-mapper.php';
 // ---- Fake WooCommerce order/item (duck-typed) ----
 class FakeWC_Item
 {
-    public function __construct(private $pid, private $name, private $qty, private $total) {}
+    public function __construct(private $pid, private $name, private $qty, private $total, private $vid = 0) {}
     public function get_product_id() { return $this->pid; }
+    public function get_variation_id() { return $this->vid; }
     public function get_name() { return $this->name; }
     public function get_quantity() { return $this->qty; }
     public function get_total() { return $this->total; }
@@ -53,6 +54,12 @@ check('line 0 qty = 1',            ($lines[0]['qty'] ?? null) === 1);
 check('line 0 unit price = 99.90', abs(($lines[0]['price'] ?? 0) - 99.90) < 0.0001);
 check('line 1 qty = 2',            ($lines[1]['qty'] ?? null) === 2);
 check('line 1 unit price = 25.00', abs(($lines[1]['price'] ?? 0) - 25.00) < 0.0001);
+
+echo "lineItems() prefers the variation id (catalog/feed consistency)\n";
+$variableOrder = new FakeWC_Order();
+$variableOrder->items = [new FakeWC_Item(303, 'T-Shirt', 1, '20.00', 808)]; // parent 303, variation 808
+$varLines = $mapper->lineItems($variableOrder);
+check('variation id wins over parent', ($varLines[0]['id'] ?? null) === '808');
 
 echo "lineItems() empty order\n";
 $empty = new FakeWC_Order();

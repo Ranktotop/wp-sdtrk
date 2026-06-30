@@ -24,7 +24,7 @@ Strukturierte Positionsliste über **alle** Warenkorb-Positionen:
 [ ['id' => string, 'name' => string, 'qty' => int, 'price' => float], … ]
 ```
 
-`price` ist der Stückpreis (`get_total()` der Position / Menge). Diese Liste wird von der Engine als `items[]` ins Event übernommen und von jedem Kauf-Catcher in seine plattformspezifische Mehr-Produkt-Payload (`contents[]`/`items[]`) umgesetzt.
+`id` ist die **Variations-ID**, falls vorhanden (`get_variation_id() ?: get_product_id()`) — so stimmen Order-Positionen mit dem Produkt-Feed und den AddToCart-/ViewItem-IDs überein (Katalog-Konsistenz); für einfache Produkte greift die Parent-Produkt-ID. `price` ist der Stückpreis (`get_total()` der Position / Menge). Diese Liste wird von der Engine als `items[]` ins Event übernommen und von jedem Kauf-Catcher in seine plattformspezifische Mehr-Produkt-Payload (`contents[]`/`items[]`) umgesetzt.
 
 ## `Wp_Sdtrk_WC_Order_Mapper::productLine($product, int $qty = 1): array`
 

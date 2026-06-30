@@ -24,7 +24,10 @@ class Wp_Sdtrk_WC_Order_Mapper
         foreach ($order->get_items() as $item) {
             $qty = (int) $item->get_quantity();
             $lines[] = [
-                'id'    => (string) $item->get_product_id(),
+                // Prefer the variation id so order items match the product feed and
+                // the AddToCart/ViewItem ids (catalog-level consistency); fall back
+                // to the parent product id for simple products.
+                'id'    => (string) ($item->get_variation_id() ?: $item->get_product_id()),
                 'name'  => $item->get_name(),
                 'qty'   => $qty,
                 'price' => $qty > 0 ? ((float) $item->get_total()) / $qty : (float) $item->get_total(),
