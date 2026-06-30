@@ -28,7 +28,10 @@ Smart Serverside Tracking (sdtrk_settings)
 └── Tutorials              # Doku/Videos
 ```
 
-**Versteckte Zusatzseite:** `wp_sdtrk_admin_map_linkedin` (registriert via `admin_menu` → `register_page_wp_sdtrk_admin_map_linkedin`), per CSS (`display:none`) aus dem Menü ausgeblendet; Aufruf nur über den Link im LinkedIn-Tab. Template: `templates/wp-sdtrk-admin-map-linkedin.php`. Siehe [05 › LinkedIn-Mapping](../05-data-model/linkedin-mapping.md).
+**Versteckte Zusatzseiten** (registriert via `admin_menu`, per CSS `display:none` aus dem Menü ausgeblendet, Aufruf nur über einen Button in der jeweiligen Sektion):
+
+- `wp_sdtrk_admin_map_linkedin` (`register_page_wp_sdtrk_admin_map_linkedin`) — Link im LinkedIn-Tab. Template: `templates/wp-sdtrk-admin-map-linkedin.php`. Siehe [05 › LinkedIn-Mapping](../05-data-model/linkedin-mapping.md).
+- `wp_sdtrk_feed_manage` (`register_page_wp_sdtrk_feed_manage`) — Button „Manage feed" in der WooCommerce-Sektion (nur bei aktivem Feed). Template: `templates/wp-sdtrk-admin-feed-manage.php`. Steuert die Feed-Ausschluss-Liste. Siehe [07 › Produktfeed-Verwaltung](../07-woocommerce/feed-management.md).
 
 ## 3. Metabox (Page-Level)
 
@@ -52,7 +55,7 @@ wp_localize_script('wp_sdtrk', 'wp_sdtrk', [
 ]);
 ```
 
-Für die LinkedIn-Mapping-Seite zusätzlich `SDTRK_Linkedin = { ajaxUrl, nonce }`.
+Für die LinkedIn-Mapping-Seite zusätzlich `SDTRK_Linkedin = { ajaxUrl, nonce }`, für die Feed-Verwaltungsseite `SDTRK_FeedManage = { ajaxUrl, nonce, perPage, i18n }`.
 
 ## 6. Admin-AJAX — `Wp_Sdtrk_Admin_Ajax_Handler`
 
@@ -65,6 +68,8 @@ Gleiches `func`-Dispatch-Muster wie Public (Action `wp_sdtrk_handle_admin_ajax_c
 | `get_linkedin_mapping` | Mapping-Details laden (id, event, convid, rules) |
 | `delete_linkedin_mapping` | Mapping löschen |
 | `regenerate_feed_token` | Produkt-Feed-Token rotieren, neue Feed-URL zurückgeben ([07 › Produkt-Feed](../07-woocommerce/product-feed.md)) |
+| `list_feed_products` | Veröffentlichte Produkte paginiert/durchsuchbar listen (inkl. Ausschluss-Status) ([07 › Produktfeed-Verwaltung](../07-woocommerce/feed-management.md)) |
+| `save_feed_exclusion` | Ausschluss-Deltas anwenden + Feed-Cache invalidieren ([07 › Produktfeed-Verwaltung](../07-woocommerce/feed-management.md)) |
 
 Antwort: JSON `{ state, message, … }` (z. B. `mapping` bzw. `url`).
 

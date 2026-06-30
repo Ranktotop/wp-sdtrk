@@ -9,7 +9,8 @@ Optionale Integration, die **nur** greift, wenn WooCommerce installiert/aktiv is
 | [purchase-tracking.md](purchase-tracking.md) | Danke-Seiten-Injection: Engine-Ingestion, Browser + Server, Mehr-Produkt, Währung, Dedup, Consent |
 | [view-item-and-add-to-cart.md](view-item-and-add-to-cart.md) | ViewItem (Produktseite) & AddToCart über dasselbe Seed-Modell; Quellen-Präzedenz |
 | [initiate-checkout.md](initiate-checkout.md) | InitiateCheckout (Checkout-Seite) über dasselbe Seed-Modell |
-| [product-feed.md](product-feed.md) | RSS-2.0/`g:`-Produkt-Feed, Token-Endpoint, täglicher Cron |
+| [product-feed.md](product-feed.md) | RSS-2.0/`g:`-Produkt-Feed, Token-Endpoint, täglicher Cron, Ausschluss-Liste |
+| [feed-management.md](feed-management.md) | Admin-Seite zur Steuerung, welche Produkte im Feed sind (versteckte Seite, AJAX) |
 
 ## Klassen / Dateien
 
@@ -18,7 +19,10 @@ Optionale Integration, die **nur** greift, wenn WooCommerce installiert/aktiv is
 | Integration (Gate + Commerce-Daten-Localize) | [public/class-wp-sdtrk-wc-integration.php](../../public/class-wp-sdtrk-wc-integration.php) |
 | Order-/Produkt-/Warenkorb-Mapper (`lineItems` / `productLine` / `cartLines`) | [public/class-wp-sdtrk-wc-order-mapper.php](../../public/class-wp-sdtrk-wc-order-mapper.php) |
 | Engine (Ingestion in `collect_eventData`) | [public/js/wp-sdtrk-engine.js](../../public/js/wp-sdtrk-engine.js) |
-| Produkt-Feed | [public/class-wp-sdtrk-wc-feed.php](../../public/class-wp-sdtrk-wc-feed.php) |
+| Produkt-Feed (inkl. Ausschluss-Liste) | [public/class-wp-sdtrk-wc-feed.php](../../public/class-wp-sdtrk-wc-feed.php) |
+| Feed-Verwaltungsseite (Template) | [templates/wp-sdtrk-admin-feed-manage.php](../../templates/wp-sdtrk-admin-feed-manage.php) |
+| Feed-Verwaltung (Seiten-JS) | [admin/js/wp-sdtrk-admin-feed-manage.js](../../admin/js/wp-sdtrk-admin-feed-manage.js) |
+| Feed-Verwaltung (AJAX `list_feed_products`/`save_feed_exclusion`) | [admin/class-wp-sdtrk-admin-ajax.php](../../admin/class-wp-sdtrk-admin-ajax.php) |
 | Cron (täglich) | [includes/class-wp-sdtrk-cron.php](../../includes/class-wp-sdtrk-cron.php) |
 | Redux-Sektion `WooCommerce` / Schalter `wc_integration` | [admin/class-wp-sdtrk-admin.php](../../admin/class-wp-sdtrk-admin.php) |
 | Loader-Registrierung | [includes/class-wp-sdtrk.php](../../includes/class-wp-sdtrk.php) |
