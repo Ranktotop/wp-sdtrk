@@ -95,12 +95,15 @@ class Wp_Sdtrk_Admin_Ajax_Handler
      */
     private function list_feed_products(array $data, array $meta): array
     {
-        if (!class_exists('Wp_Sdtrk_WC_Feed') || !function_exists('wc_get_products')) {
+        if (!$this->feed_ready()) {
             return ['state' => false, 'message' => __('Product feed is not available', 'wp-sdtrk')];
         }
 
         $feed     = new Wp_Sdtrk_WC_Feed();
         $excluded = $feed->get_excluded_ids();
+        // Counter (global, filter-independent). Run before the list query so the
+        // counts query doesn't shadow it in callers that inspect the last query.
+        $counts   = $this->feed_counts($excluded);
 
         $search   = isset($data['search']) ? sanitize_text_field((string) $data['search']) : '';
         $page     = isset($data['page']) ? max(1, (int) $data['page']) : 1;
@@ -151,19 +154,59 @@ class Wp_Sdtrk_Admin_Ajax_Handler
             ];
         }
 
-        $total_products = function_exists('wp_count_posts')
-            ? (int) (wp_count_posts('product')->publish ?? 0)
-            : $total;
-
         return [
             'state'         => true,
             'rows'          => $rows,
             'total'         => $total,
             'totalPages'    => max(1, $maxPages),
             'page'          => $page,
-            'totalProducts' => $total_products,
-            'excludedCount' => count($excluded),
+            'totalProducts' => $counts['totalProducts'],
+            'excludedCount' => $counts['excludedCount'],
         ];
+    }
+
+    /**
+     * Whether the feed management endpoints may run (feed available + enabled).
+     *
+     * @return bool
+     */
+    private function feed_ready(): bool
+    {
+        return class_exists('Wp_Sdtrk_WC_Feed')
+            && function_exists('wc_get_products')
+            && Wp_Sdtrk_WC_Feed::is_enabled();
+    }
+
+    /**
+     * Header counters: total published products and how many of them are excluded.
+     *
+     * excludedCount counts only excluded ids that are *currently* published
+     * products, so a stale id (a since-deleted/unpublished product still in the
+     * option) doesn't skew the "in feed" figure. The count query loads a single
+     * row (paginate + LIMIT 1) and reads the total.
+     *
+     * @param int[] $excluded
+     * @return array{totalProducts:int, excludedCount:int}
+     */
+    private function feed_counts(array $excluded): array
+    {
+        $total = function_exists('wp_count_posts') ? (int) (wp_count_posts('product')->publish ?? 0) : 0;
+
+        $excluded_active = 0;
+        if (!empty($excluded) && function_exists('wc_get_products')) {
+            $res = wc_get_products([
+                'status'   => 'publish',
+                'include'  => $excluded,
+                'limit'    => 1,
+                'paginate' => true,
+                'return'   => 'ids',
+            ]);
+            $excluded_active = is_object($res)
+                ? (int) ($res->total ?? 0)
+                : (is_array($res) ? count($res) : 0);
+        }
+
+        return ['totalProducts' => $total, 'excludedCount' => $excluded_active];
     }
 
     /**
@@ -181,7 +224,7 @@ class Wp_Sdtrk_Admin_Ajax_Handler
      */
     private function save_feed_exclusion(array $data, array $meta): array
     {
-        if (!class_exists('Wp_Sdtrk_WC_Feed')) {
+        if (!$this->feed_ready()) {
             return ['state' => false, 'message' => __('Product feed is not available', 'wp-sdtrk')];
         }
 
@@ -212,13 +255,13 @@ class Wp_Sdtrk_Admin_Ajax_Handler
         $new_excluded = array_map('intval', array_keys($set));
         $feed->set_excluded_ids($new_excluded); // persists + clears the feed cache
 
-        $total = function_exists('wp_count_posts') ? (int) (wp_count_posts('product')->publish ?? 0) : 0;
+        $counts = $this->feed_counts($new_excluded);
 
         return [
             'state'         => true,
             'message'       => __('Saved.', 'wp-sdtrk'),
-            'excludedCount' => count($new_excluded),
-            'totalProducts' => $total,
+            'excludedCount' => $counts['excludedCount'],
+            'totalProducts' => $counts['totalProducts'],
         ];
     }
 

@@ -31,6 +31,19 @@ if (!function_exists('wc_price'))      { function wc_price($amount) { return '<s
 if (!function_exists('wp_get_attachment_image_url')) { function wp_get_attachment_image_url($id, $size = 'thumbnail') { return $id ? 'http://shop/img/' . $id . '.jpg' : ''; } }
 if (!function_exists('wp_count_posts')) { function wp_count_posts($type = 'post') { $o = new stdClass(); $o->publish = $GLOBALS['__publish_count'] ?? 0; return $o; } }
 
+// is_enabled() pulls in WooCommerce + the options helper + the integration gate.
+$GLOBALS['__feed_enabled'] = true;
+if (!class_exists('WooCommerce')) { class WooCommerce {} }
+if (!class_exists('WP_SDTRK_Helper_Options')) {
+    class WP_SDTRK_Helper_Options
+    {
+        // wc_integration + wc_feed_enabled both gate is_enabled(); a global lets a
+        // test flip the feed off.
+        public static function get_bool_option($k, $d = false) { return $GLOBALS['__feed_enabled'] ?? true; }
+        public static function get_string_option($k) { return ''; }
+    }
+}
+
 class FakeAjaxProduct
 {
     public function __construct(private int $id, private string $name, private string $sku, private string $price) {}
@@ -64,6 +77,7 @@ if (!function_exists('wc_get_products')) {
     }
 }
 
+require_once dirname(__DIR__) . '/public/class-wp-sdtrk-wc-integration.php';
 require_once dirname(__DIR__) . '/public/class-wp-sdtrk-wc-feed.php';
 require_once dirname(__DIR__) . '/admin/class-wp-sdtrk-admin-ajax.php';
 
@@ -105,6 +119,11 @@ check('row 2 flagged excluded',        $byId[2]['excluded'] === true);
 check('row 1 flagged included',        $byId[1]['excluded'] === false);
 check('counter: totalProducts = 4',    (int) $r['totalProducts'] === 4);
 check('counter: excludedCount = 1',    (int) $r['excludedCount'] === 1);
+
+echo "list_feed_products() — counter ignores stale (non-published) excluded ids\n";
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [2, 999]; // 999 is not a product
+$r = call_priv($handler, $ref, 'list_feed_products', ['status' => 'all', 'per_page' => 50]);
+check('excludedCount counts only real',(int) $r['excludedCount'] === 1);
 
 echo "list_feed_products() — search + pagination forwarded\n";
 $r = call_priv($handler, $ref, 'list_feed_products', ['search' => 'alph', 'page' => 2, 'per_page' => 2, 'status' => 'all']);
@@ -167,6 +186,14 @@ $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [7];
 $r = call_priv($handler, $ref, 'save_feed_exclusion', []);
 check('empty changes => state true',   ($r['state'] ?? null) === true);
 check('list unchanged',                $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] === [7]);
+
+echo "both handlers gate on the feed being enabled\n";
+$GLOBALS['__feed_enabled'] = false;
+$rl = call_priv($handler, $ref, 'list_feed_products', ['status' => 'all']);
+$rs = call_priv($handler, $ref, 'save_feed_exclusion', ['changes' => [['id' => 1, 'excluded' => true]]]);
+check('list rejected when feed off',   ($rl['state'] ?? null) === false);
+check('save rejected when feed off',   ($rs['state'] ?? null) === false);
+$GLOBALS['__feed_enabled'] = true;
 
 if ($fails > 0) {
     echo "\n$fails assertion(s) failed.\n";

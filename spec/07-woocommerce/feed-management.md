@@ -25,9 +25,10 @@ WooCommerce-Sektion ──Button „Manage feed"──▶ Seite wp_sdtrk_feed_ma
 ```
 
 - **Liste laden:** AJAX `list_feed_products` (`data`: `search`, `page`, `per_page`, `status`). Serverseitig: `wc_get_products(['status'=>'publish','paginate'=>true,'limit'=>per_page,'page'=>page,'s'=>search,'orderby'=>'title'])`. Der Status-Filter verengt die Query über `include`/`exclude` gegen die Ausschluss-Liste. Antwort: `{ state, rows:[{id,name,sku,price,image,excluded}], total, totalPages, page, totalProducts, excludedCount }`.
-- **Speichern:** AJAX `save_feed_exclusion` (`data.changes`: `[{id, excluded}]`). Wendet die Deltas idempotent auf die Ausschluss-Liste an (Set-über-ID), persistiert via `set_excluded_ids()` (inkl. Cache-Invalidierung) und liefert aktualisierte Zähler (`excludedCount`, `totalProducts`). Junk-Einträge (fehlende/nicht-positive ID, Nicht-Array) werden übersprungen; String-Booleans aus `$_POST` (`'true'`/`'false'`) werden berücksichtigt.
+- **Speichern:** AJAX `save_feed_exclusion` (`data.changes`: `[{id, excluded}]`). Wendet die Deltas idempotent auf die Ausschluss-Liste an (Set-über-ID), persistiert via `set_excluded_ids()` (inkl. Cache-Invalidierung) und liefert aktualisierte Zähler. Junk-Einträge (fehlende/nicht-positive ID, Nicht-Array) werden übersprungen; String-Booleans aus `$_POST` (`'true'`/`'false'`) werden berücksichtigt.
+- **Zähler:** `totalProducts` = veröffentlichte Produkte (`wp_count_posts('product')->publish`), `excludedCount` = **nur die aktuell veröffentlichten** ausgeschlossenen Produkte (eine seither gelöschte/depublizierte ID in der Option verfälscht die „im Feed"-Zahl also nicht). Beide Funktionen teilen sich den privaten Helfer `feed_counts()`.
 
-Beide AJAX-Funktionen laufen über den bestehenden Sammel-Handler (`func`-Dispatch, Nonce `security_wp-sdtrk`, Capability `manage_options`) — siehe [04 › Admin-AJAX](../04-admin-and-options/settings-and-menu.md).
+Beide AJAX-Funktionen laufen über den bestehenden Sammel-Handler (`func`-Dispatch, Nonce `security_wp-sdtrk`, Capability `manage_options`) und prüfen zusätzlich `feed_ready()` (`Wp_Sdtrk_WC_Feed::is_enabled()`) — bei deaktiviertem Feed liefern sie `state=false` — siehe [04 › Admin-AJAX](../04-admin-and-options/settings-and-menu.md).
 
 ## Grenzen
 
