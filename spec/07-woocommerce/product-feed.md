@@ -20,10 +20,19 @@ Verfügbar nur, wenn `Wp_Sdtrk_WC_Feed::is_enabled()`: WooCommerce-Integration a
 
 | Methode | Aufgabe |
 |---------|---------|
-| `collect()` | veröffentlichte WC-Produkte + Variationen → Rohdaten-Zeilen |
+| `collect()` | veröffentlichte WC-Produkte + Variationen → Rohdaten-Zeilen, **abzüglich der ausgeschlossenen Produkte** (`exclude` an `wc_get_products`) |
 | `feed_items($rows)` | Normalisierung (rein): `id` (SKU oder ID), Verfügbarkeit, Preis `"<Betrag> <Währung>"`, `condition=new`, `item_group_id` bei Variationen |
 | `render_xml($items, $channel)` | RSS-2.0-/`g:`-Dokument (rein) |
 | `generate()` | `render_xml(feed_items(collect()))` |
+
+## Ausschluss-Liste (welche Produkte im Feed sind)
+
+Per Default sind **alle veröffentlichten** Produkte im Feed; gesteuert wird ausschließlich, was **ausgeschlossen** wird. Verwaltet wird die Liste über die [Feed-Verwaltungsseite](feed-management.md).
+
+- **Speicher:** eigenständige Option `wp_sdtrk_feed_excluded` (`autoload = false`, **nicht** Redux), ein Array der ausgeschlossenen Produkt-IDs. Kein Eintrag = enthalten, sodass neu veröffentlichte Produkte automatisch im Feed sind.
+- **Helfer auf `Wp_Sdtrk_WC_Feed`:** `get_excluded_ids()` (liest + sanitisiert: `intval`, positive, dedupe; toleriert fehlenden/korrupten Wert → `[]`), `set_excluded_ids($ids)` (persistiert sanitisiert **und** invalidiert den Feed-Cache, s. u.), `is_excluded($id)`.
+- **Filterung:** `collect()` reicht `get_excluded_ids()` als `exclude`-Argument an `wc_get_products()`. Da Variationen nur über die `get_children()`-Schleife des Elternprodukts gesammelt werden, entfernt der Ausschluss eines variablen Elternprodukts **transitiv** auch seine Variationen.
+- **Granularität:** Ausschluss greift auf **Elternebene**; einzelne Variationen können nicht separat ausgeschlossen werden.
 
 **Feld-Mapping (`g:`):** `g:id`, `title`, `description` (Tags entfernt), `link`, `g:image_link`, `g:availability` (`in_stock`/`out_of_stock`), `g:price`, `g:condition`, `g:brand`, `g:item_group_id` (Variationen). Die optionalen Felder `g:image_link`, `g:price`, `g:brand` und `g:item_group_id` werden bei leerem Wert **ganz weggelassen** — ein Produkt ohne Preis erzeugt also kein (fehlerhaftes) `<g:price>EUR</g:price>`, sondern gar kein Preis-Element.
 
@@ -38,6 +47,7 @@ Verfügbar nur, wenn `Wp_Sdtrk_WC_Feed::is_enabled()`: WooCommerce-Integration a
   - **Cache vorhanden:** wird direkt ausgegeben.
   - **Kalter Cache** (Cron noch nicht gelaufen / Cache geleert): Es baut **nur ein** Request live auf, abgesichert durch einen kurzlebigen Transient-Lock (`wp_sdtrk_feed_lock`, TTL 300 s). Parallele Requests bekommen währenddessen `503` mit `Retry-After: 120` (kein paralleler Voll-Aufbau → Stampede-Schutz).
 - `get_cached()` ist ein **reiner** Getter (liefert Cache oder `''`, baut nie) — genutzt für Cron/Tests.
+- **Invalidierung bei Ausschluss-Änderung:** `set_excluded_ids()` löscht den Cache (`delete_option(wp_sdtrk_feed_cache)`). Der nächste Abruf läuft damit über den kalten-Cache-Pfad (`get_or_build_cached()`) und baut den Feed unter dem Stampede-Lock neu — die Änderung wird ohne Warten auf den Cron sichtbar.
 
 ## Einschränkungen
 
