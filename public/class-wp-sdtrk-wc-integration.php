@@ -262,6 +262,12 @@ class Wp_Sdtrk_WC_Integration
 
         switch ($source) {
             case 'order':
+                // A purchase supersedes any pending add-to-cart: drop the buffer so
+                // it cannot fire a phantom add_to_cart for already-bought items on a
+                // later page (WooCommerce empties its own cart but not our session key).
+                if (count($pending) > 0) {
+                    WC()->session->set('wp_sdtrk_atc', array());
+                }
                 wp_localize_script('wp_sdtrk-engine', 'wp_sdtrk_wc', $this->build_order_payload($order));
                 break;
             case 'addToCart':
