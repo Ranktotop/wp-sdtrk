@@ -15,6 +15,7 @@ class Wp_Sdtrk_WC_Feed
     public const QUERY_VAR     = 'wp_sdtrk_feed';
     public const TOKEN_OPTION  = 'wp_sdtrk_feed_token';
     public const CACHE_OPTION  = 'wp_sdtrk_feed_cache';
+    public const EXCLUDED_OPTION = 'wp_sdtrk_feed_excluded';
     public const CRON_HOOK     = 'wp_sdtrk_cron_generate_feed';
     public const LOCK_TRANSIENT = 'wp_sdtrk_feed_lock';
     public const LOCK_TTL       = 300; // seconds — short-lived stampede guard
@@ -131,6 +132,63 @@ class Wp_Sdtrk_WC_Feed
         // ENT_SUBSTITUTE: replace any invalid UTF-8 with U+FFFD instead of
         // letting htmlspecialchars() return '' and silently drop the field.
         return htmlspecialchars((string) $value, ENT_XML1 | ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+
+    /* ---------------------------------------------------------------------
+     * Exclusion list — which published products are kept out of the feed
+     * ------------------------------------------------------------------- */
+
+    /**
+     * The product IDs excluded from the feed.
+     *
+     * Stored in the standalone wp_sdtrk_feed_excluded option (not Redux). The
+     * list holds exclusions only — anything not listed is included, so newly
+     * published products are in the feed by default. Tolerates a missing or
+     * corrupt (non-array) stored value by returning [].
+     *
+     * @return int[] Unique, positive product IDs.
+     */
+    public function get_excluded_ids(): array
+    {
+        $raw = get_option(self::EXCLUDED_OPTION, []);
+        if (!is_array($raw)) {
+            return [];
+        }
+        $ids = array_filter(array_map('intval', $raw), static function ($id) {
+            return $id > 0;
+        });
+        return array_values(array_unique($ids));
+    }
+
+    /**
+     * Persist the exclusion list and invalidate the cached feed.
+     *
+     * Sanitizes the input to a unique, positive int list. Deleting the cache
+     * forces a cold rebuild on the next feed request (under the existing
+     * stampede lock), so the change is reflected without waiting for the cron.
+     *
+     * @param int[] $ids
+     * @return void
+     */
+    public function set_excluded_ids(array $ids): void
+    {
+        $clean = array_filter(array_map('intval', $ids), static function ($id) {
+            return $id > 0;
+        });
+        $clean = array_values(array_unique($clean));
+        update_option(self::EXCLUDED_OPTION, $clean, false);
+        delete_option(self::CACHE_OPTION);
+    }
+
+    /**
+     * Whether a product ID is excluded from the feed.
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function is_excluded(int $id): bool
+    {
+        return in_array($id, $this->get_excluded_ids(), true);
     }
 
     /* ---------------------------------------------------------------------
