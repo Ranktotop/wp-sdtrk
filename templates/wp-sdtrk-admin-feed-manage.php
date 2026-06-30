@@ -54,7 +54,7 @@ $feed_available = class_exists('Wp_Sdtrk_WC_Feed') && Wp_Sdtrk_WC_Feed::is_enabl
                 <thead>
                     <tr>
                         <th scope="col" style="width:32px;">
-                            <label class="screen-reader-text" for="wpsdtrk-feed-select-all"><?php esc_html_e('Select all', 'wp-sdtrk'); ?></label>
+                            <label class="screen-reader-text" for="wpsdtrk-feed-select-all"><?php esc_html_e('Select all on this page', 'wp-sdtrk'); ?></label>
                             <input type="checkbox" id="wpsdtrk-feed-select-all">
                         </th>
                         <th scope="col" style="width:48px;"><?php esc_html_e('Image', 'wp-sdtrk'); ?></th>

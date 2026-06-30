@@ -37,6 +37,12 @@
         return $('<div>').text(value == null ? '' : String(value)).html();
     }
 
+    // Attribute-context escape: esc() encodes < > &, but not quotes — add them
+    // so a value can be placed safely inside a double-quoted HTML attribute.
+    function escAttr(value) {
+        return esc(value).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
     function sprintf(tpl, a, b) {
         return String(tpl)
             .replace('%1$d', a)
@@ -67,7 +73,7 @@
 
     function rowHtml(p) {
         var img = p.image
-            ? '<img src="' + esc(p.image) + '" alt="" width="40" height="40" style="object-fit:cover;border-radius:4px;">'
+            ? '<img src="' + escAttr(p.image) + '" alt="" width="40" height="40" style="object-fit:cover;border-radius:4px;">'
             : '';
         var checked = p.excluded ? '' : 'checked';
         // The status toggle is a checkbox (checked = in feed); the custom-pages
@@ -131,6 +137,11 @@
             state.excludedCount = parseInt(r.excludedCount, 10) || 0;
             renderCounter();
             notice(r.message || i18n.saved || 'Saved.', 'success');
+            // With an active status filter the changed row(s) may no longer match
+            // it; refresh from the server so the list stays consistent.
+            if (state.status !== 'all') {
+                load();
+            }
         }, function () {
             if (onFail) { onFail(); }
             notice(i18n.saveError || 'Could not save the change.', 'error');
