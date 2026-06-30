@@ -6,16 +6,17 @@ Diese Events laufen unter dem bestehenden Gate `Wp_Sdtrk_WC_Integration::is_acti
 
 ## Eine Quelle pro Seitenaufbau (Präzedenz)
 
-`Wp_Sdtrk_WC_Integration::localize_commerce_data()` (Hook `wp_enqueue_scripts`, Priorität 20) lokalisiert **genau eine** Datenquelle als `wp_sdtrk_wc.*`. Die Auswahl trifft der reine Resolver `resolve_commerce_source($order_received, $has_pending_atc, $is_product)` in fester Reihenfolge **order > addToCart > viewItem**:
+`Wp_Sdtrk_WC_Integration::localize_commerce_data()` (Hook `wp_enqueue_scripts`, Priorität 20) lokalisiert **genau eine** Datenquelle als `wp_sdtrk_wc.*`. Die Auswahl trifft der reine Resolver `resolve_commerce_source($order_received, $is_checkout, $has_pending_atc, $is_product)` in fester Reihenfolge **order > beginCheckout > addToCart > viewItem**:
 
 | Reihenfolge | Quelle | Bedingung | Lokalisiert |
 |:-:|--------|-----------|-------------|
 | 1 | `order` | Order-Received-Seite + auflösbare Order (gültiger Key) | `wp_sdtrk_wc.order` |
-| 2 | `addToCart` | Pending-Position(en) in der WC-Session | `wp_sdtrk_wc.addToCart` |
-| 3 | `viewItem` | `is_product()` | `wp_sdtrk_wc.viewItem` |
+| 2 | `beginCheckout` | `is_checkout()` + nicht-leerer Warenkorb | `wp_sdtrk_wc.beginCheckout` |
+| 3 | `addToCart` | Pending-Position(en) in der WC-Session | `wp_sdtrk_wc.addToCart` |
+| 4 | `viewItem` | `is_product()` | `wp_sdtrk_wc.viewItem` |
 | — | `none` | sonst | nichts |
 
-So wird pro Seitenaufbau höchstens **ein** Commerce-Event geseedet. Die Engine wertet die `wp_sdtrk_wc`-Unterschlüssel in derselben Reihenfolge als `else if`-Kette aus.
+So wird pro Seitenaufbau höchstens **ein** Commerce-Event geseedet. Die Engine wertet die `wp_sdtrk_wc`-Unterschlüssel in derselben Reihenfolge als `else if`-Kette aus. `beginCheckout` ist in [initiate-checkout.md](initiate-checkout.md) beschrieben.
 
 ## ViewItem (Produkt-Detailseite)
 
@@ -38,7 +39,7 @@ Auf `is_product()` baut `build_view_item_payload($product)` das Objekt `wp_sdtrk
 - `setEventName({wc:'view_item'})`, `setValue({wc})`, `setCurrency()`, `setItems()`
 - `setProdId/Name({wc})` aus der (einzigen) Position
 
-> `seedWcCommerce()` entscheidet die Quelle clientseitig in derselben Reihenfolge `order > addToCart > viewItem` (`if/else if`-Kette); `seedCommerceEvent(name, src)` setzt die gemeinsamen Commerce-Felder für alle drei Quellen (der `order`-Zweig ergänzt Order-ID, Käuferdaten und den `localStorage`-Once-Guard).
+> `seedWcCommerce()` entscheidet die Quelle clientseitig in derselben Reihenfolge `order > beginCheckout > addToCart > viewItem` (`if/else if`-Kette); `seedCommerceEvent(name, src)` setzt die gemeinsamen Commerce-Felder für alle Quellen (der `order`-Zweig ergänzt Order-ID, Käuferdaten und den `localStorage`-Once-Guard).
 
 `catchPageHit(2) → catchEventHit(2)` feuert daraufhin pro Catcher den Browser-Hit **und** den Server-Call. Plattform-Abbildung des Event-Namens: Meta `ViewContent`, GA4 `view_item`, TikTok `ViewContent` (jeweils über die bestehende `convert_eventname()`-Logik). Wert, Währung und Position reisen über die regulären `getValue()/getCurrency()/getItems()`-Pfade mit — identisch zum Purchase.
 

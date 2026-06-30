@@ -8,6 +8,7 @@ Optionale Integration, die **nur** greift, wenn WooCommerce installiert/aktiv is
 | [order-mapping.md](order-mapping.md) | Order → Datenquelle für die Engine (`build_order_payload` + `lineItems`) |
 | [purchase-tracking.md](purchase-tracking.md) | Danke-Seiten-Injection: Engine-Ingestion, Browser + Server, Mehr-Produkt, Währung, Dedup, Consent |
 | [view-item-and-add-to-cart.md](view-item-and-add-to-cart.md) | ViewItem (Produktseite) & AddToCart über dasselbe Seed-Modell; Quellen-Präzedenz |
+| [initiate-checkout.md](initiate-checkout.md) | InitiateCheckout (Checkout-Seite) über dasselbe Seed-Modell |
 | [product-feed.md](product-feed.md) | RSS-2.0/`g:`-Produkt-Feed, Token-Endpoint, täglicher Cron |
 
 ## Klassen / Dateien
@@ -15,7 +16,7 @@ Optionale Integration, die **nur** greift, wenn WooCommerce installiert/aktiv is
 | Artefakt | Pfad |
 |----------|------|
 | Integration (Gate + Commerce-Daten-Localize) | [public/class-wp-sdtrk-wc-integration.php](../../public/class-wp-sdtrk-wc-integration.php) |
-| Order-/Produkt-Mapper (`lineItems` / `productLine`) | [public/class-wp-sdtrk-wc-order-mapper.php](../../public/class-wp-sdtrk-wc-order-mapper.php) |
+| Order-/Produkt-/Warenkorb-Mapper (`lineItems` / `productLine` / `cartLines`) | [public/class-wp-sdtrk-wc-order-mapper.php](../../public/class-wp-sdtrk-wc-order-mapper.php) |
 | Engine (Ingestion in `collect_eventData`) | [public/js/wp-sdtrk-engine.js](../../public/js/wp-sdtrk-engine.js) |
 | Produkt-Feed | [public/class-wp-sdtrk-wc-feed.php](../../public/class-wp-sdtrk-wc-feed.php) |
 | Cron (täglich) | [includes/class-wp-sdtrk-cron.php](../../includes/class-wp-sdtrk-cron.php) |
@@ -27,6 +28,7 @@ Optionale Integration, die **nur** greift, wenn WooCommerce installiert/aktiv is
 | Seite/Ereignis | Was passiert | Ziel |
 |----------------|--------------|------|
 | Order-Received-Seite (`wp_enqueue_scripts`) | `Wp_Sdtrk_WC_Integration::localize_commerce_data()` legt die Order-Daten (`wp_sdtrk_wc.order`) auf das Engine-Skript. Die Engine seedet daraus ein Purchase-Event und feuert es über alle aktiven Catcher | Browser **und** Server (S2S) in einem Durchlauf |
+| Checkout-Seite (`wp_enqueue_scripts`) | `localize_commerce_data()` legt bei `is_checkout()` und nicht-leerem Warenkorb die Warenkorb-Daten (`wp_sdtrk_wc.beginCheckout`) auf das Engine-Skript. Die Engine seedet ein `begin_checkout`-Event ([initiate-checkout.md](initiate-checkout.md)) | Browser **und** Server (S2S) in einem Durchlauf |
 | Produkt-Detailseite (`wp_enqueue_scripts`) | `localize_commerce_data()` legt bei `is_product()` die Produktdaten (`wp_sdtrk_wc.viewItem`) auf das Engine-Skript. Die Engine seedet ein `view_item`-Event ([view-item-and-add-to-cart.md](view-item-and-add-to-cart.md)) | Browser **und** Server (S2S) in einem Durchlauf |
 | Add-to-Cart (`woocommerce_add_to_cart`) | `capture_add_to_cart()` puffert das Produkt in der WC-Session (`wp_sdtrk_atc`). Beim **nächsten** Seitenaufbau legt `localize_commerce_data()` es als `wp_sdtrk_wc.addToCart` auf das Engine-Skript und leert den Puffer; die Engine seedet ein `add_to_cart`-Event ([view-item-and-add-to-cart.md](view-item-and-add-to-cart.md)) | Browser **und** Server (S2S) in einem Durchlauf |
 

@@ -36,5 +36,15 @@ Eine einzelne Position für die **ViewItem**- und **AddToCart**-Payloads (statt 
 
 `price` ist der Einzel-Anzeigepreis (`wc_get_price_to_display($product)`; außerhalb WooCommerce Fallback `$product->get_price()`). Verwendung: [view-item-and-add-to-cart.md](view-item-and-add-to-cart.md).
 
+## `Wp_Sdtrk_WC_Order_Mapper::cartLines($cart): array`
+
+Strukturierte Positionsliste über **alle** Warenkorb-Positionen (`$cart->get_cart()`) für die **InitiateCheckout**-Payload, in derselben Form wie `lineItems`:
+
+```php
+[ ['id' => string, 'name' => string, 'qty' => int, 'price' => float], … ]
+```
+
+`id` ist die **Variations-ID**, falls vorhanden (`variation_id ?: product_id`) — konsistent mit Order-, ViewItem- und AddToCart-IDs sowie dem Produkt-Feed. `price` ist der Stückpreis aus dem Warenkorb-Positionswert (`line_total` / Menge; nach Rabatt, vor Versand). Verwendung: [initiate-checkout.md](initiate-checkout.md).
+
 **Dedup:** Der Gesamtwert (`value`) und die Order-ID (`orderId`) führen im Event dazu, dass JS `grabOrderId()` und PHP `getEventId()` die Order-ID als gemeinsame `event_id` liefern.
 </content>
