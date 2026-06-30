@@ -7,7 +7,7 @@
  * leaves nothing behind:
  *   - DB table {prefix}sdtrk_linkedin
  *   - options wp_sdtrk_options (+ Redux transients), wp_sdtrk_feed_token,
- *     wp_sdtrk_feed_cache
+ *     wp_sdtrk_feed_cache, wp_sdtrk_feed_excluded
  *   - per-post metabox meta (key wp_sdtrk_options)
  *   - the daily product-feed cron event
  *
@@ -32,11 +32,12 @@ function wp_sdtrk_uninstall_cleanup(): void
 	$table = $wpdb->prefix . 'sdtrk_linkedin';
 	$wpdb->query("DROP TABLE IF EXISTS `{$table}`");
 
-	// 2) Options (settings panel, Redux transients cache, feed token + cache)
+	// 2) Options (settings panel, Redux transients cache, feed token + cache + exclusion list)
 	delete_option('wp_sdtrk_options');
 	delete_option('wp_sdtrk_options-transients');
 	delete_option('wp_sdtrk_feed_token');
 	delete_option('wp_sdtrk_feed_cache');
+	delete_option('wp_sdtrk_feed_excluded');
 
 	// 3) Per-post metabox meta (Redux stores it under the opt_name key)
 	delete_post_meta_by_key('wp_sdtrk_options');

@@ -61,6 +61,7 @@ echo "options\n";
 check('deletes wp_sdtrk_options',            in_array('wp_sdtrk_options', $c['delete_option'], true));
 check('deletes wp_sdtrk_feed_token',         in_array('wp_sdtrk_feed_token', $c['delete_option'], true));
 check('deletes wp_sdtrk_feed_cache',         in_array('wp_sdtrk_feed_cache', $c['delete_option'], true));
+check('deletes wp_sdtrk_feed_excluded',      in_array('wp_sdtrk_feed_excluded', $c['delete_option'], true));
 check('deletes redux transients option',     in_array('wp_sdtrk_options-transients', $c['delete_option'], true));
 
 echo "post meta\n";
