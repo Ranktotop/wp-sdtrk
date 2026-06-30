@@ -30,6 +30,7 @@ class FakeWC_Session
 class FakeWC_Container
 {
     public $session;
+    public $cart = null; // localize_commerce_data() reads WC()->cart; null is fine here (no checkout context).
     public function __construct($session) { $this->session = $session; }
 }
 $GLOBALS['__wc'] = new FakeWC_Container(new FakeWC_Session());
