@@ -82,6 +82,87 @@ class Wp_Sdtrk_Admin_Ajax_Handler
     }
 
     /**
+     * List published products for the feed management page (paginated, searchable).
+     *
+     * Translates the table's controls into a wc_get_products() query and marks
+     * each row's current feed status. The status filter constrains the query via
+     * include/exclude against the exclusion list. Returns pagination metadata
+     * plus the global counters (total published vs. excluded) for the header.
+     *
+     * @param array $data search, page, per_page, status ('all'|'in_feed'|'excluded')
+     * @param array $meta Ignored.
+     * @return array { state, rows[], total, totalPages, page, totalProducts, excludedCount }
+     */
+    private function list_feed_products(array $data, array $meta): array
+    {
+        if (!class_exists('Wp_Sdtrk_WC_Feed') || !function_exists('wc_get_products')) {
+            return ['state' => false, 'message' => __('Product feed is not available', 'wp-sdtrk')];
+        }
+
+        $feed     = new Wp_Sdtrk_WC_Feed();
+        $excluded = $feed->get_excluded_ids();
+
+        $search   = isset($data['search']) ? sanitize_text_field((string) $data['search']) : '';
+        $page     = isset($data['page']) ? max(1, (int) $data['page']) : 1;
+        $per_page = isset($data['per_page']) ? (int) $data['per_page'] : 50;
+        $per_page = max(1, min(200, $per_page));
+        $status   = isset($data['status']) ? (string) $data['status'] : 'all';
+
+        $args = [
+            'status'   => 'publish',
+            'paginate' => true,
+            'limit'    => $per_page,
+            'page'     => $page,
+            'orderby'  => 'title',
+            'order'    => 'ASC',
+            'return'   => 'objects',
+        ];
+        if ($search !== '') {
+            $args['s'] = $search;
+        }
+        // Status filter narrows the query against the exclusion list. Using a
+        // sentinel [0] for "excluded" with an empty list guarantees zero rows.
+        if ($status === 'excluded') {
+            $args['include'] = !empty($excluded) ? $excluded : [0];
+        } elseif ($status === 'in_feed' && !empty($excluded)) {
+            $args['exclude'] = $excluded;
+        }
+
+        $result   = wc_get_products($args);
+        $products = is_object($result) ? ($result->products ?? []) : (array) $result;
+        $total    = is_object($result) ? (int) ($result->total ?? count($products)) : count($products);
+        $maxPages = is_object($result) ? (int) ($result->max_num_pages ?? 1) : 1;
+
+        $rows = [];
+        foreach ($products as $product) {
+            $id    = (int) $product->get_id();
+            $price = $product->get_price();
+            $rows[] = [
+                'id'       => $id,
+                'name'     => (string) $product->get_name(),
+                'sku'      => (string) $product->get_sku(),
+                'price'    => function_exists('wc_price') ? wp_strip_all_tags(wc_price($price)) : (string) $price,
+                'image'    => (string) wp_get_attachment_image_url($product->get_image_id(), 'thumbnail'),
+                'excluded' => in_array($id, $excluded, true),
+            ];
+        }
+
+        $total_products = function_exists('wp_count_posts')
+            ? (int) (wp_count_posts('product')->publish ?? 0)
+            : $total;
+
+        return [
+            'state'         => true,
+            'rows'          => $rows,
+            'total'         => $total,
+            'totalPages'    => max(1, $maxPages),
+            'page'          => $page,
+            'totalProducts' => $total_products,
+            'excludedCount' => count($excluded),
+        ];
+    }
+
+    /**
      * Regenerates the WooCommerce product-feed token and returns the new URL.
      *
      * @param array $data Ignored.
