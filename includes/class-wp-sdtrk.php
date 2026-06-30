@@ -233,6 +233,7 @@ class Wp_Sdtrk
 		$this->loader->add_action('in_admin_footer', $plugin_admin, 'inject_global_admin_ui');
 		$this->loader->add_action('admin_init', $plugin_admin, 'register_form_handler');
 		$this->loader->add_action('admin_menu', $plugin_admin, 'register_page_wp_sdtrk_admin_map_linkedin');
+		$this->loader->add_action('admin_menu', $plugin_admin, 'register_page_wp_sdtrk_feed_manage');
 	}
 
 	/**

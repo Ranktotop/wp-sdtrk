@@ -120,6 +120,11 @@ class Wp_Sdtrk_Admin
 			$this->enqueue_wp_sdtrk_admin_map_linkedin($hook_suffix);
 		}
 
+		if ($hook_suffix === 'toplevel_page_wp_sdtrk_feed_manage') {
+			// Product feed management
+			$this->enqueue_wp_sdtrk_feed_manage($hook_suffix);
+		}
+
 		/**
 		 * In backend there is global ajaxurl variable defined by WordPress itself.
 		 *
@@ -1009,6 +1014,46 @@ class Wp_Sdtrk_Admin
 	}
 
 	/**
+	 * Load scripts + AJAX config for the product-feed management page.
+	 */
+	public function enqueue_wp_sdtrk_feed_manage(): void
+	{
+		wp_enqueue_script(
+			$this->wp_sdtrk . '-admin-feed-manage-js',
+			plugin_dir_url(__FILE__) . 'js/wp-sdtrk-admin-feed-manage.js',
+			['jquery', $this->wp_sdtrk],
+			$this->version,
+			true
+		);
+
+		wp_localize_script(
+			$this->wp_sdtrk . '-admin-feed-manage-js',
+			'SDTRK_FeedManage',
+			[
+				'ajaxUrl' => admin_url('admin-ajax.php'),
+				'nonce'   => wp_create_nonce('security_wp-sdtrk'),
+				'perPage' => 50,
+				'i18n'    => [
+					'inFeed'        => __('In feed', 'wp-sdtrk'),
+					'excluded'      => __('Excluded', 'wp-sdtrk'),
+					'searchPlaceholder' => __('Search products…', 'wp-sdtrk'),
+					'statusAll'     => __('All', 'wp-sdtrk'),
+					'noProducts'    => __('No products found.', 'wp-sdtrk'),
+					'loadError'     => __('Could not load products.', 'wp-sdtrk'),
+					'saved'         => __('Saved.', 'wp-sdtrk'),
+					'saveError'     => __('Could not save the change.', 'wp-sdtrk'),
+					'counter'       => __('%1$d of %2$d products in feed', 'wp-sdtrk'),
+					'prev'          => __('Previous', 'wp-sdtrk'),
+					'next'          => __('Next', 'wp-sdtrk'),
+					'page'          => __('Page %1$d of %2$d', 'wp-sdtrk'),
+					'bulkExclude'   => __('Exclude selected', 'wp-sdtrk'),
+					'bulkInclude'   => __('Include selected', 'wp-sdtrk'),
+				],
+			]
+		);
+	}
+
+	/**
 	 * Register the page for mapping products.
 	 *
 	 * This function registers a new top-level menu page in the WordPress admin area.
@@ -1050,6 +1095,42 @@ class Wp_Sdtrk_Admin
 	{
 		$this->enqueue_custom_page_css();
 		$view = plugin_dir_path(dirname(__FILE__)) . 'templates/wp-sdtrk-admin-map-linkedin.php';
+		if (file_exists($view)) {
+			include $view;
+		}
+	}
+
+	/**
+	 * Register the hidden "manage product feed" page.
+	 *
+	 * Mirrors the LinkedIn mapping page: a top-level menu page hidden from the
+	 * sidebar via CSS, reached only through the "Feed verwalten" button in the
+	 * WooCommerce Redux section. Lets the admin control which published products
+	 * are excluded from the product feed (see Wp_Sdtrk_WC_Feed exclusion list).
+	 */
+	public function register_page_wp_sdtrk_feed_manage(): void
+	{
+		add_action('admin_head', function () {
+			echo '<style>#toplevel_page_wp_sdtrk_feed_manage { display: none !important; }</style>';
+		});
+		add_menu_page(
+			__('Manage Product Feed', 'wp-sdtrk'),   // Page Title
+			__('Manage Product Feed', 'wp-sdtrk'),   // Menu Title
+			'manage_options',                        // Capability
+			'wp_sdtrk_feed_manage',                  // Menu Slug
+			[$this, 'render_page_wp_sdtrk_feed_manage'], // Callback
+			'',                                      // Icon
+			null                                     // Position
+		);
+	}
+
+	/**
+	 * Render the "manage product feed" page from its template.
+	 */
+	public function render_page_wp_sdtrk_feed_manage(): void
+	{
+		$this->enqueue_custom_page_css();
+		$view = plugin_dir_path(dirname(__FILE__)) . 'templates/wp-sdtrk-admin-feed-manage.php';
 		if (file_exists($view)) {
 			include $view;
 		}
