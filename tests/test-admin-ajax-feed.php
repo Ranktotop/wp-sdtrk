@@ -77,6 +77,26 @@ if (!function_exists('wc_get_products')) {
     }
 }
 
+// feed_counts() counts published excluded products via a direct COUNT(*) — stub
+// $wpdb to count catalog products whose id appears in the IN (...) list.
+class WPDB_FeedStub
+{
+    public $posts = 'wp_posts';
+    public function get_var($sql)
+    {
+        if (preg_match('/IN \(([^)]*)\)/', $sql, $m)) {
+            $ids = array_filter(array_map('intval', explode(',', $m[1])));
+            $count = 0;
+            foreach ($GLOBALS['__catalog'] as $p) {
+                if (in_array($p->get_id(), $ids, true)) { $count++; }
+            }
+            return $count;
+        }
+        return 0;
+    }
+}
+$GLOBALS['wpdb'] = new WPDB_FeedStub();
+
 require_once dirname(__DIR__) . '/public/class-wp-sdtrk-wc-integration.php';
 require_once dirname(__DIR__) . '/public/class-wp-sdtrk-wc-feed.php';
 require_once dirname(__DIR__) . '/admin/class-wp-sdtrk-admin-ajax.php';
@@ -145,6 +165,25 @@ $ids = array_map(static fn($row) => $row['id'], $r['rows']);
 sort($ids);
 check('in_feed filter => only 1 & 3',  $ids === [1, 3]);
 
+echo "list_feed_products() — per_page/page clamp (G1)\n";
+call_priv($handler, $ref, 'list_feed_products', ['per_page' => 100000]);
+check('per_page capped at 200',        (int) $GLOBALS['__wc_args']['limit'] === 200);
+call_priv($handler, $ref, 'list_feed_products', ['per_page' => 0]);
+check('per_page floored at 1',         (int) $GLOBALS['__wc_args']['limit'] === 1);
+call_priv($handler, $ref, 'list_feed_products', ['per_page' => -3]);
+check('negative per_page floored at 1',(int) $GLOBALS['__wc_args']['limit'] === 1);
+call_priv($handler, $ref, 'list_feed_products', ['page' => 0]);
+check('page floored at 1 (0)',         (int) $GLOBALS['__wc_args']['page'] === 1);
+call_priv($handler, $ref, 'list_feed_products', ['page' => -5]);
+check('page floored at 1 (neg)',       (int) $GLOBALS['__wc_args']['page'] === 1);
+
+echo "list_feed_products() — unknown status falls through to all (G2)\n";
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [2];
+$r = call_priv($handler, $ref, 'list_feed_products', ['status' => 'bogus', 'per_page' => 50]);
+check('unknown status => no include',  !isset($GLOBALS['__wc_args']['include']));
+check('unknown status => no exclude',  !isset($GLOBALS['__wc_args']['exclude']));
+check('unknown status => all rows',    count($r['rows']) === 4);
+
 echo "save_feed_exclusion() — apply add/remove deltas\n";
 $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [2];
 $GLOBALS['__deleted'] = [];
@@ -180,6 +219,20 @@ $r = call_priv($handler, $ref, 'save_feed_exclusion', ['changes' => [
 ]]);
 $saved = $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION];
 check('idempotent + junk ignored',     $saved === [5]);
+
+echo "save_feed_exclusion() — duplicate id in one batch: last write wins (G4)\n";
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [];
+call_priv($handler, $ref, 'save_feed_exclusion', ['changes' => [
+    ['id' => 5, 'excluded' => true],
+    ['id' => 5, 'excluded' => false], // later entry wins
+]]);
+check('exclude then include => out',   $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] === []);
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [];
+call_priv($handler, $ref, 'save_feed_exclusion', ['changes' => [
+    ['id' => 5, 'excluded' => false],
+    ['id' => 5, 'excluded' => true],  // later entry wins
+]]);
+check('include then exclude => in',    $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] === [5]);
 
 echo "save_feed_exclusion() — no changes is a no-op success\n";
 $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [7];

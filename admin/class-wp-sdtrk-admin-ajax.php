@@ -101,8 +101,7 @@ class Wp_Sdtrk_Admin_Ajax_Handler
 
         $feed     = new Wp_Sdtrk_WC_Feed();
         $excluded = $feed->get_excluded_ids();
-        // Counter (global, filter-independent). Run before the list query so the
-        // counts query doesn't shadow it in callers that inspect the last query.
+        // Global, filter-independent header counter (cheap COUNT(*), not a product query).
         $counts   = $this->feed_counts($excluded);
 
         $search   = isset($data['search']) ? sanitize_text_field((string) $data['search']) : '';
@@ -182,8 +181,9 @@ class Wp_Sdtrk_Admin_Ajax_Handler
      *
      * excludedCount counts only excluded ids that are *currently* published
      * products, so a stale id (a since-deleted/unpublished product still in the
-     * option) doesn't skew the "in feed" figure. The count query loads a single
-     * row (paginate + LIMIT 1) and reads the total.
+     * option) doesn't skew the "in feed" figure. Counted with a single indexed
+     * COUNT(*) over the primary key — cheap even for a large exclusion list,
+     * unlike loading products through wc_get_products.
      *
      * @param int[] $excluded
      * @return array{totalProducts:int, excludedCount:int}
@@ -193,17 +193,19 @@ class Wp_Sdtrk_Admin_Ajax_Handler
         $total = function_exists('wp_count_posts') ? (int) (wp_count_posts('product')->publish ?? 0) : 0;
 
         $excluded_active = 0;
-        if (!empty($excluded) && function_exists('wc_get_products')) {
-            $res = wc_get_products([
-                'status'   => 'publish',
-                'include'  => $excluded,
-                'limit'    => 1,
-                'paginate' => true,
-                'return'   => 'ids',
-            ]);
-            $excluded_active = is_object($res)
-                ? (int) ($res->total ?? 0)
-                : (is_array($res) ? count($res) : 0);
+        if (!empty($excluded)) {
+            global $wpdb;
+            if (isset($wpdb) && is_object($wpdb) && method_exists($wpdb, 'get_var')) {
+                // $excluded is already intval-sanitized (get_excluded_ids), so the
+                // IN list is a safe integer literal — no user data reaches the SQL.
+                $ids = implode(',', array_map('intval', $excluded));
+                $excluded_active = (int) $wpdb->get_var(
+                    "SELECT COUNT(*) FROM {$wpdb->posts}
+                     WHERE ID IN ($ids) AND post_type = 'product' AND post_status = 'publish'"
+                );
+            } else {
+                $excluded_active = count($excluded);
+            }
         }
 
         return ['totalProducts' => $total, 'excludedCount' => $excluded_active];
