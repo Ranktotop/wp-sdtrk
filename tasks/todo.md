@@ -4,7 +4,9 @@
 
 Bestätigte Entscheidungen: Präzedenz **order > beginCheckout > addToCart > viewItem** · Checkout gewinnt gegen ATC-Puffer (Puffer wird verworfen) · **kein Guard** (feuert bei jedem Checkout-Load, analog `view_item`) · nur bei nicht-leerem Warenkorb · `value` = Σ `line_total`.
 
-Legende: ☑ erledigt · `[ ]`-Boxen = offene Verifikation
+Legende: ☑ erledigt · `[ ]`-Boxen = offene manuelle Live-Verifikation
+
+> **Status:** T1–T5 implementiert, alle Unit-Tests grün (26 PHP + 8 mjs). Offen: Live-Smoke-Test der Browser-/Server-Pfade auf der Checkout-Seite.
 
 ---
 
