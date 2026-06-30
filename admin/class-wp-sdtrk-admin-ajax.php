@@ -163,6 +163,62 @@ class Wp_Sdtrk_Admin_Ajax_Handler
     }
 
     /**
+     * Apply exclusion changes from the feed management page.
+     *
+     * Accepts a list of per-product deltas ({id, excluded}); each one adds or
+     * removes the product from the exclusion list. Persisting via
+     * set_excluded_ids() invalidates the feed cache. Idempotent — re-sending the
+     * same delta is a no-op. Junk entries (missing/non-positive id, non-array)
+     * are skipped. String booleans from $_POST ('true'/'false') are honoured.
+     *
+     * @param array $data { changes: [{ id:int, excluded:bool }] }
+     * @param array $meta Ignored.
+     * @return array { state, message, excludedCount, totalProducts }
+     */
+    private function save_feed_exclusion(array $data, array $meta): array
+    {
+        if (!class_exists('Wp_Sdtrk_WC_Feed')) {
+            return ['state' => false, 'message' => __('Product feed is not available', 'wp-sdtrk')];
+        }
+
+        $changes = (isset($data['changes']) && is_array($data['changes'])) ? $data['changes'] : [];
+
+        $feed = new Wp_Sdtrk_WC_Feed();
+        // Use the id as a set key so adds/removes are inherently idempotent.
+        $set = array_fill_keys($feed->get_excluded_ids(), true);
+
+        foreach ($changes as $change) {
+            if (!is_array($change) || !isset($change['id'])) {
+                continue;
+            }
+            $id = (int) $change['id'];
+            if ($id <= 0) {
+                continue;
+            }
+            $excluded = isset($change['excluded']) ? $change['excluded'] : false;
+            // jQuery serializes booleans to the strings 'true'/'false'.
+            $exclude = ($excluded === true || $excluded === 1 || $excluded === '1' || $excluded === 'true');
+            if ($exclude) {
+                $set[$id] = true;
+            } else {
+                unset($set[$id]);
+            }
+        }
+
+        $new_excluded = array_map('intval', array_keys($set));
+        $feed->set_excluded_ids($new_excluded); // persists + clears the feed cache
+
+        $total = function_exists('wp_count_posts') ? (int) (wp_count_posts('product')->publish ?? 0) : 0;
+
+        return [
+            'state'         => true,
+            'message'       => __('Saved.', 'wp-sdtrk'),
+            'excludedCount' => count($new_excluded),
+            'totalProducts' => $total,
+        ];
+    }
+
+    /**
      * Regenerates the WooCommerce product-feed token and returns the new URL.
      *
      * @param array $data Ignored.

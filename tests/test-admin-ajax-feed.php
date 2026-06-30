@@ -121,6 +121,48 @@ $ids = array_map(static fn($row) => $row['id'], $r['rows']);
 sort($ids);
 check('in_feed filter => only 1 & 3',  $ids === [1, 3]);
 
+echo "save_feed_exclusion() — apply add/remove deltas\n";
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [2];
+$GLOBALS['__deleted'] = [];
+$r = call_priv($handler, $ref, 'save_feed_exclusion', ['changes' => [
+    ['id' => 3, 'excluded' => true],   // add
+    ['id' => 2, 'excluded' => false],  // remove
+]]);
+$saved = $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION];
+sort($saved);
+check('state true',                    ($r['state'] ?? null) === true);
+check('delta applied (2 out, 3 in)',   $saved === [3]);
+check('cache invalidated',             in_array(Wp_Sdtrk_WC_Feed::CACHE_OPTION, $GLOBALS['__deleted'], true));
+check('excludedCount refreshed',       (int) $r['excludedCount'] === 1);
+check('totalProducts refreshed',       (int) $r['totalProducts'] === 4);
+
+echo "save_feed_exclusion() — string booleans from \$_POST\n";
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [];
+$r = call_priv($handler, $ref, 'save_feed_exclusion', ['changes' => [
+    ['id' => '1', 'excluded' => 'true'],
+    ['id' => '4', 'excluded' => 'false'],
+]]);
+$saved = $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION];
+check('string "true" excludes',        in_array(1, $saved, true));
+check('string "false" does not',       !in_array(4, $saved, true));
+
+echo "save_feed_exclusion() — idempotent + ignores junk\n";
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [5];
+$r = call_priv($handler, $ref, 'save_feed_exclusion', ['changes' => [
+    ['id' => 5, 'excluded' => true],   // already excluded
+    ['id' => 0, 'excluded' => true],   // junk id
+    ['excluded' => true],              // missing id
+    'not-an-array',
+]]);
+$saved = $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION];
+check('idempotent + junk ignored',     $saved === [5]);
+
+echo "save_feed_exclusion() — no changes is a no-op success\n";
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [7];
+$r = call_priv($handler, $ref, 'save_feed_exclusion', []);
+check('empty changes => state true',   ($r['state'] ?? null) === true);
+check('list unchanged',                $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] === [7]);
+
 if ($fails > 0) {
     echo "\n$fails assertion(s) failed.\n";
     exit(1);
