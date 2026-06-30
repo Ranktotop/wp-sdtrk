@@ -27,15 +27,15 @@ Die Server-Tracker (Meta `getData_custom`/`fireTracking_Server_Event`, GA4, TikT
 
 ### 🟡 Funnelytics-Browser-Pixel live verifizieren
 
-Der Code nutzt `cdn.funnelytics.io/track-v3.js` + `window.funnelytics.events.trigger()` ([public/js/wp-sdtrk-fl.js](public/js/wp-sdtrk-fl.js)). Die heute offiziell dokumentierte Basis ist `cdn.funnelytics.io/track.js` + `window.funnelytics.init()`. `track-v3.js` kann die neuere Variante sein — daher **nicht blind ändern**, sondern in einer Live-Umgebung prüfen, ob Events ankommen. Nur bei nachgewiesener Abweichung anpassen. Details: [tasks/api-audit.md](tasks/api-audit.md) (Abschnitt 4).
+Der Code nutzt `cdn.funnelytics.io/track-v3.js` + `window.funnelytics.events.trigger()` ([public/js/wp-sdtrk-fl.js](public/js/wp-sdtrk-fl.js)). Die heute offiziell dokumentierte Basis ist `cdn.funnelytics.io/track.js` + `window.funnelytics.init()`. `track-v3.js` kann die neuere Variante sein — daher **nicht blind ändern**, sondern in einer Live-Umgebung prüfen, ob Events ankommen. Nur bei nachgewiesener Abweichung anpassen.
 
-> Die übrigen API-Integrationen wurden geprüft und auf den aktuellen Stand gebracht (Meta CAPI `v23.0`, TikTok Events API 2.0 `v1.3`, GA4 MP verifiziert, übrige Browser-Pixel verifiziert). Der Meta-CAPI-Dispatch-Bug ist behoben. Siehe [tasks/plan.md](tasks/plan.md) und [tasks/api-audit.md](tasks/api-audit.md).
+> Die übrigen API-Integrationen wurden geprüft und auf den aktuellen Stand gebracht (Meta CAPI `v23.0`, TikTok Events API 2.0 `v1.3`, GA4 MP verifiziert, übrige Browser-Pixel verifiziert). Der Meta-CAPI-Dispatch-Bug ist behoben.
 
 ## Umgesetzt (Live-Verifikation offen)
 
 ### ✅ WooCommerce-Integration (Purchase)
 
-Umgesetzt: Auto-Erkennung + Redux-Switch, Order→Event-Mapping, Browser-Purchase auf der Order-Received-Seite (alle Plattformen), Server-APIs auf Order-Status (consent-gated, dedupliziert), Spec-Sektion [07 WooCommerce](spec/07-woocommerce/README.md). Siehe [tasks/plan.md](tasks/plan.md) / [tasks/wc-design.md](tasks/wc-design.md).
+Umgesetzt: Auto-Erkennung + Redux-Switch, Order→Event-Mapping, Browser-Purchase auf der Order-Received-Seite (alle Plattformen), Server-APIs auf Order-Status (consent-gated, dedupliziert), Spec-Sektion [07 WooCommerce](spec/07-woocommerce/README.md).
 
 **Offen:** Live-Verifikation auf echter HTTPS-Seite (Browser-Pixel feuern lokal nicht zuverlässig).
 
@@ -43,7 +43,7 @@ Umgesetzt: Auto-Erkennung + Redux-Switch, Order→Event-Mapping, Browser-Purchas
 
 ### ✅ Produkt-Feed (WooCommerce)
 
-Umgesetzt: RSS-2.0/`g:`-Feed-Generator, token-geschützter Endpoint, täglicher Cron (reaktiviert), Spec [07 › Produkt-Feed](spec/07-woocommerce/product-feed.md). Siehe [tasks/feed-design.md](tasks/feed-design.md).
+Umgesetzt: RSS-2.0/`g:`-Feed-Generator, token-geschützter Endpoint, täglicher Cron (reaktiviert), Verwaltungsseite für Produkt-Ein-/Ausschluss, Spec [07 › Produkt-Feed](spec/07-woocommerce/product-feed.md) + [07 › Produktfeed-Verwaltung](spec/07-woocommerce/feed-management.md).
 
 **Offen:** Live-Verifikation (Feed-URL/Token, Merchant-Center-/Commerce-Manager-Import, Cron-Lauf).
 

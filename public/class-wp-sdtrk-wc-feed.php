@@ -8,7 +8,7 @@
  * on. Served from a token-protected query-var endpoint and refreshed daily by
  * WP-Cron (cached output).
  *
- * Design: tasks/feed-design.md
+ * Spec: spec/07-woocommerce/product-feed.md
  */
 class Wp_Sdtrk_WC_Feed
 {
