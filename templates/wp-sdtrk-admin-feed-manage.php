@@ -53,15 +53,15 @@ $feed_available = class_exists('Wp_Sdtrk_WC_Feed') && Wp_Sdtrk_WC_Feed::is_enabl
             <table>
                 <thead>
                     <tr>
-                        <th style="width:32px;">
+                        <th scope="col" style="width:32px;">
                             <label class="screen-reader-text" for="wpsdtrk-feed-select-all"><?php esc_html_e('Select all', 'wp-sdtrk'); ?></label>
                             <input type="checkbox" id="wpsdtrk-feed-select-all">
                         </th>
-                        <th style="width:48px;"><?php esc_html_e('Image', 'wp-sdtrk'); ?></th>
-                        <th><?php esc_html_e('Product', 'wp-sdtrk'); ?></th>
-                        <th><?php esc_html_e('SKU', 'wp-sdtrk'); ?></th>
-                        <th><?php esc_html_e('Price', 'wp-sdtrk'); ?></th>
-                        <th style="width:160px;"><?php esc_html_e('Status', 'wp-sdtrk'); ?></th>
+                        <th scope="col" style="width:48px;"><?php esc_html_e('Image', 'wp-sdtrk'); ?></th>
+                        <th scope="col"><?php esc_html_e('Product', 'wp-sdtrk'); ?></th>
+                        <th scope="col"><?php esc_html_e('SKU', 'wp-sdtrk'); ?></th>
+                        <th scope="col"><?php esc_html_e('Price', 'wp-sdtrk'); ?></th>
+                        <th scope="col" style="width:160px;"><?php esc_html_e('Status', 'wp-sdtrk'); ?></th>
                     </tr>
                 </thead>
                 <tbody id="wpsdtrk-feed-rows">

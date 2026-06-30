@@ -371,3 +371,49 @@
 .wpsdtrk-table-glass table a:hover {
     transform: scale(1.1);
 }
+
+/* -----------------------------------------------------------------------
+ * Product-feed management page
+ * --------------------------------------------------------------------- */
+.wpsdtrk-feed-manage .wpsdtrk-feed-counter {
+    font-size: 14px;
+    color: #ededed;
+    font-weight: 600;
+    margin: 8px 0 0;
+}
+
+.wpsdtrk-feed-manage .wpsdtrk-feed-toolbar select {
+    min-width: 160px;
+}
+
+/* Status toggle: keep the switch + its label on one line, switch first. */
+.wpsdtrk-table-glass .wpsdtrk-feed-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    margin: 0;
+}
+
+.wpsdtrk-table-glass .wpsdtrk-feed-status-label {
+    color: #ededed;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Dim excluded rows so the in/out state reads at a glance. */
+.wpsdtrk-table-glass tr.is-excluded td {
+    opacity: 0.55;
+}
+.wpsdtrk-table-glass tr.is-excluded .wpsdtrk-feed-status-label {
+    color: #b95757;
+    opacity: 1;
+}
+
+.wpsdtrk-table-glass td img {
+    display: block;
+}
+
+.wpsdtrk-feed-manage .wpsdtrk-feed-pagination span {
+    color: #ededed;
+}
