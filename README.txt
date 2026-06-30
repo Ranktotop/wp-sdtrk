@@ -32,6 +32,11 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.9.0 =
+* Added WooCommerce ViewItem tracking on product pages (Meta ViewContent, GA4 view_item, etc.), browser and server in one pass
+* Added WooCommerce AddToCart tracking (server-buffered on add, fired on the next page load; covers AJAX and form add-to-cart)
+* Unified product id scheme: order line items now use the variation id so the feed, ViewItem, AddToCart and Purchase share one catalog id for variable products
+
 = 1.8.0 =
 * Rebuilt WooCommerce purchase tracking: fires on the order-received page, browser and server in one pass, deduplicated via the order id
 * Multi-product carts and shop currency for Meta, GA4 and TikTok purchases (single-product and EUR fallbacks unchanged)
