@@ -79,9 +79,19 @@ check('firstName seeded', pur.getUserFirstName() === 'Ada');
 check('currency EUR', pur.getCurrency() === 'EUR');
 check('prodId 808', pur.grabProdId() === '808');
 
-console.log('precedence order > addToCart > viewItem (real else-if chain)');
-const both = seed({ order: { orderId: '1', value: '1', items: [] }, addToCart: { value: '5', items: [] }, viewItem: { value: '9', items: [] } });
-check('order wins over all', both.grabEventName() === 'purchase');
+console.log('begin_checkout seeding (checkout page, whole cart)');
+const bc = seed({ beginCheckout: { value: '30', currency: 'USD', items: [{ id: '501', name: 'A', qty: 2, price: 15 }] } });
+check('eventName begin_checkout', bc.grabEventName() === 'begin_checkout');
+check('value 30', bc.grabValue() === 30);
+check('currency USD', bc.getCurrency() === 'USD');
+check('items length 1', bc.getItems().length === 1);
+check('prodId 501', bc.grabProdId() === '501');
+
+console.log('precedence order > beginCheckout > addToCart > viewItem (real else-if chain)');
+const all = seed({ order: { orderId: '1', value: '1', items: [] }, beginCheckout: { value: '3', items: [] }, addToCart: { value: '5', items: [] }, viewItem: { value: '9', items: [] } });
+check('order wins over all', all.grabEventName() === 'purchase');
+const bcVsAtc = seed({ beginCheckout: { value: '3', items: [] }, addToCart: { value: '5', items: [] }, viewItem: { value: '9', items: [] } });
+check('beginCheckout wins over addToCart', bcVsAtc.grabEventName() === 'begin_checkout');
 const atcVsVi = seed({ addToCart: { value: '5', items: [] }, viewItem: { value: '9', items: [] } });
 check('addToCart wins over viewItem', atcVsVi.grabEventName() === 'add_to_cart');
 

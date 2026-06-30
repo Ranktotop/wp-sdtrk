@@ -227,14 +227,15 @@ class Wp_Sdtrk_Engine {
 
 	/**
 	* Seed the event from the WooCommerce commerce data, at most one source in the
-	* precedence order > addToCart > viewItem. PHP localizes only one source; the
-	* else-if chain is the client-side safety net. The order branch additionally
-	* carries the buyer data and a per-order localStorage once-guard (a reload of
-	* the thankyou page is not a new purchase; GA4 does not dedup by transaction_id,
-	* so without the guard a refresh double-counts). View/AddToCart have no guard —
-	* a view_item fires on every product view, an add_to_cart is consumed once
-	* server-side from the WC session.
-	* @param {Object} wc The localized wp_sdtrk_wc object (order|addToCart|viewItem)
+	* precedence order > beginCheckout > addToCart > viewItem. PHP localizes only
+	* one source; the else-if chain is the client-side safety net. The order branch
+	* additionally carries the buyer data and a per-order localStorage once-guard (a
+	* reload of the thankyou page is not a new purchase; GA4 does not dedup by
+	* transaction_id, so without the guard a refresh double-counts). BeginCheckout/
+	* View/AddToCart have no guard — a begin_checkout fires on every checkout view, a
+	* view_item on every product view, an add_to_cart is consumed once server-side
+	* from the WC session.
+	* @param {Object} wc The localized wp_sdtrk_wc object (order|beginCheckout|addToCart|viewItem)
 	 */
 	seedWcCommerce(wc) {
 		if (wc.order) {
@@ -251,6 +252,9 @@ class Wp_Sdtrk_Engine {
 			this.event.setUserFirstName({ wc: String(order.firstName || '') });
 			this.event.setUserLastName({ wc: String(order.lastName || '') });
 			try { window.localStorage.setItem(orderKey, '1'); } catch (e) { }
+		}
+		else if (wc.beginCheckout) {
+			this.seedCommerceEvent('begin_checkout', wc.beginCheckout);
 		}
 		else if (wc.addToCart) {
 			this.seedCommerceEvent('add_to_cart', wc.addToCart);
