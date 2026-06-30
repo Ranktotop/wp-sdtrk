@@ -125,9 +125,10 @@
     }
 
     // Persist a set of {id, excluded} changes; reconcile counters from the
-    // authoritative response. onFail rolls the optimistic UI back.
+    // authoritative response. onFail rolls the optimistic UI back. Returns the
+    // promise so callers can re-enable controls once the request settles.
     function save(changes, onFail) {
-        ajax('save_feed_exclusion', { changes: changes }).then(function (r) {
+        return ajax('save_feed_exclusion', { changes: changes }).then(function (r) {
             if (!r || !r.state) {
                 if (onFail) { onFail(); }
                 notice((r && r.message) || i18n.saveError || 'Could not save the change.', 'error');
@@ -222,14 +223,20 @@
             if (state.page < state.totalPages) { state.page++; load(); }
         });
 
-        // Per-row status toggle — optimistic, rolls back on failure.
+        // Per-row status toggle — optimistic, rolls back on failure. The toggle
+        // is disabled while its save is in flight so a rapid re-toggle of the
+        // same row can't race its own request (out-of-order responses).
         $rows.on('change', '.wpsdtrk-feed-status', function () {
-            var $tr = $(this).closest('tr');
+            var $cb = $(this);
+            var $tr = $cb.closest('tr');
             var id = parseInt($tr.data('product-id'), 10);
-            var excluded = !$(this).prop('checked'); // checked = in feed
+            var excluded = !$cb.prop('checked'); // checked = in feed
+            $cb.prop('disabled', true);
             applyRowState($tr, excluded);
             save([{ id: id, excluded: excluded }], function () {
                 applyRowState($tr, !excluded); // rollback
+            }).always(function () {
+                $cb.prop('disabled', false);
             });
         });
 
