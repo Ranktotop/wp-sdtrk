@@ -6,7 +6,7 @@
 |-------------|------|
 | **Name** | Smart Server Side Tracking Plugin |
 | **Slug / Textdomain** | `wp-sdtrk` |
-| **Version** | 1.7.6 (Konstante `WP_SDTRK_VERSION`) |
+| **Version** | 1.9.0 (Konstante `WP_SDTRK_VERSION`) |
 | **Autor** | Marc Meese |
 | **Author URI / Plugin URI** | https://marcmeese.de/ |
 | **Lizenz** | GPL-2.0+ |
