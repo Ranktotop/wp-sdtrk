@@ -4,19 +4,6 @@ Offene Aufgaben für `wp-sdtrk`. Bekannte Auffälligkeiten sind ausführlich in 
 
 ## Offen
 
-### 🟢 WooCommerce View-Item & Add-to-Cart einbauen
-
-Zusätzlich zum bereits umgesetzten Purchase-Tracking sollen zwei weitere kanonische Events für WooCommerce gefeuert werden (Event-Modell kennt `view_item`/`add_to_cart` bereits):
-
-- **View-Item:** **immer** auf einer Produkt-Einzelseite feuern, gespeist mit den Produktdaten (ID/SKU, Name, Preis/Wert, Währung). Browser-Pixel auf allen aktiven Plattformen; Server-API analog zum Purchase-Pfad (consent-gated, Dedup über gemeinsame `event_id`).
-- **Add-to-Cart:** beim Hinzufügen eines Produkts in den Warenkorb feuern, mit den Produktdaten.
-
-**Offene Designfragen:** Hooks (Produktseite via `is_product()`/`template_redirect`; ATC via `woocommerce_add_to_cart` bzw. AJAX-ATC), `event_id`-Strategie (keine Order-ID vorhanden → eigener stabiler Identifier je View/ATC), Reuse des bestehenden `wp-sdtrk-wc.js`-Browserpfads bzw. der Tracker. Bei Umsetzung Spec-Sektion [07 WooCommerce](spec/07-woocommerce/README.md) ergänzen.
-
-**Status:** geplant — noch nicht umgesetzt.
-
----
-
 ### 🟡 Währung fest auf `EUR` — durch echte Währung ersetzen
 
 Die Server-Tracker (Meta `getData_custom`/`fireTracking_Server_Event`, GA4, TikTok) sowie der Meta-Browser-Pfad (`get_data_custom`) setzen die Währung hart auf `"EUR"`. Für WooCommerce liefert der [Order-Mapper](public/class-wp-sdtrk-wc-order-mapper.php) bereits die Order-Währung, sie wird aber von den Trackern noch nicht genutzt → bei abweichender Shop-Währung falsche Meldung. **Tun:** Währung über das Event-Modell durchreichen und in den Payloads statt `EUR` verwenden. Betrifft nicht nur WooCommerce. Details: [spec/99-findings.md](spec/99-findings.md).
@@ -38,6 +25,14 @@ Der Code nutzt `cdn.funnelytics.io/track-v3.js` + `window.funnelytics.events.tri
 Umgesetzt: Auto-Erkennung + Redux-Switch, Order→Event-Mapping, Browser-Purchase auf der Order-Received-Seite (alle Plattformen), Server-APIs auf Order-Status (consent-gated, dedupliziert), Spec-Sektion [07 WooCommerce](spec/07-woocommerce/README.md).
 
 **Offen:** Live-Verifikation auf echter HTTPS-Seite (Browser-Pixel feuern lokal nicht zuverlässig).
+
+---
+
+### ✅ WooCommerce Funnel-Events (ViewItem / AddToCart / InitiateCheckout)
+
+Umgesetzt: `view_item` (Produkt-Einzelseite), `add_to_cart` (Session-gepuffert, beim nächsten Seitenaufbau geseedet) und `begin_checkout` (Checkout-Seite) über dasselbe Engine-Seed-Modell wie Purchase — Browser **und** Server in einem Durchlauf, Präzedenz `order > beginCheckout > addToCart > viewItem`. Spec [07 › ViewItem/AddToCart](spec/07-woocommerce/view-item-and-add-to-cart.md) + [07 › InitiateCheckout](spec/07-woocommerce/initiate-checkout.md).
+
+**Offen:** Live-Verifikation auf echter HTTPS-Seite (Browser + Server feuern auf Produkt-/Checkout-Seiten).
 
 ---
 
