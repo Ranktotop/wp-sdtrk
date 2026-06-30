@@ -25,7 +25,9 @@ if (!function_exists('get_option'))    { function get_option($k, $d = false) { r
 if (!function_exists('update_option')) { function update_option($k, $v, $a = null) { $GLOBALS['__opts'][$k] = $v; return true; } }
 if (!function_exists('delete_option')) { function delete_option($k) { unset($GLOBALS['__opts'][$k]); $GLOBALS['__deleted'][] = $k; return true; } }
 if (!function_exists('wp_strip_all_tags')) { function wp_strip_all_tags($s) { return trim(strip_tags((string) $s)); } }
-if (!function_exists('wc_price'))      { function wc_price($amount) { return number_format((float) $amount, 2) . ' &euro;'; } }
+// Mimic WooCommerce: HTML wrapper with &nbsp; + &euro; entities. The handler
+// must strip the tags AND decode the entities, else they render literally.
+if (!function_exists('wc_price'))      { function wc_price($amount) { return '<span class="amount"><bdi>' . number_format((float) $amount, 2) . '&nbsp;<span class="currency">&euro;</span></bdi></span>'; } }
 if (!function_exists('wp_get_attachment_image_url')) { function wp_get_attachment_image_url($id, $size = 'thumbnail') { return $id ? 'http://shop/img/' . $id . '.jpg' : ''; } }
 if (!function_exists('wp_count_posts')) { function wp_count_posts($type = 'post') { $o = new stdClass(); $o->publish = $GLOBALS['__publish_count'] ?? 0; return $o; } }
 
@@ -96,6 +98,9 @@ check('returns all 4 rows',            count($r['rows']) === 4);
 $byId = [];
 foreach ($r['rows'] as $row) { $byId[$row['id']] = $row; }
 check('row carries name/sku/price',    $byId[1]['name'] === 'Alpha' && $byId[1]['sku'] === 'SKU-1' && isset($byId[1]['price']));
+check('price tags stripped',           strpos($byId[1]['price'], '<') === false);
+check('price entities decoded',        strpos($byId[1]['price'], '&euro;') === false && strpos($byId[1]['price'], '&nbsp;') === false);
+check('price shows currency symbol',   strpos($byId[1]['price'], "\xE2\x82\xAC") !== false); // €
 check('row 2 flagged excluded',        $byId[2]['excluded'] === true);
 check('row 1 flagged included',        $byId[1]['excluded'] === false);
 check('counter: totalProducts = 4',    (int) $r['totalProducts'] === 4);

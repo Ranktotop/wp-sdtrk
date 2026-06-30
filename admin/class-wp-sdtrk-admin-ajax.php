@@ -141,7 +141,11 @@ class Wp_Sdtrk_Admin_Ajax_Handler
                 'id'       => $id,
                 'name'     => (string) $product->get_name(),
                 'sku'      => (string) $product->get_sku(),
-                'price'    => function_exists('wc_price') ? wp_strip_all_tags(wc_price($price)) : (string) $price,
+                // wc_price() returns HTML with entities (&nbsp;, &euro;); strip the
+                // tags AND decode the entities so the value isn't shown literally.
+                'price'    => function_exists('wc_price')
+                    ? trim(html_entity_decode(wp_strip_all_tags(wc_price($price)), ENT_QUOTES | ENT_HTML5, 'UTF-8'))
+                    : (string) $price,
                 'image'    => (string) wp_get_attachment_image_url($product->get_image_id(), 'thumbnail'),
                 'excluded' => in_array($id, $excluded, true),
             ];
