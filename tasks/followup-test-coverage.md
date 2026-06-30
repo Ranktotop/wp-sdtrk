@@ -7,7 +7,9 @@ Legende: ☐ offen · ☑ erledigt
 
 ---
 
-## ☐ F1 (HIGH) — Echte Engine-Branch-Coverage für die Seed-Zweige
+## ☑ F1 (HIGH) — Echte Engine-Branch-Coverage für die Seed-Zweige
+
+> **Erledigt:** Seed-Zweige in `Wp_Sdtrk_Engine.seedWcCommerce()` + `seedCommerceEvent()` extrahiert (entfernt zugleich die Dreifach-Duplizierung). Neuer Test `test-wc-engine-seeding.mjs` lädt die **echte** Engine-Klasse (Stub-Scope für `window.localStorage` + `Wp_Sdtrk_Decrypter`) und ruft `seedWcCommerce()` real — deckt Präzedenz `order > addToCart > viewItem`, alle drei Seed-Zweige und den Order-`localStorage`-Once-Guard ab. Die zwei Mirror-Tests (`test-wc-view-item-seeding.mjs`, `test-wc-add-to-cart-seeding.mjs`) ersetzt/gelöscht.
 
 **Problem:** `test-wc-view-item-seeding.mjs` und `test-wc-add-to-cart-seeding.mjs` **spiegeln** den Seed-Block (bauen ein `Wp_Sdtrk_Event` von Hand nach), statt `collect_eventData()` real auszuführen. Die echte `else if`-Kette (`order > addToCart > viewItem`), die per-Zweig-`set*`-Aufrufe und der `localStorage`-Once-Guard des Order-Zweigs sind nur durch Substring-Asserts (`engineSrc.includes(...)`, `indexOf(...) < indexOf(...)`) abgesichert → Drift möglich (gelöschter `setCurrency`, falscher `String(...)`-Cast, fehlender `Array.isArray`-Guard fällt nicht auf).
 

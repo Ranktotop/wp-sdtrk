@@ -213,69 +213,69 @@ class Wp_Sdtrk_Engine {
 			this.event.setVisibilityTrigger(this.localizedData.visibilityTrigger);
 		}
 
-		//WooCommerce order-received data (authoritative on the thankyou page).
-		//Provided by Wp_Sdtrk_WC_Integration::localize_order_data(). Seeds the event
-		//as a Purchase carrying the whole cart, so the engine fires it browser +
-		//server in one pass, deduplicated via the order id.
-		if (typeof wp_sdtrk_wc !== 'undefined' && wp_sdtrk_wc.order) {
-			var wc = wp_sdtrk_wc.order;
-			// Fire the Purchase at most once per order in this browser. A reload of
-			// the order-received page is not a new purchase; Meta/TikTok dedup by
-			// event_id, but GA4 (browser + Measurement Protocol) does not dedup by
-			// transaction_id, so without this guard a refresh double-counts in GA4.
-			var wc_orderKey = 'wp_sdtrk_wc_' + String(wc.orderId || '');
-			var wc_alreadyFired = false;
-			try { wc_alreadyFired = window.localStorage.getItem(wc_orderKey) === '1'; } catch (e) { }
-			if (!wc_alreadyFired) {
-				this.event.setOrderId({ wc: String(wc.orderId || '') });
-				this.event.setEventName({ wc: 'purchase' });
-				this.event.setValue({ wc: String(wc.value || '') });
-				this.event.setCurrency(wc.currency || '');
-				this.event.setUserEmail({ wc: String(wc.email || '') });
-				this.event.setUserFirstName({ wc: String(wc.firstName || '') });
-				this.event.setUserLastName({ wc: String(wc.lastName || '') });
-				this.event.setItems(Array.isArray(wc.items) ? wc.items : []);
-				if (Array.isArray(wc.items) && wc.items.length > 0) {
-					this.event.setProdId({ wc: String(wc.items[0].id || '') });
-					this.event.setProdName({ wc: String(wc.items[0].name || '') });
-				}
-				try { window.localStorage.setItem(wc_orderKey, '1'); } catch (e) { }
-			}
-		}
-		//WooCommerce AddToCart data (server-buffered, seeded on the next page load).
-		//Provided by Wp_Sdtrk_WC_Integration::localize_commerce_data() from the WC
-		//session, which clears the buffer on localize (server-side once-guard), so
-		//no localStorage guard is needed here. Mutually exclusive with .order/.viewItem.
-		else if (typeof wp_sdtrk_wc !== 'undefined' && wp_sdtrk_wc.addToCart) {
-			var atc = wp_sdtrk_wc.addToCart;
-			this.event.setEventName({ wc: 'add_to_cart' });
-			this.event.setValue({ wc: String(atc.value || '') });
-			this.event.setCurrency(atc.currency || '');
-			this.event.setItems(Array.isArray(atc.items) ? atc.items : []);
-			if (Array.isArray(atc.items) && atc.items.length > 0) {
-				this.event.setProdId({ wc: String(atc.items[0].id || '') });
-				this.event.setProdName({ wc: String(atc.items[0].name || '') });
-			}
-		}
-		//WooCommerce ViewItem data (product detail page). Provided by
-		//Wp_Sdtrk_WC_Integration::localize_commerce_data(). Seeds the event as a
-		//view_item carrying the product, so the engine fires it browser + server in
-		//one pass. No once-guard: a view_item fires on every product page view.
-		//Mutually exclusive with .order/.addToCart (PHP localizes only one source).
-		else if (typeof wp_sdtrk_wc !== 'undefined' && wp_sdtrk_wc.viewItem) {
-			var vi = wp_sdtrk_wc.viewItem;
-			this.event.setEventName({ wc: 'view_item' });
-			this.event.setValue({ wc: String(vi.value || '') });
-			this.event.setCurrency(vi.currency || '');
-			this.event.setItems(Array.isArray(vi.items) ? vi.items : []);
-			if (Array.isArray(vi.items) && vi.items.length > 0) {
-				this.event.setProdId({ wc: String(vi.items[0].id || '') });
-				this.event.setProdName({ wc: String(vi.items[0].name || '') });
-			}
+		//WooCommerce commerce data (order / add-to-cart / view-item). Provided by
+		//Wp_Sdtrk_WC_Integration::localize_commerce_data(); PHP localizes exactly one
+		//source per page load. The engine seeds it so the event fires browser +
+		//server in one pass over all active catchers.
+		if (typeof wp_sdtrk_wc !== 'undefined' && wp_sdtrk_wc) {
+			this.seedWcCommerce(wp_sdtrk_wc);
 		}
 
 		//Remove sensible queries from url
 		window.history.replaceState({}, document.title, this.helper.get_privacyUrl([this.event.getUserFirstName_all(), this.event.getUserLastName_all(), this.event.getUserEmail_all()]));
+	}
+
+	/**
+	* Seed the event from the WooCommerce commerce data, at most one source in the
+	* precedence order > addToCart > viewItem. PHP localizes only one source; the
+	* else-if chain is the client-side safety net. The order branch additionally
+	* carries the buyer data and a per-order localStorage once-guard (a reload of
+	* the thankyou page is not a new purchase; GA4 does not dedup by transaction_id,
+	* so without the guard a refresh double-counts). View/AddToCart have no guard —
+	* a view_item fires on every product view, an add_to_cart is consumed once
+	* server-side from the WC session.
+	* @param {Object} wc The localized wp_sdtrk_wc object (order|addToCart|viewItem)
+	 */
+	seedWcCommerce(wc) {
+		if (wc.order) {
+			var order = wc.order;
+			var orderKey = 'wp_sdtrk_wc_' + String(order.orderId || '');
+			var alreadyFired = false;
+			try { alreadyFired = window.localStorage.getItem(orderKey) === '1'; } catch (e) { }
+			if (alreadyFired) {
+				return;
+			}
+			this.seedCommerceEvent('purchase', order);
+			this.event.setOrderId({ wc: String(order.orderId || '') });
+			this.event.setUserEmail({ wc: String(order.email || '') });
+			this.event.setUserFirstName({ wc: String(order.firstName || '') });
+			this.event.setUserLastName({ wc: String(order.lastName || '') });
+			try { window.localStorage.setItem(orderKey, '1'); } catch (e) { }
+		}
+		else if (wc.addToCart) {
+			this.seedCommerceEvent('add_to_cart', wc.addToCart);
+		}
+		else if (wc.viewItem) {
+			this.seedCommerceEvent('view_item', wc.viewItem);
+		}
+	}
+
+	/**
+	* Apply the shared commerce fields onto the event: event name, value, currency,
+	* the whole cart (items) and the first item as the single-product fallback for
+	* the prodId/prodName getters.
+	* @param {String} eventName The event name to set (purchase|add_to_cart|view_item)
+	* @param {Object} src The source object carrying value/currency/items
+	 */
+	seedCommerceEvent(eventName, src) {
+		this.event.setEventName({ wc: eventName });
+		this.event.setValue({ wc: String(src.value || '') });
+		this.event.setCurrency(src.currency || '');
+		this.event.setItems(Array.isArray(src.items) ? src.items : []);
+		if (Array.isArray(src.items) && src.items.length > 0) {
+			this.event.setProdId({ wc: String(src.items[0].id || '') });
+			this.event.setProdName({ wc: String(src.items[0].name || '') });
+		}
 	}
 
 

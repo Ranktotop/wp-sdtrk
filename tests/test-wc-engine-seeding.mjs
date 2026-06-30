@@ -1,9 +1,14 @@
 /**
- * Contract test for the WooCommerce seeding the engine performs in
- * collect_eventData() (see wp-sdtrk-engine.js). It does not boot the full engine
- * (which needs the DOM + all catcher globals); instead it applies the exact same
- * field shapes to a real Wp_Sdtrk_Event and asserts the getter outcomes the
- * downstream catchers + server dedup rely on.
+ * Real-engine test for the WooCommerce seeding in wp-sdtrk-engine.js. Unlike a
+ * mirror test, this loads the ACTUAL Wp_Sdtrk_Engine class and invokes its real
+ * seedWcCommerce()/seedCommerceEvent() methods against a Wp_Sdtrk_Event, so the
+ * precedence chain (order > addToCart > viewItem), the per-branch field wiring and
+ * the order-branch localStorage once-guard are genuinely covered — a dropped
+ * setCurrency, a wrong String() cast or a reordered branch would fail here.
+ *
+ * The engine class is eval'd with a minimal stub scope (window.localStorage +
+ * a no-op Wp_Sdtrk_Decrypter for the file's bootstrap tail). collect_eventData()
+ * itself (DOM/helper/fp) is NOT booted; only the pure seeding methods are.
  *
  * Run:  node tests/test-wc-engine-seeding.mjs
  */
@@ -12,9 +17,27 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const src = readFileSync(join(here, '..', 'public', 'js', 'wp-sdtrk-event.js'), 'utf8');
+const eventSrc = readFileSync(join(here, '..', 'public', 'js', 'wp-sdtrk-event.js'), 'utf8');
+const engineSrc = readFileSync(join(here, '..', 'public', 'js', 'wp-sdtrk-engine.js'), 'utf8');
+
+const preamble = `
+	var __ls = {};
+	var window = {
+		localStorage: {
+			getItem: function (k) { return Object.prototype.hasOwnProperty.call(__ls, k) ? __ls[k] : null; },
+			setItem: function (k, v) { __ls[k] = String(v); },
+			removeItem: function (k) { delete __ls[k]; }
+		},
+		history: { replaceState: function () {} }
+	};
+	function Wp_Sdtrk_Decrypter() {}
+	Wp_Sdtrk_Decrypter.prototype.decrypt = function () {};
+`;
 // eslint-disable-next-line no-new-func
-const Wp_Sdtrk_Event = new Function(src + '\nreturn Wp_Sdtrk_Event;')();
+const mod = new Function(preamble + '\n' + eventSrc + '\n' + engineSrc +
+	'\nreturn { Engine: Wp_Sdtrk_Engine, Event: Wp_Sdtrk_Event, ls: __ls };')();
+
+const { Engine, Event } = mod;
 
 let fails = 0;
 function check(label, cond) {
@@ -22,52 +45,55 @@ function check(label, cond) {
 	else { console.log('  FAIL: ' + label); fails++; }
 }
 
-// Mirror of the localized wp_sdtrk_wc.order payload.
-const wc = {
-	orderId: '32548',
-	value: '2150',
-	currency: 'EUR',
-	email: 'buyer@example.com',
-	firstName: 'Ada',
-	lastName: 'Lovelace',
-	items: [
-		{ id: '24215', name: 'Hybridlehrgang', qty: 1, price: 2000 },
-		{ id: '777', name: 'Skript', qty: 2, price: 75 },
-	],
-};
-
-// Exact seeding block from collect_eventData().
-const ev = new Wp_Sdtrk_Event();
-ev.setOrderId({ wc: String(wc.orderId || '') });
-ev.setEventName({ wc: 'purchase' });
-ev.setValue({ wc: String(wc.value || '') });
-ev.setCurrency(wc.currency || '');
-ev.setUserEmail({ wc: String(wc.email || '') });
-ev.setUserFirstName({ wc: String(wc.firstName || '') });
-ev.setUserLastName({ wc: String(wc.lastName || '') });
-ev.setItems(Array.isArray(wc.items) ? wc.items : []);
-if (Array.isArray(wc.items) && wc.items.length > 0) {
-	ev.setProdId({ wc: String(wc.items[0].id || '') });
-	ev.setProdName({ wc: String(wc.items[0].name || '') });
+// Build an engine instance without running the heavy constructor; only the
+// seeding methods (which use this.event) are exercised.
+function seed(wc) {
+	const engine = Object.create(Engine.prototype);
+	engine.event = new Event();
+	engine.seedWcCommerce(wc);
+	return engine.event;
 }
 
-console.log('WooCommerce engine seeding -> event getters');
-check('grabEventName() === purchase', ev.grabEventName() === 'purchase');
-check('grabOrderId() === order id (dedup)', ev.grabOrderId() === '32548');
-check('grabValue() === 2150', ev.grabValue() === 2150);
-check('getCurrency() === EUR', ev.getCurrency() === 'EUR');
-check('getUserEmail() === buyer', ev.getUserEmail() === 'buyer@example.com');
-check('getUserFirstName() === Ada', ev.getUserFirstName() === 'Ada');
-check('getUserLastName() === Lovelace', ev.getUserLastName() === 'Lovelace');
-check('getItems().length === 2', ev.getItems().length === 2);
-check('first item id 24215', ev.grabProdId() === '24215');
+console.log('view_item seeding (real seedWcCommerce/seedCommerceEvent)');
+const vi = seed({ viewItem: { value: '49', currency: 'USD', items: [{ id: '24215', name: 'Hybridlehrgang', qty: 1, price: 49 }] } });
+check('eventName view_item', vi.grabEventName() === 'view_item');
+check('value 49', vi.grabValue() === 49);
+check('currency USD', vi.getCurrency() === 'USD');
+check('items length 1', vi.getItems().length === 1);
+check('prodId 24215', vi.grabProdId() === '24215');
+check('prodName Hybridlehrgang', vi.grabProdName() === 'Hybridlehrgang');
 
-// Auto-purchase: even without an explicit eventName, an order id implies purchase.
-const auto = new Wp_Sdtrk_Event();
-auto.setOrderId({ wc: '32548' });
-auto.setEventName({ wc: '' });
-auto.setProdId({ wc: '' });
-check('auto purchase from orderId', auto.grabEventName() === 'purchase');
+console.log('add_to_cart seeding (merged multi-add)');
+const atc = seed({ addToCart: { value: '25.5', currency: 'USD', items: [{ id: '1', name: 'A', qty: 2, price: 10 }, { id: '2', name: 'B', qty: 1, price: 5.5 }] } });
+check('eventName add_to_cart', atc.grabEventName() === 'add_to_cart');
+check('value 25.5', atc.grabValue() === 25.5);
+check('items length 2', atc.getItems().length === 2);
+check('prodId first item', atc.grabProdId() === '1');
+
+console.log('purchase seeding (order branch: buyer data + order id)');
+const pur = seed({ order: { orderId: '4711', value: '59', currency: 'EUR', email: 'a@b.c', firstName: 'Ada', lastName: 'L', items: [{ id: '808', name: 'T', qty: 1, price: 59 }] } });
+check('eventName purchase', pur.grabEventName() === 'purchase');
+check('orderId 4711 (dedup)', pur.grabOrderId() === '4711');
+check('email seeded', pur.getUserEmail() === 'a@b.c');
+check('firstName seeded', pur.getUserFirstName() === 'Ada');
+check('currency EUR', pur.getCurrency() === 'EUR');
+check('prodId 808', pur.grabProdId() === '808');
+
+console.log('precedence order > addToCart > viewItem (real else-if chain)');
+const both = seed({ order: { orderId: '1', value: '1', items: [] }, addToCart: { value: '5', items: [] }, viewItem: { value: '9', items: [] } });
+check('order wins over all', both.grabEventName() === 'purchase');
+const atcVsVi = seed({ addToCart: { value: '5', items: [] }, viewItem: { value: '9', items: [] } });
+check('addToCart wins over viewItem', atcVsVi.grabEventName() === 'add_to_cart');
+
+console.log('no commerce source => nothing seeded');
+const none = seed({});
+check('eventName false (nothing set)', none.grabEventName() === false);
+
+console.log('order localStorage once-guard (reload does not re-seed)');
+const first = seed({ order: { orderId: '999', value: '5', items: [{ id: '5', name: 'x', qty: 1, price: 5 }] } });
+check('first load seeds purchase', first.grabEventName() === 'purchase');
+const second = seed({ order: { orderId: '999', value: '5', items: [{ id: '5', name: 'x', qty: 1, price: 5 }] } });
+check('reload does not re-seed (guard)', second.grabEventName() === false && second.getCurrency() === '');
 
 if (fails > 0) {
 	console.log('\n' + fails + ' assertion(s) failed.');

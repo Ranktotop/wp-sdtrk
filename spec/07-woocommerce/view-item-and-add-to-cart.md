@@ -33,10 +33,12 @@ Auf `is_product()` baut `build_view_item_payload($product)` das Objekt `wp_sdtrk
 
 ### Ingestion in der Engine
 
-`collect_eventData()` übernimmt — falls `wp_sdtrk_wc.viewItem` vorhanden und keine `.order`-Quelle gesetzt — diese Werte:
+`collect_eventData()` ruft `seedWcCommerce(wp_sdtrk_wc)`; bei der `viewItem`-Quelle übernimmt `seedCommerceEvent('view_item', …)` die gemeinsamen Felder:
 
 - `setEventName({wc:'view_item'})`, `setValue({wc})`, `setCurrency()`, `setItems()`
 - `setProdId/Name({wc})` aus der (einzigen) Position
+
+> `seedWcCommerce()` entscheidet die Quelle clientseitig in derselben Reihenfolge `order > addToCart > viewItem` (`if/else if`-Kette); `seedCommerceEvent(name, src)` setzt die gemeinsamen Commerce-Felder für alle drei Quellen (der `order`-Zweig ergänzt Order-ID, Käuferdaten und den `localStorage`-Once-Guard).
 
 `catchPageHit(2) → catchEventHit(2)` feuert daraufhin pro Catcher den Browser-Hit **und** den Server-Call. Plattform-Abbildung des Event-Namens: Meta `ViewContent`, GA4 `view_item`, TikTok `ViewContent` (jeweils über die bestehende `convert_eventname()`-Logik). Wert, Währung und Position reisen über die regulären `getValue()/getCurrency()/getItems()`-Pfade mit — identisch zum Purchase.
 
@@ -62,7 +64,7 @@ Single-Product-Seiten fügen per Default über einen **Formular-Submit** in den 
 | `currency` | `get_woocommerce_currency()` (Shop-Währung) |
 | `items` | die gesamte Pufferliste `[{id,name,qty,price}, …]` |
 
-Die Engine seedet daraus — `else if`-Zweig **vor** `viewItem` — ein `add_to_cart`-Event (`setEventName({wc:'add_to_cart'})` + `value`/`currency`/`items` + `prodId/Name` aus der ersten Position) und feuert es browser- **und** serverseitig: Meta `AddToCart`, GA4 `add_to_cart`, TikTok `AddToCart`.
+Die Engine seedet daraus über `seedWcCommerce()` — `addToCart`-Zweig **vor** `viewItem` — ein `add_to_cart`-Event (`seedCommerceEvent('add_to_cart', …)`: `value`/`currency`/`items` + `prodId/Name` aus der ersten Position) und feuert es browser- **und** serverseitig: Meta `AddToCart`, GA4 `add_to_cart`, TikTok `AddToCart`.
 
 ### 3. Once-Guard (Session-Verbrauch)
 
