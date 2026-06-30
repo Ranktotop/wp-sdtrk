@@ -209,7 +209,14 @@ class Wp_Sdtrk_WC_Feed
         $brand    = $brand ? $brand : get_bloginfo('name');
         $currency = function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : '';
 
-        $products = wc_get_products(['status' => 'publish', 'limit' => -1]);
+        // Exclude products the admin has kept out of the feed. A variable
+        // parent's variations are only gathered via its get_children() loop
+        // below, so excluding the parent drops its variations transitively.
+        $products = wc_get_products([
+            'status'  => 'publish',
+            'limit'   => -1,
+            'exclude' => $this->get_excluded_ids(),
+        ]);
         $rows     = [];
         foreach ($products as $product) {
             if ($product->is_type('variable')) {
