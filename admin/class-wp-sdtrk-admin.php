@@ -838,6 +838,14 @@ class Wp_Sdtrk_Admin
 						'content'  => $this->get_wc_feed_url_info(),
 						'required' => [['wc_integration', '=', '1'], ['wc_feed_enabled', '=', '1']],
 					],
+					[
+						'id'       => 'wc_feed_manage_link',
+						'type'     => 'raw',
+						'content'  => '<p><a href="' . esc_url(admin_url('admin.php?page=wp_sdtrk_feed_manage')) . '" class="button button-primary">'
+							. esc_html__('Manage feed', 'wp-sdtrk') . '</a>'
+							. ' <span class="description">' . esc_html__('Choose which products are included in or excluded from the feed.', 'wp-sdtrk') . '</span></p>',
+						'required' => [['wc_integration', '=', '1'], ['wc_feed_enabled', '=', '1']],
+					],
 				],
 			]);
 		}
