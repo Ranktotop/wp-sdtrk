@@ -74,3 +74,5 @@ Beim Lokalisieren wird die Session-Liste **vor** dem Localize geleert (`WC()->se
 - **Mehrere Adds → ein Event.** Werden vor einem Seitenaufbau mehrere Produkte hinzugefügt, entsteht **ein** AddToCart-Event mit allen Positionen in `items[]` (Folge des Ein-Event-pro-Load-Modells). Der Warenkorb-Zuwachs reist verlustfrei mit; es gibt **kein** Ein-Event-pro-Position.
 - **Clear-on-Localize.** Läuft das Engine-JS nach dem Localize nicht (Bot, JS deaktiviert, AdBlocker), geht dieser eine AddToCart-Hit verloren — dieselbe Klasse wie „Server hängt am Browser" ([README › Trade-offs](README.md#bewusste-trade-offs)).
 - **Dedup ohne Order-ID.** Browser- und Server-AddToCart teilen die gemeinsame Engine-`eventId` (`grabOrderId()` → `getEventId()`), wie jedes Nicht-Kauf-Event.
+
+> **Preisbasis:** `value`/`price` von ViewItem und AddToCart sind der **Anzeigepreis** (`wc_get_price_to_display()`, Steuer nach Shop-Einstellung). Der Purchase-`value` ist dagegen der tatsächlich berechnete Order-Gesamtwert (`get_total()`); je nach Steuerkonfiguration kann sich die Basis zwischen Funnel-Schritt und Kauf leicht unterscheiden (akzeptiert).

@@ -189,6 +189,10 @@ class Wp_Sdtrk_WC_Integration
             $price = isset($line['price']) ? (float) $line['price'] : 0.0;
             $value += $price * $qty;
         }
+        // Round the summed value so accumulated float error cannot leak a long
+        // decimal string (e.g. "59.9699999") into the event payload.
+        $decimals = function_exists('wc_get_price_decimals') ? wc_get_price_decimals() : 2;
+        $value = round($value, $decimals);
 
         return [
             'addToCart' => [
