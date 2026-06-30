@@ -257,18 +257,26 @@ class Wp_Sdtrk_WC_Integration
 
     /**
      * Pure precedence resolver: at most one commerce source seeds the engine per
-     * page load, in the order order > addToCart > viewItem. Keeps the localize
-     * method's branching unit-testable without WP/WC context.
+     * page load, in the order order > beginCheckout > addToCart > viewItem. Keeps
+     * the localize method's branching unit-testable without WP/WC context.
+     *
+     * Checkout outranks a pending add-to-cart: entering the kasse is the stronger
+     * funnel signal, so begin_checkout fires and the (rarely co-occurring) buffer
+     * is dropped by the caller rather than seeding a competing add_to_cart.
      *
      * @param bool $order_received  On the order-received page for a resolvable order.
+     * @param bool $is_checkout     On the checkout page with a non-empty cart.
      * @param bool $has_pending_atc A pending add-to-cart sits in the WC session.
      * @param bool $is_product      On a single product page.
-     * @return string 'order' | 'addToCart' | 'viewItem' | 'none'
+     * @return string 'order' | 'beginCheckout' | 'addToCart' | 'viewItem' | 'none'
      */
-    public static function resolve_commerce_source(bool $order_received, bool $has_pending_atc, bool $is_product): string
+    public static function resolve_commerce_source(bool $order_received, bool $is_checkout, bool $has_pending_atc, bool $is_product): string
     {
         if ($order_received) {
             return 'order';
+        }
+        if ($is_checkout) {
+            return 'beginCheckout';
         }
         if ($has_pending_atc) {
             return 'addToCart';
@@ -284,9 +292,9 @@ class Wp_Sdtrk_WC_Integration
      *
      * Hooked to `wp_enqueue_scripts` at a priority that runs after the engine is
      * registered/enqueued. Inert unless the integration is active. Exactly one
-     * source is localized per page load (order > addToCart > viewItem) so the
-     * engine seeds a single commerce event that fires browser + server in one
-     * pass.
+     * source is localized per page load (order > beginCheckout > addToCart >
+     * viewItem) so the engine seeds a single commerce event that fires browser +
+     * server in one pass.
      *
      * @return void
      */
@@ -298,9 +306,14 @@ class Wp_Sdtrk_WC_Integration
 
         $order      = $this->current_received_order();
         $pending    = $this->pending_add_to_cart();
-        $is_product = function_exists('is_product') && is_product();
+        $cart       = (function_exists('WC') && WC()->cart) ? WC()->cart : null;
+        // begin_checkout only fires on a real, non-empty checkout. is_checkout()
+        // is also true on the order-received page, but the resolver returns
+        // 'order' first there, so there is no conflict.
+        $is_checkout = function_exists('is_checkout') && is_checkout() && $cart && !$cart->is_empty();
+        $is_product  = function_exists('is_product') && is_product();
 
-        $source = self::resolve_commerce_source($order !== null, count($pending) > 0, $is_product);
+        $source = self::resolve_commerce_source($order !== null, $is_checkout, count($pending) > 0, $is_product);
 
         switch ($source) {
             case 'order':
@@ -311,6 +324,16 @@ class Wp_Sdtrk_WC_Integration
                     WC()->session->set('wp_sdtrk_atc', array());
                 }
                 wp_localize_script('wp_sdtrk-engine', 'wp_sdtrk_wc', $this->build_order_payload($order));
+                break;
+            case 'beginCheckout':
+                // Checkout supersedes a pending add-to-cart (same rationale as the
+                // order branch): drop the buffer so it cannot fire a competing
+                // add_to_cart on a later page. begin_checkout has no once-guard — it
+                // fires on every checkout page load, like view_item.
+                if (count($pending) > 0) {
+                    WC()->session->set('wp_sdtrk_atc', array());
+                }
+                wp_localize_script('wp_sdtrk-engine', 'wp_sdtrk_wc', $this->build_begin_checkout_payload($cart));
                 break;
             case 'addToCart':
                 // Consume the buffer once: clear it before localizing so a reload

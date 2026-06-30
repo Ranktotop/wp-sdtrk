@@ -1,9 +1,15 @@
 <?php
 /**
  * Regression guard for the commerce-source precedence through the real
- * localize_commerce_data() seam: with BOTH a pending add-to-cart buffer and a
- * product page, addToCart must win over viewItem; once the buffer is consumed,
- * the same product page falls through to viewItem.
+ * localize_commerce_data() seam. Precedence: order > beginCheckout > addToCart
+ * > viewItem.
+ *  - With a pending add-to-cart buffer AND a product page, addToCart wins over
+ *    viewItem; once the buffer is consumed, the same product page falls through
+ *    to viewItem.
+ *  - On the checkout page (non-empty cart), beginCheckout wins even over a
+ *    pending add-to-cart buffer, and drops that buffer (a purchase-like
+ *    supersede) so it cannot fire a phantom add_to_cart later.
+ *  - An empty cart on the checkout page yields no commerce event.
  *
  * WooCommerce/WP primitives are stubbed. Run:
  *   php tests/test-wc-commerce-precedence.php
@@ -26,12 +32,19 @@ class FakeWC_Session
     public function get($k, $d = null) { return $this->store[$k] ?? $d; }
     public function set($k, $v) { $this->store[$k] = $v; }
 }
+class FakeWC_Cart
+{
+    public function get_cart() { return $GLOBALS['__cart_items']; }
+    public function is_empty() { return count($GLOBALS['__cart_items']) === 0; }
+}
 class FakeWC_Container
 {
     public $session;
-    public function __construct($session) { $this->session = $session; }
+    public $cart;
+    public function __construct($session, $cart) { $this->session = $session; $this->cart = $cart; }
 }
-$GLOBALS['__wc'] = new FakeWC_Container(new FakeWC_Session());
+$GLOBALS['__cart_items'] = array();
+$GLOBALS['__wc'] = new FakeWC_Container(new FakeWC_Session(), new FakeWC_Cart());
 if (!function_exists('WC')) { function WC() { return $GLOBALS['__wc']; } }
 
 $GLOBALS['__localized'] = array();
@@ -39,9 +52,12 @@ if (!function_exists('wp_localize_script')) {
     function wp_localize_script($handle, $name, $data) { $GLOBALS['__localized'][] = $data; }
 }
 
-// Product page context for the viewItem branch.
-if (!function_exists('is_product')) { function is_product() { return true; } }
-if (!function_exists('get_the_ID')) { function get_the_ID() { return 24215; } }
+// Page-context toggles (default: product page, not checkout).
+$GLOBALS['__is_product']  = true;
+$GLOBALS['__is_checkout'] = false;
+if (!function_exists('is_product'))  { function is_product()  { return (bool) $GLOBALS['__is_product']; } }
+if (!function_exists('is_checkout')) { function is_checkout() { return (bool) $GLOBALS['__is_checkout']; } }
+if (!function_exists('get_the_ID'))  { function get_the_ID()  { return 24215; } }
 class FakeWC_Product
 {
     public function __construct(private $id) {}
@@ -76,6 +92,25 @@ $integration->localize_commerce_data();
 $second = end($GLOBALS['__localized']);
 check('localized viewItem',                isset($second['viewItem']) && !isset($second['addToCart']));
 check('viewItem prodId from product',      ($second['viewItem']['prodId'] ?? null) === '24215');
+
+echo "beginCheckout wins over a pending add-to-cart on the checkout page\n";
+$GLOBALS['__is_checkout'] = true;
+$GLOBALS['__cart_items']  = array(
+    'k1' => array('data' => new FakeWC_Product(501), 'quantity' => 2, 'product_id' => 501, 'variation_id' => 0, 'line_total' => 30.0),
+);
+$session->set('wp_sdtrk_atc', array(array('id' => '777', 'name' => 'X', 'qty' => 1, 'price' => 9.99)));
+$integration->localize_commerce_data();
+$third = end($GLOBALS['__localized']);
+check('localized beginCheckout, not addToCart', isset($third['beginCheckout']) && !isset($third['addToCart']));
+check('beginCheckout value = 30',               abs((float) ($third['beginCheckout']['value'] ?? 0) - 30.0) < 0.0001);
+check('pending buffer dropped on checkout win',  $session->get('wp_sdtrk_atc', array()) === array());
+
+echo "empty cart on the checkout page yields no commerce event\n";
+$GLOBALS['__cart_items'] = array();
+$GLOBALS['__is_product'] = false; // genuine checkout page is not a product page
+$before = count($GLOBALS['__localized']);
+$integration->localize_commerce_data();
+check('nothing localized for empty checkout', count($GLOBALS['__localized']) === $before);
 
 if ($fails > 0) {
     echo "\n$fails assertion(s) failed.\n";

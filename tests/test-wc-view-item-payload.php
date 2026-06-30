@@ -56,12 +56,13 @@ check('currency = shop currency',($vi['currency'] ?? null) === 'USD');
 check('items is single line',    is_array($vi['items'] ?? null) && count($vi['items']) === 1);
 check('items[0] id',             ($vi['items'][0]['id'] ?? null) === '24215');
 
-echo "resolve_commerce_source() precedence (order > addToCart > viewItem)\n";
-// resolve_commerce_source(bool orderReceived, bool hasPendingAtc, bool isProduct)
-check('order received wins',     Wp_Sdtrk_WC_Integration::resolve_commerce_source(true,  true,  true)  === 'order');
-check('addToCart over viewItem', Wp_Sdtrk_WC_Integration::resolve_commerce_source(false, true,  true)  === 'addToCart');
-check('viewItem on product',     Wp_Sdtrk_WC_Integration::resolve_commerce_source(false, false, true)  === 'viewItem');
-check('none otherwise',          Wp_Sdtrk_WC_Integration::resolve_commerce_source(false, false, false) === 'none');
+echo "resolve_commerce_source() precedence (order > beginCheckout > addToCart > viewItem)\n";
+// resolve_commerce_source(bool orderReceived, bool isCheckout, bool hasPendingAtc, bool isProduct)
+check('order received wins',       Wp_Sdtrk_WC_Integration::resolve_commerce_source(true,  true,  true,  true)  === 'order');
+check('beginCheckout over atc',    Wp_Sdtrk_WC_Integration::resolve_commerce_source(false, true,  true,  true)  === 'beginCheckout');
+check('addToCart over viewItem',   Wp_Sdtrk_WC_Integration::resolve_commerce_source(false, false, true,  true)  === 'addToCart');
+check('viewItem on product',       Wp_Sdtrk_WC_Integration::resolve_commerce_source(false, false, false, true)  === 'viewItem');
+check('none otherwise',            Wp_Sdtrk_WC_Integration::resolve_commerce_source(false, false, false, false) === 'none');
 
 if ($fails > 0) {
     echo "\n$fails assertion(s) failed.\n";
