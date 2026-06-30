@@ -32,6 +32,10 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.10.0 =
+* Added WooCommerce InitiateCheckout tracking on the checkout page (Meta InitiateCheckout, GA4 begin_checkout, TikTok InitiateCheckout), browser and server in one pass
+* Fires on every checkout page load for a non-empty cart; takes precedence over a pending add-to-cart (order > beginCheckout > addToCart > viewItem)
+
 = 1.9.0 =
 * Added WooCommerce ViewItem tracking on product pages (Meta ViewContent, GA4 view_item, etc.), browser and server in one pass
 * Added WooCommerce AddToCart tracking (server-buffered on add, fired on the next page load; covers AJAX and form add-to-cart)
