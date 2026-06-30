@@ -15,9 +15,15 @@ if (!class_exists('WooCommerce')) { class WooCommerce {} }
 if (!class_exists('WP_SDTRK_Helper_Options')) {
     class WP_SDTRK_Helper_Options
     {
-        public static function get_bool_option($k, $d = false) { return $k === 'wc_integration'; }
+        // Honour a global so the wc_integration switch can be toggled per assertion.
+        public static function get_bool_option($k, $d = false)
+        {
+            if ($k === 'wc_integration') { return $GLOBALS['__wc_switch'] ?? true; }
+            return $d;
+        }
     }
 }
+$GLOBALS['__wc_switch'] = true;
 if (!function_exists('get_woocommerce_currency')) {
     function get_woocommerce_currency() { return 'USD'; }
 }
@@ -83,6 +89,19 @@ echo "missing product is skipped (no fatal, no append)\n";
 $integration->capture_add_to_cart('key4', 0, 1, 0);
 $pending = $session->get('wp_sdtrk_atc', array());
 check('still three lines',        count($pending) === 3);
+
+echo "inactive integration short-circuits (switch off => no append)\n";
+$GLOBALS['__wc_switch'] = false;
+$integration->capture_add_to_cart('key5', 24215, 1);
+check('no append when inactive',  count($session->get('wp_sdtrk_atc', array())) === 3);
+$GLOBALS['__wc_switch'] = true;
+
+echo "no WC session short-circuits (no fatal, no append)\n";
+$savedSession = $GLOBALS['__wc']->session;
+$GLOBALS['__wc']->session = null;
+$integration->capture_add_to_cart('key6', 24215, 1);
+$GLOBALS['__wc']->session = $savedSession;
+check('no fatal, buffer intact',  count($session->get('wp_sdtrk_atc', array())) === 3);
 
 if ($fails > 0) {
     echo "\n$fails assertion(s) failed.\n";

@@ -28,7 +28,7 @@ Legende: ☐ offen · ☑ erledigt
 
 ---
 
-## ☐ F2 (MEDIUM) — `capture_add_to_cart`-Kurzschlüsse
+## ☑ F2 (MEDIUM) — `capture_add_to_cart`-Kurzschlüsse
 
 **Lücke:** Nur der `!$product`-Pfad ist getestet. `!is_active()` (Schalter aus) und `!WC()->session` (keine Session) sind ungeprüft — eine Regression, die das Gate hinter den Buffer-Write verschiebt, fiele nicht auf.
 
@@ -38,7 +38,7 @@ Legende: ☐ offen · ☑ erledigt
 
 ---
 
-## ☐ F3 (MEDIUM) — Nicht-Array-`wp_sdtrk_atc` auf der Consume-Seite
+## ☑ F3 (MEDIUM) — Nicht-Array-`wp_sdtrk_atc` auf der Consume-Seite
 
 **Lücke:** `pending_add_to_cart()` hat einen `is_array(...) ? … : []`-Guard (Schutz vor korruptem Session-Wert eines Fremd-Plugins), aber kein Test deckt ihn ab.
 
@@ -46,7 +46,7 @@ Legende: ☐ offen · ☑ erledigt
 
 ---
 
-## ☐ F4 (MEDIUM) — Currency-Fallback `''` für view_item/add_to_cart
+## ☑ F4 (MEDIUM) — Currency-Fallback `''` für view_item/add_to_cart
 
 **Lücke:** Alle PHP-Tests stubben `get_woocommerce_currency()` → `'USD'`. Der Produktions-Fallback (`function_exists(...) ? … : ''`) der **neuen** Builder ist nie ausgeführt.
 
@@ -54,7 +54,7 @@ Legende: ☐ offen · ☑ erledigt
 
 ---
 
-## ☐ F5 (LOW) — String-typisierte qty/price in der Buffer-Summe
+## ☑ F5 (LOW) — String-typisierte qty/price in der Buffer-Summe
 
 **Lücke:** `build_add_to_cart_payload` castet `(float)` auf `qty`/`price`, Test füttert aber bereits Floats.
 

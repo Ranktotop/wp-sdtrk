@@ -40,6 +40,12 @@ check('items carry full buffer', is_array($atc['items'] ?? null) && count($atc['
 check('items[0] id preserved',   ($atc['items'][0]['id'] ?? null) === '1');
 check('items[1] qty preserved',  ($atc['items'][1]['qty'] ?? null) === 1);
 
+echo "string-typed qty/price are coerced in the value sum\n";
+$typed = $integration->build_add_to_cart_payload(array(
+    array('id' => '9', 'name' => 'C', 'qty' => '2', 'price' => '10.5'),
+));
+check('value 21.0 from strings',  abs((float) ($typed['addToCart']['value'] ?? 0) - 21.0) < 0.0001);
+
 echo "empty buffer => zero value, empty items\n";
 $empty = $integration->build_add_to_cart_payload(array());
 check('value 0',                 abs((float) ($empty['addToCart']['value'] ?? 1) - 0.0) < 0.0001);

@@ -71,6 +71,14 @@ $before = count($GLOBALS['__localized']);
 $integration->localize_commerce_data();
 check('no re-fire on reload',         count($GLOBALS['__localized']) === $before);
 
+echo "corrupt (non-array) session value is tolerated\n";
+// A foreign plugin could poison wp_sdtrk_atc with a scalar. pending_add_to_cart()
+// must coerce it to [] so resolve_commerce_source() sees no pending buffer.
+$session->set('wp_sdtrk_atc', 'garbage-string');
+$before = count($GLOBALS['__localized']);
+$integration->localize_commerce_data();
+check('scalar session => no localize', count($GLOBALS['__localized']) === $before);
+
 if ($fails > 0) {
     echo "\n$fails assertion(s) failed.\n";
     exit(1);
