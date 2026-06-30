@@ -204,6 +204,44 @@ class Wp_Sdtrk_WC_Integration
     }
 
     /**
+     * Build the BeginCheckout data the engine consumes on the checkout page.
+     *
+     * Localized as wp_sdtrk_wc.beginCheckout; the engine seeds it as a
+     * begin_checkout event that fires browser + server in one pass. `value` is
+     * the summed line total across all cart lines (after discount, before
+     * shipping); `items` carries the whole cart. Mirrors the addToCart payload
+     * shape so the same engine + catcher paths apply. Fires on every checkout
+     * page load (no once-guard, like view_item).
+     *
+     * @param WC_Cart $cart
+     * @return array
+     */
+    public function build_begin_checkout_payload($cart): array
+    {
+        $mapper = new Wp_Sdtrk_WC_Order_Mapper();
+        $items  = $mapper->cartLines($cart);
+
+        $value = 0.0;
+        foreach ($items as $line) {
+            $qty   = isset($line['qty']) ? (float) $line['qty'] : 0.0;
+            $price = isset($line['price']) ? (float) $line['price'] : 0.0;
+            $value += $price * $qty;
+        }
+        // Round the summed value so accumulated float error cannot leak a long
+        // decimal string into the event payload (same as build_add_to_cart_payload).
+        $decimals = function_exists('wc_get_price_decimals') ? wc_get_price_decimals() : 2;
+        $value = round($value, $decimals);
+
+        return [
+            'beginCheckout' => [
+                'value'    => (string) $value,
+                'currency' => function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : '',
+                'items'    => array_values($items),
+            ],
+        ];
+    }
+
+    /**
      * The add-to-cart buffer pending in the WC session (empty when none/no session).
      *
      * @return array

@@ -37,6 +37,37 @@ class Wp_Sdtrk_WC_Order_Mapper
     }
 
     /**
+     * Structured per-line list for the cart (begin_checkout payload).
+     *
+     * Mirrors the lineItems()/productLine() shape ({id,name,qty,price}) so the
+     * engine and platform catchers treat checkout items exactly like order/ATC
+     * items. `price` is the per-unit value derived from the cart line total
+     * (after discount, before shipping), matching how lineItems() prices an
+     * order line. id prefers the variation id for catalog-level consistency.
+     *
+     * @param WC_Cart $cart
+     * @return array<int, array{id:string, name:string, qty:int, price:float}>
+     */
+    public function cartLines($cart): array
+    {
+        $lines = [];
+        foreach ($cart->get_cart() as $cart_item) {
+            $qty        = (int) ($cart_item['quantity'] ?? 0);
+            $line_total = isset($cart_item['line_total']) ? (float) $cart_item['line_total'] : 0.0;
+            $product    = isset($cart_item['data']) ? $cart_item['data'] : null;
+            $variation  = (int) ($cart_item['variation_id'] ?? 0);
+            $product_id = (int) ($cart_item['product_id'] ?? 0);
+            $lines[] = [
+                'id'    => (string) ($variation ?: $product_id),
+                'name'  => $product ? $product->get_name() : '',
+                'qty'   => $qty,
+                'price' => $qty > 0 ? $line_total / $qty : $line_total,
+            ];
+        }
+        return $lines;
+    }
+
+    /**
      * Single-product line for the ViewItem and AddToCart payloads.
      *
      * Mirrors the lineItems() shape ({id,name,qty,price}) so the engine and the
