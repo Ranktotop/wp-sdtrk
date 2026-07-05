@@ -27,7 +27,7 @@ WooCommerce-Sektion ──Button „Manage feed"──▶ Seite wp_sdtrk_feed_ma
   └─ Panel „Google-Produktkategorien" (<details>, lazy) ─AJAX─▶ list_gpc_categories / save_gpc_map
 ```
 
-- **Liste laden:** AJAX `list_feed_products` (`data`: `search`, `page`, `per_page`, `status`). Serverseitig: `wc_get_products(['status'=>'publish','paginate'=>true,'limit'=>per_page,'page'=>page,'s'=>search,'orderby'=>'title'])`. Der Status-Filter verengt die Query über `include`/`exclude` gegen die Ausschluss-Liste. Antwort: `{ state, rows:[{id,name,sku,price,image,excluded,image_status,sku_missing,price_missing,gpc_missing}], total, totalPages, page, totalProducts, excludedCount }`.
+- **Liste laden:** AJAX `list_feed_products` (`data`: `search`, `page`, `per_page`, `status`). Serverseitig: `wc_get_products(['status'=>'publish','paginate'=>true,'limit'=>per_page,'page'=>page,'s'=>search,'orderby'=>'title'])`. Der Status-Filter verengt die Query über `include`/`exclude` gegen die Ausschluss-Liste. Antwort: `{ state, rows:[{id,name,sku,price,image,excluded,image_status,sku_missing,price_missing}], total, totalPages, page, totalProducts, excludedCount }`.
 - **Speichern (Ausschluss):** AJAX `save_feed_exclusion` (`data.changes`: `[{id, excluded}]`). Wendet die Deltas idempotent auf die Ausschluss-Liste an (Set-über-ID), persistiert via `set_excluded_ids()` (inkl. Cache-Invalidierung) und liefert aktualisierte Zähler. Junk-Einträge (fehlende/nicht-positive ID, Nicht-Array) werden übersprungen; String-Booleans aus `$_POST` (`'true'`/`'false'`) werden berücksichtigt.
 
 > Ob Variationen als eigene Feed-Items erscheinen, steuert der Schalter `wc_feed_include_variants` (WooCommerce-Sektion, Default an) — siehe [product-feed.md › Aktivierung](product-feed.md). Er betrifft nur den generierten Feed, nicht diese Liste (die zeigt weiterhin Elternprodukte).
@@ -41,20 +41,18 @@ Pro Zeile liefert `list_feed_products` mehrere Prüf-Ergebnisse, die **nur** fü
 - `image_status` = `Wp_Sdtrk_WC_Feed::image_health()` (Bild gegen Meta-Vorgaben 500×500 / 8 MB; Maße aus DB-Metadaten, keine Bulk-Datei-I/O — Details siehe [product-feed.md › Bild-Qualitätsprüfung](product-feed.md)).
 - `sku_missing` = SKU ist leer.
 - `price_missing` = Preis ist leer oder ≤ 0.
-- `gpc_missing` = `resolve_gpc($product) === ''` (Produkt löst keine Google-Produktkategorie auf).
 
-Das JS hebt **das betroffene Feld selbst** hervor, statt einer eigenen Spalte:
+Das JS hebt **das betroffene Feld selbst** hervor, statt einer eigenen Spalte: Bei einem harten Feed-Fehler (fehlendes/zu kleines/zu großes Bild, leere SKU, Preis 0) wird die jeweilige Zelle knallrot (`.wpsdtrk-cell-error`) mit einem ⛔-Hover-Icon (`.wpsdtrk-field-icon-error`), das den Grund als Tooltip trägt (inkl. Ist-Maße/-Größe beim Bild); zusätzlich bekommt die ganze Zeile eine dezente rote Tönung (`.wpsdtrk-has-error`).
 
-- **Harte Feed-Fehler** (fehlendes/zu kleines/zu großes Bild, leere SKU, Preis 0): die jeweilige Zelle wird knallrot (`.wpsdtrk-cell-error`) mit einem ⛔-Hover-Icon (`.wpsdtrk-field-icon-error`), das den Grund als Tooltip trägt (inkl. Ist-Maße/-Größe beim Bild); zusätzlich bekommt die ganze Zeile eine dezente rote Tönung (`.wpsdtrk-has-error`).
-- **Optionale Warnung** (fehlende Google-Kategorie): ein bernsteinfarbenes ⚠-Icon (`.wpsdtrk-field-icon-warn`) an der Produktbezeichnung, **ohne** Zeilentönung — die Kategorie ist für Google optional und über das Panel unten behebbar.
+Eine **fehlende Google-Kategorie wird in dieser Produktliste bewusst nicht angezeigt** (sie ist für Google optional und produktweit nicht sinnvoll pro Zeile zu markieren) — der Handlungsbedarf erscheint stattdessen im Mapping-Panel unten, wo die noch nicht zugewiesenen Kategorien rot hinterlegt sind.
 
 ### Panel „Google-Produktkategorien"
 
 Aufklappbares `<details>` unter der Tabelle; beim **ersten Öffnen** lazy befüllt.
 
-- **Kategorien laden:** AJAX `list_gpc_categories` → `{ state, rows:[{term_id, label, count, google_category}], mappedCount }`. `label` ist der Breadcrumb-Pfad (`Oberkategorie › Unterkategorie`), sortiert. Liefert **alle** `product_cat`-Terms (auch leere).
+- **Kategorien laden:** AJAX `list_gpc_categories` → `{ state, rows:[{term_id, label, count, google_category}], mappedCount }`. `label` ist der Breadcrumb-Pfad (`Oberkategorie › Unterkategorie`), sortiert. Liefert **alle** `product_cat`-Terms (auch leere). Zeilen ohne Mapping (`google_category === ''`) werden rot hinterlegt (`.wpsdtrk-gpc-unmapped`).
 - **Autocomplete:** Die gebündelte Google-Taxonomie wird per `fetch(gpcTaxonomyUrl)` einmalig in ein `<datalist>` geladen; die Eingabefelder sind Freitext mit datalist-Vervollständigung (Fehlschlag ist nicht fatal).
-- **Speichern:** AJAX `save_gpc_map` (`data.changes`: `[{term_id, category}]`). Nicht-leere `category` setzt das Mapping, leere entfernt es; persistiert via `set_gpc_map()` (Cache-Invalidierung). Nach Erfolg lädt die Produktliste neu, damit die „Google-Kategorie fehlt"-Badges der aktuellen Seite den neuen Stand zeigen.
+- **Speichern:** AJAX `save_gpc_map` (`data.changes`: `[{term_id, category}]`). Nicht-leere `category` setzt das Mapping, leere entfernt es; persistiert via `set_gpc_map()` (Cache-Invalidierung). Nach Erfolg wird die rote Hinterlegung der Zeile passend zum neuen Wert umgeschaltet (leer = weiterhin markiert).
 
 Alle vier AJAX-Funktionen laufen über den bestehenden Sammel-Handler (`func`-Dispatch, Nonce `security_wp-sdtrk`, Capability `manage_options`) und prüfen zusätzlich `feed_ready()` (`Wp_Sdtrk_WC_Feed::is_enabled()`) — bei deaktiviertem Feed liefern sie `state=false` — siehe [04 › Admin-AJAX](../04-admin-and-options/settings-and-menu.md).
 

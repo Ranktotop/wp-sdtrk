@@ -128,10 +128,12 @@ const priceBad = rowHtml({ id: 14, name: 'S', sku: 'S', price: '0,00 €', image
 check('price zero => cell-error',      priceBad.includes('wpsdtrk-cell-error'));
 check('price zero => tooltip reason',  priceBad.includes('Preis ist 0'));
 
-const gpcBad = rowHtml({ id: 15, name: 'S', sku: 'S', price: '5', image: 'http://x', excluded: false, gpc_missing: true });
-check('gpc missing => amber icon',     gpcBad.includes('wpsdtrk-field-icon-warn') && gpcBad.includes('Google-Kategorie fehlt'));
-check('gpc missing => no red cell',    !gpcBad.includes('wpsdtrk-cell-error'));
-check('gpc missing => no row tint',    !gpcBad.includes('wpsdtrk-has-error'));
+// A missing Google category is NOT flagged in the product list — it is surfaced
+// in the mapping panel instead (unmapped categories tinted there).
+const gpcOnly = rowHtml({ id: 15, name: 'S', sku: 'S', price: '5', image: 'http://x', excluded: false, gpc_missing: true });
+check('gpc missing => no field icon',  !gpcOnly.includes('wpsdtrk-field-icon'));
+check('gpc missing => no red cell',    !gpcOnly.includes('wpsdtrk-cell-error'));
+check('gpc missing => no row tint',    !gpcOnly.includes('wpsdtrk-has-error'));
 
 const multi = rowHtml({ id: 16, name: 'S', sku: '', price: '0', image: '', excluded: false,
     image_status: { ok: false, issues: ['no_image'] }, sku_missing: true, price_missing: true });

@@ -153,12 +153,12 @@ class Wp_Sdtrk_Admin_Ajax_Handler
                 'excluded' => in_array($id, $excluded, true),
                 // Per-row feed quality, computed only for the ≤ per_page products
                 // on this page: the featured image against Meta's constraints
-                // (dimensions from stored metadata, no bulk I/O), a missing SKU, a
-                // zero/empty price, and whether a Google product category resolves.
+                // (dimensions from stored metadata, no bulk I/O), a missing SKU and
+                // a zero/empty price. The Google-category gap is surfaced in the
+                // mapping panel (unmapped categories highlighted), not per product.
                 'image_status'  => $feed->image_health((int) $product->get_image_id()),
                 'sku_missing'   => ($sku === ''),
                 'price_missing' => ($price === '' || $price === null || (float) $price <= 0),
-                'gpc_missing'   => ($feed->resolve_gpc($product) === ''),
             ];
         }
 

@@ -438,13 +438,16 @@
 .wpsdtrk-field-icon-error {
     color: #ff8a8a;
 }
-.wpsdtrk-field-icon-warn {
-    color: #e6b95c;
-}
 /* Keep the warnings legible even on dimmed (excluded) rows. */
 .wpsdtrk-table-glass tr.is-excluded td.wpsdtrk-cell-error,
 .wpsdtrk-table-glass tr.is-excluded .wpsdtrk-field-icon {
     opacity: 1;
+}
+
+/* Mapping panel: categories without a Google category yet are tinted red so
+   the remaining work is obvious. */
+.wpsdtrk-table-glass tr.wpsdtrk-gpc-unmapped td {
+    background: rgba(201, 74, 74, 0.16);
 }
 
 /* Google-category mapping panel. */

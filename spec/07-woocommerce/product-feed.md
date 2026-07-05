@@ -44,7 +44,7 @@ Google Merchant Center erwartet eine Produktkategorie; Meta ignoriert das Feld. 
 
 - **Speicher:** eigenständige Option `wp_sdtrk_feed_gpc_map` (`autoload = false`, **nicht** Redux) — Array `term_id (int) => Google-Kategorie (string, voller Pfad)`. Google akzeptiert den Pfad-String ebenso wie die numerische ID.
 - **Helfer auf `Wp_Sdtrk_WC_Feed`:** `get_gpc_map()` (liest + sanitisiert, verwirft leere/ungültige Einträge), `set_gpc_map($map)` (persistiert sanitisiert **und** invalidiert den Feed-Cache), `resolve_gpc($product)`.
-- **Auflösung (`resolve_gpc`):** prüft die zugeordneten `product_cat`-Terms des Produkts und — falls ungemappt — deren **Ancestors** (`get_ancestors`), sodass das Mappen einer Oberkategorie ihre Unterkategorien mit abdeckt. Erster Treffer gewinnt; ohne Treffer `''` (Feld entfällt, wird in der Feed-Verwaltung als „Google-Kategorie fehlt" markiert).
+- **Auflösung (`resolve_gpc`):** prüft die zugeordneten `product_cat`-Terms des Produkts und — falls ungemappt — deren **Ancestors** (`get_ancestors`), sodass das Mappen einer Oberkategorie ihre Unterkategorien mit abdeckt. Erster Treffer gewinnt; ohne Treffer `''` (Feld entfällt; die betroffene Kategorie wird im Mapping-Panel der Feed-Verwaltung rot hinterlegt).
 - **Variationen** erben den am Elternprodukt aufgelösten Wert (Variationen haben keine eigenen Kategorien).
 
 Gepflegt wird das Mapping über das Panel „Google-Produktkategorien" auf der [Feed-Verwaltungsseite](feed-management.md).
@@ -72,5 +72,5 @@ Für die Qualitätsanzeige der [Feed-Verwaltungsseite](feed-management.md) träg
 ## Einschränkungen
 
 - Sehr große Kataloge: `collect()` lädt alle Produkte ohne Batching/Pagination. Der Stampede-Lock verhindert parallele Voll-Aufbauten, nicht die Kosten eines einzelnen Aufbaus.
-- Produkte ohne Bild/Preis werden mit-exportiert (kein Filter); das jeweilige `g:`-Element fehlt dann, was das Merchant Center als fehlendes Pflichtfeld beanstanden kann. Die Feed-Verwaltung markiert fehlende Bilder, zu kleine/zu große Bilder und fehlende Google-Kategorien pro Produkt in der Qualitäts-Spalte.
+- Produkte ohne Bild/Preis werden mit-exportiert (kein Filter); das jeweilige `g:`-Element fehlt dann, was das Merchant Center als fehlendes Pflichtfeld beanstanden kann. Die Feed-Verwaltung hebt fehlende/zu kleine/zu große Bilder, leere SKUs und Preis 0 pro Produkt am betroffenen Feld hervor; fehlende Google-Kategorien erscheinen im Mapping-Panel.
 - Die Bild-Qualitätsprüfung erfolgt auf dem **Beitragsbild des Elternprodukts** (konsistent mit der parent-basierten Ausschluss-Granularität); variationseigene Bilder werden nicht einzeln geprüft.

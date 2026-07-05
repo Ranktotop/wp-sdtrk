@@ -82,7 +82,7 @@ $feed_available = class_exists('Wp_Sdtrk_WC_Feed') && Wp_Sdtrk_WC_Feed::is_enabl
                 <?php esc_html_e('Google product categories', 'wp-sdtrk'); ?>
             </summary>
             <p class="description" style="margin-top:8px;">
-                <?php esc_html_e('Google Merchant Center wants a product category (Meta does not). WooCommerce has no field for it, so map each WooCommerce category to a Google category once — every product in it (and its sub-categories) inherits the value. Products whose category is unmapped are flagged in the Quality column above.', 'wp-sdtrk'); ?>
+                <?php esc_html_e('Google Merchant Center wants a product category (Meta does not). WooCommerce has no field for it, so map each WooCommerce category to a Google category once — every product in it (and its sub-categories) inherits the value. Categories without a mapping yet are highlighted in red below.', 'wp-sdtrk'); ?>
             </p>
 
             <div class="wpsdtrk-table-glass" style="margin-top:12px;">

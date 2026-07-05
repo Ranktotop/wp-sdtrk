@@ -59,12 +59,10 @@
         return (Math.round(mb * 10) / 10) + ' MB';
     }
 
-    // A hover icon carrying the reason a field is highlighted. kind 'error' (red)
-    // for hard feed problems, 'warn' (amber) for the optional Google category.
-    function fieldIcon(title, kind) {
-        return ' <span class="wpsdtrk-field-icon wpsdtrk-field-icon-' + (kind || 'error') + '"' +
-            ' title="' + escAttr(title) + '" aria-label="' + escAttr(title) + '">' +
-            (kind === 'warn' ? '⚠' : '⛔') + '</span>';
+    // A red hover icon carrying the reason a field is highlighted (hard feed error).
+    function fieldIcon(title) {
+        return ' <span class="wpsdtrk-field-icon wpsdtrk-field-icon-error"' +
+            ' title="' + escAttr(title) + '" aria-label="' + escAttr(title) + '">⛔</span>';
     }
 
     // The image's problems (against Meta's constraints) as tooltip lines; [] when ok.
@@ -115,8 +113,9 @@
 
         // Per-field problems: the offending cell gets .wpsdtrk-cell-error (bright
         // red) plus a hover icon explaining why; the whole row gets a subtle red
-        // tint. Image/SKU/price are hard feed errors (red); a missing Google
-        // category is an optional warning (amber icon on the name, no row tint).
+        // tint. Only hard feed errors count here (image / SKU / price). A missing
+        // Google category is not flagged in this list — unmapped categories are
+        // highlighted in the mapping panel below instead.
         var imgMsgs   = imageIssues(p);
         var imgErr    = imgMsgs.length > 0;
         var skuErr    = !!p.sku_missing;
@@ -126,14 +125,12 @@
         var rowClass = (p.excluded ? 'is-excluded' : 'is-in-feed') + (hasError ? ' wpsdtrk-has-error' : '');
 
         var imgCell = '<td' + (imgErr ? ' class="wpsdtrk-cell-error"' : '') + '>' +
-            img + (imgErr ? fieldIcon(imgMsgs.join(' · '), 'error') : '') + '</td>';
-        var nameCell = '<td>' + esc(p.name) +
-            (p.gpc_missing ? fieldIcon(i18n.gpcMissingTip || 'No Google product category mapped for this product', 'warn') : '') +
-            '</td>';
+            img + (imgErr ? fieldIcon(imgMsgs.join(' · ')) : '') + '</td>';
+        var nameCell = '<td>' + esc(p.name) + '</td>';
         var skuCell = '<td' + (skuErr ? ' class="wpsdtrk-cell-error"' : '') + '>' +
-            esc(p.sku) + (skuErr ? fieldIcon(i18n.skuMissing || 'SKU is empty', 'error') : '') + '</td>';
+            esc(p.sku) + (skuErr ? fieldIcon(i18n.skuMissing || 'SKU is empty') : '') + '</td>';
         var priceCell = '<td' + (priceErr ? ' class="wpsdtrk-cell-error"' : '') + '>' +
-            esc(p.price) + (priceErr ? fieldIcon(i18n.priceZero || 'Price is 0', 'error') : '') + '</td>';
+            esc(p.price) + (priceErr ? fieldIcon(i18n.priceZero || 'Price is 0') : '') + '</td>';
 
         // The status toggle is a checkbox (checked = in feed); the custom-pages
         // CSS renders it as a switch. Change/bulk wiring lives below.
@@ -260,8 +257,11 @@
         var categoriesLoaded = false;
 
         function gpcRowHtml(c) {
+            // Categories with no mapping yet are highlighted so the shop owner
+            // can see at a glance what still needs a Google category.
+            var unmapped = !c.google_category;
             return '' +
-                '<tr>' +
+                '<tr' + (unmapped ? ' class="wpsdtrk-gpc-unmapped"' : '') + '>' +
                     '<td>' + esc(c.label) + '</td>' +
                     '<td>' + esc(c.count) + '</td>' +
                     '<td>' +
@@ -328,8 +328,7 @@
         });
 
         // Persist a single mapping on change; only when the value actually moved.
-        // On success refresh the product list so the "No Google category" badges
-        // on the current page reflect the new mapping.
+        // On success re-highlight the row: an empty value flags it as unmapped.
         $gpcRows.on('change', '.wpsdtrk-gpc-input', function () {
             var $inp = $(this);
             var termId = parseInt($inp.data('term-id'), 10);
@@ -344,8 +343,8 @@
                     return;
                 }
                 $inp.data('saved', value);
+                $inp.closest('tr').toggleClass('wpsdtrk-gpc-unmapped', value === '');
                 notice(r.message || i18n.saved || 'Saved.', 'success');
-                load(); // refresh product-list badges
             }, function () {
                 notice(i18n.saveError || 'Could not save the change.', 'error');
             }).always(function () {

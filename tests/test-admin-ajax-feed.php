@@ -268,7 +268,7 @@ $r = call_priv($handler, $ref, 'save_feed_exclusion', []);
 check('empty changes => state true',   ($r['state'] ?? null) === true);
 check('list unchanged',                $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] === [7]);
 
-echo "list_feed_products() — per-row image_status + gpc_missing\n";
+echo "list_feed_products() — per-row image_status + sku/price flags\n";
 // Fresh product/attachment ids: image_health() memoises per attachment id for
 // the request, so reusing ids from earlier assertions would hit a stale result.
 $GLOBALS['__opts'] = [];
@@ -297,8 +297,7 @@ check('row carries image_status',        isset($byId[11]['image_status']['ok']))
 check('good image ok=true',              $byId[11]['image_status']['ok'] === true);
 check('small image flagged too_small',   in_array('too_small', $byId[12]['image_status']['issues'], true));
 check('large image flagged too_large',   in_array('too_large', $byId[13]['image_status']['issues'], true));
-check('mapped product gpc_missing=false', $byId[11]['gpc_missing'] === false);
-check('unmapped product gpc_missing=true', $byId[12]['gpc_missing'] === true);
+check('gpc_missing not in product rows', !array_key_exists('gpc_missing', $byId[11]));
 check('empty sku => sku_missing true',   $byId[14]['sku_missing'] === true);
 check('present sku => sku_missing false', $byId[11]['sku_missing'] === false);
 check('zero price => price_missing true', $byId[15]['price_missing'] === true);

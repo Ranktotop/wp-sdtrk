@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.12.1 =
+* Product feed: a missing Google product category no longer highlights the product row in the feed list — the list now only turns red for image, SKU or price problems. Instead, categories without a mapping yet are highlighted in red in the mapping panel below, where they are assigned
+
 = 1.12.0 =
 * Product feed: added a per-field quality check on the "Manage feed" page. Products with a feed problem now highlight the offending field in red with a hover icon explaining why: missing image, image below 500x500 px or above 8 MB (Facebook/Meta limits), empty SKU, or price of 0. Image dimensions are read from stored metadata and only the visible page is checked, so large catalogs stay fast
 * Product feed: added Google product category support. Map each WooCommerce category to a Google product category once (with autocomplete from the bundled Google taxonomy) in the new panel on the "Manage feed" page; products inherit the mapping (including sub-categories and variations) and the feed emits g:google_product_category. Products without a mapped category are flagged
