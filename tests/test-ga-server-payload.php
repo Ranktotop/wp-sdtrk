@@ -86,9 +86,9 @@ check('currency from shop (USD)',   ($params['currency'] ?? null) === 'USD');
 check('value = 2150',               abs(($params['value'] ?? 0) - 2150) < 0.0001);
 check('transaction_id = order id',  ($params['transaction_id'] ?? null) === '4711');
 check('two items',                  isset($params['items']) && count($params['items']) === 2);
-check('item 0 id',                  ($params['items'][0]['id'] ?? null) === '24215');
+check('item 0 item_id',             ($params['items'][0]['item_id'] ?? null) === '24215');
 check('item 1 quantity 2',          (int) ($params['items'][1]['quantity'] ?? 0) === 2);
-check('item 1 name',                ($params['items'][1]['name'] ?? null) === 'Skript');
+check('item 1 item_name',           ($params['items'][1]['item_name'] ?? null) === 'Skript');
 
 if ($fails > 0) {
     echo "\n$fails assertion(s) failed.\n";

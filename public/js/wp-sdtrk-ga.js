@@ -331,22 +331,22 @@ class Wp_Sdtrk_Catcher_Ga {
 			customData['items'] = [];
 			for (var i = 0; i < items.length; i++) {
 				customData['items'].push({
-					'id': String(items[i].id || ''),
-					'name': String(items[i].name || ''),
+					'item_id': String(items[i].id || ''),
+					'item_name': String(items[i].name || ''),
 					'quantity': Number(items[i].qty) || 1,
 					'price': Number(items[i].price) || 0,
-					'brand': this.event.getBrandName(),
+					'item_brand': this.event.getBrandName(),
 				});
 			}
 		}
 		else if (this.event.grabProdId() !== "") {
 			customData['items'] = [{
-				'id': this.event.grabProdId(),
-				'name': this.event.grabProdName(),
-				//'category': "SomeCategory",
+				'item_id': this.event.grabProdId(),
+				'item_name': this.event.grabProdName(),
+				//'item_category': "SomeCategory",
 				'quantity': 1,
 				'price': this.event.grabValue(),
-				'brand': this.event.getBrandName(),
+				'item_brand': this.event.getBrandName(),
 			}]
 		}
 		//UTM

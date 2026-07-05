@@ -345,12 +345,15 @@ class Wp_Sdtrk_Tracker_Ga
         if (! empty($items)) {
             $list = array();
             foreach ($items as $item) {
+                // GA4 Measurement Protocol requires item_id/item_name (unlike gtag,
+                // which still accepts the legacy id/name). Wrong keys → GA4 sees no
+                // valid item and drops the whole ecommerce event.
                 $list[] = array(
-                    'id'       => (string) ($item['id'] ?? ''),
-                    'name'     => (string) ($item['name'] ?? ''),
-                    'quantity' => (int) ($item['qty'] ?? 1),
-                    'price'    => (float) ($item['price'] ?? 0),
-                    'brand'    => $event->getBrandName(),
+                    'item_id'    => (string) ($item['id'] ?? ''),
+                    'item_name'  => (string) ($item['name'] ?? ''),
+                    'quantity'   => (int) ($item['qty'] ?? 1),
+                    'price'      => (float) ($item['price'] ?? 0),
+                    'item_brand' => $event->getBrandName(),
                 );
             }
             return $list;
@@ -370,11 +373,11 @@ class Wp_Sdtrk_Tracker_Ga
     private function getData_products($event)
     {
         $productData = array();
-        $productData['id'] = $event->getProductId();
+        $productData['item_id'] = $event->getProductId();
         $productData['quantity'] = 1;
-        $productData['name'] = $event->getProductName();
+        $productData['item_name'] = $event->getProductName();
         $productData['price'] = $event->getEventValue();
-        $productData['brand'] = $event->getBrandName();
+        $productData['item_brand'] = $event->getBrandName();
         return $productData;
     }
 

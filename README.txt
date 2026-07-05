@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.11.2 =
+* Fixed Google Analytics 4 server-side ecommerce events (view_item, add_to_cart, purchase, etc.) not appearing in GA4: the Measurement Protocol requires item_id/item_name/item_brand, but the plugin sent the legacy id/name/brand keys, so GA4 saw no valid item and dropped the whole event. Browser and server GA4 item payloads now use the correct GA4 item keys
+
 = 1.11.1 =
 * Fixed a harmless "[object Object] is not valid JSON" console error that appeared when a plugin (e.g. Borlabs Cookie) makes admin-ajax reply with an application/json content type; the tracking AJAX callbacks now handle both string and pre-parsed object responses
 

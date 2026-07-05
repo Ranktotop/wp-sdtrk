@@ -61,7 +61,7 @@ $baseUrl = ($this->debugMode && ! $this->debugModeLive)
       "transaction_id": "<dedup-id>",
       "value": 49.0,
       "currency": "EUR",
-      "items": [{ "id": "<prodId>", "name": "<prodName>", "price": 49.0, "quantity": 1, "brand": "<brand>" }],
+      "items": [{ "item_id": "<prodId>", "item_name": "<prodName>", "price": 49.0, "quantity": 1, "item_brand": "<brand>" }],
       "debug_mode": true,            // wenn Debug aktiv
       "non_interaction": true,
       "plugin": "Wp-Sdtrk",
@@ -78,3 +78,4 @@ $baseUrl = ($this->debugMode && ! $this->debugModeLive)
 - **Kein Hashing**: GA4 MP nimmt Klartextwerte; E-Mail/Name werden hier nicht (gehasht) übertragen.
 - **UTM-Parameter** werden direkt in `params` eingebettet.
 - **Deduplizierung** über `transaction_id` (= `event_id` aus dem Event), kombiniert mit `name` + `client_id`.
+- **Item-Schlüssel**: Die `items[]` verwenden die GA4-Standardnamen **`item_id`**, **`item_name`**, **`item_brand`** (dazu `price`, `quantity`). Das Measurement Protocol nimmt — anders als gtag im Browser — **keine** Alt-Schlüssel (`id`/`name`/`brand`) entgegen; ein Item ohne `item_id`/`item_name` ist für GA4 ungültig und das komplette E-Commerce-Event (`view_item`, `add_to_cart`, `purchase`) wird verworfen. Der Browser-Tracker (`wp-sdtrk-ga.js`) sendet dieselben Schlüssel, damit beide Wege konsistent sind.

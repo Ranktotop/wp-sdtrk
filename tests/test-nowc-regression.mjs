@@ -39,7 +39,7 @@ check('meta content_ids single', am.content_ids === '["999"]');
 check('meta no value (not purchase)', !('value' in am));
 check('meta no currency (not purchase)', !('currency' in am));
 const ag = make(Ga, a).get_data_custom();
-check('ga single item', Array.isArray(ag.items) && ag.items.length === 1 && ag.items[0].id === '999');
+check('ga single item', Array.isArray(ag.items) && ag.items.length === 1 && ag.items[0].item_id === '999');
 check('ga no currency', !('currency' in ag));
 const at = make(Tt, a).get_data_custom();
 check('tt single content_id', at.content_id === '999');

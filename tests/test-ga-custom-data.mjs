@@ -46,10 +46,10 @@ check('currency USD', cd.currency === 'USD');
 check('value 2150', cd.value === 2150);
 check('transaction_id = order id', cd.transaction_id === '4711');
 check('two items', Array.isArray(cd.items) && cd.items.length === 2);
-check('item 0 id', cd.items[0].id === '24215');
+check('item 0 item_id', cd.items[0].item_id === '24215');
 check('item 1 quantity 2', cd.items[1].quantity === 2);
 check('item 1 price 75', cd.items[1].price === 75);
-check('item 1 name', cd.items[1].name === 'Skript');
+check('item 1 item_name', cd.items[1].item_name === 'Skript');
 
 console.log('GA get_data_custom — single-product fallback + EUR fallback');
 const single = new Wp_Sdtrk_Event();
@@ -60,7 +60,7 @@ single.setValue({ p: '50' });
 single.setBrandName('EIA');
 const cd2 = catcher(single).get_data_custom();
 check('EUR fallback', cd2.currency === 'EUR');
-check('single item', Array.isArray(cd2.items) && cd2.items.length === 1 && cd2.items[0].id === '999');
+check('single item', Array.isArray(cd2.items) && cd2.items.length === 1 && cd2.items[0].item_id === '999');
 
 if (fails > 0) {
 	console.log('\n' + fails + ' assertion(s) failed.');
