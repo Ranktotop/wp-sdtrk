@@ -21,7 +21,7 @@ $feed_available = class_exists('Wp_Sdtrk_WC_Feed') && Wp_Sdtrk_WC_Feed::is_enabl
     <?php else : ?>
         <p class="description">
             <?php esc_html_e('All published products are in the feed by default. Switch a product to "Excluded" to keep it out. Changes take effect on the next feed refresh.', 'wp-sdtrk'); ?>
-            <?php esc_html_e('Fields with a feed problem (no/too small/too large image, empty SKU, price 0) are highlighted in red — hover the icon to see why.', 'wp-sdtrk'); ?>
+            <?php esc_html_e('Fields with a feed problem (no/too small/too large image, empty SKU, price 0, empty/too long description) are highlighted in red — hover the icon to see why.', 'wp-sdtrk'); ?>
         </p>
 
         <p id="wpsdtrk-feed-counter" class="wpsdtrk-feed-counter" aria-live="polite"></p>
@@ -62,11 +62,12 @@ $feed_available = class_exists('Wp_Sdtrk_WC_Feed') && Wp_Sdtrk_WC_Feed::is_enabl
                         <th scope="col"><?php esc_html_e('Product', 'wp-sdtrk'); ?></th>
                         <th scope="col"><?php esc_html_e('SKU', 'wp-sdtrk'); ?></th>
                         <th scope="col"><?php esc_html_e('Price', 'wp-sdtrk'); ?></th>
+                        <th scope="col"><?php esc_html_e('Description', 'wp-sdtrk'); ?></th>
                         <th scope="col" style="width:160px;"><?php esc_html_e('Status', 'wp-sdtrk'); ?></th>
                     </tr>
                 </thead>
                 <tbody id="wpsdtrk-feed-rows">
-                    <tr><td colspan="6"><?php esc_html_e('Loading…', 'wp-sdtrk'); ?></td></tr>
+                    <tr><td colspan="7"><?php esc_html_e('Loading…', 'wp-sdtrk'); ?></td></tr>
                 </tbody>
             </table>
         </div>

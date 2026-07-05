@@ -64,7 +64,8 @@ $.post = function () { return { then() { return { always() {} }; } }; };
 const cfg = { ajaxUrl: '', nonce: 'n', perPage: 50, i18n: {
     excluded: 'Ausgeschlossen', inFeed: 'Im Feed',
     imgNoImage: 'Kein Bild', imgTooSmallTip: 'Bild %s px', imgTooLargeTip: 'Bild %s',
-    skuMissing: 'SKU fehlt', priceZero: 'Preis ist 0', gpcMissingTip: 'Google-Kategorie fehlt'
+    skuMissing: 'SKU fehlt', priceZero: 'Preis ist 0',
+    descMissing: 'Beschreibung fehlt', descTooLongTip: 'Beschreibung zu lang (%s Zeichen)'
 } };
 
 // eslint-disable-next-line no-new-func
@@ -99,7 +100,7 @@ check('excluded label',                excluded.includes('>Ausgeschlossen<'));
 check('renders <img> when image set',  excluded.includes('<img src="http://s/i.jpg"'));
 
 console.log('rowHtml() — no separate quality column');
-check('row has 6 cells',               (inFeed.match(/<td/g) || []).length === 6);
+check('row has 7 cells',               (inFeed.match(/<td/g) || []).length === 7);
 check('clean row: no cell-error',      !inFeed.includes('wpsdtrk-cell-error'));
 check('clean row: no error tint',      !inFeed.includes('wpsdtrk-has-error'));
 
@@ -127,6 +128,23 @@ check('sku missing => tooltip reason', skuBad.includes('SKU fehlt'));
 const priceBad = rowHtml({ id: 14, name: 'S', sku: 'S', price: '0,00 €', image: 'http://x', excluded: false, price_missing: true });
 check('price zero => cell-error',      priceBad.includes('wpsdtrk-cell-error'));
 check('price zero => tooltip reason',  priceBad.includes('Preis ist 0'));
+
+const descEmpty = rowHtml({ id: 17, name: 'S', sku: 'S', price: '5', image: 'http://x', excluded: false,
+    description_status: { ok: false, issues: ['no_description'], length: 0 }, description_preview: '' });
+check('empty desc => cell-error',      descEmpty.includes('wpsdtrk-cell-error'));
+check('empty desc => row tint',        descEmpty.includes('wpsdtrk-has-error'));
+check('empty desc => tooltip reason',  descEmpty.includes('Beschreibung fehlt'));
+
+const descLong = rowHtml({ id: 18, name: 'S', sku: 'S', price: '5', image: 'http://x', excluded: false,
+    description_status: { ok: false, issues: ['too_long'], length: 5001 }, description_preview: 'xxxx…' });
+check('too_long desc => cell-error',   descLong.includes('wpsdtrk-cell-error'));
+check('too_long tooltip has length',   descLong.includes('5001'));
+check('desc preview rendered',         descLong.includes('wpsdtrk-feed-desc-text') && descLong.includes('xxxx…'));
+
+const descOk = rowHtml({ id: 19, name: 'S', sku: 'S', price: '5', image: 'http://x', excluded: false,
+    description_status: { ok: true, issues: [], length: 20 }, description_preview: 'A good description' });
+check('ok desc => no cell-error',      !descOk.includes('wpsdtrk-cell-error'));
+check('ok desc => no row tint',        !descOk.includes('wpsdtrk-has-error'));
 
 // A missing Google category is NOT flagged in the product list — it is surfaced
 // in the mapping panel instead (unmapped categories tinted there).

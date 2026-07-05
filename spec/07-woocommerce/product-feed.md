@@ -49,12 +49,15 @@ Google Merchant Center erwartet eine Produktkategorie; Meta ignoriert das Feld. 
 
 Gepflegt wird das Mapping über das Panel „Google-Produktkategorien" auf der [Feed-Verwaltungsseite](feed-management.md).
 
-## Bild-Qualitätsprüfung (Anzeige)
+## Qualitätsprüfung (Anzeige)
 
-Für die Qualitätsanzeige der [Feed-Verwaltungsseite](feed-management.md) trägt `Wp_Sdtrk_WC_Feed` zwei read-only-Helfer:
+Für die Qualitätsanzeige der [Feed-Verwaltungsseite](feed-management.md) trägt `Wp_Sdtrk_WC_Feed` read-only-Helfer:
 
-- **Rein, unit-testbar:** `evaluate_image($width, $height, $bytes, $has_image)` → Issue-Codes ⊆ `{no_image, too_small, too_large}` gegen die Meta-Vorgaben (Konstanten `IMAGE_MIN_DIMENSION = 500`, `IMAGE_MAX_BYTES = 8·1024·1024`). Unbekannte (`0`) Maße werden **nicht** als `too_small` gewertet.
-- **WP-Wrapper:** `image_health($attachment_id)` → `{ok, issues, width, height, size}`. Maße stammen aus `wp_get_attachment_metadata()` (DB-Postmeta, **keine** Datei-I/O); die Dateigröße aus dem Metadata-`filesize` (WP 6.0+), nur ersatzweise ein einzelner `wp_filesize()`-`stat()`. Ergebnisse werden pro `attachment_id` requestweit memoisiert. Dieser Check läuft **nur** in der Admin-Liste (seitenweise), **nicht** in `generate()`/`collect()`.
+- **`evaluate_image($width, $height, $bytes, $has_image)`** (rein, unit-testbar) → Issue-Codes ⊆ `{no_image, too_small, too_large}` gegen die Meta-Vorgaben (Konstanten `IMAGE_MIN_DIMENSION = 500`, `IMAGE_MAX_BYTES = 8·1024·1024`). Unbekannte (`0`) Maße werden **nicht** als `too_small` gewertet.
+- **`image_health($attachment_id)`** (WP-Wrapper) → `{ok, issues, width, height, size}`. Maße stammen aus `wp_get_attachment_metadata()` (DB-Postmeta, **keine** Datei-I/O); die Dateigröße aus dem Metadata-`filesize` (WP 6.0+), nur ersatzweise ein einzelner `wp_filesize()`-`stat()`. Ergebnisse werden pro `attachment_id` requestweit memoisiert.
+- **`evaluate_description($plain)`** (rein, unit-testbar) → Issue-Codes ⊆ `{no_description, too_long}` plus `length`. Leerer Text ⇒ `no_description`; Länge (per `mb_strlen`) über `DESCRIPTION_MAX_LENGTH = 5000` ⇒ `too_long`. Die Feed-Verwaltung übergibt dieselbe aufgelöste Klartext-Beschreibung, die der Feed als `<description>` ausgibt (Kurz-, sonst Langbeschreibung, Tags entfernt).
+
+Diese Checks laufen **nur** in der Admin-Liste (seitenweise), **nicht** in `generate()`/`collect()`.
 
 **Währung:** direkt aus WooCommerce (`get_woocommerce_currency()`) — nicht von der `EUR`-Verdrahtung der Tracker betroffen.
 
@@ -72,5 +75,5 @@ Für die Qualitätsanzeige der [Feed-Verwaltungsseite](feed-management.md) träg
 ## Einschränkungen
 
 - Sehr große Kataloge: `collect()` lädt alle Produkte ohne Batching/Pagination. Der Stampede-Lock verhindert parallele Voll-Aufbauten, nicht die Kosten eines einzelnen Aufbaus.
-- Produkte ohne Bild/Preis werden mit-exportiert (kein Filter); das jeweilige `g:`-Element fehlt dann, was das Merchant Center als fehlendes Pflichtfeld beanstanden kann. Die Feed-Verwaltung hebt fehlende/zu kleine/zu große Bilder, leere SKUs und Preis 0 pro Produkt am betroffenen Feld hervor; fehlende Google-Kategorien erscheinen im Mapping-Panel.
+- Produkte ohne Bild/Preis werden mit-exportiert (kein Filter); das jeweilige `g:`-Element fehlt dann, was das Merchant Center als fehlendes Pflichtfeld beanstanden kann. Die Feed-Verwaltung hebt fehlende/zu kleine/zu große Bilder, leere SKUs, Preis 0 und leere/zu lange Beschreibungen pro Produkt am betroffenen Feld hervor; fehlende Google-Kategorien erscheinen im Mapping-Panel.
 - Die Bild-Qualitätsprüfung erfolgt auf dem **Beitragsbild des Elternprodukts** (konsistent mit der parent-basierten Ausschluss-Granularität); variationseigene Bilder werden nicht einzeln geprüft.

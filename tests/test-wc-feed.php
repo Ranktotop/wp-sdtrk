@@ -97,6 +97,17 @@ $both = $feed->evaluate_image(100, 100, Wp_Sdtrk_WC_Feed::IMAGE_MAX_BYTES + 1, t
 check('small + large reported together',   in_array('too_small', $both['issues'], true) && in_array('too_large', $both['issues'], true));
 check('unknown (0) dims not flagged small', $feed->evaluate_image(0, 0, 1000, true)['issues'] === []);
 
+echo "evaluate_description() against required/length constraints\n";
+check('ok for a normal description',       $feed->evaluate_description('A nice product.')['ok'] === true);
+$empty = $feed->evaluate_description('');
+check('empty => no_description',           in_array('no_description', $empty['issues'], true) && $empty['ok'] === false);
+check('empty => length 0',                 $empty['length'] === 0);
+check('exactly max length is allowed',     $feed->evaluate_description(str_repeat('x', Wp_Sdtrk_WC_Feed::DESCRIPTION_MAX_LENGTH))['ok'] === true);
+$long = $feed->evaluate_description(str_repeat('x', Wp_Sdtrk_WC_Feed::DESCRIPTION_MAX_LENGTH + 1));
+check('over max => too_long',              in_array('too_long', $long['issues'], true));
+check('too_long reports the length',       $long['length'] === Wp_Sdtrk_WC_Feed::DESCRIPTION_MAX_LENGTH + 1);
+check('multibyte counted by characters',   $feed->evaluate_description('äöü')['length'] === 3);
+
 echo "render_xml() output\n";
 $xml = $feed->render_xml($items, ['title' => 'My Shop', 'link' => 'http://shop', 'description' => 'Feed']);
 

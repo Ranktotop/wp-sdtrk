@@ -73,13 +73,15 @@ if (!class_exists('WP_SDTRK_Helper_Options')) {
 
 class FakeAjaxProduct
 {
-    public function __construct(private int $id, private string $name, private string $sku, private string $price) {}
+    public function __construct(private int $id, private string $name, private string $sku, private string $price, private string $desc = 'A fine product description.') {}
     public function get_id() { return $this->id; }
     public function get_name() { return $this->name; }
     public function get_sku() { return $this->sku; }
     public function get_price() { return $this->price; }
     public function get_image_id() { return $this->id; }
     public function get_category_ids() { return $GLOBALS['__cat_ids'][$this->id] ?? []; }
+    public function get_short_description() { return $this->desc; }
+    public function get_description() { return ''; }
 }
 
 // Paginate-shaped return; honours include/exclude so status filtering is real.
@@ -288,8 +290,10 @@ $GLOBALS['__catalog'] = [
     new FakeAjaxProduct(13, 'Img Large', 'SKU-13', '30.00'),
     new FakeAjaxProduct(14, 'No SKU',    '',       '10.00'), // empty SKU
     new FakeAjaxProduct(15, 'Free',      'SKU-15', '0'),     // zero price
+    new FakeAjaxProduct(16, 'No Desc',   'SKU-16', '10.00', ''),                                        // empty description
+    new FakeAjaxProduct(17, 'Long Desc', 'SKU-17', '10.00', str_repeat('x', Wp_Sdtrk_WC_Feed::DESCRIPTION_MAX_LENGTH + 1)), // too long
 ];
-$GLOBALS['__publish_count'] = 5;
+$GLOBALS['__publish_count'] = 7;
 $r = call_priv($handler, $ref, 'list_feed_products', ['status' => 'all', 'per_page' => 50]);
 $byId = [];
 foreach ($r['rows'] as $row) { $byId[$row['id']] = $row; }
@@ -302,6 +306,11 @@ check('empty sku => sku_missing true',   $byId[14]['sku_missing'] === true);
 check('present sku => sku_missing false', $byId[11]['sku_missing'] === false);
 check('zero price => price_missing true', $byId[15]['price_missing'] === true);
 check('positive price => price_missing false', $byId[11]['price_missing'] === false);
+check('good description ok=true',        $byId[11]['description_status']['ok'] === true);
+check('empty desc => no_description',    in_array('no_description', $byId[16]['description_status']['issues'], true));
+check('long desc => too_long',           in_array('too_long', $byId[17]['description_status']['issues'], true));
+check('row carries description preview',  array_key_exists('description_preview', $byId[11]));
+check('long preview is truncated',        mb_strlen($byId[17]['description_preview']) <= 81);
 
 echo "list_gpc_categories() — terms + current mapping\n";
 $t1 = new stdClass(); $t1->term_id = 90;  $t1->name = 'Garden';   $t1->parent = 0;  $t1->count = 3;

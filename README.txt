@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.13.0 =
+* Product feed: added a "Description" column to the "Manage feed" product table showing a short preview of each product's feed description, with a quality check. An empty description or one longer than 5000 characters (Google/Meta limit) highlights the field in red with a hover icon explaining why. Like the other checks, it only runs for the products on the current page
+
 = 1.12.1 =
 * Product feed: a missing Google product category no longer highlights the product row in the feed list — the list now only turns red for image, SKU or price problems. Instead, categories without a mapping yet are highlighted in red in the mapping panel below, where they are assigned
 

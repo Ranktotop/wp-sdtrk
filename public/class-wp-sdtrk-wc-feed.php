@@ -27,6 +27,10 @@ class Wp_Sdtrk_WC_Feed
     public const IMAGE_MIN_DIMENSION = 500;          // px, min width AND height
     public const IMAGE_MAX_BYTES     = 8388608;      // 8 * 1024 * 1024
 
+    // Google/Meta accept a product description up to 5000 characters; an empty
+    // one is a missing required field. Surfaced in the Manage Feed page.
+    public const DESCRIPTION_MAX_LENGTH = 5000;
+
     /* ---------------------------------------------------------------------
      * Pure core (no WordPress/WooCommerce dependencies) — unit-tested
      * ------------------------------------------------------------------- */
@@ -182,6 +186,29 @@ class Wp_Sdtrk_WC_Feed
             $issues[] = 'too_large';
         }
         return ['ok' => empty($issues), 'issues' => $issues];
+    }
+
+    /**
+     * Evaluate a product's (plain-text) feed description.
+     *
+     * Pure and side-effect free. The caller passes the already-resolved plain
+     * text (short description, else long description, tags stripped) — the same
+     * value the feed emits as <description>. Issue codes are stable identifiers
+     * the UI maps to translated messages.
+     *
+     * @param string $description Plain-text description.
+     * @return array{ok:bool, issues:string[], length:int} issues ⊆ {no_description, too_long}
+     */
+    public function evaluate_description(string $description): array
+    {
+        $length = function_exists('mb_strlen') ? mb_strlen($description) : strlen($description);
+        $issues = [];
+        if ($description === '') {
+            $issues[] = 'no_description';
+        } elseif ($length > self::DESCRIPTION_MAX_LENGTH) {
+            $issues[] = 'too_long';
+        }
+        return ['ok' => empty($issues), 'issues' => $issues, 'length' => $length];
     }
 
     /**

@@ -1065,12 +1065,14 @@ class Wp_Sdtrk_Admin
 					'page'          => __('Page %1$d of %2$d', 'wp-sdtrk'),
 					'bulkExclude'   => __('Exclude selected', 'wp-sdtrk'),
 					'bulkInclude'   => __('Include selected', 'wp-sdtrk'),
-					// Field-highlight tooltips (image / SKU / price).
+					// Field-highlight tooltips (image / SKU / price / description).
 					'imgNoImage'    => __('No image — Facebook requires a product image', 'wp-sdtrk'),
 					'imgTooSmallTip' => __('Image is %s px — Facebook requires at least 500×500', 'wp-sdtrk'),
 					'imgTooLargeTip' => __('Image is %s — Facebook allows at most 8 MB', 'wp-sdtrk'),
 					'skuMissing'    => __('SKU is empty', 'wp-sdtrk'),
 					'priceZero'     => __('Price is 0', 'wp-sdtrk'),
+					'descMissing'   => __('Description is empty', 'wp-sdtrk'),
+					'descTooLongTip' => __('Description is too long (%s characters, max 5000)', 'wp-sdtrk'),
 					// Google-category mapping panel.
 					'gpcNoCategories' => __('No product categories found.', 'wp-sdtrk'),
 					'gpcPlaceholder'  => __('e.g. Apparel & Accessories > Clothing', 'wp-sdtrk'),

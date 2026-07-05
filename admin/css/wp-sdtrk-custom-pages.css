@@ -435,6 +435,19 @@
     vertical-align: middle;
     white-space: nowrap;
 }
+/* Description column: keep the preview to one truncated line so a long
+   description never blows up the row height/width. */
+.wpsdtrk-table-glass td.wpsdtrk-feed-desc {
+    max-width: 280px;
+}
+.wpsdtrk-feed-desc-text {
+    display: inline-block;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
 .wpsdtrk-field-icon-error {
     color: #ff8a8a;
 }

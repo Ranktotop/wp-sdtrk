@@ -83,6 +83,20 @@
         return msgs;
     }
 
+    // The description's problems as tooltip lines; [] when ok.
+    function descriptionIssues(p) {
+        var d = p.description_status || {};
+        var issues = d.issues || [];
+        var msgs = [];
+        if (issues.indexOf('no_description') !== -1) {
+            msgs.push(i18n.descMissing || 'Description is empty');
+        }
+        if (issues.indexOf('too_long') !== -1) {
+            msgs.push(sprintfS(i18n.descTooLongTip || 'Description too long (%s chars, max 5000)', d.length || 0));
+        }
+        return msgs;
+    }
+
     function ajax(func, data) {
         return $.post(cfg.ajaxUrl, {
             action: 'wp_sdtrk_handle_admin_ajax_callback',
@@ -113,14 +127,16 @@
 
         // Per-field problems: the offending cell gets .wpsdtrk-cell-error (bright
         // red) plus a hover icon explaining why; the whole row gets a subtle red
-        // tint. Only hard feed errors count here (image / SKU / price). A missing
-        // Google category is not flagged in this list — unmapped categories are
-        // highlighted in the mapping panel below instead.
+        // tint. Only hard feed errors count here (image / SKU / price /
+        // description). A missing Google category is not flagged in this list —
+        // unmapped categories are highlighted in the mapping panel below instead.
         var imgMsgs   = imageIssues(p);
+        var descMsgs  = descriptionIssues(p);
         var imgErr    = imgMsgs.length > 0;
         var skuErr    = !!p.sku_missing;
         var priceErr  = !!p.price_missing;
-        var hasError  = imgErr || skuErr || priceErr;
+        var descErr   = descMsgs.length > 0;
+        var hasError  = imgErr || skuErr || priceErr || descErr;
 
         var rowClass = (p.excluded ? 'is-excluded' : 'is-in-feed') + (hasError ? ' wpsdtrk-has-error' : '');
 
@@ -131,6 +147,9 @@
             esc(p.sku) + (skuErr ? fieldIcon(i18n.skuMissing || 'SKU is empty') : '') + '</td>';
         var priceCell = '<td' + (priceErr ? ' class="wpsdtrk-cell-error"' : '') + '>' +
             esc(p.price) + (priceErr ? fieldIcon(i18n.priceZero || 'Price is 0') : '') + '</td>';
+        var descCell = '<td class="wpsdtrk-feed-desc' + (descErr ? ' wpsdtrk-cell-error' : '') + '">' +
+            '<span class="wpsdtrk-feed-desc-text">' + esc(p.description_preview) + '</span>' +
+            (descErr ? fieldIcon(descMsgs.join(' · ')) : '') + '</td>';
 
         // The status toggle is a checkbox (checked = in feed); the custom-pages
         // CSS renders it as a switch. Change/bulk wiring lives below.
@@ -141,6 +160,7 @@
                 nameCell +
                 skuCell +
                 priceCell +
+                descCell +
                 '<td>' +
                     '<label class="wpsdtrk-feed-toggle">' +
                         '<input type="checkbox" class="wpsdtrk-feed-status" ' + checked + '> ' +
@@ -154,7 +174,7 @@
 
     function renderRows(rows) {
         if (!rows || !rows.length) {
-            $rows.html('<tr><td colspan="6">' + esc(i18n.noProducts || 'No products found.') + '</td></tr>');
+            $rows.html('<tr><td colspan="7">' + esc(i18n.noProducts || 'No products found.') + '</td></tr>');
             return;
         }
         $rows.html(rows.map(rowHtml).join(''));
@@ -216,7 +236,7 @@
         }).then(function (r) {
             state.loading = false;
             if (!r || !r.state) {
-                $rows.html('<tr><td colspan="6">' + esc(i18n.loadError || 'Could not load products.') + '</td></tr>');
+                $rows.html('<tr><td colspan="7">' + esc(i18n.loadError || 'Could not load products.') + '</td></tr>');
                 return;
             }
             state.totalPages = parseInt(r.totalPages, 10) || 1;
@@ -228,7 +248,7 @@
             if ($selectAll) { $selectAll.prop('checked', false); }
         }, function () {
             state.loading = false;
-            $rows.html('<tr><td colspan="6">' + esc(i18n.loadError || 'Could not load products.') + '</td></tr>');
+            $rows.html('<tr><td colspan="7">' + esc(i18n.loadError || 'Could not load products.') + '</td></tr>');
             renderPagination();
         });
     }

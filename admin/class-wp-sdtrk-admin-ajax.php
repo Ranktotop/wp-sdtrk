@@ -140,6 +140,18 @@ class Wp_Sdtrk_Admin_Ajax_Handler
             $id    = (int) $product->get_id();
             $price = $product->get_price();
             $sku   = (string) $product->get_sku();
+            // Resolve the description the same way the feed does (short, else
+            // long, tags stripped) so the check reflects the exported value.
+            $desc = (string) $product->get_short_description();
+            if ($desc === '') {
+                $desc = (string) $product->get_description();
+            }
+            $desc_plain  = trim(wp_strip_all_tags($desc));
+            $desc_status = $feed->evaluate_description($desc_plain);
+            // Short preview for the column — never ship the full text per row.
+            $desc_preview = (function_exists('mb_substr') && $desc_status['length'] > 80)
+                ? mb_substr($desc_plain, 0, 80) . '…'
+                : $desc_plain;
             $rows[] = [
                 'id'       => $id,
                 'name'     => (string) $product->get_name(),
@@ -153,12 +165,14 @@ class Wp_Sdtrk_Admin_Ajax_Handler
                 'excluded' => in_array($id, $excluded, true),
                 // Per-row feed quality, computed only for the ≤ per_page products
                 // on this page: the featured image against Meta's constraints
-                // (dimensions from stored metadata, no bulk I/O), a missing SKU and
-                // a zero/empty price. The Google-category gap is surfaced in the
-                // mapping panel (unmapped categories highlighted), not per product.
-                'image_status'  => $feed->image_health((int) $product->get_image_id()),
-                'sku_missing'   => ($sku === ''),
-                'price_missing' => ($price === '' || $price === null || (float) $price <= 0),
+                // (dimensions from stored metadata, no bulk I/O), a missing SKU, a
+                // zero/empty price and the description (empty / too long). The
+                // Google-category gap is surfaced in the mapping panel instead.
+                'image_status'       => $feed->image_health((int) $product->get_image_id()),
+                'sku_missing'        => ($sku === ''),
+                'price_missing'      => ($price === '' || $price === null || (float) $price <= 0),
+                'description_status' => $desc_status,
+                'description_preview' => $desc_preview,
             ];
         }
 
