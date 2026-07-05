@@ -155,6 +155,9 @@ class Wp_Sdtrk_Admin_Ajax_Handler
             $rows[] = [
                 'id'       => $id,
                 'name'     => (string) $product->get_name(),
+                // Edit-screen link so the admin can jump straight to a product to
+                // fix a flagged problem. 'raw' context — JS attribute-escapes it.
+                'edit_url' => (string) get_edit_post_link($id, 'raw'),
                 'sku'      => $sku,
                 // wc_price() returns HTML with entities (&nbsp;, &euro;); strip the
                 // tags AND decode the entities so the value isn't shown literally.

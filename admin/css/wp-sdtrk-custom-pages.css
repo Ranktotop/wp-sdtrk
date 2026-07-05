@@ -435,6 +435,18 @@
     vertical-align: middle;
     white-space: nowrap;
 }
+/* Product name link: looks like plain text, only reveals itself on hover
+   (underline + pointer) so it doesn't read as a blue link. */
+.wpsdtrk-table-glass .wpsdtrk-feed-name-link {
+    color: inherit;
+    text-decoration: none;
+}
+.wpsdtrk-table-glass .wpsdtrk-feed-name-link:hover,
+.wpsdtrk-table-glass .wpsdtrk-feed-name-link:focus {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 /* Description column: the widest column (holds the preview), kept to one
    truncated line so a long description never blows up the row height. */
 .wpsdtrk-table-glass td.wpsdtrk-feed-desc {

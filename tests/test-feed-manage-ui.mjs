@@ -104,6 +104,15 @@ check('row has 7 cells',               (inFeed.match(/<td/g) || []).length === 7
 check('clean row: no cell-error',      !inFeed.includes('wpsdtrk-cell-error'));
 check('clean row: no error tint',      !inFeed.includes('wpsdtrk-has-error'));
 
+console.log('rowHtml() — product name edit link');
+const linked = rowHtml({ id: 5, name: 'Gamma', sku: 'S', price: '5', image: '', excluded: false,
+    edit_url: 'http://s/wp-admin/post.php?post=5&action=edit' });
+check('name is a link',                linked.includes('class="wpsdtrk-feed-name-link"'));
+check('link opens in a new tab',       linked.includes('target="_blank"') && linked.includes('rel="noopener noreferrer"'));
+check('link href is the edit url',     linked.includes('href="http://s/wp-admin/post.php?post=5&amp;action=edit"'));
+check('link text is the product name', linked.includes('>Gamma</a>'));
+check('no link without edit_url',      !inFeed.includes('wpsdtrk-feed-name-link'));
+
 console.log('rowHtml() — field highlighting for hard feed errors');
 const imgBad = rowHtml({ id: 10, name: 'Img', sku: 'S', price: '5', image: '', excluded: false,
     image_status: { ok: false, issues: ['no_image'], width: 0, height: 0, size: 0 } });

@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.13.2 =
+* Manage feed table: the product name now links to the product's edit screen (opens in a new tab) so you can jump straight to a product and fix a flagged problem. The link looks like normal text and only underlines on hover
+
 = 1.13.1 =
 * Manage feed table: reordered and resized the columns for readability — Image, Product, Description, Price, SKU, Status. Product and SKU are now narrower and the description column is much wider
 

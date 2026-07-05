@@ -40,6 +40,7 @@ if (!function_exists('wp_get_attachment_metadata')) {
     }
 }
 if (!function_exists('get_attached_file')) { function get_attached_file($id) { return ''; } }
+if (!function_exists('get_edit_post_link')) { function get_edit_post_link($id, $context = 'display') { return 'http://shop/wp-admin/post.php?post=' . (int) $id . '&action=edit'; } }
 
 // resolve_gpc(): category ids per product + a term→parent tree for ancestors.
 $GLOBALS['__cat_ids']     = [];
@@ -310,6 +311,7 @@ check('good description ok=true',        $byId[11]['description_status']['ok'] =
 check('empty desc => no_description',    in_array('no_description', $byId[16]['description_status']['issues'], true));
 check('long desc => too_long',           in_array('too_long', $byId[17]['description_status']['issues'], true));
 check('row carries description preview',  array_key_exists('description_preview', $byId[11]));
+check('row carries edit_url',             strpos((string) $byId[11]['edit_url'], 'post=11') !== false);
 check('long preview is truncated',        mb_strlen($byId[17]['description_preview']) <= 81);
 
 echo "list_gpc_categories() — terms + current mapping\n";

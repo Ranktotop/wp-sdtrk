@@ -142,7 +142,11 @@
 
         var imgCell = '<td' + (imgErr ? ' class="wpsdtrk-cell-error"' : '') + '>' +
             img + (imgErr ? fieldIcon(imgMsgs.join(' · ')) : '') + '</td>';
-        var nameCell = '<td>' + esc(p.name) + '</td>';
+        // Product name links to its edit screen (new tab) so problems can be
+        // fixed quickly. Falls back to plain text if there's no edit URL.
+        var nameCell = '<td>' + (p.edit_url
+            ? '<a class="wpsdtrk-feed-name-link" href="' + escAttr(p.edit_url) + '" target="_blank" rel="noopener noreferrer">' + esc(p.name) + '</a>'
+            : esc(p.name)) + '</td>';
         var skuCell = '<td' + (skuErr ? ' class="wpsdtrk-cell-error"' : '') + '>' +
             esc(p.sku) + (skuErr ? fieldIcon(i18n.skuMissing || 'SKU is empty') : '') + '</td>';
         var priceCell = '<td' + (priceErr ? ' class="wpsdtrk-cell-error"' : '') + '>' +
