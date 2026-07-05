@@ -833,6 +833,14 @@ class Wp_Sdtrk_Admin
 						'required' => ['wc_integration', '=', '1'],
 					],
 					[
+						'id'       => 'wc_feed_include_variants',
+						'type'     => 'switch',
+						'title'    => __('Include product variants', 'wp-sdtrk'),
+						'subtitle' => __('When on, each variation of a variable product is its own feed item (with item_group_id). When off, only the parent product is listed.', 'wp-sdtrk'),
+						'default'  => 1,
+						'required' => [['wc_integration', '=', '1'], ['wc_feed_enabled', '=', '1']],
+					],
+					[
 						'id'       => 'wc_feed_url_info',
 						'type'     => 'raw',
 						'content'  => $this->get_wc_feed_url_info(),
@@ -1041,6 +1049,7 @@ class Wp_Sdtrk_Admin
 				'ajaxUrl' => admin_url('admin-ajax.php'),
 				'nonce'   => wp_create_nonce('security_wp-sdtrk'),
 				'perPage' => 50,
+				'gpcTaxonomyUrl' => plugin_dir_url(__FILE__) . 'data/google-product-taxonomy-de.txt',
 				'i18n'    => [
 					'inFeed'        => __('In feed', 'wp-sdtrk'),
 					'excluded'      => __('Excluded', 'wp-sdtrk'),
@@ -1056,6 +1065,16 @@ class Wp_Sdtrk_Admin
 					'page'          => __('Page %1$d of %2$d', 'wp-sdtrk'),
 					'bulkExclude'   => __('Exclude selected', 'wp-sdtrk'),
 					'bulkInclude'   => __('Include selected', 'wp-sdtrk'),
+					// Field-highlight tooltips (image / SKU / price / Google category).
+					'imgNoImage'    => __('No image — Facebook requires a product image', 'wp-sdtrk'),
+					'imgTooSmallTip' => __('Image is %s px — Facebook requires at least 500×500', 'wp-sdtrk'),
+					'imgTooLargeTip' => __('Image is %s — Facebook allows at most 8 MB', 'wp-sdtrk'),
+					'skuMissing'    => __('SKU is empty', 'wp-sdtrk'),
+					'priceZero'     => __('Price is 0', 'wp-sdtrk'),
+					'gpcMissingTip' => __('No Google product category — map its WooCommerce category below', 'wp-sdtrk'),
+					// Google-category mapping panel.
+					'gpcNoCategories' => __('No product categories found.', 'wp-sdtrk'),
+					'gpcPlaceholder'  => __('e.g. Apparel & Accessories > Clothing', 'wp-sdtrk'),
 				],
 			]
 		);

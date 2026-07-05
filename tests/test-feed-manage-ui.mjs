@@ -61,14 +61,18 @@ const $ = function (arg) {
 };
 $.post = function () { return { then() { return { always() {} }; } }; };
 
-const cfg = { ajaxUrl: '', nonce: 'n', perPage: 50, i18n: { excluded: 'Ausgeschlossen', inFeed: 'Im Feed' } };
+const cfg = { ajaxUrl: '', nonce: 'n', perPage: 50, i18n: {
+    excluded: 'Ausgeschlossen', inFeed: 'Im Feed',
+    imgNoImage: 'Kein Bild', imgTooSmallTip: 'Bild %s px', imgTooLargeTip: 'Bild %s',
+    skuMissing: 'SKU fehlt', priceZero: 'Preis ist 0', gpcMissingTip: 'Google-Kategorie fehlt'
+} };
 
 // eslint-disable-next-line no-new-func
 const api = new Function('$', 'SDTRK_FeedManage', 'window',
-    body + '\n return { esc: esc, escAttr: escAttr, rowHtml: rowHtml, applyRowState: applyRowState };'
+    body + '\n return { esc: esc, escAttr: escAttr, rowHtml: rowHtml, applyRowState: applyRowState, fieldIcon: fieldIcon, imageIssues: imageIssues };'
 )($, cfg, { wpsdtrk_show_notice: function () {} });
 
-const { esc, escAttr, rowHtml, applyRowState } = api;
+const { esc, escAttr, rowHtml, applyRowState, fieldIcon, imageIssues } = api;
 
 console.log('esc() — text-context escaping');
 check('encodes < > &',                 esc('a<b>&c') === 'a&lt;b&gt;&amp;c');
@@ -93,6 +97,45 @@ check('excluded row class',            excluded.includes('class="is-excluded"'))
 check('excluded toggle NOT checked',   !/class="wpsdtrk-feed-status" checked/.test(excluded));
 check('excluded label',                excluded.includes('>Ausgeschlossen<'));
 check('renders <img> when image set',  excluded.includes('<img src="http://s/i.jpg"'));
+
+console.log('rowHtml() — no separate quality column');
+check('row has 6 cells',               (inFeed.match(/<td/g) || []).length === 6);
+check('clean row: no cell-error',      !inFeed.includes('wpsdtrk-cell-error'));
+check('clean row: no error tint',      !inFeed.includes('wpsdtrk-has-error'));
+
+console.log('rowHtml() — field highlighting for hard feed errors');
+const imgBad = rowHtml({ id: 10, name: 'Img', sku: 'S', price: '5', image: '', excluded: false,
+    image_status: { ok: false, issues: ['no_image'], width: 0, height: 0, size: 0 } });
+check('no_image => cell-error',        imgBad.includes('wpsdtrk-cell-error'));
+check('no_image => row tint',          imgBad.includes('wpsdtrk-has-error'));
+check('no_image => tooltip reason',    imgBad.includes('Kein Bild'));
+
+const smallBad = rowHtml({ id: 11, name: 'S', sku: 'S', price: '5', image: 'http://x', excluded: false,
+    image_status: { ok: false, issues: ['too_small'], width: 300, height: 400, size: 1000 } });
+check('too_small => cell-error',       smallBad.includes('wpsdtrk-cell-error'));
+check('too_small tooltip has dims',    smallBad.includes('300×400'));
+
+const largeBad = rowHtml({ id: 12, name: 'S', sku: 'S', price: '5', image: 'http://x', excluded: false,
+    image_status: { ok: false, issues: ['too_large'], width: 600, height: 600, size: 9 * 1024 * 1024 } });
+check('too_large tooltip has MB',      largeBad.includes('9 MB'));
+
+const skuBad = rowHtml({ id: 13, name: 'S', sku: '', price: '5', image: 'http://x', excluded: false, sku_missing: true });
+check('sku missing => cell-error',     skuBad.includes('wpsdtrk-cell-error'));
+check('sku missing => row tint',       skuBad.includes('wpsdtrk-has-error'));
+check('sku missing => tooltip reason', skuBad.includes('SKU fehlt'));
+
+const priceBad = rowHtml({ id: 14, name: 'S', sku: 'S', price: '0,00 €', image: 'http://x', excluded: false, price_missing: true });
+check('price zero => cell-error',      priceBad.includes('wpsdtrk-cell-error'));
+check('price zero => tooltip reason',  priceBad.includes('Preis ist 0'));
+
+const gpcBad = rowHtml({ id: 15, name: 'S', sku: 'S', price: '5', image: 'http://x', excluded: false, gpc_missing: true });
+check('gpc missing => amber icon',     gpcBad.includes('wpsdtrk-field-icon-warn') && gpcBad.includes('Google-Kategorie fehlt'));
+check('gpc missing => no red cell',    !gpcBad.includes('wpsdtrk-cell-error'));
+check('gpc missing => no row tint',    !gpcBad.includes('wpsdtrk-has-error'));
+
+const multi = rowHtml({ id: 16, name: 'S', sku: '', price: '0', image: '', excluded: false,
+    image_status: { ok: false, issues: ['no_image'] }, sku_missing: true, price_missing: true });
+check('three problems => 3 red cells', (multi.match(/wpsdtrk-cell-error/g) || []).length === 3);
 
 console.log('rowHtml() — XSS safety');
 const xss = rowHtml({

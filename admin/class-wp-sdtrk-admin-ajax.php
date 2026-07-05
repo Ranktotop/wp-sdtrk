@@ -139,10 +139,11 @@ class Wp_Sdtrk_Admin_Ajax_Handler
         foreach ($products as $product) {
             $id    = (int) $product->get_id();
             $price = $product->get_price();
+            $sku   = (string) $product->get_sku();
             $rows[] = [
                 'id'       => $id,
                 'name'     => (string) $product->get_name(),
-                'sku'      => (string) $product->get_sku(),
+                'sku'      => $sku,
                 // wc_price() returns HTML with entities (&nbsp;, &euro;); strip the
                 // tags AND decode the entities so the value isn't shown literally.
                 'price'    => function_exists('wc_price')
@@ -150,6 +151,14 @@ class Wp_Sdtrk_Admin_Ajax_Handler
                     : (string) $price,
                 'image'    => (string) wp_get_attachment_image_url($product->get_image_id(), 'thumbnail'),
                 'excluded' => in_array($id, $excluded, true),
+                // Per-row feed quality, computed only for the ≤ per_page products
+                // on this page: the featured image against Meta's constraints
+                // (dimensions from stored metadata, no bulk I/O), a missing SKU, a
+                // zero/empty price, and whether a Google product category resolves.
+                'image_status'  => $feed->image_health((int) $product->get_image_id()),
+                'sku_missing'   => ($sku === ''),
+                'price_missing' => ($price === '' || $price === null || (float) $price <= 0),
+                'gpc_missing'   => ($feed->resolve_gpc($product) === ''),
             ];
         }
 
@@ -264,6 +273,123 @@ class Wp_Sdtrk_Admin_Ajax_Handler
             'message'       => __('Saved.', 'wp-sdtrk'),
             'excludedCount' => $counts['excludedCount'],
             'totalProducts' => $counts['totalProducts'],
+        ];
+    }
+
+    /**
+     * List the WooCommerce product categories with their current Google-category
+     * mapping, for the feed page's mapping panel.
+     *
+     * Returns every product_cat term (including empty ones) with a hierarchical
+     * label (ancestor path), its product count and the currently mapped Google
+     * category string. This is a taxonomy read, independent of product
+     * pagination — the term set is small (categories, not products).
+     *
+     * @param array $data Ignored.
+     * @param array $meta Ignored.
+     * @return array { state, rows[]:{term_id, label, count, google_category}, mappedCount }
+     */
+    private function list_gpc_categories(array $data, array $meta): array
+    {
+        if (!$this->feed_ready()) {
+            return ['state' => false, 'message' => __('Product feed is not available', 'wp-sdtrk')];
+        }
+
+        $terms = get_terms([
+            'taxonomy'   => 'product_cat',
+            'hide_empty' => false,
+        ]);
+        if (is_wp_error($terms) || !is_array($terms)) {
+            $terms = [];
+        }
+
+        $feed = new Wp_Sdtrk_WC_Feed();
+        $map  = $feed->get_gpc_map();
+
+        // Index terms so we can build each one's ancestor path without extra
+        // queries, then present them as "Parent › Child" breadcrumb labels.
+        $by_id = [];
+        foreach ($terms as $term) {
+            $by_id[(int) $term->term_id] = $term;
+        }
+        $label_of = static function ($term) use ($by_id) {
+            $parts = [$term->name];
+            $parent = (int) $term->parent;
+            $guard = 0;
+            while ($parent > 0 && isset($by_id[$parent]) && $guard < 20) {
+                array_unshift($parts, $by_id[$parent]->name);
+                $parent = (int) $by_id[$parent]->parent;
+                $guard++;
+            }
+            return implode(' › ', $parts);
+        };
+
+        $rows = [];
+        foreach ($terms as $term) {
+            $term_id = (int) $term->term_id;
+            $rows[] = [
+                'term_id'         => $term_id,
+                'label'           => $label_of($term),
+                'count'           => (int) $term->count,
+                'google_category' => isset($map[$term_id]) ? (string) $map[$term_id] : '',
+            ];
+        }
+        // Sort by the breadcrumb label so children sit under their parents.
+        usort($rows, static function ($a, $b) {
+            return strcasecmp($a['label'], $b['label']);
+        });
+
+        return [
+            'state'       => true,
+            'rows'        => $rows,
+            'mappedCount' => count($map),
+        ];
+    }
+
+    /**
+     * Apply Google-category mapping changes from the feed page's mapping panel.
+     *
+     * Accepts a list of {term_id, category} deltas; a non-empty category sets the
+     * mapping for that term, an empty one removes it. Persisting via set_gpc_map()
+     * invalidates the feed cache. Idempotent; junk entries are skipped.
+     *
+     * @param array $data { changes: [{ term_id:int, category:string }] }
+     * @param array $meta Ignored.
+     * @return array { state, message, mappedCount }
+     */
+    private function save_gpc_map(array $data, array $meta): array
+    {
+        if (!$this->feed_ready()) {
+            return ['state' => false, 'message' => __('Product feed is not available', 'wp-sdtrk')];
+        }
+
+        $changes = (isset($data['changes']) && is_array($data['changes'])) ? $data['changes'] : [];
+
+        $feed = new Wp_Sdtrk_WC_Feed();
+        $map  = $feed->get_gpc_map();
+
+        foreach ($changes as $change) {
+            if (!is_array($change) || !isset($change['term_id'])) {
+                continue;
+            }
+            $term_id = (int) $change['term_id'];
+            if ($term_id <= 0) {
+                continue;
+            }
+            $category = isset($change['category']) ? sanitize_text_field((string) $change['category']) : '';
+            if ($category === '') {
+                unset($map[$term_id]);
+            } else {
+                $map[$term_id] = $category;
+            }
+        }
+
+        $feed->set_gpc_map($map); // persists + clears the feed cache
+
+        return [
+            'state'       => true,
+            'message'     => __('Saved.', 'wp-sdtrk'),
+            'mappedCount' => count($feed->get_gpc_map()),
         ];
     }
 

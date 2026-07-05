@@ -61,6 +61,42 @@ $bare = $feed->feed_items([
 check('no price key when amount empty',   !isset($bare[0]['price']));
 check('no image key when image empty',    !isset($bare[0]['image']));
 
+echo "feed_items() carries google_product_category only when set\n";
+$gpc = $feed->feed_items([
+    [
+        'id' => 20, 'sku' => 'SKU-20', 'title' => 'Mapped', 'description' => '',
+        'link' => 'http://shop/p/20', 'image' => '', 'in_stock' => true,
+        'price' => '', 'currency' => 'EUR', 'brand' => '', 'group_id' => '',
+        'google_product_category' => 'Apparel & Accessories > Clothing',
+    ],
+    [
+        'id' => 21, 'sku' => 'SKU-21', 'title' => 'Unmapped', 'description' => '',
+        'link' => 'http://shop/p/21', 'image' => '', 'in_stock' => true,
+        'price' => '', 'currency' => 'EUR', 'brand' => '', 'group_id' => '',
+        'google_product_category' => '',
+    ],
+]);
+check('gpc kept when set',                ($gpc[0]['google_product_category'] ?? null) === 'Apparel & Accessories > Clothing');
+check('gpc omitted when empty',           !isset($gpc[1]['google_product_category']));
+$gpcXml = $feed->render_xml($gpc);
+check('g:google_product_category emitted', strpos($gpcXml, '<g:google_product_category>Apparel &amp; Accessories &gt; Clothing</g:google_product_category>') !== false);
+check('gpc element count = 1',             substr_count($gpcXml, '<g:google_product_category>') === 1);
+
+echo "evaluate_image() against Meta constraints\n";
+check('ok when large enough & small file', $feed->evaluate_image(600, 600, 100000, true)['ok'] === true);
+check('no issues when ok',                 $feed->evaluate_image(600, 600, 100000, true)['issues'] === []);
+$noimg = $feed->evaluate_image(0, 0, 0, false);
+check('no_image when missing',             in_array('no_image', $noimg['issues'], true) && $noimg['ok'] === false);
+$small = $feed->evaluate_image(499, 600, 1000, true);
+check('too_small below 500 edge',          in_array('too_small', $small['issues'], true));
+check('exactly 500 is allowed',            $feed->evaluate_image(500, 500, 1000, true)['ok'] === true);
+$big = $feed->evaluate_image(600, 600, Wp_Sdtrk_WC_Feed::IMAGE_MAX_BYTES + 1, true);
+check('too_large above 8MB',               in_array('too_large', $big['issues'], true));
+check('exactly 8MB is allowed',            $feed->evaluate_image(600, 600, Wp_Sdtrk_WC_Feed::IMAGE_MAX_BYTES, true)['ok'] === true);
+$both = $feed->evaluate_image(100, 100, Wp_Sdtrk_WC_Feed::IMAGE_MAX_BYTES + 1, true);
+check('small + large reported together',   in_array('too_small', $both['issues'], true) && in_array('too_large', $both['issues'], true));
+check('unknown (0) dims not flagged small', $feed->evaluate_image(0, 0, 1000, true)['issues'] === []);
+
 echo "render_xml() output\n";
 $xml = $feed->render_xml($items, ['title' => 'My Shop', 'link' => 'http://shop', 'description' => 'Feed']);
 

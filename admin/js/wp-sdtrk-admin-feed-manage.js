@@ -49,6 +49,42 @@
             .replace('%2$d', b);
     }
 
+    // "%s" single-token substitution for badge tooltips.
+    function sprintfS(tpl, a) {
+        return String(tpl).replace('%s', a);
+    }
+
+    function fmtMB(bytes) {
+        var mb = (parseInt(bytes, 10) || 0) / (1024 * 1024);
+        return (Math.round(mb * 10) / 10) + ' MB';
+    }
+
+    // A hover icon carrying the reason a field is highlighted. kind 'error' (red)
+    // for hard feed problems, 'warn' (amber) for the optional Google category.
+    function fieldIcon(title, kind) {
+        return ' <span class="wpsdtrk-field-icon wpsdtrk-field-icon-' + (kind || 'error') + '"' +
+            ' title="' + escAttr(title) + '" aria-label="' + escAttr(title) + '">' +
+            (kind === 'warn' ? '⚠' : '⛔') + '</span>';
+    }
+
+    // The image's problems (against Meta's constraints) as tooltip lines; [] when ok.
+    function imageIssues(p) {
+        var img = p.image_status || {};
+        var issues = img.issues || [];
+        var msgs = [];
+        if (issues.indexOf('no_image') !== -1) {
+            msgs.push(i18n.imgNoImage || 'No image');
+        }
+        if (issues.indexOf('too_small') !== -1) {
+            msgs.push(sprintfS(i18n.imgTooSmallTip || 'Image %s px — below 500×500',
+                (img.width || 0) + '×' + (img.height || 0)));
+        }
+        if (issues.indexOf('too_large') !== -1) {
+            msgs.push(sprintfS(i18n.imgTooLargeTip || 'Image %s — above 8 MB', fmtMB(img.size)));
+        }
+        return msgs;
+    }
+
     function ajax(func, data) {
         return $.post(cfg.ajaxUrl, {
             action: 'wp_sdtrk_handle_admin_ajax_callback',
@@ -76,15 +112,38 @@
             ? '<img src="' + escAttr(p.image) + '" alt="" width="40" height="40" style="object-fit:cover;border-radius:4px;">'
             : '';
         var checked = p.excluded ? '' : 'checked';
+
+        // Per-field problems: the offending cell gets .wpsdtrk-cell-error (bright
+        // red) plus a hover icon explaining why; the whole row gets a subtle red
+        // tint. Image/SKU/price are hard feed errors (red); a missing Google
+        // category is an optional warning (amber icon on the name, no row tint).
+        var imgMsgs   = imageIssues(p);
+        var imgErr    = imgMsgs.length > 0;
+        var skuErr    = !!p.sku_missing;
+        var priceErr  = !!p.price_missing;
+        var hasError  = imgErr || skuErr || priceErr;
+
+        var rowClass = (p.excluded ? 'is-excluded' : 'is-in-feed') + (hasError ? ' wpsdtrk-has-error' : '');
+
+        var imgCell = '<td' + (imgErr ? ' class="wpsdtrk-cell-error"' : '') + '>' +
+            img + (imgErr ? fieldIcon(imgMsgs.join(' · '), 'error') : '') + '</td>';
+        var nameCell = '<td>' + esc(p.name) +
+            (p.gpc_missing ? fieldIcon(i18n.gpcMissingTip || 'No Google product category mapped for this product', 'warn') : '') +
+            '</td>';
+        var skuCell = '<td' + (skuErr ? ' class="wpsdtrk-cell-error"' : '') + '>' +
+            esc(p.sku) + (skuErr ? fieldIcon(i18n.skuMissing || 'SKU is empty', 'error') : '') + '</td>';
+        var priceCell = '<td' + (priceErr ? ' class="wpsdtrk-cell-error"' : '') + '>' +
+            esc(p.price) + (priceErr ? fieldIcon(i18n.priceZero || 'Price is 0', 'error') : '') + '</td>';
+
         // The status toggle is a checkbox (checked = in feed); the custom-pages
         // CSS renders it as a switch. Change/bulk wiring lives below.
         return '' +
-            '<tr data-product-id="' + esc(p.id) + '" class="' + (p.excluded ? 'is-excluded' : 'is-in-feed') + '">' +
+            '<tr data-product-id="' + esc(p.id) + '" class="' + rowClass + '">' +
                 '<td><input type="checkbox" class="wpsdtrk-feed-select" value="' + esc(p.id) + '"></td>' +
-                '<td>' + img + '</td>' +
-                '<td>' + esc(p.name) + '</td>' +
-                '<td>' + esc(p.sku) + '</td>' +
-                '<td>' + esc(p.price) + '</td>' +
+                imgCell +
+                nameCell +
+                skuCell +
+                priceCell +
                 '<td>' +
                     '<label class="wpsdtrk-feed-toggle">' +
                         '<input type="checkbox" class="wpsdtrk-feed-status" ' + checked + '> ' +
@@ -187,6 +246,114 @@
         };
     }
 
+    /* -----------------------------------------------------------------------
+     * Google product category mapping panel (lazy — only touched when opened)
+     * --------------------------------------------------------------------- */
+    function initGpcPanel() {
+        var $panel = $('#wpsdtrk-gpc-panel');
+        if (!$panel.length) {
+            return;
+        }
+        var $gpcRows  = $('#wpsdtrk-gpc-rows');
+        var $datalist = $('#wpsdtrk-gpc-taxonomy');
+        var taxonomyLoaded = false;
+        var categoriesLoaded = false;
+
+        function gpcRowHtml(c) {
+            return '' +
+                '<tr>' +
+                    '<td>' + esc(c.label) + '</td>' +
+                    '<td>' + esc(c.count) + '</td>' +
+                    '<td>' +
+                        '<input type="text" class="regular-text wpsdtrk-gpc-input" ' +
+                            'list="wpsdtrk-gpc-taxonomy" ' +
+                            'data-term-id="' + esc(c.term_id) + '" ' +
+                            'data-saved="' + escAttr(c.google_category) + '" ' +
+                            'value="' + escAttr(c.google_category) + '" ' +
+                            'placeholder="' + escAttr(i18n.gpcPlaceholder || 'e.g. Apparel & Accessories > Clothing') + '">' +
+                    '</td>' +
+                '</tr>';
+        }
+
+        // The bundled Google taxonomy is ~5.5k lines; fetch it once and turn it
+        // into <option>s so the inputs get native autocomplete. Failure is
+        // non-fatal — the inputs still work as free text.
+        function loadTaxonomy() {
+            if (taxonomyLoaded || !cfg.gpcTaxonomyUrl) {
+                return;
+            }
+            taxonomyLoaded = true;
+            $.get(cfg.gpcTaxonomyUrl).then(function (text) {
+                var lines = String(text).split('\n');
+                var html = '';
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i].trim();
+                    if (line === '' || line.charAt(0) === '#') {
+                        continue;
+                    }
+                    html += '<option value="' + escAttr(line) + '"></option>';
+                }
+                $datalist.html(html);
+            }, function () {
+                taxonomyLoaded = false; // allow a retry on next open
+            });
+        }
+
+        function loadCategories() {
+            if (categoriesLoaded) {
+                return;
+            }
+            ajax('list_gpc_categories', {}).then(function (r) {
+                if (!r || !r.state) {
+                    $gpcRows.html('<tr><td colspan="3">' + esc(i18n.loadError || 'Could not load products.') + '</td></tr>');
+                    return;
+                }
+                categoriesLoaded = true;
+                if (!r.rows || !r.rows.length) {
+                    $gpcRows.html('<tr><td colspan="3">' + esc(i18n.gpcNoCategories || 'No product categories found.') + '</td></tr>');
+                    return;
+                }
+                $gpcRows.html(r.rows.map(gpcRowHtml).join(''));
+            }, function () {
+                $gpcRows.html('<tr><td colspan="3">' + esc(i18n.loadError || 'Could not load products.') + '</td></tr>');
+            });
+        }
+
+        // Populate on first open (details toggles the `open` attribute).
+        $panel.on('toggle', function () {
+            if ($panel.prop('open')) {
+                loadTaxonomy();
+                loadCategories();
+            }
+        });
+
+        // Persist a single mapping on change; only when the value actually moved.
+        // On success refresh the product list so the "No Google category" badges
+        // on the current page reflect the new mapping.
+        $gpcRows.on('change', '.wpsdtrk-gpc-input', function () {
+            var $inp = $(this);
+            var termId = parseInt($inp.data('term-id'), 10);
+            var value = $.trim($inp.val());
+            if (value === String($inp.data('saved'))) {
+                return;
+            }
+            $inp.prop('disabled', true);
+            ajax('save_gpc_map', { changes: [{ term_id: termId, category: value }] }).then(function (r) {
+                if (!r || !r.state) {
+                    notice((r && r.message) || i18n.saveError || 'Could not save the change.', 'error');
+                    return;
+                }
+                $inp.data('saved', value);
+                notice(r.message || i18n.saved || 'Saved.', 'success');
+                load(); // refresh product-list badges
+            }, function () {
+                notice(i18n.saveError || 'Could not save the change.', 'error');
+            }).always(function () {
+                $inp.prop('disabled', false);
+            });
+        });
+    }
+
     $(function () {
         $rows         = $('#wpsdtrk-feed-rows');
         $counter      = $('#wpsdtrk-feed-counter');
@@ -271,6 +438,7 @@
         $bulkExclude.on('click', function () { bulk(true); });
         $bulkInclude.on('click', function () { bulk(false); });
 
+        initGpcPanel();
         load();
     });
 

@@ -32,6 +32,11 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.12.0 =
+* Product feed: added a per-field quality check on the "Manage feed" page. Products with a feed problem now highlight the offending field in red with a hover icon explaining why: missing image, image below 500x500 px or above 8 MB (Facebook/Meta limits), empty SKU, or price of 0. Image dimensions are read from stored metadata and only the visible page is checked, so large catalogs stay fast
+* Product feed: added Google product category support. Map each WooCommerce category to a Google product category once (with autocomplete from the bundled Google taxonomy) in the new panel on the "Manage feed" page; products inherit the mapping (including sub-categories and variations) and the feed emits g:google_product_category. Products without a mapped category are flagged
+* Product feed: added an "Include product variants" switch (WooCommerce section, on by default). When off, variable products are listed as a single parent item instead of one item per variation
+
 = 1.11.2 =
 * Fixed Google Analytics 4 server-side ecommerce events (view_item, add_to_cart, purchase, etc.) not appearing in GA4: the Measurement Protocol requires item_id/item_name/item_brand, but the plugin sent the legacy id/name/brand keys, so GA4 saw no valid item and dropped the whole event. Browser and server GA4 item payloads now use the correct GA4 item keys
 

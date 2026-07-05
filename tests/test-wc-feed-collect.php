@@ -29,6 +29,9 @@ if (!class_exists('WP_SDTRK_Helper_Options')) {
     class WP_SDTRK_Helper_Options
     {
         public static function get_string_option($k) { return ''; }
+        public static function get_bool_option($k, $default = false) {
+            return array_key_exists($k, $GLOBALS['__opts']) ? (bool) $GLOBALS['__opts'][$k] : $default;
+        }
     }
 }
 if (!function_exists('get_bloginfo'))         { function get_bloginfo($k = '') { return 'StubSite'; } }
@@ -36,6 +39,22 @@ if (!function_exists('get_site_url'))         { function get_site_url() { return
 if (!function_exists('get_woocommerce_currency')) { function get_woocommerce_currency() { return 'EUR'; } }
 if (!function_exists('get_permalink'))        { function get_permalink($id) { return 'http://shop/p/' . $id; } }
 if (!function_exists('wp_get_attachment_url')) { function wp_get_attachment_url($id) { return 'http://shop/img/' . $id . '.jpg'; } }
+
+// term_id => parent term_id, so resolve_gpc()'s ancestor walk has data.
+$GLOBALS['__term_parent'] = [];
+if (!function_exists('get_ancestors')) {
+    function get_ancestors($term_id, $taxonomy) {
+        $out = [];
+        $p = $GLOBALS['__term_parent'][$term_id] ?? 0;
+        $guard = 0;
+        while ($p && $guard < 20) {
+            $out[] = $p;
+            $p = $GLOBALS['__term_parent'][$p] ?? 0;
+            $guard++;
+        }
+        return $out;
+    }
+}
 
 // ---- Fake WooCommerce product (duck-typed) ----
 class FakeFeedProduct
@@ -46,7 +65,8 @@ class FakeFeedProduct
         private string $sku = '',
         private string $price = '9.99',
         private bool $variable = false,
-        private array $children = []
+        private array $children = [],
+        private array $category_ids = []
     ) {}
     public function get_id() { return $this->id; }
     public function get_name() { return $this->name; }
@@ -58,13 +78,20 @@ class FakeFeedProduct
     public function is_in_stock() { return true; }
     public function is_type($t) { return $t === 'variable' ? $this->variable : false; }
     public function get_children() { return $this->children; }
+    public function get_category_ids() { return $this->category_ids; }
 }
 
+// Category tree: term 100 (child) → term 90 (parent).
+$GLOBALS['__term_parent'] = [100 => 90];
+
 // Whole catalog, keyed by id, resolved by wc_get_product().
+//  - Simple A: category 100 → resolves via its ancestor 90.
+//  - Simple B: no category → resolves to ''.
+//  - Variable C: category 90 directly; its variations inherit the parent value.
 $GLOBALS['__catalog'] = [
-    1 => new FakeFeedProduct(1, 'Simple A', 'SKU-1'),
+    1 => new FakeFeedProduct(1, 'Simple A', 'SKU-1', '9.99', false, [], [100]),
     2 => new FakeFeedProduct(2, 'Simple B', 'SKU-2'),
-    3 => new FakeFeedProduct(3, 'Variable C', 'SKU-3', '0', true, [31, 32]),
+    3 => new FakeFeedProduct(3, 'Variable C', 'SKU-3', '0', true, [31, 32], [90]),
     31 => new FakeFeedProduct(31, 'Variation C-1', 'SKU-3-1', '11.00'),
     32 => new FakeFeedProduct(32, 'Variation C-2', 'SKU-3-2', '12.00'),
 ];
@@ -124,11 +151,58 @@ check('variation 31 absent',            !in_array(31, $ids, true));
 check('variation 32 absent',            !in_array(32, $ids, true));
 check('unrelated simple still present', in_array(1, $ids, true));
 
+echo "collect() with variants disabled lists only the parent row\n";
+$GLOBALS['__opts'] = [];
+$GLOBALS['__opts']['wc_feed_include_variants'] = false;
+$rows = $feed->collect();
+$byId = [];
+foreach ($rows as $r) { $byId[(int) $r['id']] = $r; }
+$ids = array_keys($byId);
+check('variable parent present as row',  in_array(3, $ids, true));
+check('parent row has no item_group_id', ($byId[3]['group_id'] ?? '') === '');
+check('variation 31 absent',             !in_array(31, $ids, true));
+check('variation 32 absent',             !in_array(32, $ids, true));
+check('simple products still present',   in_array(1, $ids, true) && in_array(2, $ids, true));
+
+echo "collect() with variants enabled (default) expands variations\n";
+$GLOBALS['__opts'] = [];
+$ids = array_map(static fn($r) => (int) $r['id'], $feed->collect());
+check('variations present by default',   in_array(31, $ids, true) && in_array(32, $ids, true));
+check('variable parent NOT a row',       !in_array(3, $ids, true));
+
 echo "generate() XML omits the excluded product\n";
 $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [2];
 $xml = $feed->generate();
 check('excluded SKU not in XML',        strpos($xml, '<g:id>SKU-2</g:id>') === false);
 check('included SKU in XML',            strpos($xml, '<g:id>SKU-1</g:id>') !== false);
+
+echo "resolve_gpc() maps directly and via ancestors\n";
+$GLOBALS['__opts'] = [];
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::GPC_MAP_OPTION] = [90 => 'Home & Garden'];
+check('direct term mapping',            $feed->resolve_gpc($GLOBALS['__catalog'][3]) === 'Home & Garden');
+check('ancestor mapping (child→parent)', $feed->resolve_gpc($GLOBALS['__catalog'][1]) === 'Home & Garden');
+check('no mapping → empty',             $feed->resolve_gpc($GLOBALS['__catalog'][2]) === '');
+
+echo "collect() attaches the resolved gpc; variations inherit the parent\n";
+$rows = $feed->collect();
+$byId = [];
+foreach ($rows as $r) { $byId[(int) $r['id']] = $r; }
+check('simple A gpc via ancestor',      ($byId[1]['google_product_category'] ?? null) === 'Home & Garden');
+check('simple B gpc empty',             ($byId[2]['google_product_category'] ?? '') === '');
+check('variation 31 inherits parent',   ($byId[31]['google_product_category'] ?? null) === 'Home & Garden');
+check('variation 32 inherits parent',   ($byId[32]['google_product_category'] ?? null) === 'Home & Garden');
+
+echo "generate() emits g:google_product_category and set_gpc_map clears the cache\n";
+$xml2 = $feed->generate();
+check('mapped product has gpc element',  strpos($xml2, '<g:google_product_category>Home &amp; Garden</g:google_product_category>') !== false);
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::CACHE_OPTION] = '<cached/>';
+$feed->set_gpc_map([90 => 'Furniture']);
+check('set_gpc_map persisted',           ($GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::GPC_MAP_OPTION][90] ?? null) === 'Furniture');
+check('set_gpc_map cleared feed cache',  !isset($GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::CACHE_OPTION]));
+$feed->set_gpc_map([90 => '', 0 => 'x', 5 => 'Kept']);
+check('empty value removes mapping',     !isset($feed->get_gpc_map()[90]));
+check('non-positive term id dropped',    !isset($feed->get_gpc_map()[0]));
+check('valid pair kept',                 ($feed->get_gpc_map()[5] ?? null) === 'Kept');
 
 if ($fails > 0) {
     echo "\n$fails assertion(s) failed.\n";

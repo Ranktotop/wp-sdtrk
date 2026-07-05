@@ -417,3 +417,45 @@
 .wpsdtrk-feed-manage .wpsdtrk-feed-pagination span {
     color: #ededed;
 }
+
+/* Feed problems are flagged on the offending field. A row with any hard error
+   gets a subtle red tint; the specific cell turns bright red and carries a hover
+   icon explaining why. */
+.wpsdtrk-table-glass tr.wpsdtrk-has-error td {
+    background: rgba(201, 74, 74, 0.10);
+}
+.wpsdtrk-table-glass td.wpsdtrk-cell-error {
+    background: rgba(201, 74, 74, 0.30);
+    box-shadow: inset 0 0 0 1px rgba(224, 82, 82, 0.65);
+    color: #ffd9d9;
+}
+.wpsdtrk-field-icon {
+    cursor: help;
+    font-size: 12px;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+.wpsdtrk-field-icon-error {
+    color: #ff8a8a;
+}
+.wpsdtrk-field-icon-warn {
+    color: #e6b95c;
+}
+/* Keep the warnings legible even on dimmed (excluded) rows. */
+.wpsdtrk-table-glass tr.is-excluded td.wpsdtrk-cell-error,
+.wpsdtrk-table-glass tr.is-excluded .wpsdtrk-field-icon {
+    opacity: 1;
+}
+
+/* Google-category mapping panel. */
+.wpsdtrk-feed-manage .wpsdtrk-gpc-panel > summary {
+    color: #ededed;
+}
+.wpsdtrk-feed-manage .wpsdtrk-gpc-panel .description {
+    color: #b9b9b9;
+    max-width: 760px;
+}
+.wpsdtrk-table-glass .wpsdtrk-gpc-input {
+    width: 100%;
+    max-width: 420px;
+}

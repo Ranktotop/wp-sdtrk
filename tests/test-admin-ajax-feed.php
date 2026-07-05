@@ -31,6 +31,33 @@ if (!function_exists('wc_price'))      { function wc_price($amount) { return '<s
 if (!function_exists('wp_get_attachment_image_url')) { function wp_get_attachment_image_url($id, $size = 'thumbnail') { return $id ? 'http://shop/img/' . $id . '.jpg' : ''; } }
 if (!function_exists('wp_count_posts')) { function wp_count_posts($type = 'post') { $o = new stdClass(); $o->publish = $GLOBALS['__publish_count'] ?? 0; return $o; } }
 
+// image_health(): dimensions/size come from attachment metadata (keyed by id).
+// Default is a valid image; per-id overrides let a test inject a bad one.
+$GLOBALS['__img_meta'] = [];
+if (!function_exists('wp_get_attachment_metadata')) {
+    function wp_get_attachment_metadata($id) {
+        return $GLOBALS['__img_meta'][$id] ?? ['width' => 600, 'height' => 600, 'filesize' => 100000];
+    }
+}
+if (!function_exists('get_attached_file')) { function get_attached_file($id) { return ''; } }
+
+// resolve_gpc(): category ids per product + a term→parent tree for ancestors.
+$GLOBALS['__cat_ids']     = [];
+$GLOBALS['__term_parent'] = [];
+if (!function_exists('get_ancestors')) {
+    function get_ancestors($term_id, $taxonomy) {
+        $out = []; $p = $GLOBALS['__term_parent'][$term_id] ?? 0; $g = 0;
+        while ($p && $g < 20) { $out[] = $p; $p = $GLOBALS['__term_parent'][$p] ?? 0; $g++; }
+        return $out;
+    }
+}
+// list_gpc_categories(): term set + WP_Error guard.
+if (!function_exists('is_wp_error')) { function is_wp_error($t) { return $t instanceof WP_Error; } }
+if (!class_exists('WP_Error')) { class WP_Error {} }
+if (!function_exists('get_terms')) {
+    function get_terms($args) { return $GLOBALS['__terms'] ?? []; }
+}
+
 // is_enabled() pulls in WooCommerce + the options helper + the integration gate.
 $GLOBALS['__feed_enabled'] = true;
 if (!class_exists('WooCommerce')) { class WooCommerce {} }
@@ -52,6 +79,7 @@ class FakeAjaxProduct
     public function get_sku() { return $this->sku; }
     public function get_price() { return $this->price; }
     public function get_image_id() { return $this->id; }
+    public function get_category_ids() { return $GLOBALS['__cat_ids'][$this->id] ?? []; }
 }
 
 // Paginate-shaped return; honours include/exclude so status filtering is real.
@@ -240,12 +268,88 @@ $r = call_priv($handler, $ref, 'save_feed_exclusion', []);
 check('empty changes => state true',   ($r['state'] ?? null) === true);
 check('list unchanged',                $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] === [7]);
 
-echo "both handlers gate on the feed being enabled\n";
+echo "list_feed_products() — per-row image_status + gpc_missing\n";
+// Fresh product/attachment ids: image_health() memoises per attachment id for
+// the request, so reusing ids from earlier assertions would hit a stale result.
+$GLOBALS['__opts'] = [];
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::GPC_MAP_OPTION] = [90 => 'Home & Garden'];
+$GLOBALS['__term_parent'] = [100 => 90];
+$GLOBALS['__cat_ids'] = [11 => [100], 12 => []]; // 11 maps via ancestor 90, 12 unmapped
+$GLOBALS['__img_meta'] = [
+    11 => ['width' => 600, 'height' => 600, 'filesize' => 100000],           // ok
+    12 => ['width' => 300, 'height' => 300, 'filesize' => 100000],           // too small
+    13 => ['width' => 600, 'height' => 600, 'filesize' => 9 * 1024 * 1024],  // too large
+    14 => ['width' => 600, 'height' => 600, 'filesize' => 100000],           // ok (isolates sku)
+    15 => ['width' => 600, 'height' => 600, 'filesize' => 100000],           // ok (isolates price)
+];
+$GLOBALS['__catalog'] = [
+    new FakeAjaxProduct(11, 'Img OK',    'SKU-11', '10.00'),
+    new FakeAjaxProduct(12, 'Img Small', 'SKU-12', '20.00'),
+    new FakeAjaxProduct(13, 'Img Large', 'SKU-13', '30.00'),
+    new FakeAjaxProduct(14, 'No SKU',    '',       '10.00'), // empty SKU
+    new FakeAjaxProduct(15, 'Free',      'SKU-15', '0'),     // zero price
+];
+$GLOBALS['__publish_count'] = 5;
+$r = call_priv($handler, $ref, 'list_feed_products', ['status' => 'all', 'per_page' => 50]);
+$byId = [];
+foreach ($r['rows'] as $row) { $byId[$row['id']] = $row; }
+check('row carries image_status',        isset($byId[11]['image_status']['ok']));
+check('good image ok=true',              $byId[11]['image_status']['ok'] === true);
+check('small image flagged too_small',   in_array('too_small', $byId[12]['image_status']['issues'], true));
+check('large image flagged too_large',   in_array('too_large', $byId[13]['image_status']['issues'], true));
+check('mapped product gpc_missing=false', $byId[11]['gpc_missing'] === false);
+check('unmapped product gpc_missing=true', $byId[12]['gpc_missing'] === true);
+check('empty sku => sku_missing true',   $byId[14]['sku_missing'] === true);
+check('present sku => sku_missing false', $byId[11]['sku_missing'] === false);
+check('zero price => price_missing true', $byId[15]['price_missing'] === true);
+check('positive price => price_missing false', $byId[11]['price_missing'] === false);
+
+echo "list_gpc_categories() — terms + current mapping\n";
+$t1 = new stdClass(); $t1->term_id = 90;  $t1->name = 'Garden';   $t1->parent = 0;  $t1->count = 3;
+$t2 = new stdClass(); $t2->term_id = 100; $t2->name = 'Tools';    $t2->parent = 90; $t2->count = 1;
+$t3 = new stdClass(); $t3->term_id = 50;  $t3->name = 'Apparel';  $t3->parent = 0;  $t3->count = 0;
+$GLOBALS['__terms'] = [$t2, $t1, $t3];
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::GPC_MAP_OPTION] = [90 => 'Home & Garden'];
+$r = call_priv($handler, $ref, 'list_gpc_categories', []);
+check('state true',                      ($r['state'] ?? null) === true);
+check('returns all 3 terms',             count($r['rows']) === 3);
+$byTerm = [];
+foreach ($r['rows'] as $row) { $byTerm[$row['term_id']] = $row; }
+check('child label shows breadcrumb',    $byTerm[100]['label'] === 'Garden › Tools');
+check('empty term included (count 0)',   $byTerm[50]['count'] === 0);
+check('mapped term carries value',       $byTerm[90]['google_category'] === 'Home & Garden');
+check('unmapped term empty value',       $byTerm[100]['google_category'] === '');
+check('mappedCount = 1',                 (int) $r['mappedCount'] === 1);
+
+echo "save_gpc_map() — set, remove, cache invalidation, junk\n";
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::GPC_MAP_OPTION] = [90 => 'Home & Garden'];
+$GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::CACHE_OPTION] = '<cached/>';
+$GLOBALS['__deleted'] = [];
+$r = call_priv($handler, $ref, 'save_gpc_map', ['changes' => [
+    ['term_id' => 100, 'category' => 'Apparel > Shirts'], // add
+    ['term_id' => 90,  'category' => ''],                 // remove
+    ['term_id' => 0,   'category' => 'x'],                // junk id
+    ['category' => 'no-term'],                            // missing term_id
+    'not-an-array',
+]]);
+$map = $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::GPC_MAP_OPTION];
+check('state true',                      ($r['state'] ?? null) === true);
+check('mapping added',                   ($map[100] ?? null) === 'Apparel > Shirts');
+check('empty category removes mapping',  !isset($map[90]));
+check('junk term id dropped',            !isset($map[0]));
+check('cache invalidated',               in_array(Wp_Sdtrk_WC_Feed::CACHE_OPTION, $GLOBALS['__deleted'], true));
+check('mappedCount reflects result',     (int) $r['mappedCount'] === 1);
+
+echo "all feed handlers gate on the feed being enabled\n";
 $GLOBALS['__feed_enabled'] = false;
 $rl = call_priv($handler, $ref, 'list_feed_products', ['status' => 'all']);
 $rs = call_priv($handler, $ref, 'save_feed_exclusion', ['changes' => [['id' => 1, 'excluded' => true]]]);
+$rg = call_priv($handler, $ref, 'list_gpc_categories', []);
+$rm = call_priv($handler, $ref, 'save_gpc_map', ['changes' => [['term_id' => 1, 'category' => 'X']]]);
 check('list rejected when feed off',   ($rl['state'] ?? null) === false);
 check('save rejected when feed off',   ($rs['state'] ?? null) === false);
+check('gpc list rejected when feed off', ($rg['state'] ?? null) === false);
+check('gpc save rejected when feed off', ($rm['state'] ?? null) === false);
 $GLOBALS['__feed_enabled'] = true;
 
 if ($fails > 0) {

@@ -68,8 +68,10 @@ Gleiches `func`-Dispatch-Muster wie Public (Action `wp_sdtrk_handle_admin_ajax_c
 | `get_linkedin_mapping` | Mapping-Details laden (id, event, convid, rules) |
 | `delete_linkedin_mapping` | Mapping löschen |
 | `regenerate_feed_token` | Produkt-Feed-Token rotieren, neue Feed-URL zurückgeben ([07 › Produkt-Feed](../07-woocommerce/product-feed.md)) |
-| `list_feed_products` | Veröffentlichte Produkte paginiert/durchsuchbar listen (inkl. Ausschluss-Status) ([07 › Produktfeed-Verwaltung](../07-woocommerce/feed-management.md)) |
+| `list_feed_products` | Veröffentlichte Produkte paginiert/durchsuchbar listen (inkl. Ausschluss-Status, Bild-Qualität, fehlende Google-Kategorie) ([07 › Produktfeed-Verwaltung](../07-woocommerce/feed-management.md)) |
 | `save_feed_exclusion` | Ausschluss-Deltas anwenden + Feed-Cache invalidieren ([07 › Produktfeed-Verwaltung](../07-woocommerce/feed-management.md)) |
+| `list_gpc_categories` | WooCommerce-Kategorien + aktuelles Google-Kategorie-Mapping listen ([07 › Produktfeed-Verwaltung](../07-woocommerce/feed-management.md)) |
+| `save_gpc_map` | Google-Kategorie-Mapping-Deltas anwenden + Feed-Cache invalidieren ([07 › Produktfeed-Verwaltung](../07-woocommerce/feed-management.md)) |
 
 Antwort: JSON `{ state, message, … }` (z. B. `mapping` bzw. `url`).
 
