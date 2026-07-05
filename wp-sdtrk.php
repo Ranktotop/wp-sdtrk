@@ -79,8 +79,15 @@ $updateChecker = PucFactory::buildUpdateChecker(
     'wp-sdtrk'
 );
 
-// Verwende GitHub Releases (nicht den Branch-Zip)
-$updateChecker->getVcsApi()->enableReleaseAssets();
+// Verwende GitHub Releases (nicht den Branch-Zip).
+// getVcsApi() ist als abstrakte Api-Basis typisiert; enableReleaseAssets() lebt
+// nur auf der konkreten GitHubApi (Trait ReleaseAssetSupport). Zur Laufzeit ist
+// die API bei einer github.com-URL immer GitHubApi — der Guard macht das explizit
+// (und hält den Static-Analyzer ruhig), falls die VCS-API je eine andere ist.
+$sdtrkVcsApi = $updateChecker->getVcsApi();
+if (method_exists($sdtrkVcsApi, 'enableReleaseAssets')) {
+    $sdtrkVcsApi->enableReleaseAssets();
+}
 
 /**
  * The code that runs during plugin activation.
