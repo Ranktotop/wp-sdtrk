@@ -104,7 +104,10 @@ class Wp_Sdtrk_Decrypter {
 				url: wp_sdtrk_engine.ajax_url, //comes from wp
 				data: dataJSON,
 				success: function (response) {
-					decrypter.setDecryptedData(JSON.parse(response).data);
+					// jQuery may already return a parsed object when the server replies
+					// with a JSON Content-Type — only JSON.parse an actual string.
+					var parsed = (typeof response === 'string') ? JSON.parse(response) : response;
+					decrypter.setDecryptedData(parsed.data);
 					resolve(decrypter);
 				},
 				error: function (xhr, status, error) {

@@ -98,3 +98,15 @@ return ['state' => false, 'debug' => false];
 ```
 
 > Das Event-Objekt (`data.event`) wird im Browser gesammelt (siehe [03 › Event-Erfassung](../03-browser-tracking/event-collection.md)) und im PHP-Tracker über `Wp_Sdtrk_Tracker_Event` gekapselt.
+
+## 5. Antwort-Verarbeitung im Browser
+
+Der Server beendet den Request mit `die(json_encode($result))` — also einem JSON-**String** ohne eigenen `Content-Type`-Header. Wie der `success`-Callback die Antwort erhält, hängt davon ab, welchen Content-Type `admin-ajax.php` in der jeweiligen Umgebung setzt: jQuery leitet ohne explizites `dataType` den Typ aus dem Header ab („intelligent guess"). Bei `text/html` kommt ein **String** an, bei `application/json` (z. B. durch Borlabs Cookie oder andere Plugins gesetzt) parst jQuery bereits selbst und liefert ein **Objekt**.
+
+Die Callbacks in `wp-sdtrk-helper.js` (`send_ajax`) und `wp-sdtrk-decrypter.js` (`decryptOnServer`) fangen beide Fälle ab und parsen nur, wenn wirklich ein String vorliegt:
+
+```js
+var r = (typeof response === 'string') ? JSON.parse(response) : response;
+```
+
+> Ohne diese Fallunterscheidung würde ein bereits geparstes Objekt beim erneuten `JSON.parse` zu `SyntaxError: "[object Object]" is not valid JSON` führen. Der Fehler wäre rein kosmetisch (nur im Debug-Log, das eigentliche Server- und Browser-Tracking läuft davon unabhängig), wird aber so vermieden.

@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.11.1 =
+* Fixed a harmless "[object Object] is not valid JSON" console error that appeared when a plugin (e.g. Borlabs Cookie) makes admin-ajax reply with an application/json content type; the tracking AJAX callbacks now handle both string and pre-parsed object responses
+
 = 1.11.0 =
 * Added a product-feed management page (WooCommerce section -> "Manage feed"): control which published products are included in or excluded from the product feed without editing each product
 * Server-side paginated, searchable product list with a per-row in-feed/excluded toggle and bulk include/exclude; excluding a variable product also removes its variations

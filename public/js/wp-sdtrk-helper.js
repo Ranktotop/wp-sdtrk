@@ -59,7 +59,11 @@ class Wp_Sdtrk_Helper {
 			data: dataJSON,
 			success: function (response) {
 				try {
-					var r = JSON.parse(response);
+					// jQuery guesses the response type from the Content-Type header.
+					// Some hosts/plugins (e.g. Borlabs Cookie) make admin-ajax reply with
+					// `application/json`, so jQuery already hands us a parsed object here —
+					// re-parsing that would throw. Only parse when we actually got a string.
+					var r = (typeof response === 'string') ? JSON.parse(response) : response;
 					if (r.state) {
 						var debugging = (debugMode === '1' && r.debug && r.debug === true);
 						helper.debugLog(debugging, r.state, 'Response Data from Server (' + data.type + '-' + data.handler + ')');
