@@ -59,10 +59,10 @@ $feed_available = class_exists('Wp_Sdtrk_WC_Feed') && Wp_Sdtrk_WC_Feed::is_enabl
                             <input type="checkbox" id="wpsdtrk-feed-select-all">
                         </th>
                         <th scope="col" style="width:48px;"><?php esc_html_e('Image', 'wp-sdtrk'); ?></th>
-                        <th scope="col"><?php esc_html_e('Product', 'wp-sdtrk'); ?></th>
-                        <th scope="col"><?php esc_html_e('SKU', 'wp-sdtrk'); ?></th>
-                        <th scope="col"><?php esc_html_e('Price', 'wp-sdtrk'); ?></th>
+                        <th scope="col" style="width:180px;"><?php esc_html_e('Product', 'wp-sdtrk'); ?></th>
                         <th scope="col"><?php esc_html_e('Description', 'wp-sdtrk'); ?></th>
+                        <th scope="col" style="width:90px;"><?php esc_html_e('Price', 'wp-sdtrk'); ?></th>
+                        <th scope="col" style="width:80px;"><?php esc_html_e('SKU', 'wp-sdtrk'); ?></th>
                         <th scope="col" style="width:160px;"><?php esc_html_e('Status', 'wp-sdtrk'); ?></th>
                     </tr>
                 </thead>

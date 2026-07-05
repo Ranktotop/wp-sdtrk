@@ -158,9 +158,9 @@
                 '<td><input type="checkbox" class="wpsdtrk-feed-select" value="' + esc(p.id) + '"></td>' +
                 imgCell +
                 nameCell +
-                skuCell +
-                priceCell +
                 descCell +
+                priceCell +
+                skuCell +
                 '<td>' +
                     '<label class="wpsdtrk-feed-toggle">' +
                         '<input type="checkbox" class="wpsdtrk-feed-status" ' + checked + '> ' +

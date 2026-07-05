@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.13.1 =
+* Manage feed table: reordered and resized the columns for readability — Image, Product, Description, Price, SKU, Status. Product and SKU are now narrower and the description column is much wider
+
 = 1.13.0 =
 * Product feed: added a "Description" column to the "Manage feed" product table showing a short preview of each product's feed description, with a quality check. An empty description or one longer than 5000 characters (Google/Meta limit) highlights the field in red with a hover icon explaining why. Like the other checks, it only runs for the products on the current page
 

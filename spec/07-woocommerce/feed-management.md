@@ -20,7 +20,7 @@ Das Google-Kategorie-Mapping liegt in der Option `wp_sdtrk_feed_gpc_map` (`get_g
 WooCommerce-Sektion ──Button „Manage feed"──▶ Seite wp_sdtrk_feed_manage
   ├─ Kopf: Zähler „X von Y Produkten im Feed" (aria-live)
   ├─ Toolbar: Suche (serverseitig, debounced) · Status-Filter (Alle/Im Feed/Ausgeschlossen) · Bulk (Ausschließen/Aufnehmen)
-  ├─ Tabelle (.wpsdtrk-table-glass): ☐ | Bild | Name | SKU | Preis | Beschreibung | Status-Toggle (Problemfelder rot hervorgehoben)
+  ├─ Tabelle (.wpsdtrk-table-glass): ☐ | Bild | Name | Beschreibung | Preis | SKU | Status-Toggle (Problemfelder rot hervorgehoben)
   │    ├─ Zeilen-Toggle ─AJAX─▶ save_feed_exclusion (ein Delta) · optimistisch, Rollback bei Fehler
   │    └─ Mehrfachauswahl + Bulk ─AJAX─▶ save_feed_exclusion (mehrere Deltas)
   ├─ Paginierung (Prev/Next + Seitenzahl)

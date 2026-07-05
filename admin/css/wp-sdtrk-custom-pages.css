@@ -435,14 +435,14 @@
     vertical-align: middle;
     white-space: nowrap;
 }
-/* Description column: keep the preview to one truncated line so a long
-   description never blows up the row height/width. */
+/* Description column: the widest column (holds the preview), kept to one
+   truncated line so a long description never blows up the row height. */
 .wpsdtrk-table-glass td.wpsdtrk-feed-desc {
-    max-width: 280px;
+    max-width: 620px;
 }
 .wpsdtrk-feed-desc-text {
     display: inline-block;
-    max-width: 240px;
+    max-width: 580px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
