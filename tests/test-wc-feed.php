@@ -39,8 +39,8 @@ $rows = [
 $items = $feed->feed_items($rows);
 
 check('two items',                       count($items) === 2);
-check('id falls back to SKU',            $items[0]['id'] === 'SKU-10');
-check('id falls back to product id',     $items[1]['id'] === '11');
+check('id is numeric product id (SKU ignored)', $items[0]['id'] === '10');
+check('id is numeric product id',        $items[1]['id'] === '11');
 check('description tags stripped',       $items[0]['description'] === 'Great stuff');
 check('availability in_stock',           $items[0]['availability'] === 'in_stock');
 check('availability out_of_stock',       $items[1]['availability'] === 'out_of_stock');
@@ -115,7 +115,7 @@ check('xml declaration',                 strpos($xml, '<?xml version="1.0" encod
 check('g: namespace declared',           strpos($xml, 'xmlns:g="http://base.google.com/ns/1.0"') !== false);
 check('rss 2.0',                         strpos($xml, '<rss version="2.0"') !== false);
 check('channel title',                   strpos($xml, '<title>My Shop</title>') !== false);
-check('g:id present',                     strpos($xml, '<g:id>SKU-10</g:id>') !== false);
+check('g:id present',                     strpos($xml, '<g:id>10</g:id>') !== false);
 check('g:price present',                  strpos($xml, '<g:price>19.99 EUR</g:price>') !== false);
 check('g:availability present',           strpos($xml, '<g:availability>out_of_stock</g:availability>') !== false);
 check('g:item_group_id present',          strpos($xml, '<g:item_group_id>10</g:item_group_id>') !== false);

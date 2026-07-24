@@ -127,16 +127,15 @@
 
         // Per-field problems: the offending cell gets .wpsdtrk-cell-error (bright
         // red) plus a hover icon explaining why; the whole row gets a subtle red
-        // tint. Only hard feed errors count here (image / SKU / price /
-        // description). A missing Google category is not flagged in this list —
-        // unmapped categories are highlighted in the mapping panel below instead.
+        // tint. Only hard feed errors count here (image / price / description).
+        // A missing Google category is not flagged in this list — unmapped
+        // categories are highlighted in the mapping panel below instead.
         var imgMsgs   = imageIssues(p);
         var descMsgs  = descriptionIssues(p);
         var imgErr    = imgMsgs.length > 0;
-        var skuErr    = !!p.sku_missing;
         var priceErr  = !!p.price_missing;
         var descErr   = descMsgs.length > 0;
-        var hasError  = imgErr || skuErr || priceErr || descErr;
+        var hasError  = imgErr || priceErr || descErr;
 
         var rowClass = (p.excluded ? 'is-excluded' : 'is-in-feed') + (hasError ? ' wpsdtrk-has-error' : '');
 
@@ -147,8 +146,9 @@
         var nameCell = '<td>' + (p.edit_url
             ? '<a class="wpsdtrk-feed-name-link" href="' + escAttr(p.edit_url) + '" target="_blank" rel="noopener noreferrer">' + esc(p.name) + '</a>'
             : esc(p.name)) + '</td>';
-        var skuCell = '<td' + (skuErr ? ' class="wpsdtrk-cell-error"' : '') + '>' +
-            esc(p.sku) + (skuErr ? fieldIcon(i18n.skuMissing || 'SKU is empty') : '') + '</td>';
+        // The numeric product id = the feed <g:id> / pixel content_id. Shown so
+        // the catalog id can be cross-checked against Meta; never an error state.
+        var idCell = '<td>' + esc(p.id) + '</td>';
         var priceCell = '<td' + (priceErr ? ' class="wpsdtrk-cell-error"' : '') + '>' +
             esc(p.price) + (priceErr ? fieldIcon(i18n.priceZero || 'Price is 0') : '') + '</td>';
         var descCell = '<td class="wpsdtrk-feed-desc' + (descErr ? ' wpsdtrk-cell-error' : '') + '">' +
@@ -164,7 +164,7 @@
                 nameCell +
                 descCell +
                 priceCell +
-                skuCell +
+                idCell +
                 '<td>' +
                     '<label class="wpsdtrk-feed-toggle">' +
                         '<input type="checkbox" class="wpsdtrk-feed-status" ' + checked + '> ' +

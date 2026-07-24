@@ -9,6 +9,16 @@
  * the engine's collect_eventData(). Each platform catcher turns it into its
  * own multi-product payload (Meta contents[]/content_ids, GA items[], TikTok
  * contents[]). The shared event_id (= order id) deduplicates browser + server.
+ *
+ * ── Product identity ──────────────────────────────────────────────────────
+ * Every line's `id` is the numeric WooCommerce id — the variation id when the
+ * line is a variation, else the parent product id. This is the canonical,
+ * always-present, always-unique product key. The product feed publishes the
+ * very same numeric id as each item's <g:id> (see Wp_Sdtrk_WC_Feed::feed_items())
+ * so the pixel/CAPI content_ids match the catalog and Meta reports a high
+ * catalog match rate. SKUs are deliberately NOT used here: they are optional in
+ * WooCommerce (may be empty, non-unique, or edited after the fact) and would
+ * make matching fragile.
  */
 class Wp_Sdtrk_WC_Order_Mapper
 {
@@ -24,9 +34,8 @@ class Wp_Sdtrk_WC_Order_Mapper
         foreach ($order->get_items() as $item) {
             $qty = (int) $item->get_quantity();
             $lines[] = [
-                // Prefer the variation id so order items match the product feed and
-                // the AddToCart/ViewItem ids (catalog-level consistency); fall back
-                // to the parent product id for simple products.
+                // Numeric WooCommerce id (variation id when present, else parent):
+                // the canonical product key the feed publishes as <g:id>.
                 'id'    => (string) ($item->get_variation_id() ?: $item->get_product_id()),
                 'name'  => $item->get_name(),
                 'qty'   => $qty,
@@ -43,7 +52,7 @@ class Wp_Sdtrk_WC_Order_Mapper
      * engine and platform catchers treat checkout items exactly like order/ATC
      * items. `price` is the per-unit value derived from the cart line total
      * (after discount, before shipping), matching how lineItems() prices an
-     * order line. id prefers the variation id for catalog-level consistency.
+     * order line. `id` is the numeric (variation-or-parent) id, matching the feed.
      *
      * @param WC_Cart $cart
      * @return array<int, array{id:string, name:string, qty:int, price:float}>

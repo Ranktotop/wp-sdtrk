@@ -139,7 +139,6 @@ class Wp_Sdtrk_Admin_Ajax_Handler
         foreach ($products as $product) {
             $id    = (int) $product->get_id();
             $price = $product->get_price();
-            $sku   = (string) $product->get_sku();
             // Resolve the description the same way the feed does (short, else
             // long, tags stripped) so the check reflects the exported value.
             $desc = (string) $product->get_short_description();
@@ -158,7 +157,6 @@ class Wp_Sdtrk_Admin_Ajax_Handler
                 // Edit-screen link so the admin can jump straight to a product to
                 // fix a flagged problem. 'raw' context — JS attribute-escapes it.
                 'edit_url' => (string) get_edit_post_link($id, 'raw'),
-                'sku'      => $sku,
                 // wc_price() returns HTML with entities (&nbsp;, &euro;); strip the
                 // tags AND decode the entities so the value isn't shown literally.
                 'price'    => function_exists('wc_price')
@@ -168,11 +166,12 @@ class Wp_Sdtrk_Admin_Ajax_Handler
                 'excluded' => in_array($id, $excluded, true),
                 // Per-row feed quality, computed only for the ≤ per_page products
                 // on this page: the featured image against Meta's constraints
-                // (dimensions from stored metadata, no bulk I/O), a missing SKU, a
-                // zero/empty price and the description (empty / too long). The
-                // Google-category gap is surfaced in the mapping panel instead.
+                // (dimensions from stored metadata, no bulk I/O), a zero/empty
+                // price and the description (empty / too long). The Google-category
+                // gap is surfaced in the mapping panel instead. (The SKU is not a
+                // feed field — the <g:id> is the numeric product id — so an empty
+                // SKU is not flagged.)
                 'image_status'       => $feed->image_health((int) $product->get_image_id()),
-                'sku_missing'        => ($sku === ''),
                 'price_missing'      => ($price === '' || $price === null || (float) $price <= 0),
                 'description_status' => $desc_status,
                 'description_preview' => $desc_preview,

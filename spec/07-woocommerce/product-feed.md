@@ -23,7 +23,7 @@ Ein zweiter Schalter `wc_feed_include_variants` (WooCommerce-Sektion, **Default 
 | Methode | Aufgabe |
 |---------|---------|
 | `collect()` | veröffentlichte WC-Produkte → Rohdaten-Zeilen, **abzüglich der ausgeschlossenen Produkte** (`exclude` an `wc_get_products`). Variable Produkte werden bei `wc_feed_include_variants` an in ihre Variationen expandiert, sonst als einzelne Eltern-Zeile geführt. Löst je Elternprodukt einmal die Google-Produktkategorie auf (`resolve_gpc()`) und reicht sie an die Zeilen durch |
-| `feed_items($rows)` | Normalisierung (rein): `id` (SKU oder ID), Verfügbarkeit, Preis `"<Betrag> <Währung>"`, `condition=new`, `google_product_category` (falls gesetzt), `item_group_id` bei Variationen |
+| `feed_items($rows)` | Normalisierung (rein): `id` (numerische Produkt-/Variations-ID), Verfügbarkeit, Preis `"<Betrag> <Währung>"`, `condition=new`, `google_product_category` (falls gesetzt), `item_group_id` bei Variationen |
 | `render_xml($items, $channel)` | RSS-2.0-/`g:`-Dokument (rein) |
 | `generate()` | `render_xml(feed_items(collect()))` |
 
@@ -35,6 +35,8 @@ Per Default sind **alle veröffentlichten** Produkte im Feed; gesteuert wird aus
 - **Helfer auf `Wp_Sdtrk_WC_Feed`:** `get_excluded_ids()` (liest + sanitisiert: `intval`, positive, dedupe; toleriert fehlenden/korrupten Wert → `[]`), `set_excluded_ids($ids)` (persistiert sanitisiert **und** invalidiert den Feed-Cache, s. u.), `is_excluded($id)`.
 - **Filterung:** `collect()` reicht `get_excluded_ids()` als `exclude`-Argument an `wc_get_products()`. Da Variationen nur über die `get_children()`-Schleife des Elternprodukts gesammelt werden, entfernt der Ausschluss eines variablen Elternprodukts **transitiv** auch seine Variationen.
 - **Granularität:** Ausschluss greift auf **Elternebene**; einzelne Variationen können nicht separat ausgeschlossen werden.
+
+> **`g:id` ↔ Pixel/CAPI-`content_ids`:** Die `<g:id>` ist die **numerische WooCommerce-ID** (Variations-ID bei Variationen, sonst Produkt-ID). Genau dieselbe ID sendet der Pixel/CAPI als `content_ids` (Order-Mapper, [order-mapping.md](order-mapping.md)) — beide Seiten müssen übereinstimmen, sonst meldet Meta eine Katalog-Übereinstimmungsrate unter 90 %. Die SKU wird bewusst **nicht** als `<g:id>` verwendet (optional/nicht eindeutig in WooCommerce).
 
 **Feld-Mapping (`g:`):** `g:id`, `title`, `description` (Tags entfernt), `link`, `g:image_link`, `g:availability` (`in_stock`/`out_of_stock`), `g:price`, `g:condition`, `g:brand`, `g:google_product_category`, `g:item_group_id` (Variationen). Die optionalen Felder `g:image_link`, `g:price`, `g:brand`, `g:google_product_category` und `g:item_group_id` werden bei leerem Wert **ganz weggelassen** — ein Produkt ohne Preis erzeugt also kein (fehlerhaftes) `<g:price>EUR</g:price>`, sondern gar kein Preis-Element.
 
@@ -75,5 +77,5 @@ Diese Checks laufen **nur** in der Admin-Liste (seitenweise), **nicht** in `gene
 ## Einschränkungen
 
 - Sehr große Kataloge: `collect()` lädt alle Produkte ohne Batching/Pagination. Der Stampede-Lock verhindert parallele Voll-Aufbauten, nicht die Kosten eines einzelnen Aufbaus.
-- Produkte ohne Bild/Preis werden mit-exportiert (kein Filter); das jeweilige `g:`-Element fehlt dann, was das Merchant Center als fehlendes Pflichtfeld beanstanden kann. Die Feed-Verwaltung hebt fehlende/zu kleine/zu große Bilder, leere SKUs, Preis 0 und leere/zu lange Beschreibungen pro Produkt am betroffenen Feld hervor; fehlende Google-Kategorien erscheinen im Mapping-Panel.
+- Produkte ohne Bild/Preis werden mit-exportiert (kein Filter); das jeweilige `g:`-Element fehlt dann, was das Merchant Center als fehlendes Pflichtfeld beanstanden kann. Die Feed-Verwaltung hebt fehlende/zu kleine/zu große Bilder, Preis 0 und leere/zu lange Beschreibungen pro Produkt am betroffenen Feld hervor; fehlende Google-Kategorien erscheinen im Mapping-Panel.
 - Die Bild-Qualitätsprüfung erfolgt auf dem **Beitragsbild des Elternprodukts** (konsistent mit der parent-basierten Ausschluss-Granularität); variationseigene Bilder werden nicht einzeln geprüft.

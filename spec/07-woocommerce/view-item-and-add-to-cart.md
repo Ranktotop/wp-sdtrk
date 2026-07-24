@@ -26,7 +26,7 @@ Auf `is_product()` baut `build_view_item_payload($product)` das Objekt `wp_sdtrk
 
 | Feld | Quelle |
 |------|--------|
-| `prodId` | `$product->get_id()` |
+| `prodId` | numerische Produkt-ID der Position (`productLine($product,1)['id']` = `$product->get_id()` — s. [order-mapping.md](order-mapping.md)) |
 | `name` | `$product->get_name()` |
 | `value` | Einzel-Anzeigepreis (`wc_get_price_to_display($product)`; Steuerbehandlung nach Shop-Einstellung) |
 | `currency` | `get_woocommerce_currency()` (Shop-Währung) |

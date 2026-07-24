@@ -162,7 +162,8 @@ check('state true',                    ($r['state'] ?? null) === true);
 check('returns all 4 rows',            count($r['rows']) === 4);
 $byId = [];
 foreach ($r['rows'] as $row) { $byId[$row['id']] = $row; }
-check('row carries name/sku/price',    $byId[1]['name'] === 'Alpha' && $byId[1]['sku'] === 'SKU-1' && isset($byId[1]['price']));
+check('row carries id/name/price',     $byId[1]['name'] === 'Alpha' && (int) $byId[1]['id'] === 1 && isset($byId[1]['price']));
+check('row does not carry sku',        !array_key_exists('sku', $byId[1]));
 check('price tags stripped',           strpos($byId[1]['price'], '<') === false);
 check('price entities decoded',        strpos($byId[1]['price'], '&euro;') === false && strpos($byId[1]['price'], '&nbsp;') === false);
 check('price shows currency symbol',   strpos($byId[1]['price'], "\xE2\x82\xAC") !== false); // €
@@ -271,7 +272,7 @@ $r = call_priv($handler, $ref, 'save_feed_exclusion', []);
 check('empty changes => state true',   ($r['state'] ?? null) === true);
 check('list unchanged',                $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] === [7]);
 
-echo "list_feed_products() — per-row image_status + sku/price flags\n";
+echo "list_feed_products() — per-row image_status + price flags\n";
 // Fresh product/attachment ids: image_health() memoises per attachment id for
 // the request, so reusing ids from earlier assertions would hit a stale result.
 $GLOBALS['__opts'] = [];
@@ -282,14 +283,14 @@ $GLOBALS['__img_meta'] = [
     11 => ['width' => 600, 'height' => 600, 'filesize' => 100000],           // ok
     12 => ['width' => 300, 'height' => 300, 'filesize' => 100000],           // too small
     13 => ['width' => 600, 'height' => 600, 'filesize' => 9 * 1024 * 1024],  // too large
-    14 => ['width' => 600, 'height' => 600, 'filesize' => 100000],           // ok (isolates sku)
+    14 => ['width' => 600, 'height' => 600, 'filesize' => 100000],           // ok (empty-SKU product, no longer flagged)
     15 => ['width' => 600, 'height' => 600, 'filesize' => 100000],           // ok (isolates price)
 ];
 $GLOBALS['__catalog'] = [
     new FakeAjaxProduct(11, 'Img OK',    'SKU-11', '10.00'),
     new FakeAjaxProduct(12, 'Img Small', 'SKU-12', '20.00'),
     new FakeAjaxProduct(13, 'Img Large', 'SKU-13', '30.00'),
-    new FakeAjaxProduct(14, 'No SKU',    '',       '10.00'), // empty SKU
+    new FakeAjaxProduct(14, 'No SKU',    '',       '10.00'), // empty SKU — no longer a feed problem
     new FakeAjaxProduct(15, 'Free',      'SKU-15', '0'),     // zero price
     new FakeAjaxProduct(16, 'No Desc',   'SKU-16', '10.00', ''),                                        // empty description
     new FakeAjaxProduct(17, 'Long Desc', 'SKU-17', '10.00', str_repeat('x', Wp_Sdtrk_WC_Feed::DESCRIPTION_MAX_LENGTH + 1)), // too long
@@ -303,8 +304,7 @@ check('good image ok=true',              $byId[11]['image_status']['ok'] === tru
 check('small image flagged too_small',   in_array('too_small', $byId[12]['image_status']['issues'], true));
 check('large image flagged too_large',   in_array('too_large', $byId[13]['image_status']['issues'], true));
 check('gpc_missing not in product rows', !array_key_exists('gpc_missing', $byId[11]));
-check('empty sku => sku_missing true',   $byId[14]['sku_missing'] === true);
-check('present sku => sku_missing false', $byId[11]['sku_missing'] === false);
+check('sku_missing flag removed (SKU is not a feed field)', !array_key_exists('sku_missing', $byId[14]) && !array_key_exists('sku_missing', $byId[11]));
 check('zero price => price_missing true', $byId[15]['price_missing'] === true);
 check('positive price => price_missing false', $byId[11]['price_missing'] === false);
 check('good description ok=true',        $byId[11]['description_status']['ok'] === true);

@@ -45,11 +45,15 @@ class Wp_Sdtrk_WC_Feed
     {
         $items = [];
         foreach ($rows as $row) {
-            $sku   = isset($row['sku']) ? trim((string) $row['sku']) : '';
             $price = isset($row['price']) ? trim((string) $row['price']) : '';
 
             $item = [
-                'id'           => $sku !== '' ? $sku : (string) ($row['id'] ?? ''),
+                // <g:id> is the numeric WooCommerce id (variation id for variation
+                // rows, else the product id) — the exact same value the pixel/CAPI
+                // send as content_ids (see Wp_Sdtrk_WC_Order_Mapper). Matching ids
+                // are what keep Meta's catalog match rate high; the SKU is NOT used
+                // (optional/non-unique in WooCommerce, would break the match).
+                'id'           => (string) ($row['id'] ?? ''),
                 'title'        => (string) ($row['title'] ?? ''),
                 'description'  => trim(strip_tags((string) ($row['description'] ?? ''))),
                 'link'         => (string) ($row['link'] ?? ''),
@@ -466,7 +470,6 @@ class Wp_Sdtrk_WC_Feed
         }
         return [
             'id'          => $product->get_id(),
-            'sku'         => $product->get_sku(),
             'title'       => $product->get_name(),
             'description' => $description,
             'link'        => get_permalink($product->get_id()),

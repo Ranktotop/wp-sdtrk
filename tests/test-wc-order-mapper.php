@@ -55,7 +55,7 @@ check('line 0 unit price = 99.90', abs(($lines[0]['price'] ?? 0) - 99.90) < 0.00
 check('line 1 qty = 2',            ($lines[1]['qty'] ?? null) === 2);
 check('line 1 unit price = 25.00', abs(($lines[1]['price'] ?? 0) - 25.00) < 0.0001);
 
-echo "lineItems() prefers the variation id (catalog/feed consistency)\n";
+echo "lineItems() uses the numeric variation id (matches the feed <g:id>)\n";
 $variableOrder = new FakeWC_Order();
 $variableOrder->items = [new FakeWC_Item(303, 'T-Shirt', 1, '20.00', 808)]; // parent 303, variation 808
 $varLines = $mapper->lineItems($variableOrder);

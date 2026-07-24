@@ -64,7 +64,7 @@ $.post = function () { return { then() { return { always() {} }; } }; };
 const cfg = { ajaxUrl: '', nonce: 'n', perPage: 50, i18n: {
     excluded: 'Ausgeschlossen', inFeed: 'Im Feed',
     imgNoImage: 'Kein Bild', imgTooSmallTip: 'Bild %s px', imgTooLargeTip: 'Bild %s',
-    skuMissing: 'SKU fehlt', priceZero: 'Preis ist 0',
+    priceZero: 'Preis ist 0',
     descMissing: 'Beschreibung fehlt', descTooLongTip: 'Beschreibung zu lang (%s Zeichen)'
 } };
 
@@ -87,13 +87,14 @@ check('encodes single quote',          ea.includes('&#39;') && !ea.includes("'")
 check('still encodes <',               ea.includes('&lt;') && !ea.includes('<'));
 
 console.log('rowHtml() — rendering + status toggle');
-const inFeed = rowHtml({ id: 7, name: 'Alpha', sku: 'SKU-7', price: '10,00 €', image: '', excluded: false });
+const inFeed = rowHtml({ id: 7, name: 'Alpha', price: '10,00 €', image: '', excluded: false });
 check('in-feed row class',             inFeed.includes('class="is-in-feed"'));
 check('in-feed toggle checked',        /class="wpsdtrk-feed-status" checked/.test(inFeed));
 check('in-feed label',                 inFeed.includes('>Im Feed<'));
 check('no <img> when image empty',     !inFeed.includes('<img'));
+check('id cell shows the product id',  inFeed.includes('<td>7</td>'));
 
-const excluded = rowHtml({ id: 8, name: 'Beta', sku: 'SKU-8', price: '20,00 €', image: 'http://s/i.jpg', excluded: true });
+const excluded = rowHtml({ id: 8, name: 'Beta', price: '20,00 €', image: 'http://s/i.jpg', excluded: true });
 check('excluded row class',            excluded.includes('class="is-excluded"'));
 check('excluded toggle NOT checked',   !/class="wpsdtrk-feed-status" checked/.test(excluded));
 check('excluded label',                excluded.includes('>Ausgeschlossen<'));
@@ -129,10 +130,11 @@ const largeBad = rowHtml({ id: 12, name: 'S', sku: 'S', price: '5', image: 'http
     image_status: { ok: false, issues: ['too_large'], width: 600, height: 600, size: 9 * 1024 * 1024 } });
 check('too_large tooltip has MB',      largeBad.includes('9 MB'));
 
-const skuBad = rowHtml({ id: 13, name: 'S', sku: '', price: '5', image: 'http://x', excluded: false, sku_missing: true });
-check('sku missing => cell-error',     skuBad.includes('wpsdtrk-cell-error'));
-check('sku missing => row tint',       skuBad.includes('wpsdtrk-has-error'));
-check('sku missing => tooltip reason', skuBad.includes('SKU fehlt'));
+// An empty SKU is no longer a feed problem — the <g:id> is the numeric product
+// id, so a missing SKU must NOT flag the row.
+const noSku = rowHtml({ id: 13, name: 'S', price: '5', image: 'http://x', excluded: false, sku_missing: true });
+check('empty sku => no cell-error',    !noSku.includes('wpsdtrk-cell-error'));
+check('empty sku => no row tint',      !noSku.includes('wpsdtrk-has-error'));
 
 const priceBad = rowHtml({ id: 14, name: 'S', sku: 'S', price: '0,00 €', image: 'http://x', excluded: false, price_missing: true });
 check('price zero => cell-error',      priceBad.includes('wpsdtrk-cell-error'));
@@ -162,21 +164,20 @@ check('gpc missing => no field icon',  !gpcOnly.includes('wpsdtrk-field-icon'));
 check('gpc missing => no red cell',    !gpcOnly.includes('wpsdtrk-cell-error'));
 check('gpc missing => no row tint',    !gpcOnly.includes('wpsdtrk-has-error'));
 
-const multi = rowHtml({ id: 16, name: 'S', sku: '', price: '0', image: '', excluded: false,
+const multi = rowHtml({ id: 16, name: 'S', price: '0', image: '', excluded: false,
     image_status: { ok: false, issues: ['no_image'] }, sku_missing: true, price_missing: true });
-check('three problems => 3 red cells', (multi.match(/wpsdtrk-cell-error/g) || []).length === 3);
+// sku_missing is ignored now: only the image and price problems flag cells.
+check('two problems => 2 red cells',   (multi.match(/wpsdtrk-cell-error/g) || []).length === 2);
 
 console.log('rowHtml() — XSS safety');
 const xss = rowHtml({
     id: 9,
     name: '<script>alert(1)</script>',
-    sku: 'a&b',
     price: '1',
     image: 'x" onerror="alert(1)',
     excluded: false
 });
 check('script tag in name escaped',    !xss.includes('<script>') && xss.includes('&lt;script&gt;'));
-check('ampersand in sku escaped',      xss.includes('a&amp;b'));
 check('image attr cannot break out',   !xss.includes('onerror="') && xss.includes('onerror=&quot;'));
 
 console.log('applyRowState() — optimistic state application');

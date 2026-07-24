@@ -173,8 +173,8 @@ check('variable parent NOT a row',       !in_array(3, $ids, true));
 echo "generate() XML omits the excluded product\n";
 $GLOBALS['__opts'][Wp_Sdtrk_WC_Feed::EXCLUDED_OPTION] = [2];
 $xml = $feed->generate();
-check('excluded SKU not in XML',        strpos($xml, '<g:id>SKU-2</g:id>') === false);
-check('included SKU in XML',            strpos($xml, '<g:id>SKU-1</g:id>') !== false);
+check('excluded product id not in XML', strpos($xml, '<g:id>2</g:id>') === false);
+check('included product id in XML',     strpos($xml, '<g:id>1</g:id>') !== false);
 
 echo "resolve_gpc() maps directly and via ancestors\n";
 $GLOBALS['__opts'] = [];

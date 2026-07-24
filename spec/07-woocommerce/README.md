@@ -10,7 +10,7 @@ Optionale Integration, die **nur** greift, wenn WooCommerce installiert/aktiv is
 | [view-item-and-add-to-cart.md](view-item-and-add-to-cart.md) | ViewItem (Produktseite) & AddToCart über dasselbe Seed-Modell; Quellen-Präzedenz |
 | [initiate-checkout.md](initiate-checkout.md) | InitiateCheckout (Checkout-Seite) über dasselbe Seed-Modell |
 | [product-feed.md](product-feed.md) | RSS-2.0/`g:`-Produkt-Feed, Token-Endpoint, täglicher Cron, Ausschluss-Liste, Variants-Schalter, Google-Kategorie-Mapping, Qualitätsprüfung (Bild/Beschreibung) |
-| [feed-management.md](feed-management.md) | Admin-Seite zur Steuerung, welche Produkte im Feed sind, mit Feld-Qualitätschecks (Bild/SKU/Preis/Beschreibung) & Google-Kategorie-Panel (versteckte Seite, AJAX) |
+| [feed-management.md](feed-management.md) | Admin-Seite zur Steuerung, welche Produkte im Feed sind, mit Feld-Qualitätschecks (Bild/Preis/Beschreibung) & Google-Kategorie-Panel (versteckte Seite, AJAX) |
 
 ## Klassen / Dateien
 

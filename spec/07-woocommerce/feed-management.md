@@ -20,14 +20,14 @@ Das Google-Kategorie-Mapping liegt in der Option `wp_sdtrk_feed_gpc_map` (`get_g
 WooCommerce-Sektion ──Button „Manage feed"──▶ Seite wp_sdtrk_feed_manage
   ├─ Kopf: Zähler „X von Y Produkten im Feed" (aria-live)
   ├─ Toolbar: Suche (serverseitig, debounced) · Status-Filter (Alle/Im Feed/Ausgeschlossen) · Bulk (Ausschließen/Aufnehmen)
-  ├─ Tabelle (.wpsdtrk-table-glass): ☐ | Bild | Name | Beschreibung | Preis | SKU | Status-Toggle (Problemfelder rot hervorgehoben)
+  ├─ Tabelle (.wpsdtrk-table-glass): ☐ | Bild | Name | Beschreibung | Preis | ID | Status-Toggle (Problemfelder rot hervorgehoben)
   │    ├─ Zeilen-Toggle ─AJAX─▶ save_feed_exclusion (ein Delta) · optimistisch, Rollback bei Fehler
   │    └─ Mehrfachauswahl + Bulk ─AJAX─▶ save_feed_exclusion (mehrere Deltas)
   ├─ Paginierung (Prev/Next + Seitenzahl)
   └─ Panel „Google-Produktkategorien" (<details>, lazy) ─AJAX─▶ list_gpc_categories / save_gpc_map
 ```
 
-- **Liste laden:** AJAX `list_feed_products` (`data`: `search`, `page`, `per_page`, `status`). Serverseitig: `wc_get_products(['status'=>'publish','paginate'=>true,'limit'=>per_page,'page'=>page,'s'=>search,'orderby'=>'title'])`. Der Status-Filter verengt die Query über `include`/`exclude` gegen die Ausschluss-Liste. Antwort: `{ state, rows:[{id,name,edit_url,sku,price,image,excluded,image_status,sku_missing,price_missing,description_status,description_preview}], total, totalPages, page, totalProducts, excludedCount }`. `edit_url` (`get_edit_post_link($id,'raw')`) verlinkt den Produktnamen auf den Bearbeiten-Screen (neuer Tab, `.wpsdtrk-feed-name-link`: neutrale Farbe, erst beim Hover unterstrichen).
+- **Liste laden:** AJAX `list_feed_products` (`data`: `search`, `page`, `per_page`, `status`). Serverseitig: `wc_get_products(['status'=>'publish','paginate'=>true,'limit'=>per_page,'page'=>page,'s'=>search,'orderby'=>'title'])`. Der Status-Filter verengt die Query über `include`/`exclude` gegen die Ausschluss-Liste. Antwort: `{ state, rows:[{id,name,edit_url,price,image,excluded,image_status,price_missing,description_status,description_preview}], total, totalPages, page, totalProducts, excludedCount }`. `edit_url` (`get_edit_post_link($id,'raw')`) verlinkt den Produktnamen auf den Bearbeiten-Screen (neuer Tab, `.wpsdtrk-feed-name-link`: neutrale Farbe, erst beim Hover unterstrichen). Die `id` wird als eigene **ID-Spalte** angezeigt: Es ist die numerische Produkt-ID, die als `<g:id>`/`content_id` in den Feed geht und mit der Pixel-ID übereinstimmen muss (kein Fehlerzustand, nur Anzeige).
 - **Speichern (Ausschluss):** AJAX `save_feed_exclusion` (`data.changes`: `[{id, excluded}]`). Wendet die Deltas idempotent auf die Ausschluss-Liste an (Set-über-ID), persistiert via `set_excluded_ids()` (inkl. Cache-Invalidierung) und liefert aktualisierte Zähler. Junk-Einträge (fehlende/nicht-positive ID, Nicht-Array) werden übersprungen; String-Booleans aus `$_POST` (`'true'`/`'false'`) werden berücksichtigt.
 
 > Ob Variationen als eigene Feed-Items erscheinen, steuert der Schalter `wc_feed_include_variants` (WooCommerce-Sektion, Default an) — siehe [product-feed.md › Aktivierung](product-feed.md). Er betrifft nur den generierten Feed, nicht diese Liste (die zeigt weiterhin Elternprodukte).
@@ -39,11 +39,10 @@ WooCommerce-Sektion ──Button „Manage feed"──▶ Seite wp_sdtrk_feed_ma
 Pro Zeile liefert `list_feed_products` mehrere Prüf-Ergebnisse, die **nur** für die ≤ `per_page` Produkte der aktuellen Seite berechnet werden (nie der ganze Katalog):
 
 - `image_status` = `Wp_Sdtrk_WC_Feed::image_health()` (Bild gegen Meta-Vorgaben 500×500 / 8 MB; Maße aus DB-Metadaten, keine Bulk-Datei-I/O — Details siehe [product-feed.md › Qualitätsprüfung](product-feed.md)).
-- `sku_missing` = SKU ist leer.
 - `price_missing` = Preis ist leer oder ≤ 0.
 - `description_status` = `Wp_Sdtrk_WC_Feed::evaluate_description()` (leer ⇒ `no_description`, > 5000 Zeichen ⇒ `too_long`, inkl. `length`) auf der aufgelösten Klartext-Beschreibung; `description_preview` ist eine auf 80 Zeichen gekürzte Vorschau für die Spalte.
 
-Das JS hebt **das betroffene Feld selbst** hervor, statt einer eigenen Spalte: Bei einem harten Feed-Fehler (fehlendes/zu kleines/zu großes Bild, leere SKU, Preis 0, leere/zu lange Beschreibung) wird die jeweilige Zelle knallrot (`.wpsdtrk-cell-error`) mit einem ⛔-Hover-Icon (`.wpsdtrk-field-icon-error`), das den Grund als Tooltip trägt (inkl. Ist-Maße/-Größe beim Bild bzw. Ist-Zeichenzahl bei der Beschreibung); zusätzlich bekommt die ganze Zeile eine dezente rote Tönung (`.wpsdtrk-has-error`). Die Beschreibungs-Spalte zeigt die gekürzte Vorschau einzeilig (`.wpsdtrk-feed-desc-text`, Ellipsis).
+Das JS hebt **das betroffene Feld selbst** hervor, statt einer eigenen Spalte: Bei einem harten Feed-Fehler (fehlendes/zu kleines/zu großes Bild, Preis 0, leere/zu lange Beschreibung) wird die jeweilige Zelle knallrot (`.wpsdtrk-cell-error`) mit einem ⛔-Hover-Icon (`.wpsdtrk-field-icon-error`), das den Grund als Tooltip trägt (inkl. Ist-Maße/-Größe beim Bild bzw. Ist-Zeichenzahl bei der Beschreibung); zusätzlich bekommt die ganze Zeile eine dezente rote Tönung (`.wpsdtrk-has-error`). Die Beschreibungs-Spalte zeigt die gekürzte Vorschau einzeilig (`.wpsdtrk-feed-desc-text`, Ellipsis).
 
 Eine **fehlende Google-Kategorie wird in dieser Produktliste bewusst nicht angezeigt** (sie ist für Google optional und produktweit nicht sinnvoll pro Zeile zu markieren) — der Handlungsbedarf erscheint stattdessen im Mapping-Panel unten, wo die noch nicht zugewiesenen Kategorien rot hinterlegt sind.
 
