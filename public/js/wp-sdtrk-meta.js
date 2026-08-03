@@ -376,6 +376,8 @@ class Wp_Sdtrk_Catcher_Meta {
 	 */
 	get_fbc() {
 		var validDays = 90;
+		// A fresh fbclid always wins: a returning visitor who clicks another ad
+		// gets the new click-id with a new timestamp, replacing the stored one.
 		if (this.helper.get_Param("fbclid")) {
 			var version = 'fb';
 			var subdomainIndex = '1';
@@ -385,12 +387,33 @@ class Wp_Sdtrk_Catcher_Meta {
 			this.helper.save_cookie('_fbc', cValue, validDays, false);
 			return cValue;
 		}
-		else if (this.helper.get_Cookie('_fbc', false)) {
-			var value = this.helper.get_Cookie('_fbc', false);
-			this.helper.save_cookie('_fbc', value, validDays, false);
+		// No new click: reuse the stored value, but only while the click-id inside
+		// it is still within Meta's window. The lifetime is deliberately NOT
+		// refreshed here — re-saving on every pageview would keep a long-expired
+		// click-id alive indefinitely for recurring visitors.
+		var value = this.helper.get_Cookie('_fbc', false);
+		if (value && this.is_fbc_valid(value, validDays)) {
 			return value;
 		}
 		return ""
+	}
+
+	/**
+	* Checks if the click-id inside an fbc value is still inside Metas click-window
+	* @param {String} value The fbc value (fb.{subdomainIndex}.{creationTime}.{fbclid})
+	* @param {Integer} validDays The click-window in days
+	* @return  {Boolean} True if the value may still be sent
+	*/
+	is_fbc_valid(value, validDays) {
+		var parts = String(value).split('.');
+		if (parts.length < 4) {
+			return false;
+		}
+		var creationTime = parseInt(parts[2], 10);
+		if (!creationTime) {
+			return false;
+		}
+		return ((+ new Date()) - creationTime) < (validDays * 24 * 60 * 60 * 1000);
 	}
 }
 

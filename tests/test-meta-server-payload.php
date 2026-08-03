@@ -72,9 +72,14 @@ $eventArr = [
     'eventTime'         => 1782741408,
 ];
 
+// fbc carries its creation time (ms) in the third segment; Meta rejects click-ids
+// older than 90 days, so the payload must only ever contain a fresh one.
+$freshFbc = 'fb.1.' . ((time() - 3600) * 1000) . '.FreshClickId';
+$staleFbc = 'fb.1.' . ((time() - 100 * 86400) * 1000) . '.StaleClickId';
+
 $event   = new Wp_Sdtrk_Tracker_Event($eventArr);
 $tracker = new Wp_Sdtrk_Tracker_Meta();
-$tracker->fireTracking_Server($event, 'Event', ['fbp' => 'fb.1.x', 'fbc' => 'fb.1.y']);
+$tracker->fireTracking_Server($event, 'Event', ['fbp' => 'fb.1.x', 'fbc' => $freshFbc]);
 
 $payload = json_decode($GLOBALS['captured'], true);
 $d = $payload['data'][0] ?? [];
@@ -94,7 +99,23 @@ check('contents has both w/ quantity',   isset($custom['contents']) && count($cu
 check('email hashed (sha256, normalized)', ($user['em'] ?? null) === hash('sha256', 'buyer@example.com'));
 check('first name hashed (normalized)',  ($user['fn'] ?? null) === hash('sha256', 'ada'));
 check('last name hashed (normalized)',   ($user['ln'] ?? null) === hash('sha256', 'lovelace'));
-check('fbp/fbc passed through',          ($user['fbp'] ?? null) === 'fb.1.x' && ($user['fbc'] ?? null) === 'fb.1.y');
+check('fbp passed through',              ($user['fbp'] ?? null) === 'fb.1.x');
+check('fresh fbc passed through',        ($user['fbc'] ?? null) === $freshFbc);
+
+// Expired and malformed click-ids must be dropped rather than forwarded — a
+// stale fbc makes Meta discard the event's attribution and flags the pixel.
+echo "\nfbc click-window\n";
+foreach ([
+    'expired fbc dropped (>90d)'   => $staleFbc,
+    'fbc without timestamp dropped' => 'fb.1.y',
+    'fbc with empty timestamp dropped' => 'fb.1..SomeClickId',
+    'garbage fbc dropped'          => 'not-an-fbc',
+] as $label => $badFbc) {
+    $GLOBALS['captured'] = null;
+    $tracker->fireTracking_Server($event, 'Event', ['fbp' => 'fb.1.x', 'fbc' => $badFbc]);
+    $u = json_decode($GLOBALS['captured'], true)['data'][0]['user_data'] ?? [];
+    check($label, !isset($u['fbc']) && ($u['fbp'] ?? null) === 'fb.1.x');
+}
 
 if ($fails > 0) {
     echo "\n$fails assertion(s) failed.\n";

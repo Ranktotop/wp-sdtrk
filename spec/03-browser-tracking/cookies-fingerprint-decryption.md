@@ -25,6 +25,21 @@ Verwaltete IDs (Auswahl):
 
 > Click-IDs werden persistiert, damit sie auch bei späterer Conversion (anderer Pageview) noch verfügbar sind und an die Server-API gehängt werden können.
 
+### Meta-Click-Window (`_fbc`)
+
+`get_fbc()` (`wp-sdtrk-meta.js`) hält den Wert im Format `fb.{subdomainIndex}.{creationTime}.{fbclid}`. Der Zeitstempel im dritten Segment ist Teil des Werts und markiert den Zeitpunkt des Klicks — Meta verwirft Klick-IDs, die älter als 90 Tage sind.
+
+Priorisierung:
+
+| Zustand | Verhalten |
+|---------|-----------|
+| `fbclid` im URL-Parameter | Wert wird neu gebaut (neue Klick-ID + aktueller Zeitstempel) und überschreibt den gespeicherten — auch einen noch gültigen. Cookie: 90 Tage. |
+| Kein `fbclid`, Cookie < 90 Tage | Gespeicherter Wert wird zurückgegeben, **ohne** die Cookie-Laufzeit zu verlängern. |
+| Kein `fbclid`, Cookie ≥ 90 Tage oder Format ungültig | `""` — es wird kein `fbc` gesendet. |
+
+> Die Laufzeit wird im Cookie-Zweig bewusst **nicht** erneuert: Ein Rolling Refresh bei jedem Pageview würde eine längst abgelaufene Klick-ID bei wiederkehrenden Besuchern unbegrenzt am Leben halten, während der Zeitstempel im Wert eingefroren bleibt. `is_fbc_valid()` prüft Segmentanzahl und Zeitstempel; serverseitig prüft `Wp_Sdtrk_Tracker_Meta::isFbcValid()` dasselbe noch einmal — siehe [02 Meta CAPI](../02-server-tracking/platform-meta-capi.md#identitäts-matching-daten).
+
+
 ## 2. Fingerprinting
 
 Datei: `public/js/wp-sdtrk-fp.js`, Klasse `Wp_Sdtrk_Fp`.

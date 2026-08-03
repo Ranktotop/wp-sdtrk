@@ -3,6 +3,12 @@
 class Wp_Sdtrk_Tracker_Meta
 {
 
+    /**
+     * Meta's click-window for fbclid values, in days. Older click-ids are
+     * rejected by Meta and must not be sent.
+     */
+    const FBC_VALID_DAYS = 90;
+
     private $pixelId;
 
     private $apiToken;
@@ -327,7 +333,10 @@ class Wp_Sdtrk_Tracker_Meta
         if (isset($data["fbp"])) {
             $userData["fbp"] = $data["fbp"];
         }
-        if (isset($data["fbc"])) {
+        // An fbc whose click-id has left Meta's window is worse than none: Meta
+        // discards it and flags the event, so it costs attribution instead of
+        // adding it. The browser already filters, this guards the payload itself.
+        if (isset($data["fbc"]) && $this->isFbcValid($data["fbc"])) {
             $userData["fbc"] = $data["fbc"];
         }
         // Meta requires normalized (lowercased + trimmed) values before SHA-256,
@@ -342,6 +351,27 @@ class Wp_Sdtrk_Tracker_Meta
             $userData["em"] = hash('sha256', strtolower(trim($event->getUserEmail())));
         }
         return $userData;
+    }
+
+    /**
+     * Checks whether the click-id inside an fbc value is still inside Meta's
+     * click-window (90 days). Expected format: fb.{subdomainIndex}.{creationTimeMs}.{fbclid}
+     *
+     * @param string $fbc
+     * @return boolean
+     */
+    private function isFbcValid($fbc)
+    {
+        $parts = explode('.', (string) $fbc, 4);
+        if (count($parts) < 4) {
+            return false;
+        }
+        // Segment 3 is the creation time in milliseconds (JS Date).
+        $creationTime = (int) $parts[2];
+        if ($creationTime <= 0) {
+            return false;
+        }
+        return ((time() * 1000) - $creationTime) < (self::FBC_VALID_DAYS * 86400 * 1000);
     }
 
     /**

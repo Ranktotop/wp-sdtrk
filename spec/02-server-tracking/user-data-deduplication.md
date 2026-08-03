@@ -22,7 +22,7 @@ Priorität: `event.eventSourceAgent` (vom Browser) → `$_SERVER['HTTP_USER_AGEN
 | Feld | Plattform | Quelle |
 |------|-----------|--------|
 | `fbp` | Meta | `_fbp`-Cookie |
-| `fbc` | Meta | `_fbc` (aus `fbclid`) |
+| `fbc` | Meta | `_fbc` (aus `fbclid`); nur innerhalb des 90-Tage-Click-Windows, siehe [platform-meta-capi.md](platform-meta-capi.md#click-window-für-fbc) |
 | `cid` | GA4 | GA4-Client-ID |
 | `gclid` | GA4/Ads | URL-Parameter |
 | `ttc` | TikTok | `ttclid` |

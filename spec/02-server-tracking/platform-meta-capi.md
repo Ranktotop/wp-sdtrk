@@ -75,6 +75,12 @@ Vollständige Liste: [04 › Options-Referenz](../04-admin-and-options/option-re
 - **Ungehasht:** `client_ip_address`, `client_user_agent`, `fbp`, `fbc` (so von Meta erwartet).
 - `fbp`/`fbc` kommen vom Browser-Catcher mit (`data.fbp` / `data.fbc`).
 
+### Click-Window für `fbc`
+
+`getData_user()` übernimmt `data.fbc` nur, wenn `isFbcValid()` zustimmt. Geprüft wird der Zeitstempel im dritten Segment des Werts (`fb.{subdomainIndex}.{creationTimeMs}.{fbclid}`, Millisekunden) gegen `Wp_Sdtrk_Tracker_Meta::FBC_VALID_DAYS` (90). Verworfen werden Werte mit weniger als vier Segmenten, ohne verwertbaren Zeitstempel oder außerhalb des Fensters — `user_data` enthält dann kein `fbc`.
+
+> Eine abgelaufene Klick-ID ist schlechter als keine: Meta verwirft sie für die Attribution und meldet sie im Events Manager. Die Prüfung dupliziert bewusst die Browser-seitige Filterung in `get_fbc()` ([03 Cookies](../03-browser-tracking/cookies-fingerprint-decryption.md#meta-click-window-_fbc)), weil `getData_user()` den Payload baut und sich nicht auf den Client verlassen soll.
+
 ## Deduplizierung
 
 Gemeinsame `event_id` für Browser-Pixel und CAPI. Für Signal-Events wird sie um ein Suffix ergänzt: `…-s{percent}` (Scroll), `…-t{time}` (Time), `…-b{tag}` (Click), `…-v{tag}` (Visibility). Details: [user-data-deduplication.md](user-data-deduplication.md).
