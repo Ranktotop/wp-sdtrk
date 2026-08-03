@@ -86,7 +86,7 @@ return ['state' => false, 'debug' => false];
     "handler": "Event",            // Event-Kategorie
     "data": {                      // plattform-/handler-spezifische Zusatzdaten
       "fbp": "fb.1.…", "fbc": "fb.1.…",   // Meta
-      "cid": "GA1.1.…", "gclid": "…",     // GA
+      "cid": "GA1.1.…",                   // GA
       "ttc": "…", "ttp": "…", "hash": "…", // TikTok
       "percent": 50,               // Scroll
       "time": 10,                  // Time

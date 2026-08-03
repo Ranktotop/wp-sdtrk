@@ -13,7 +13,6 @@ class Wp_Sdtrk_Catcher_Ga {
 		this.b_enabled = false;
 		this.pixelLoaded = false;
 		this.cid = false;
-		this.gclid = false;
 		this.validate();
 	}
 
@@ -40,9 +39,6 @@ class Wp_Sdtrk_Catcher_Ga {
 		}
 		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.s_ci, this.localizedData.s_cs, this.event) !== false && this.localizedData.s_e !== "") {
 			this.s_enabled = true;
-		}
-		if (this.get_Gclid()) {
-			this.gclid = this.get_Gclid();
 		}
 	}
 
@@ -300,12 +296,9 @@ class Wp_Sdtrk_Catcher_Ga {
 	 */
 	sendData(handler, data) {
 		if (this.isEnabled('s')) {
-			//add client id and click id
+			//add client id
 			if (this.cid !== false) {
 				data.cid = this.cid;
-			}
-			if (this.gclid !== false) {
-				data.gclid = this.gclid;
 			}
 			this.helper.send_ajax({ event: this.event, type: 'ga', handler: handler, data: data }, this.localizedData.dbg);
 		}
@@ -467,24 +460,6 @@ class Wp_Sdtrk_Catcher_Ga {
 		}
 	}
 
-	/**
-	* Get saved click-id if available
-	* @return  {String} The click id (gclid)
-	 */
-	get_Gclid() {
-		var validDays = 90;
-		if (this.helper.get_Param("gclid")) {
-			var clid = this.helper.get_Param("gclid");
-			this.helper.save_cookie('_gc', clid, validDays, false);
-			return clid;
-		}
-		else if (this.helper.get_Cookie('_gc', false)) {
-			var value = this.helper.get_Cookie('_gc', false);
-			this.helper.save_cookie('_gc', value, validDays, false);
-			return value;
-		}
-		return ""
-	}
 }
 
 /**

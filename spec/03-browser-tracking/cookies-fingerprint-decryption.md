@@ -18,7 +18,6 @@ Verwaltete IDs (Auswahl):
 | `_fbp` | Meta | generiert `fb.1.{ts}.{rnd}` | 90 Tage |
 | `_fbc` | Meta | aus `fbclid` | 90 Tage |
 | `_ga`/`cid` | GA4 | GA-Client-ID (ggf. aus FP) | 90 Tage |
-| `gclid` | Google Ads | URL-Parameter | 90 Tage |
 | `_ttc` | TikTok | aus `ttclid` | 7 Tage |
 | `_ttp` | TikTok | Cookie | 90 Tage |
 | `wpsdtrk_utm_*` | alle | URL-UTMs (persistiert) | 14 Tage |
@@ -38,6 +37,14 @@ Priorisierung:
 | Kein `fbclid`, Cookie ≥ 90 Tage oder Format ungültig | `""` — es wird kein `fbc` gesendet. |
 
 > Die Laufzeit wird im Cookie-Zweig bewusst **nicht** erneuert: Ein Rolling Refresh bei jedem Pageview würde eine längst abgelaufene Klick-ID bei wiederkehrenden Besuchern unbegrenzt am Leben halten, während der Zeitstempel im Wert eingefroren bleibt. `is_fbc_valid()` prüft Segmentanzahl und Zeitstempel; serverseitig prüft `Wp_Sdtrk_Tracker_Meta::isFbcValid()` dasselbe noch einmal — siehe [02 Meta CAPI](../02-server-tracking/platform-meta-capi.md#identitäts-matching-daten).
+
+### Google: keine Klick-ID-Speicherung
+
+Der GA-Catcher persistiert **keine** `gclid`. Grund: Die GA4 Measurement Protocol kennt keinen Klick-ID-Parameter — ihre Feldliste (`client_id`, `user_id`, `timestamp_micros`, `user_properties`, `user_data`, `consent`, `user_location`, `ip_override`, `device`, `user_agent`, `validation_behavior`, `events[]`) enthält nichts dergleichen. Werbe-Attribution stitcht GA4 über `client_id`/Session aus dem Browser-Tag. Browserseitig verwaltet das Google-Tag seine `_gcl_*`-Cookies ohnehin selbst, sobald die `gclid` in der URL steht.
+
+> Eine `gclid` wäre nur für den Offline-Conversion-Import über `ConversionUploadService.UploadClickConversions` der **Google Ads API** verwertbar — eine eigene Schnittstelle mit Developer-Token, OAuth und einer Conversion-Action vom Typ `UPLOAD_CLICKS`. Das Plugin bindet sie nicht an.
+
+`set_storedCampaign()` prüft den URL-Parameter `gclid` weiterhin — allerdings nur, um bei bezahltem Traffic die Landing-URL im Cookie `_cd` (14 Tage) abzulegen. Das ist Kampagnen-Kontext für `gtag()`, keine Klick-ID-Persistenz.
 
 
 ## 2. Fingerprinting

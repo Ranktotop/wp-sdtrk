@@ -84,7 +84,7 @@ class Wp_Sdtrk_Public_Ajax_Handler
 
     /**
      * Sanitize the scalar values of the handler side-channel data (fbp, fbc,
-     * cid, gclid, ttc, ttp, hash, tag, …). Bools/ints/floats are kept as-is;
+     * cid, ttc, ttp, hash, tag, …). Bools/ints/floats are kept as-is;
      * strings get sanitize_text_field; nested arrays are sanitized recursively.
      *
      * @param array $data
