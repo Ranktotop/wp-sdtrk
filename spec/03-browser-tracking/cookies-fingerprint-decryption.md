@@ -18,7 +18,7 @@ Verwaltete IDs (Auswahl):
 | `_fbp` | Meta | generiert `fb.1.{ts}.{rnd}` | 90 Tage |
 | `_fbc` | Meta | aus `fbclid` | 90 Tage |
 | `_ga`/`cid` | GA4 | GA-Client-ID (ggf. aus FP) | 90 Tage |
-| `_ttc` | TikTok | aus `ttclid` | 7 Tage |
+| `_ttc` | TikTok | aus `ttclid` | 28 Tage |
 | `_ttp` | TikTok | Cookie | 90 Tage |
 | `wpsdtrk_utm_*` | alle | URL-UTMs (persistiert) | 14 Tage |
 
@@ -46,6 +46,13 @@ Der GA-Catcher persistiert **keine** `gclid`. Grund: Die GA4 Measurement Protoco
 
 `set_storedCampaign()` prüft den URL-Parameter `gclid` weiterhin — allerdings nur, um bei bezahltem Traffic die Landing-URL im Cookie `_cd` (14 Tage) abzulegen. Das ist Kampagnen-Kontext für `gtag()`, keine Klick-ID-Persistenz.
 
+### TikTok (`_ttc`)
+
+`get_Ttc()` (`wp-sdtrk-tt.js`) speichert die nackte `ttclid` für 28 Tage und **erneuert die Laufzeit bei jedem Pageview**. Der Wert geht serverseitig als `user_data.ttclid` an die Events API.
+
+> Abweichend von Meta/Google ist der Rolling Refresh hier kein Defekt: TikTok bindet die Gültigkeit einer Klick-ID an das im **Attribution Manager** konfigurierte CTA-Fenster und prüft sie gegen die eigene Klick-Datenbank — eine Klick-ID außerhalb des Fensters wird schlicht nicht attribuiert, nicht beanstandet. TikToks eigenes `ttclid`-Cookie läuft „13 Monate ab der letzten Verwendung", ist also ebenfalls rollierend.
+>
+> Die 28 Tage entsprechen dem **Maximum** der pro Ad Group wählbaren CTA-Fenster (1/7/14/28 Tage; Default 7). Damit ist jede mögliche Kontoeinstellung abgedeckt — eine zu lange Laufzeit kostet nichts, eine zu kurze verlöre späte Conversions.
 
 ## 2. Fingerprinting
 

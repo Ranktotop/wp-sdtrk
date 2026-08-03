@@ -406,7 +406,12 @@ class Wp_Sdtrk_Catcher_Tt {
 	* @return  {String} The Click-ID (ttclid)
 	*/
 	get_Ttc() {
-		var validDays = 7;
+		// TikTok binds a click-id's validity to the CTA window set per ad group in
+		// Attribution Manager (1/7/14/28 days). 28 is the maximum, so this covers
+		// every possible account setting: a click-id outside the configured window
+		// is ignored by TikTok without penalty, while too short a lifetime would
+		// silently drop late conversions.
+		var validDays = 28;
 		if (this.helper.get_Param("ttclid")) {
 			var clid = this.helper.get_Param("ttclid");
 			this.helper.save_cookie('_ttc', clid, validDays, false);
