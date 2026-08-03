@@ -17,7 +17,7 @@ Jede Plattform hat im Browser eine Catcher-Klasse `Wp_Sdtrk_Catcher_*`. Sie kaps
 | Catcher | Natives API | `type` (Server) | Server? | Besonderheit |
 |---------|-------------|-----------------|:------:|--------------|
 | `Meta` | `fbq()` | `meta` | ✅ | verwaltet `_fbp`/`_fbc`; Pixel-Version `fb` |
-| `Ga` | `gtag()` | `ga` | ✅ | liefert `cid` |
+| `Ga` | `gtag()` | `ga` | ✅ | liefert `cid`; sendet [Consent-Mode-v2-Signale](consent-management.md#5-consent-mode-v2-google-tag) |
 | `Tt` | `ttq()` | `tt` | ✅ | `ttc`/`ttp`; Hash aus UA+IP |
 | `Lin` | `lintrk()` | — | ❌ | Event→Conversion-ID-Mapping (siehe [05](../05-data-model/linkedin-mapping.md)) |
 | `Fl` | `funnelytics.events.trigger()` | — | ❌ | SKU/Label-basiert |

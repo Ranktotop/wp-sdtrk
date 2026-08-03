@@ -6,7 +6,7 @@ Die Haupt-Plugin-Datei übernimmt beim Laden durch WordPress:
 
 1. **Sicherheits-Guard** (`if (! defined('WPINC')) die;`).
 2. **Plugin-Header** (Name, Version, Autor, Textdomain) — von WP für die Plugin-Verwaltung gelesen.
-3. **Versions-Konstante**: `define('WP_SDTRK_VERSION', '1.7.6')`.
+3. **Versions-Konstante**: `define('WP_SDTRK_VERSION', '1.15.0')`.
 4. **Composer-Autoloader**: `require_once __DIR__ . '/vendor/autoload.php'` (sofern vorhanden) — u. a. für den Update-Checker.
 5. **Update-Checker** (`YahnisElsts\PluginUpdateChecker\v5\PucFactory`) gegen `https://github.com/Ranktotop/wp-sdtrk/` mit aktivierten Release-Assets.
 6. **Aktivierungs-/Deaktivierungs-Hooks**: `register_activation_hook` → `activate_wp_sdtrk()`, `register_deactivation_hook` → `deactivate_wp_sdtrk()` (laden jeweils die Activator-/Deactivator-Klasse on demand).

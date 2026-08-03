@@ -176,6 +176,14 @@ class Wp_Sdtrk_Catcher_Ga {
 			//Save campaign data
 			this.set_storedCampaign();
 
+			window.dataLayer = window.dataLayer || [];
+			window.gtag = window.gtag || function gtag() {
+				dataLayer.push(arguments);
+			};
+
+			//Consent-Mode-v2 signals - have to be queued before the config command
+			this.set_consentMode();
+
 			//Base Pixel
 			(function (window, document, src) {
 				var a = document.createElement('script'),
@@ -184,11 +192,6 @@ class Wp_Sdtrk_Catcher_Ga {
 				a.src = src;
 				m.parentNode.insertBefore(a, m);
 			})(window, document, '//www.googletagmanager.com/gtag/js?id=' + this.localizedData.pid);
-
-			window.dataLayer = window.dataLayer || [];
-			window.gtag = window.gtag || function gtag() {
-				dataLayer.push(arguments);
-			};
 
 			//The config object for campaigns
 			//var campaignData = this.get_storedCampaign();
@@ -202,6 +205,52 @@ class Wp_Sdtrk_Catcher_Ga {
 			this.helper.debugLog(this.localizedData.dbg, { event: 'page_view', data: this.get_config() }, 'Fired in Browser (ga-Page)');
 			this.pixelLoaded = true;
 		}
+	}
+
+	/**
+	* Push the Consent-Mode-v2 signals into the dataLayer. Without an ad_user_data
+	* signal Google stops exporting GA4 conversions to Google Ads, so the tag has
+	* to state the consent instead of it only being enforced by blocking.
+	*
+	* All four signals are granted here: the catcher reaches loadPixel() only once
+	* the consent configured for it is given (basic consent mode) - and that same
+	* consent covers the advertising use. The denied default in front of it is what
+	* Google expects to see before any measurement command.
+	 */
+	set_consentMode() {
+		if (this.has_externalConsentMode()) {
+			this.helper.debugLog(this.localizedData.dbg, {}, 'Skipped consent mode, another tool already manages it (ga)');
+			return;
+		}
+		gtag('consent', 'default', {
+			'ad_storage': 'denied',
+			'ad_user_data': 'denied',
+			'ad_personalization': 'denied',
+			'analytics_storage': 'denied'
+		});
+		var signals = {
+			'ad_storage': 'granted',
+			'ad_user_data': 'granted',
+			'ad_personalization': 'granted',
+			'analytics_storage': 'granted'
+		};
+		gtag('consent', 'update', signals);
+		this.helper.debugLog(this.localizedData.dbg, signals, 'Sent consent signals (ga)');
+	}
+
+	/**
+	* Check if another tool (usually the consent manager itself) already pushed a
+	* consent command. A second default would fight it over the same state.
+	* @return  {Boolean} If consent mode is managed elsewhere
+	 */
+	has_externalConsentMode() {
+		var queue = window.dataLayer || [];
+		for (var i = 0; i < queue.length; i++) {
+			if (queue[i] && queue[i][0] === 'consent') {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

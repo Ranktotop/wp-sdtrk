@@ -38,7 +38,7 @@ Alle Felder werden in der Option `wp_sdtrk_options` (Redux) gespeichert und übe
 | `ga_trk_debug` | Debug (→ `/debug/`-Endpoint) |
 | `ga_trk_debug_live` | Debug gegen Live-Endpoint |
 | `ga_trk_browser` | Browser-Tag aktiv |
-| `ga_trk_browser_cookie_service` / `_id` | Consent (Browser) |
+| `ga_trk_browser_cookie_service` / `_id` | Consent (Browser); dieselbe Einwilligung trägt auch die Signale des [Consent Mode v2](../03-browser-tracking/consent-management.md#5-consent-mode-v2-google-tag) |
 | `ga_trk_server` | Server-MP aktiv |
 | `ga_trk_server_token` | API Secret |
 | `ga_trk_server_cookie_service` / `_id` | Consent (Server) |

@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.15.0 =
+* Google Analytics: the browser tag now sends Consent Mode v2 signals (analytics_storage, ad_storage, ad_user_data, ad_personalization). Without an ad_user_data signal Google stops exporting GA4 conversions to Google Ads — the conversion column there stays at zero even though Analytics records the purchases. The signals follow the consent that is already configured for the tag, so there is nothing new to set up. If another tool (e.g. the consent manager itself) already manages consent mode, the plugin keeps its hands off
+
 = 1.13.2 =
 * Manage feed table: the product name now links to the product's edit screen (opens in a new tab) so you can jump straight to a product and fix a flagged problem. The link looks like normal text and only underlines on hover
 
