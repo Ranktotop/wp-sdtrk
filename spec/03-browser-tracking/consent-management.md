@@ -78,3 +78,14 @@ Das vorangestellte `default` mit durchgehend `denied` bleibt trotzdem: Google er
 ### Fremde Consent-Mode-Implementierung
 
 `has_externalConsentMode()` durchsucht die `dataLayer` nach einem bereits vorhandenen `consent`-Kommando. Wird eines gefunden (z. B. weil der Consent-Manager den Consent Mode selbst verwaltet), setzt das Plugin **weder** `default` **noch** `update`. So streiten sich nie zwei Quellen um denselben Zustand.
+
+Damit ergeben sich zwei Konstellationen, die sich gegenseitig ausschließen:
+
+| Borlabs-Option „Einwilligungsmodus verwenden" | Wer setzt die Signale | Was der Betreiber hinterlegen muss |
+|---|---|---|
+| **aus** | das Plugin (`set_consentMode()`) | nur den Opt-in-Code mit `wp_sdtrk_backload_ga_b()` |
+| **an** | Borlabs (Fallback-Code schreibt `default`, Opt-in/Opt-out schreiben `update`) | Opt-in-, Opt-out- und Fallback-Code mit allen vier Signalen |
+
+Der zweite Fall ist eine Stolperfalle: Die Borlabs-Vorlage setzt von sich aus **nur `analytics_storage`** — die drei `ad_*`-Signale ergeben sich dort ausschließlich aus den IAB-TCF-Zwecken, die ein Shop üblicherweise nicht einsetzt. Ohne Anpassung bleibt `ad_user_data` dauerhaft `denied` und Google stellt den Conversion-Export ein, ohne dass irgendwo ein Fehler sichtbar wird.
+
+Beide Fälle inklusive der fertigen Code-Blöcke liefert die Admin-UI aus: Steht der Browser-Consent auf `borlabs`, erscheint unter dem Feld *Cookie ID* das aufklappbare Panel `ga_trk_borlabs_snippets` (RAW-Feld, Inhalt aus `Wp_Sdtrk_Admin::get_ga_borlabs_snippets()`) zum Kopieren — siehe [04 › Options-Referenz](../04-admin-and-options/option-reference.md#google).

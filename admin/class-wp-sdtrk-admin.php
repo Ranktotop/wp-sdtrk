@@ -179,6 +179,180 @@ class Wp_Sdtrk_Admin
 	}
 
 	/**
+	 * Build the collapsible Borlabs snippet panel for the Google section.
+	 *
+	 * Which code a site needs depends on a single Borlabs switch, and getting it
+	 * wrong is expensive but silent: without an ad_user_data signal Google stops
+	 * exporting GA4 conversions to Google Ads while Analytics keeps recording
+	 * them, so the Ads conversion column sits at zero with nothing pointing at
+	 * the cause. Both cases are therefore spelled out here.
+	 *
+	 * @return string
+	 */
+	private function get_ga_borlabs_snippets(): string
+	{
+		// Case 1 — Borlabs consent mode off: the catcher sets the signals itself.
+		$optInPlain = <<<'SNIPPET'
+<script>
+wp_sdtrk_backload_ga_b();
+</script>
+SNIPPET;
+
+		// Case 2 — Borlabs consent mode on: the catcher detects the foreign
+		// consent commands and keeps out, so Borlabs has to carry the signals.
+		$optIn = <<<'SNIPPET'
+<script>
+window.dataLayer = window.dataLayer || [];
+if (typeof gtag !== 'function') {
+    function gtag(){ dataLayer.push(arguments); }
+}
+
+if ('{{ google-analytics-consent-mode }}' === '1' || '{{ google-analytics-consent-mode-basic }}' === '1') {
+    gtag('consent', 'update', {
+        'ad_storage': 'granted',
+        'ad_user_data': 'granted',
+        'ad_personalization': 'granted',
+        'analytics_storage': 'granted'
+    });
+}
+
+if (typeof wp_sdtrk_backload_ga_b === 'function') {
+    wp_sdtrk_backload_ga_b();
+}
+
+if (typeof wp_sdtrk_backload_ga_s === 'function') {
+    wp_sdtrk_backload_ga_s();
+}
+</script>
+SNIPPET;
+
+		$optOut = <<<'SNIPPET'
+<script>
+window.dataLayer = window.dataLayer || [];
+if (typeof gtag !== 'function') {
+    function gtag(){ dataLayer.push(arguments); }
+}
+
+if ('{{ google-analytics-consent-mode }}' === '1' || '{{ google-analytics-consent-mode-basic }}' === '1') {
+    gtag('consent', 'update', {
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'analytics_storage': 'denied'
+    });
+}
+</script>
+SNIPPET;
+
+		$fallback = <<<'SNIPPET'
+<script data-borlabs-cookie-script-blocker-ignore>
+if ('{{ iab-tcf-enabled }}' === '1' && ('{{ google-analytics-consent-mode }}' === '1' || '{{ google-analytics-consent-mode-basic }}' === '1')) {
+    window['gtag_enable_tcf_support'] = true;
+}
+
+window.dataLayer = window.dataLayer || [];
+if (typeof gtag !== 'function') {
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+}
+
+gtag('set', 'developer_id.dYjRjMm', true);
+
+if ('{{ google-analytics-consent-mode }}' === '1' || '{{ google-analytics-consent-mode-basic }}' === '1') {
+    if (window.BorlabsCookieGoogleConsentModeDefaultSet !== true) {
+        let getCookieValue = function (name) {
+            return document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || '';
+        };
+
+        let cookieValue = getCookieValue('borlabs-cookie-gcs');
+        let consentsFromCookie = {};
+
+        if (cookieValue !== '') {
+            consentsFromCookie = JSON.parse(decodeURIComponent(cookieValue));
+        }
+
+        let defaultValues = {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'denied',
+            'functionality_storage': 'denied',
+            'personalization_storage': 'denied',
+            'security_storage': 'denied',
+            'wait_for_update': 500
+        };
+
+        gtag('consent', 'default', { ...defaultValues, ...consentsFromCookie });
+    }
+
+    window.BorlabsCookieGoogleConsentModeDefaultSet = true;
+
+    let borlabsCookieConsentChangeHandler = function () {
+        window.dataLayer = window.dataLayer || [];
+        if (typeof gtag !== 'function') {
+            function gtag(){ dataLayer.push(arguments); }
+        }
+
+        let getCookieValue = function (name) {
+            return document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || '';
+        };
+
+        let cookieValue = getCookieValue('borlabs-cookie-gcs');
+        let consentsFromCookie = {};
+
+        if (cookieValue !== '') {
+            consentsFromCookie = JSON.parse(decodeURIComponent(cookieValue));
+        }
+
+        let consentState = BorlabsCookie.Consents.hasConsent('google-analytics') ? 'granted' : 'denied';
+        consentsFromCookie.analytics_storage = consentState;
+        consentsFromCookie.ad_storage = consentState;
+        consentsFromCookie.ad_user_data = consentState;
+        consentsFromCookie.ad_personalization = consentState;
+
+        BorlabsCookie.CookieLibrary.setCookie(
+            'borlabs-cookie-gcs',
+            JSON.stringify(consentsFromCookie),
+            BorlabsCookie.Settings.automaticCookieDomainAndPath.value ? '' : BorlabsCookie.Settings.cookieDomain.value,
+            BorlabsCookie.Settings.cookiePath.value,
+            BorlabsCookie.Cookie.getPluginCookie().expires,
+            BorlabsCookie.Settings.cookieSecure.value,
+            BorlabsCookie.Settings.cookieSameSite.value
+        );
+    };
+
+    document.addEventListener('borlabs-cookie-consent-saved', borlabsCookieConsentChangeHandler);
+    document.addEventListener('borlabs-cookie-handle-unblock', borlabsCookieConsentChangeHandler);
+}
+</script>
+SNIPPET;
+
+		$pre = 'display:block;white-space:pre;overflow-x:auto;padding:10px;background:#f6f7f7;border:1px solid #dcdcde;font-size:12px;line-height:1.5';
+
+		$html = '<details style="margin-top:10px;border:1px solid #dcdcde;background:#fff;padding:10px">';
+		$html .= '<summary style="cursor:pointer;font-weight:600">' . esc_html__('Consent Mode v2 — code blocks for Borlabs Cookie', 'wp-sdtrk') . '</summary>';
+		$html .= '<p>' . esc_html__('Google only exports GA4 conversions to Google Ads when the page sends an ad_user_data consent signal. Without it Analytics keeps recording purchases while the conversion column in Google Ads stays at zero. Which code you need depends on one switch in the Borlabs service:', 'wp-sdtrk') . '</p>';
+
+		$html .= '<h4>' . esc_html__('A) Borlabs option "Use Consent Mode" is OFF', 'wp-sdtrk') . '</h4>';
+		$html .= '<p>' . esc_html__('The plugin sends the four signals itself as soon as the tag loads. Only the opt-in code is needed:', 'wp-sdtrk') . '</p>';
+		$html .= '<code style="' . $pre . '">' . htmlentities($optInPlain) . '</code>';
+
+		$html .= '<h4>' . esc_html__('B) Borlabs option "Use Consent Mode" is ON', 'wp-sdtrk') . '</h4>';
+		$html .= '<p>' . esc_html__('Borlabs then owns the consent mode and the plugin stays out of it, so no two sources fight over the same state. Borlabs only ever sets analytics_storage though (the ad signals follow solely from IAB TCF, which a shop usually does not run) — so the three ad signals have to be added by hand. Replace all three code blocks of the Borlabs service with these:', 'wp-sdtrk') . '</p>';
+		$html .= '<p><strong>' . esc_html__('Opt-in code', 'wp-sdtrk') . '</strong></p>';
+		$html .= '<code style="' . $pre . '">' . htmlentities($optIn) . '</code>';
+		$html .= '<p><strong>' . esc_html__('Opt-out code', 'wp-sdtrk') . '</strong></p>';
+		$html .= '<code style="' . $pre . '">' . htmlentities($optOut) . '</code>';
+		$html .= '<p><strong>' . esc_html__('Fallback code', 'wp-sdtrk') . '</strong></p>';
+		$html .= '<code style="' . $pre . '">' . htmlentities($fallback) . '</code>';
+		$html .= '<p style="color:#dd823b">' . esc_html__('Adjust the service ID "google-analytics" in the fallback code if your Borlabs service uses a different one, and keep the double backslashes in the cookie regex — some editors swallow them when pasting.', 'wp-sdtrk') . '</p>';
+		$html .= '</details>';
+
+		return $html;
+	}
+
+	/**
 	 * Register options for Redux Admin Page
 	 *
 	 * @since 1.0.0
@@ -455,7 +629,13 @@ class Wp_Sdtrk_Admin
 					'type'     => 'text',
 					'title'    => __('Cookie ID', 'wp-sdtrk'),
 					'required' => [['ga_trk_browser_cookie_service', '=', 'borlabs'], ['ga_trk_browser', '=', '1'], ['ga_measurement_id', '!=', '']],
-					'desc' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_ga_b();</script>') . '</code></p>',
+					'desc' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_ga_b();</script>') . '</code></p><p>' . __('Running Borlabs with its own consent mode needs more than this line — see the panel below.', 'wp-sdtrk') . '</p>',
+				],
+				[
+					'id'       => 'ga_trk_borlabs_snippets',
+					'type'     => 'raw',
+					'content'  => $this->get_ga_borlabs_snippets(),
+					'required' => [['ga_trk_browser_cookie_service', '=', 'borlabs'], ['ga_trk_browser', '=', '1'], ['ga_measurement_id', '!=', '']],
 				],
 				[
 					'id'       => 'ga_trk_server',
