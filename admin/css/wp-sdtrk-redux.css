@@ -377,6 +377,74 @@
 }
 
 /*======================
+  Snippet Panel
+======================*/
+.redux-main .redux-group-tab .wpsdtrk-snippet-panel {
+    margin-top: 15px;
+    padding: 12px 18px;
+    background-color: #ffffff07;
+    border: 1px solid rgb(255 255 255 / 15%);
+    border-radius: 5px;
+}
+
+.redux-main .redux-group-tab .wpsdtrk-snippet-panel>summary {
+    cursor: pointer;
+    color: #57b957;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+.redux-main .redux-group-tab .wpsdtrk-snippet-panel>summary:hover {
+    color: #66c766;
+}
+
+.redux-main .redux-group-tab .wpsdtrk-snippet-panel[open]>summary {
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgb(255 255 255 / 15%);
+}
+
+.redux-main .redux-group-tab .wpsdtrk-snippet-panel h4 {
+    font-size: 15px;
+    color: #ededed !important;
+    margin: 25px 0px 5px 0px;
+}
+
+.redux-main .redux-group-tab .wpsdtrk-snippet-panel p {
+    color: #999;
+    margin: 5px 0px 10px 0px;
+}
+
+.redux-main .redux-group-tab .wpsdtrk-snippet-panel p.wpsdtrk-snippet-label {
+    color: #ededed;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin: 15px 0px 5px 0px;
+}
+
+.redux-main .redux-group-tab .wpsdtrk-snippet-panel p.wpsdtrk-snippet-note {
+    color: #ffe200;
+    letter-spacing: 1px;
+    margin-top: 20px;
+}
+
+.redux-main .redux-group-tab .wpsdtrk-snippet-panel .wpsdtrk-snippet {
+    display: block;
+    padding: 12px 14px;
+    background: rgb(255 255 255 / 2%);
+    border: 1px solid rgb(255 255 255 / 15%);
+    border-radius: 0px;
+    color: #ededed;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+/*======================
   Repeater
 ======================*/
 .redux-container-repeater .redux-repeater-accordion-repeater h3.ui-accordion-header {

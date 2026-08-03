@@ -32,6 +32,9 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.15.1 =
+* Consent mode panel in the Google section: the code blocks were rendered with the browser default look, which collided with the dark admin theme — the theme forces light heading colours, so the headings were near invisible on the white background. The panel now follows the plugin's own styling and its presentation moved from inline styles into the admin stylesheet
+
 = 1.15.0 =
 * Google Analytics: the browser tag now sends Consent Mode v2 signals (analytics_storage, ad_storage, ad_user_data, ad_personalization). Without an ad_user_data signal Google stops exporting GA4 conversions to Google Ads — the conversion column there stays at zero even though Analytics records the purchases. The signals follow the consent that is already configured for the tag, so there is nothing new to set up. If another tool (e.g. the consent manager itself) already manages consent mode, the plugin keeps its hands off — and because Borlabs' own consent mode only ever sets analytics_storage unless IAB TCF is running, the Google section now shows a collapsible panel with the ready-made opt-in, opt-out and fallback code for Borlabs, covering both cases
 

@@ -328,25 +328,25 @@ if ('{{ google-analytics-consent-mode }}' === '1' || '{{ google-analytics-consen
 </script>
 SNIPPET;
 
-		$pre = 'display:block;white-space:pre;overflow-x:auto;padding:10px;background:#f6f7f7;border:1px solid #dcdcde;font-size:12px;line-height:1.5';
-
-		$html = '<details style="margin-top:10px;border:1px solid #dcdcde;background:#fff;padding:10px">';
-		$html .= '<summary style="cursor:pointer;font-weight:600">' . esc_html__('Consent Mode v2 — code blocks for Borlabs Cookie', 'wp-sdtrk') . '</summary>';
+		// Presentation lives in css/wp-sdtrk-redux.css — inline styles would fight
+		// the dark Redux theme, which forces its own colours with !important.
+		$html = '<details class="wpsdtrk-snippet-panel">';
+		$html .= '<summary>' . esc_html__('Consent Mode v2 — code blocks for Borlabs Cookie', 'wp-sdtrk') . '</summary>';
 		$html .= '<p>' . esc_html__('Google only exports GA4 conversions to Google Ads when the page sends an ad_user_data consent signal. Without it Analytics keeps recording purchases while the conversion column in Google Ads stays at zero. Which code you need depends on one switch in the Borlabs service:', 'wp-sdtrk') . '</p>';
 
 		$html .= '<h4>' . esc_html__('A) Borlabs option "Use Consent Mode" is OFF', 'wp-sdtrk') . '</h4>';
 		$html .= '<p>' . esc_html__('The plugin sends the four signals itself as soon as the tag loads. Only the opt-in code is needed:', 'wp-sdtrk') . '</p>';
-		$html .= '<code style="' . $pre . '">' . htmlentities($optInPlain) . '</code>';
+		$html .= '<code class="wpsdtrk-snippet">' . htmlentities($optInPlain) . '</code>';
 
 		$html .= '<h4>' . esc_html__('B) Borlabs option "Use Consent Mode" is ON', 'wp-sdtrk') . '</h4>';
 		$html .= '<p>' . esc_html__('Borlabs then owns the consent mode and the plugin stays out of it, so no two sources fight over the same state. Borlabs only ever sets analytics_storage though (the ad signals follow solely from IAB TCF, which a shop usually does not run) — so the three ad signals have to be added by hand. Replace all three code blocks of the Borlabs service with these:', 'wp-sdtrk') . '</p>';
-		$html .= '<p><strong>' . esc_html__('Opt-in code', 'wp-sdtrk') . '</strong></p>';
-		$html .= '<code style="' . $pre . '">' . htmlentities($optIn) . '</code>';
-		$html .= '<p><strong>' . esc_html__('Opt-out code', 'wp-sdtrk') . '</strong></p>';
-		$html .= '<code style="' . $pre . '">' . htmlentities($optOut) . '</code>';
-		$html .= '<p><strong>' . esc_html__('Fallback code', 'wp-sdtrk') . '</strong></p>';
-		$html .= '<code style="' . $pre . '">' . htmlentities($fallback) . '</code>';
-		$html .= '<p style="color:#dd823b">' . esc_html__('Adjust the service ID "google-analytics" in the fallback code if your Borlabs service uses a different one, and keep the double backslashes in the cookie regex — some editors swallow them when pasting.', 'wp-sdtrk') . '</p>';
+		$html .= '<p class="wpsdtrk-snippet-label">' . esc_html__('Opt-in code', 'wp-sdtrk') . '</p>';
+		$html .= '<code class="wpsdtrk-snippet">' . htmlentities($optIn) . '</code>';
+		$html .= '<p class="wpsdtrk-snippet-label">' . esc_html__('Opt-out code', 'wp-sdtrk') . '</p>';
+		$html .= '<code class="wpsdtrk-snippet">' . htmlentities($optOut) . '</code>';
+		$html .= '<p class="wpsdtrk-snippet-label">' . esc_html__('Fallback code', 'wp-sdtrk') . '</p>';
+		$html .= '<code class="wpsdtrk-snippet">' . htmlentities($fallback) . '</code>';
+		$html .= '<p class="wpsdtrk-snippet-note">' . esc_html__('Adjust the service ID "google-analytics" in the fallback code if your Borlabs service uses a different one, and keep the double backslashes in the cookie regex — some editors swallow them when pasting.', 'wp-sdtrk') . '</p>';
 		$html .= '</details>';
 
 		return $html;
