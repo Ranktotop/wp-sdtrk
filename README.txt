@@ -35,6 +35,14 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 = 1.15.0 =
 * Google Analytics: the browser tag now sends Consent Mode v2 signals (analytics_storage, ad_storage, ad_user_data, ad_personalization). Without an ad_user_data signal Google stops exporting GA4 conversions to Google Ads — the conversion column there stays at zero even though Analytics records the purchases. The signals follow the consent that is already configured for the tag, so there is nothing new to set up. If another tool (e.g. the consent manager itself) already manages consent mode, the plugin keeps its hands off — and because Borlabs' own consent mode only ever sets analytics_storage unless IAB TCF is running, the Google section now shows a collapsible panel with the ready-made opt-in, opt-out and fallback code for Borlabs, covering both cases
 
+= 1.14.0 =
+* TikTok: the click-id cookie (_ttc) was hard-wired to 7 days, TikTok's default click-through window rather than a limit. Accounts running a longer CTA window (14 or 28 days, set per ad group in Attribution Manager) silently lost the click-id on late conversions. It now lives for 28 days, the longest window TikTok offers
+* Meta: the _fbc cookie had its lifetime renewed on every pageview while the click timestamp inside the value stayed frozen, so click-ids from months ago kept riding along on every event. Meta reads that timestamp, discards the value and flags it in Events Manager as an expired fbclid. Stale values are now dropped instead of being kept alive
+* Google Analytics: removed the gclid cookie. It was stored for 90 days and sent along with every server event, where nothing consumed it — the GA4 Measurement Protocol has no click-id field at all. One cookie less per visitor
+
+= 1.13.3 =
+* Product feed: the feed now uses the numeric WooCommerce product ID as <g:id> instead of the SKU, matching the IDs the tracking pixels send as content_ids. A mismatch here is what makes Meta report a catalogue match below 90%. The "Manage feed" table shows the ID column accordingly
+
 = 1.13.2 =
 * Manage feed table: the product name now links to the product's edit screen (opens in a new tab) so you can jump straight to a product and fix a flagged problem. The link looks like normal text and only underlines on hover
 
