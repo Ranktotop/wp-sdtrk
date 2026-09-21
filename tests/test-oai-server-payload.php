@@ -27,6 +27,10 @@ if (!class_exists('WP_SDTRK_Helper_Event')) {
         public static function getCurrentReferer($strip = false) { return ''; }
         public static function getCurrentURL($strip = false) { return 'https://shop/'; }
         public static function getClientIp() { return '0.0.0.0'; }
+        public static function getGlobalEventMap()
+        {
+            return array('Time' => 'time_spent_%', 'Scroll' => 'scroll_depth_%', 'Click' => 'button_click', 'Visibility' => 'item_visit');
+        }
     }
 }
 if (!class_exists('WP_SDTRK_Helper_Options')) {
@@ -150,6 +154,28 @@ check('stale client time replaced by server time', abs($ts - time() * 1000) < 50
 echo "OpenAI CAPI unsupported event\n";
 $req = fire(['eventName' => ['foo_bar'], 'eventId' => '1', 'eventSource' => 'https://shop/', 'eventTime' => $now], 'Event');
 check('no request for unmapped event', $req === null);
+
+echo "OpenAI CAPI signal events (same fixtures + expectations as test-oai-custom-data.mjs)\n";
+$sig = ['eventId' => '555', 'eventSource' => 'https://shop/', 'eventTime' => $now];
+$cases = [
+    ['Scroll', ['percent' => '50'], 'scroll_depth_50', '555-s50'],
+    ['Time', ['time' => '30'], 'time_spent_30', '555-t30'],
+    ['Click', ['tag' => 'cta-top'], 'button_click', '555-bcta-top'],
+    ['Visibility', ['tag' => 'pricing'], 'item_visit', '555-vpricing'],
+];
+foreach ($cases as $case) {
+    $req = fire($sig, $case[0], $case[1]);
+    $e = $req ? json_decode($req['payload'], true)['events'][0] : [];
+    check(strtolower($case[0]) . ' => custom ' . $case[2] . ' / ' . $case[3],
+        ($e['type'] ?? null) === 'custom' && ($e['custom_event_name'] ?? null) === $case[2]
+        && ($e['id'] ?? null) === $case[3] && ($e['data'] ?? null) === ['type' => 'custom']);
+}
+check('valid custom name', Wp_Sdtrk_Tracker_Oai::isValidCustomEventName('scroll_depth_50') === true);
+check('rejects specials', Wp_Sdtrk_Tracker_Oai::isValidCustomEventName('bad name!') === false);
+check('rejects edge underscore/dash', !Wp_Sdtrk_Tracker_Oai::isValidCustomEventName('_x') && !Wp_Sdtrk_Tracker_Oai::isValidCustomEventName('x-'));
+check('64 ok, 65 rejected', Wp_Sdtrk_Tracker_Oai::isValidCustomEventName(str_repeat('a', 64)) && !Wp_Sdtrk_Tracker_Oai::isValidCustomEventName(str_repeat('a', 65)));
+check('rejects standard name', Wp_Sdtrk_Tracker_Oai::isValidCustomEventName('Order_Created') === false);
+check('rejects empty', Wp_Sdtrk_Tracker_Oai::isValidCustomEventName('') === false);
 
 echo "OpenAI CAPI gates\n";
 $GLOBALS['bools']['oai_trk_server'] = false;

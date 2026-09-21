@@ -142,6 +142,90 @@ class Wp_Sdtrk_Tracker_Oai
     }
 
     /**
+     * Fires the Scroll-Hit-Tracking
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param Array $data
+     * @return array|boolean
+     */
+    private function fireTracking_Server_Scroll($event, $data)
+    {
+        return $this->fireCustomEvent($event, $data, $event->get_CustomEventName('Scroll', $data['percent']), $event->getEventId() . "-s" . $data['percent']);
+    }
+
+    /**
+     * Fires the Time-Hit-Tracking
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param Array $data
+     * @return array|boolean
+     */
+    private function fireTracking_Server_Time($event, $data)
+    {
+        return $this->fireCustomEvent($event, $data, $event->get_CustomEventName('Time', $data['time']), $event->getEventId() . "-t" . $data['time']);
+    }
+
+    /**
+     * Fires the Click-Hit-Tracking
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param Array $data
+     * @return array|boolean
+     */
+    private function fireTracking_Server_Click($event, $data)
+    {
+        return $this->fireCustomEvent($event, $data, $event->get_CustomEventName('Click', $data['tag']), $event->getEventId() . "-b" . $data['tag']);
+    }
+
+    /**
+     * Fires the Visibility-Hit-Tracking
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param Array $data
+     * @return array|boolean
+     */
+    private function fireTracking_Server_Visibility($event, $data)
+    {
+        return $this->fireCustomEvent($event, $data, $event->get_CustomEventName('Visibility', $data['tag']), $event->getEventId() . "-v" . $data['tag']);
+    }
+
+    /**
+     * Sends a signal hit as OpenAI custom event — same name and id as the pixel
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param array $data
+     * @param string $customName The custom_event_name
+     * @param string $id The event id shared with the pixel
+     * @return array|boolean
+     */
+    private function fireCustomEvent($event, $data, $customName, $id)
+    {
+        if (! self::isValidCustomEventName($customName)) {
+            return false;
+        }
+        $requestData = $this->getData_base($event, $data, 'custom', $id);
+        $requestData['custom_event_name'] = $customName;
+        $requestData['data'] = array('type' => 'custom');
+        return $this->payLoadServerRequest($requestData);
+    }
+
+    /**
+     * Checks a custom_event_name: 1–64 letters, digits, underscores or dashes,
+     * starting and ending alphanumeric, not a standard event name
+     *
+     * @param string $name
+     * @return boolean
+     */
+    public static function isValidCustomEventName($name)
+    {
+        $standard = array('app_installed', 'app_opened', 'appointment_scheduled', 'checkout_started', 'contents_viewed', 'custom', 'items_added', 'lead_created', 'order_created', 'page_viewed', 'registration_completed', 'subscription_created', 'trial_started');
+        if (! is_string($name) || strlen($name) > 64 || ! preg_match('/^[A-Za-z0-9](?:[A-Za-z0-9_-]*[A-Za-z0-9])?$/', $name)) {
+            return false;
+        }
+        return ! in_array(strtolower($name), $standard, true);
+    }
+
+    /**
      * Return the base data of an event (one item of the "events" array)
      *
      * @param Wp_Sdtrk_Tracker_Event $event
