@@ -1,7 +1,8 @@
 <?php
 /**
  * Edge cases flagged in the ship review: value-0 purchase, string-typed qty/price
- * coercion, TikTok price<=0 omission, and empty-cart build_order_payload.
+ * coercion, TikTok price<=0 omission, the OpenAI minor-unit/WC-name mapping,
+ * and empty-cart build_order_payload.
  *
  * Run:  php tests/test-wc-edge-cases.php
  */
@@ -23,10 +24,10 @@ if (!class_exists('WP_SDTRK_Helper_Options')) {
     {
         public static function get_string_option($k)
         {
-            $m = ['ga_measurement_id' => 'G-X', 'ga_trk_server_token' => 'S', 'tt_pixelid' => 'TT', 'tt_trk_server_token' => 'T'];
+            $m = ['ga_measurement_id' => 'G-X', 'ga_trk_server_token' => 'S', 'tt_pixelid' => 'TT', 'tt_trk_server_token' => 'T', 'oai_pixelid' => 'OAI', 'oai_trk_server_token' => 'K'];
             return $m[$k] ?? false;
         }
-        public static function get_bool_option($k, $d = false) { return in_array($k, ['ga_trk_server', 'tt_trk_server'], true); }
+        public static function get_bool_option($k, $d = false) { return in_array($k, ['ga_trk_server', 'tt_trk_server', 'oai_trk_server'], true); }
     }
 }
 if (!function_exists('get_bloginfo')) { function get_bloginfo($k) { return 'Stub'; } }
@@ -36,6 +37,7 @@ $_SERVER['REQUEST_URI'] = '/checkout/order-received/4711/';
 require_once dirname(__DIR__) . '/public/class-wp-sdtrk-tracker-event.php';
 require_once dirname(__DIR__) . '/public/class-wp-sdtrk-tracker-ga.php';
 require_once dirname(__DIR__) . '/public/class-wp-sdtrk-tracker-tt.php';
+require_once dirname(__DIR__) . '/public/class-wp-sdtrk-tracker-oai.php';
 require_once dirname(__DIR__) . '/public/class-wp-sdtrk-wc-order-mapper.php';
 require_once dirname(__DIR__) . '/public/class-wp-sdtrk-wc-integration.php';
 
@@ -68,6 +70,36 @@ $ev2 = new Wp_Sdtrk_Tracker_Event([
 $c = json_decode($GLOBALS['captured'], true)['data'][0]['properties']['contents'][0] ?? [];
 check('content_id present',           ($c['content_id'] ?? null) === 'free');
 check('price key omitted when 0',     !array_key_exists('price', $c));
+
+// --- OpenAI: value-0 purchase, string qty/price, price <= 0 omitted ---
+echo "OpenAI: value-0 purchase + string-typed qty/price + free item\n";
+$ev3 = new Wp_Sdtrk_Tracker_Event([
+    'eventName' => ['purchase'], 'value' => ['0'], 'orderId' => ['4711'],
+    'items' => [['id' => '24215', 'name' => 'A', 'qty' => '2', 'price' => '75.50'],
+                ['id' => 'free', 'name' => 'Freebie', 'qty' => '1', 'price' => '0']],
+    'eventSource' => 'https://shop/', 'eventSourceAdress' => '0.0.0.0', 'eventSourceAgent' => 'UA', 'eventTime' => time(),
+]);
+$GLOBALS['captured'] = null;
+(new Wp_Sdtrk_Tracker_Oai())->fireTracking_Server($ev3, 'Event', []);
+$o = json_decode($GLOBALS['captured'], true)['events'][0] ?? [];
+check('order_created sent',               ($o['type'] ?? null) === 'order_created');
+check('amount present and = 0',           ($o['data']['amount'] ?? null) === 0);
+check('currency EUR fallback',            ($o['data']['currency'] ?? null) === 'EUR');
+check('string qty coerced to int 2',      ($o['data']['contents'][0]['quantity'] ?? null) === 2);
+check('string price -> 7550 minor units', ($o['data']['contents'][0]['amount'] ?? null) === 7550);
+check('free item has no amount',          !array_key_exists('amount', $o['data']['contents'][1] ?? []));
+
+echo "OpenAI: WC event names\n";
+foreach (['begin_checkout' => 'checkout_started', 'add_to_cart' => 'items_added', 'view_item' => 'contents_viewed'] as $wcName => $oaiName) {
+    $GLOBALS['captured'] = null;
+    (new Wp_Sdtrk_Tracker_Oai())->fireTracking_Server(new Wp_Sdtrk_Tracker_Event([
+        'eventName' => [$wcName], 'value' => ['10'], 'eventId' => '1',
+        'items' => [['id' => '24215', 'name' => 'A', 'qty' => 1, 'price' => 10]],
+        'eventSource' => 'https://shop/', 'eventTime' => time(),
+    ]), 'Event', []);
+    $o = json_decode($GLOBALS['captured'], true)['events'][0] ?? [];
+    check("$wcName -> $oaiName with numeric product id", ($o['type'] ?? null) === $oaiName && ($o['data']['contents'][0]['id'] ?? null) === '24215');
+}
 
 // --- empty-cart build_order_payload ---
 echo "build_order_payload: empty cart\n";
