@@ -102,6 +102,24 @@ class WP_SDTRK_Helper_Event
             return $response;
         }
 
+        // If the status is no 2xx (JSON error bodies without an "error" key)
+        $httpCode = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        if ($httpCode !== 0 && ($httpCode < 200 || $httpCode > 299)) {
+            $response = [
+                'state' => false,
+                'code' => $httpCode,
+                'msg' => $msg,
+                'payload_encoded' => $payload,
+                'payload_decoded' => json_decode($payload),
+                'destination' => $url
+            ];
+            sdtrk_log('------ START CURL Error-Response: -----', 'error', !$debug);
+            sdtrk_log($response, 'error', !$debug);
+            sdtrk_log('------ END CURL Error-Response: -----', 'error', !$debug);
+            curl_close($curl);
+            return $response;
+        }
+
         // If all is fine
         $response = [
             'state' => true,
