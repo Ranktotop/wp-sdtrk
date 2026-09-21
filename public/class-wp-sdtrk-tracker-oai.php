@@ -152,13 +152,49 @@ class Wp_Sdtrk_Tracker_Oai
      */
     private function getData_base($event, $data, $type, $id)
     {
-        return array(
+        $baseData = array(
             'id' => (string) $id,
             'type' => $type,
             'timestamp_ms' => $this->getTimestampMs($event),
             'source_url' => $event->getEventSource(),
             'action_source' => 'web'
         );
+        // oppref: the ChatGPT Ads attribution id (event level, passed unmodified)
+        if (! empty($data['oppref'])) {
+            $baseData['oppref'] = (string) $data['oppref'];
+        }
+        $userData = $this->getData_user($event, $data);
+        if (! empty($userData)) {
+            $baseData['user'] = $userData;
+        }
+        return $baseData;
+    }
+
+    /**
+     * Return the user-data (email hash, ip, user agent and the pixel's obref)
+     *
+     * @param Wp_Sdtrk_Tracker_Event $event
+     * @param array $data
+     * @return array
+     */
+    private function getData_user($event, $data)
+    {
+        $userData = array();
+        // obref: the pixel's __obref browser reference, sent without hashing
+        if (! empty($data['obref'])) {
+            $userData['obref'] = (string) $data['obref'];
+        }
+        // OpenAI requires trimmed + lowercased email before SHA-256
+        if ($event->getUserEmail()) {
+            $userData['emails_sha256'] = array(hash('sha256', strtolower(trim($event->getUserEmail()))));
+        }
+        if ($event->getEventIp()) {
+            $userData['ip_address'] = $event->getEventIp();
+        }
+        if ($event->getEventAgent()) {
+            $userData['user_agent'] = $event->getEventAgent();
+        }
+        return $userData;
     }
 
     /**

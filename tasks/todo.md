@@ -13,7 +13,7 @@ Details, Akzeptanzkriterien und Verifikation stehen in [plan.md](plan.md).
 
 ## Phase 2: Conversions API
 - [x] T4: `Wp_Sdtrk_Tracker_Oai`, Page und Events, Bearer-Auth, Admin-Server-Felder, Bootstrap (M)
-- [ ] T5: `oppref`-Erfassung (eigenes Cookie), `obref`, `user` (email_sha256, ip, ua) (M)
+- [x] T5: `oppref`-Erfassung (eigenes Cookie), `obref`, `user` (email_sha256, ip, ua) (M)
 - [ ] T6: Server-Signal-Events und Dedupe-Parität Browser ↔ Server (S)
 - [ ] T7: Fehlerauswertung (reale Antwort erfassen) und `validate_only`-Schalter (S)
 - [ ] **Checkpoint B:** alle Tests grün, Hybrid-Dedupe lokal geprüft, Review

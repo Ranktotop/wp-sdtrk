@@ -109,6 +109,24 @@ check('content id/name/type', ($d['contents'][0]['id'] ?? null) === '24215' && (
 check('content quantity int 2', ($d['contents'][1]['quantity'] ?? null) === 2);
 check('content amount 7525', ($d['contents'][1]['amount'] ?? null) === 7525);
 
+echo "OpenAI CAPI attribution + user data\n";
+$withUser = $purchase;
+$withUser['userEmail'] = ['Buyer@Example.com'];
+$req = fire($withUser, 'Event', ['oppref' => 'oppref_abc', 'obref' => '123e4567-e89b-42d3-a456-426614174000']);
+$e = json_decode($req['payload'], true)['events'][0];
+$u = $e['user'] ?? [];
+check('oppref on event level', ($e['oppref'] ?? null) === 'oppref_abc');
+check('obref inside user, unhashed', ($u['obref'] ?? null) === '123e4567-e89b-42d3-a456-426614174000');
+check('email normalized + sha256 list', ($u['emails_sha256'] ?? null) === [hash('sha256', 'buyer@example.com')]);
+check('ip_address', ($u['ip_address'] ?? null) === '203.0.113.7');
+check('user_agent', ($u['user_agent'] ?? null) === 'Mozilla/5.0 (Test)');
+check('no plaintext email anywhere', strpos($req['payload'], 'xample.com') === false);
+check('no other identifiers', count(array_diff(array_keys($u), ['obref', 'emails_sha256', 'ip_address', 'user_agent'])) === 0);
+$req = fire($purchase, 'Event', []);
+$e = json_decode($req['payload'], true)['events'][0];
+check('no oppref when absent', !array_key_exists('oppref', $e));
+check('no obref/email when absent', !isset($e['user']['obref']) && !isset($e['user']['emails_sha256']));
+
 echo "OpenAI CAPI lead_created (customer_action)\n";
 $req = fire(['eventName' => ['generate_lead'], 'eventId' => '321', 'value' => ['19.9'], 'eventSource' => 'https://shop/danke/', 'eventTime' => $now], 'Event');
 $e = json_decode($req['payload'], true)['events'][0];

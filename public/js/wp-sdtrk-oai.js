@@ -12,6 +12,7 @@ class Wp_Sdtrk_Catcher_Oai {
 		this.s_enabled = false;
 		this.b_enabled = false;
 		this.pixelLoaded = false;
+		this.oppref = "";
 		this.validate();
 	}
 
@@ -34,6 +35,10 @@ class Wp_Sdtrk_Catcher_Oai {
 		}
 		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.s_ci, this.localizedData.s_cs, this.event) !== false && this.localizedData.s_e !== "") {
 			this.s_enabled = true;
+		}
+		//Attribution ids are only collected once a path has consent
+		if (this.b_enabled || this.s_enabled) {
+			this.oppref = this.get_Oppref();
 		}
 	}
 
@@ -273,8 +278,48 @@ class Wp_Sdtrk_Catcher_Oai {
 	 */
 	sendData(handler, data) {
 		if (this.isEnabled('s')) {
+			//add attribution ids
+			if (this.oppref !== "") {
+				data.oppref = this.oppref;
+			}
+			//read at send time: the async pixel writes __obref after the first hit
+			var obref = this.get_Obref();
+			if (obref !== "") {
+				data.obref = obref;
+			}
 			this.helper.send_ajax({ event: this.event, type: 'oai', handler: handler, data: data }, this.localizedData.dbg);
 		}
+	}
+
+	/**
+	* Get the ChatGPT Ads attribution id (oppref) if available. The Conversions
+	* API doesn't capture it, so it is kept in an own cookie for server-only
+	* setups; the pixel's __oppref cookie is the fallback.
+	* @return  {String} The oppref
+	*/
+	get_Oppref() {
+		// Same lifetime as the pixel's __oppref: 30 days, reset on every new param
+		var validDays = 30;
+		if (this.helper.get_Param("oppref")) {
+			var oppref = this.helper.get_Param("oppref");
+			this.helper.save_cookie('_oai_oppref', oppref, validDays, false);
+			return oppref;
+		}
+		if (this.helper.get_Cookie('_oai_oppref', false)) {
+			return this.helper.get_Cookie('_oai_oppref', false);
+		}
+		if (this.helper.get_Cookie('__oppref', false)) {
+			return this.helper.get_Cookie('__oppref', false);
+		}
+		return "";
+	}
+
+	/**
+	* Get the browser reference of the pixel (__obref cookie) if available
+	* @return  {String} The obref
+	*/
+	get_Obref() {
+		return this.helper.get_Cookie('__obref', false) || "";
 	}
 
 	/**
