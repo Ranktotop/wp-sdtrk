@@ -31,4 +31,4 @@ In [includes/class-wp-sdtrk.php](../../includes/class-wp-sdtrk.php) (`define_pub
 
 Die Priorität 20 stellt sicher, dass das Engine-Skript bereits registriert/enqueued ist (Standard-Priorität), wenn die Commerce-Daten daran lokalisiert werden. Das Tracking selbst läuft anschließend in der Engine (siehe [purchase-tracking.md](purchase-tracking.md) bzw. [view-item-and-add-to-cart.md](view-item-and-add-to-cart.md)) — es gibt keinen Order-Status-Hook und keinen AJAX-Persist mehr.
 
-Die Tracker-Klassen (`Wp_Sdtrk_Tracker_Meta/_Ga/_Tt`) sowie `Wp_Sdtrk_WC_Order_Mapper` sind über `load_dependencies()` geladen.
+Die Tracker-Klassen (`Wp_Sdtrk_Tracker_Meta/_Ga/_Tt/_Oai`) sowie `Wp_Sdtrk_WC_Order_Mapper` sind über `load_dependencies()` geladen.

@@ -21,7 +21,7 @@ Das Plugin ergänzt klassisches Browser-Pixel-Tracking um **serverseitiges Conve
 
 Motivation laut README: Seit iOS-14/ITP und durch Adblocker geht browser-seitig ein erheblicher Teil der Conversion-Signale verloren. Server-to-Server-Tracking schließt diese Lücke.
 
-**Typische Nutzer:** Online-Marketer / Seitenbetreiber, die Meta-, Google-, TikTok- und LinkedIn-Kampagnen mit verlässlichen Conversion-Daten versorgen wollen.
+**Typische Nutzer:** Online-Marketer / Seitenbetreiber, die Meta-, Google-, TikTok-, ChatGPT-Ads- und LinkedIn-Kampagnen mit verlässlichen Conversion-Daten versorgen wollen.
 
 ## Feature-Matrix
 
@@ -32,6 +32,7 @@ Welche Plattform wird **browser-seitig** (Pixel/Tag), welche zusätzlich **serve
 | Meta / Facebook | `meta` | ✅ | ✅ | `Wp_Sdtrk_Tracker_Meta` |
 | Google Analytics 4 | `ga` | ✅ | ✅ | `Wp_Sdtrk_Tracker_Ga` |
 | TikTok | `tt` | ✅ | ✅ | `Wp_Sdtrk_Tracker_Tt` |
+| ChatGPT Ads (OpenAI) | `oai` | ✅ | ✅ | `Wp_Sdtrk_Tracker_Oai` |
 | LinkedIn | `lin` | ✅ | ❌ | – (nur Browser) |
 | Funnelytics | `fl` | ✅ | ❌ | – |
 | Mautic | `mtc` | ✅ | ❌ | – |
@@ -68,10 +69,12 @@ Welche Plattform wird **browser-seitig** (Pixel/Tag), welche zusätzlich **serve
 | **Engine** | Zentrales Browser-Orchestrierungs-Objekt (`Wp_Sdtrk_Engine`), das alle Catcher steuert. |
 | **Handler** | Event-Kategorie: `Page`, `Event`, `Scroll`, `Time`, `Click`, `Visibility`. |
 | **Signal-Event** | Kein Kauf/Lead, sondern ein Engagement-Signal (Scroll/Time/Click/Visibility). |
-| **`type`** | Plattform-Kürzel im AJAX-Payload (`meta`, `ga`, `tt`, …), das den Server-Tracker auswählt. |
+| **`type`** | Plattform-Kürzel im AJAX-Payload (`meta`, `ga`, `tt`, `oai`, …), das den Server-Tracker auswählt. |
 | **fbp/fbc** | Meta-Cookies/Click-IDs für Browser↔Server-Matching. |
 | **cid** | GA4 Client-ID. |
 | **ttc/ttp** | TikTok Click-ID bzw. User-Cookie. |
+| **oppref/obref** | ChatGPT Ads: Klick-Attributions-ID aus dem URL-Parameter `oppref` bzw. Browser-Referenz des Pixels (`__obref`). |
+| **Minor Unit** | Kleinste Währungseinheit nach ISO 4217 (z. B. Cent); ChatGPT Ads erwartet Beträge als Integer darin (`25,99 EUR` → `2599`). |
 | **Mapping** | LinkedIn: Zuordnung Event → Conversion-ID mit optionalen Regeln. |
 | **Deduplizierung** | Gemeinsame `event_id` für Browser- und Server-Event, damit Plattformen Doppelzählungen erkennen. |
 

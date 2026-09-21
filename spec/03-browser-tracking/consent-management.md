@@ -50,7 +50,7 @@ else this.event.disableForce();
 
 ## 4. Backload bei nachträglichem Consent
 
-Events werden in `wp_sdtrk_history` gehalten, sodass bei späterer Zustimmung zuvor blockierte Events nachgespielt werden können (Backload-Mechanik der Engine).
+Events werden in `wp_sdtrk_history` gehalten, sodass bei späterer Zustimmung zuvor blockierte Events nachgespielt werden können (Backload-Mechanik der Engine). Jeder Catcher mit Consent-Gate stellt dafür globale Funktionen `wp_sdtrk_backload_<type>_b()` (Browser) und `_s()` (Server) bereit, z. B. `wp_sdtrk_backload_oai_b()`; die Admin-Oberfläche zeigt den passenden Opt-in-Code am Cookie-ID-Feld.
 
 ## 5. Consent Mode v2 (Google-Tag)
 

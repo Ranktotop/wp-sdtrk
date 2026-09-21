@@ -20,6 +20,8 @@ Verwaltete IDs (Auswahl):
 | `_ga`/`cid` | GA4 | GA-Client-ID (ggf. aus FP) | 90 Tage |
 | `_ttc` | TikTok | aus `ttclid` | 28 Tage |
 | `_ttp` | TikTok | Cookie | 90 Tage |
+| `_oai_oppref` | ChatGPT Ads | aus `oppref` | 30 Tage |
+| `__oppref` / `__obref` | ChatGPT Ads | vom Pixel selbst gesetzt (nur gelesen) | 30 / 365 Tage |
 | `wpsdtrk_utm_*` | alle | URL-UTMs (persistiert) | 14 Tage |
 
 > Click-IDs werden persistiert, damit sie auch bei späterer Conversion (anderer Pageview) noch verfügbar sind und an die Server-API gehängt werden können.
@@ -48,11 +50,15 @@ Der GA-Catcher persistiert **keine** `gclid`. Grund: Die GA4 Measurement Protoco
 
 ### TikTok (`_ttc`)
 
-`get_Ttc()` (`wp-sdtrk-tt.js`) speichert die nackte `ttclid` für 28 Tage und **erneuert die Laufzeit bei jedem Pageview**. Der Wert geht serverseitig als `user_data.ttclid` an die Events API.
+`get_Ttc()` (`wp-sdtrk-tt.js`) speichert die nackte `ttclid` für 28 Tage und **erneuert die Laufzeit bei jedem Pageview**. Der Wert geht serverseitig als `user.ttclid` an die Events API.
 
 > Abweichend von Meta/Google ist der Rolling Refresh hier kein Defekt: TikTok bindet die Gültigkeit einer Klick-ID an das im **Attribution Manager** konfigurierte CTA-Fenster und prüft sie gegen die eigene Klick-Datenbank — eine Klick-ID außerhalb des Fensters wird schlicht nicht attribuiert, nicht beanstandet. TikToks eigenes `ttclid`-Cookie läuft „13 Monate ab der letzten Verwendung", ist also ebenfalls rollierend.
 >
 > Die 28 Tage entsprechen dem **Maximum** der pro Ad Group wählbaren CTA-Fenster (1/7/14/28 Tage; Default 7). Damit ist jede mögliche Kontoeinstellung abgedeckt — eine zu lange Laufzeit kostet nichts, eine zu kurze verlöre späte Conversions.
+
+### ChatGPT Ads (`_oai_oppref`)
+
+`get_Oppref()` (`wp-sdtrk-oai.js`) speichert den URL-Parameter `oppref` unverändert für 30 Tage in `_oai_oppref` und setzt die Laufzeit bei jedem neuen Parameter neu; ohne Parameter wird der gespeicherte Wert **ohne** Verlängerung gelesen, danach das Pixel-Cookie `__oppref`. Das entspricht dem Verhalten des Pixels für `__oppref`. Das eigene Cookie ist nötig, weil die Conversions API `oppref` nicht selbst erfasst und bei reinem Server-Tracking kein Pixel läuft. `__obref` (Browser-Referenz des Pixels) wird nur gelesen, und zwar erst beim Senden, da der asynchron geladene Pixel es nach dem ersten Hit schreibt.
 
 ## 2. Fingerprinting
 

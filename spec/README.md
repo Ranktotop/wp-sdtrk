@@ -12,7 +12,7 @@ Diese Spec dokumentiert den **Ist-Zustand** des WordPress-Plugins *Smart Server 
 |---|---------|--------|
 | 00 | [Überblick](00-overview.md) | Metadaten, Zielgruppe, Feature-Matrix, Glossar |
 | 01 | [Architektur](01-architecture/README.md) | Bootstrap, Loader-Pattern, Verzeichnis-/Namenskonventionen, Lebenszyklus |
-| 02 | [Server-Tracking (Conversion API / S2S)](02-server-tracking/README.md) | AJAX-Pipeline, Event-Modell, Meta CAPI, GA4 MP, TikTok Events API, User-Daten & Deduplizierung |
+| 02 | [Server-Tracking (Conversion API / S2S)](02-server-tracking/README.md) | AJAX-Pipeline, Event-Modell, Meta CAPI, GA4 MP, TikTok Events API, ChatGPT Ads Conversions API, User-Daten & Deduplizierung |
 | 03 | [Browser-Tracking (JavaScript)](03-browser-tracking/README.md) | Engine, Event-Erfassung, Catcher-Module, Consent, Cookies/Fingerprint/Decryption |
 | 04 | [Admin & Optionen](04-admin-and-options/README.md) | Redux-Settings, Menüstruktur, Options-Referenz, Metabox, Helper |
 | 05 | [Datenmodell](05-data-model/README.md) | Base-Model/ORM, DB-Schema, LinkedIn-Mapping |
@@ -25,7 +25,7 @@ Diese Spec dokumentiert den **Ist-Zustand** des WordPress-Plugins *Smart Server 
 ## Schnelleinstieg nach Frage
 
 - **„Wie startet das Plugin?"** → [01 Architektur › Bootstrap & Loader](01-architecture/bootstrap-and-loader.md)
-- **„Wie kommt ein Conversion-Event vom Browser zum Facebook/Google/TikTok-Server?"** → [02 › AJAX-Pipeline](02-server-tracking/ajax-pipeline.md)
+- **„Wie kommt ein Conversion-Event vom Browser zum Facebook/Google/TikTok/OpenAI-Server?"** → [02 › AJAX-Pipeline](02-server-tracking/ajax-pipeline.md)
 - **„Welche Tracking-Plattformen werden unterstützt?"** → [00 Überblick › Feature-Matrix](00-overview.md#feature-matrix)
 - **„Welche Einstellungen gibt es?"** → [04 › Options-Referenz](04-admin-and-options/option-reference.md)
 - **„Was ist das LinkedIn-Mapping?"** → [05 › LinkedIn-Mapping](05-data-model/linkedin-mapping.md)

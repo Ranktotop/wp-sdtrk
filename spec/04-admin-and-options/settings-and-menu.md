@@ -20,6 +20,7 @@ Smart Serverside Tracking (sdtrk_settings)
 │   ├── Meta                # el-facebook
 │   ├── Google              # el-globe
 │   ├── TikTok              # el-share
+│   ├── ChatGPT Ads (OpenAI) # el-comment
 │   ├── LinkedIn            # fa-linkedin  → Button zur Mapping-Seite
 │   ├── Funnelytics         # el-glass
 │   ├── Mautic              # el-envelope

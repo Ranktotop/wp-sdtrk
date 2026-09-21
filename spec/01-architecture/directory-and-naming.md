@@ -40,6 +40,7 @@ wp-sdtrk/
 │   ├── class-wp-sdtrk-tracker-meta.php  # Klasse Wp_Sdtrk_Tracker_Meta (Meta CAPI)
 │   ├── class-wp-sdtrk-tracker-ga.php    # GA4 Measurement Protocol
 │   ├── class-wp-sdtrk-tracker-tt.php    # TikTok Events API
+│   ├── class-wp-sdtrk-tracker-oai.php   # ChatGPT Ads (OpenAI) Conversions API
 │   ├── class-wp-sdtrk-decryptor-ds24.php# Digistore24-Entschlüsselung
 │   ├── css/
 │   └── js/                              # Engine + Catcher (siehe 03)
@@ -61,7 +62,7 @@ wp-sdtrk/
 `Wp_Sdtrk_{Modul}_{Untermodul}` in **Upper_Snake_Case** (PHP-Klassennamen sind case-insensitiv, daher kommen zwei Schreibweisen gemischt vor):
 
 - Kern/Boilerplate: `Wp_Sdtrk`, `Wp_Sdtrk_Loader`, `Wp_Sdtrk_Admin`, `Wp_Sdtrk_Public`
-- Tracker: `Wp_Sdtrk_Tracker_Ga`, `Wp_Sdtrk_Tracker_Tt`, `Wp_Sdtrk_Tracker_Meta` (Alias `Wp_Sdtrk_Tracker_Fb`)
+- Tracker: `Wp_Sdtrk_Tracker_Ga`, `Wp_Sdtrk_Tracker_Tt`, `Wp_Sdtrk_Tracker_Oai`, `Wp_Sdtrk_Tracker_Meta` (Alias `Wp_Sdtrk_Tracker_Fb`)
 - Helpers/Models/Cron werden teils **GROSS** geschrieben: `WP_SDTRK_Helper_Options`, `WP_SDTRK_Model_Base`, `WP_SDTRK_Cron`
 
 > ⚠️ **Inkonsistenz:** Präfix wechselt zwischen `Wp_Sdtrk_*` und `WP_SDTRK_*`. Funktional egal (case-insensitiv), aber stilistisch uneinheitlich. Die Datei `tracker-meta.php` enthält die Klasse `Wp_Sdtrk_Tracker_Meta`; der historische Name `Wp_Sdtrk_Tracker_Fb` bleibt als `class_alias` erhalten.

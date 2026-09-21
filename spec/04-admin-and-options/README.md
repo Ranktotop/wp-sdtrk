@@ -14,6 +14,6 @@ Beschreibt das Backend: Einstellungs-UI (Redux), die vollständige Options-Refer
 
 - **Framework:** Redux Framework (`vendor/redux`).
 - **Speicherort:** Option `wp_sdtrk_options` in `wp_options`; Page-Meta via `redux_post_meta('wp_sdtrk_options', $post_id)` in `wp_postmeta`.
-- **Menü:** „Smart Serverside Tracking" (Slug `sdtrk_settings`) mit Sektionen General / Tracking Services (Meta, Google, TikTok, LinkedIn, Funnelytics, Mautic, Matomo) / Data Sources / Tutorials.
+- **Menü:** „Smart Serverside Tracking" (Slug `sdtrk_settings`) mit Sektionen General / Tracking Services (Meta, Google, TikTok, ChatGPT Ads (OpenAI), LinkedIn, Funnelytics, Mautic, Matomo) / Data Sources / Tutorials.
 - **Versteckte Seite:** LinkedIn Conversion-Mapping (`wp_sdtrk_admin_map_linkedin`), per CSS ausgeblendet, nur über den LinkedIn-Tab erreichbar.
 - **Zugriff im Code:** ausschließlich über `WP_SDTRK_Helper_Options` (nie direkt `get_option`).

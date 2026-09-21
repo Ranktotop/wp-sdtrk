@@ -29,7 +29,7 @@ Das Event läuft unter dem bestehenden Gate `Wp_Sdtrk_WC_Integration::is_active(
 - `setEventName({wc:'begin_checkout'})`, `setValue({wc})`, `setCurrency()`, `setItems()`
 - `setProdId/Name({wc})` aus der ersten Position
 
-`catchPageHit(2) → catchEventHit(2)` feuert daraufhin pro Catcher den Browser-Hit **und** den Server-Call. Plattform-Abbildung des Event-Namens: Meta `InitiateCheckout`, GA4 `begin_checkout`, TikTok `InitiateCheckout`. Wert, Währung und Positionen reisen über die regulären `getValue()/getCurrency()/getItems()`-Pfade mit — identisch zu Purchase/AddToCart.
+`catchPageHit(2) → catchEventHit(2)` feuert daraufhin pro Catcher den Browser-Hit **und** den Server-Call. Plattform-Abbildung des Event-Namens: Meta `InitiateCheckout`, GA4 `begin_checkout`, TikTok `InitiateCheckout`, ChatGPT Ads `checkout_started`. Wert, Währung und Positionen reisen über die regulären `getValue()/getCurrency()/getItems()`-Pfade mit — identisch zu Purchase/AddToCart.
 
 ## Kein Once-Guard
 

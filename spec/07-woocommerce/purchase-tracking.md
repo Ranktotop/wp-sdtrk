@@ -42,6 +42,7 @@ Jeder Kauf-Catcher baut seine plattformspezifische Mehr-Produkt-Payload aus `get
 | Meta | `content_ids` (alle IDs) + `contents` `[{id,quantity}]` | `custom_data.content_ids` + `custom_data.contents` |
 | GA4 | `items[]` `{id,name,quantity,price,brand}` | MP `items[]` |
 | TikTok | `properties.contents[]` `{content_id,content_name,content_type,quantity,price}` | Events-API `properties.contents[]` |
+| ChatGPT Ads | `order_created` `data.contents[]` `{id,name,content_type,quantity,amount,currency}`, Beträge als Integer in Minor Units | CAPI `events[].data.contents[]` (gleiche Felder) |
 
 > Die Objekt-Platzierung dieser Felder (z. B. Meta `contents` in `custom_data`, GA4 `items[]` in den Event-`params`, TikTok `contents` in `properties`) folgt den offiziellen Anbieter-Verträgen. Vor Änderungen daran ist die [maßgebliche Anbieter-Doku](../02-server-tracking/README.md#maßgebliche-anbieter-dokumentation-immer-beachten) zu prüfen.
 
@@ -60,8 +61,9 @@ Gemeinsame `event_id` = Order-ID:
 | Meta | `eventID = grabOrderId()` = Order-ID | `event_id = getEventId()` = Order-ID | identische `event_id` |
 | GA4 | `transaction_id` = Order-ID | `transaction_id` = Order-ID | GA4 dedupliziert per `transaction_id` |
 | TikTok | `event_id = "<Order-ID>_<hash>"` | `event_id = "<Order-ID>_<hash>"` | identischer `hash` |
+| ChatGPT Ads | `event_id = grabOrderId()` = Order-ID | `events[].id = getEventId()` = Order-ID | Pixel-ID + `order_created` + ID |
 
-Mehrfaches Laden der Danke-Seite ist unkritisch: Die Engine seedet das Purchase pro Order **nur einmal je Browser** (`localStorage`-Marke `wp_sdtrk_wc_<orderId>`) und feuert es bei einem Reload gar nicht erneut. Das ist nötig, weil GA4 (Browser **und** Measurement Protocol) Käufe **nicht** zuverlässig per `transaction_id` dedupliziert — ohne den Guard würde ein Reload die GA4-Käufe doppelt zählen. Meta/TikTok würden über die gemeinsame `event_id` ohnehin deduplizieren.
+Mehrfaches Laden der Danke-Seite ist unkritisch: Die Engine seedet das Purchase pro Order **nur einmal je Browser** (`localStorage`-Marke `wp_sdtrk_wc_<orderId>`) und feuert es bei einem Reload gar nicht erneut. Das ist nötig, weil GA4 (Browser **und** Measurement Protocol) Käufe **nicht** zuverlässig per `transaction_id` dedupliziert — ohne den Guard würde ein Reload die GA4-Käufe doppelt zählen. Meta/TikTok/ChatGPT Ads würden über die gemeinsame `event_id` ohnehin deduplizieren.
 
 ## 7. Consent
 

@@ -24,6 +24,7 @@ Die clientseitige Schicht erfasst Events im Browser, lädt die nativen Pixel/Tag
 | `wp-sdtrk-meta.js` | `Wp_Sdtrk_Catcher_Meta` | Meta-Pixel (`fbq`) + Server |
 | `wp-sdtrk-ga.js` | `Wp_Sdtrk_Catcher_Ga` | GA4 (`gtag`) + Server |
 | `wp-sdtrk-tt.js` | `Wp_Sdtrk_Catcher_Tt` | TikTok (`ttq`) + Server |
+| `wp-sdtrk-oai.js` | `Wp_Sdtrk_Catcher_Oai` | ChatGPT Ads Measurement Pixel (`oaiq`) + Server |
 | `wp-sdtrk-lin.js` | `Wp_Sdtrk_Catcher_Lin` | LinkedIn (`lintrk`), nur Browser |
 | `wp-sdtrk-fl.js` | `Wp_Sdtrk_Catcher_Fl` | Funnelytics, nur Browser |
 | `wp-sdtrk-mtc.js` | `Wp_Sdtrk_Catcher_Mtc` | Mautic (`mt`), nur Browser |

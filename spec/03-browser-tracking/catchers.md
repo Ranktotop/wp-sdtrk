@@ -19,6 +19,7 @@ Jede Plattform hat im Browser eine Catcher-Klasse `Wp_Sdtrk_Catcher_*`. Sie kaps
 | `Meta` | `fbq()` | `meta` | ✅ | verwaltet `_fbp`/`_fbc`; Pixel-Version `fb` |
 | `Ga` | `gtag()` | `ga` | ✅ | liefert `cid`; sendet [Consent-Mode-v2-Signale](consent-management.md#5-consent-mode-v2-google-tag) |
 | `Tt` | `ttq()` | `tt` | ✅ | `ttc`/`ttp`; Hash aus UA+IP |
+| `Oai` | `oaiq()` | `oai` | ✅ | `oppref`/`obref`; Beträge in Minor Units; Signal-Events als `custom` (siehe [2c](#2c-chatgpt-ads-oai)) |
 | `Lin` | `lintrk()` | — | ❌ | Event→Conversion-ID-Mapping (siehe [05](../05-data-model/linkedin-mapping.md)) |
 | `Fl` | `funnelytics.events.trigger()` | — | ❌ | SKU/Label-basiert |
 | `Mtc` | `mt()` | — | ❌ | Mautic, Event-Name-basiert |
@@ -26,13 +27,14 @@ Jede Plattform hat im Browser eine Catcher-Klasse `Wp_Sdtrk_Catcher_*`. Sie kaps
 
 ## 2a. Maßgebliche Anbieter-Dokumentation (immer beachten)
 
-> ⚠️ **Verbindlich:** Natives Pixel-/Tag-Snippet, globale API (`fbq`/`gtag`/`ttq`/`lintrk`/`funnelytics.events`/`mt`/`_paq`), Event-Namen und Payload-Felder folgen **ausschließlich** der offiziellen Anbieter-Doku. Vor **jeder** Änderung an einem Browser-Payload oder Snippet die hier verlinkten Quellen prüfen — nicht aus dem Gedächtnis oder aus Sekundärquellen arbeiten. Snippet-URLs und API-Signaturen ändern sich anbieterseitig; veraltete Snippets laden nicht oder verwerfen Events still. Die server-seitigen Payloads (Meta/GA/TikTok) haben ihren eigenen verbindlichen Block: [02 › Maßgebliche Anbieter-Dokumentation](../02-server-tracking/README.md#maßgebliche-anbieter-dokumentation-immer-beachten).
+> ⚠️ **Verbindlich:** Natives Pixel-/Tag-Snippet, globale API (`fbq`/`gtag`/`ttq`/`oaiq`/`lintrk`/`funnelytics.events`/`mt`/`_paq`), Event-Namen und Payload-Felder folgen **ausschließlich** der offiziellen Anbieter-Doku. Vor **jeder** Änderung an einem Browser-Payload oder Snippet die hier verlinkten Quellen prüfen — nicht aus dem Gedächtnis oder aus Sekundärquellen arbeiten. Snippet-URLs und API-Signaturen ändern sich anbieterseitig; veraltete Snippets laden nicht oder verwerfen Events still. Die server-seitigen Payloads (Meta/GA/TikTok/ChatGPT Ads) haben ihren eigenen verbindlichen Block: [02 › Maßgebliche Anbieter-Dokumentation](../02-server-tracking/README.md#maßgebliche-anbieter-dokumentation-immer-beachten).
 
 | Catcher | Natives API | Offizielle Doku |
 |---------|-------------|-----------------|
 | `Meta` | `fbq()` | [Meta-Pixel-Referenz](https://developers.facebook.com/docs/meta-pixel/reference) · [Advanced Matching](https://developers.facebook.com/docs/meta-pixel/implementation/conversion-tracking#advanced-matching) |
 | `Ga` | `gtag()` | [GA4 E-Commerce (gtag)](https://developers.google.com/analytics/devguides/collection/ga4/ecommerce) · [gtag.js-Referenz](https://developers.google.com/tag-platform/gtagjs/reference) |
 | `Tt` | `ttq()` | [TikTok About Events API](https://ads.tiktok.com/help/article/events-api) · [Parameter](https://ads.tiktok.com/help/article/about-parameters) |
+| `Oai` | `oaiq('init'/'measure', …)` | [ChatGPT Ads Measurement Pixel](https://developers.openai.com/ads/measurement-pixel) · [Supported Events](https://developers.openai.com/ads/supported-events) |
 | `Lin` | `lintrk('track', { conversion_id })` | [LinkedIn Insight-Tag Conversion-Tracking](https://learn.microsoft.com/en-us/linkedin/marketing/integrations/ads-reporting/conversion-tracking) · [Insight-Tag-Conversions einrichten](https://www.linkedin.com/help/lms/answer/a425606) |
 | `Fl` | `funnelytics.events.trigger(name, props)` | [Funnelytics — Base-Script + Custom/Revenue Actions](https://hub.funnelytics.io/c/tracking-setup/base-script-install) · [Tracking JavaScript Actions](https://help.funnelytics.io/en/knowledge/tracking-javascript-actions) |
 | `Mtc` | `mt('send', 'pageview', …)` (MauticJS `mtc.js`) | [Mautic — Tracking Script (mtc.js)](https://devdocs.mautic.org/en/5.x/components/tracking_script.html) |
@@ -50,6 +52,15 @@ Mautic und Funnelytics ziehen die Währung aus dem Event (`getCurrency()`, Fallb
 | `Mtc` (Mautic) | Mautic-Custom-Events sind flach (kein Mehr-Produkt-Schema). Der ganze Warenkorb wird **verlustfrei** als JSON-String-Feld `items` (`[{id,name,qty,price}]`) mitgesendet; die repräsentativen `item_*`-Felder (erste Position) bleiben für Back-Compat. **Kein** Ein-Event-pro-Position (Doppelzählungs-Risiko auf Kontaktebene). |
 
 > Quelle der Positionsliste/Währung ist das Engine-Event (`getItems()`/`getCurrency()`), gespeist bei WooCommerce aus den Order-Daten ([07 › Purchase-Tracking](../07-woocommerce/purchase-tracking.md)).
+
+## 2c. ChatGPT Ads (`Oai`)
+
+- **`loadPixel()`** injiziert das offizielle Snippet (`https://bzrcdn.openai.com/sdk/oaiq.min.js`, Guard `if (w.oaiq) return;`) und ruft `oaiq("init", {pixelId, debug})` auf; `debug` folgt `oai_trk_debug`. Es wird **kein** `user`-Objekt übergeben (der Pixel akzeptiert nur vorab gehashte Identifier; die Browser-E-Mail liegt nur im Klartext vor). Die Consent-API des Pixels (`oaiq("consent", …)`) wird nicht genutzt — ohne Einwilligung wird der Pixel gar nicht geladen.
+- **`fireData()`** ruft `oaiq("measure", name, data, options)` auf: Page → `page_viewed` (`contents` mit `{id: pageId, name: pageTitle, content_type: "page"}`), Conversion → Name/Datenform wie in [02 › ChatGPT Ads](../02-server-tracking/platform-openai.md#event-namens-mapping-kanonisch--openai), Signal-Hits → `custom` mit `custom_event_name` aus `evmap`. `options.event_id` = `grabOrderId()` (+ Signal-Suffix `-s/-t/-b/-v`). Ungültige `custom_event_name` werden nicht gesendet.
+- **`contents[]`** enthält nur die im Pixel erlaubten Felder `id`, `name`, `content_type`, `quantity`, `amount`, `currency` (kein `group_id`/`variant_dict`), keine UTMs.
+- **`get_Oppref()`**: URL-Parameter `oppref` → Cookie `_oai_oppref` (30 Tage, bei jedem neuen Parameter neu gesetzt) → gespeichertes `_oai_oppref` (ohne Verlängerung) → Pixel-Cookie `__oppref`. Wird erfasst, sobald Browser- oder Server-Pfad Consent hat.
+- **`sendData()`** hängt `oppref` sowie das beim Senden gelesene Pixel-Cookie `__obref` an (`type: 'oai'`), jeweils nur wenn nicht leer.
+- Backload: `wp_sdtrk_backload_oai_b()` / `wp_sdtrk_backload_oai_s()`.
 
 ## 3. `sendData`-Beispiel (Meta)
 

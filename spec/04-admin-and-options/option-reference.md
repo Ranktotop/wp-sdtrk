@@ -57,6 +57,21 @@ Alle Felder werden in der Option `wp_sdtrk_options` (Redux) gespeichert und übe
 | `tt_trk_server_token` | Access-Token |
 | `tt_trk_server_cookie_service` / `_id` | Consent (Server) |
 
+## ChatGPT Ads (OpenAI)
+
+Sektion `openai_tracking_section`.
+
+| Feld | Bedeutung |
+|------|-----------|
+| `oai_pixelid` | Pixel-ID |
+| `oai_trk_debug` | Debug (Pixel-`debug`, Konsolen-/Server-Log) |
+| `oai_trk_browser` | Browser-Pixel aktiv |
+| `oai_trk_browser_cookie_service` / `_id` | Consent (Browser); Opt-in-Code `wp_sdtrk_backload_oai_b()` |
+| `oai_trk_server` | Conversions API aktiv |
+| `oai_trk_server_token` | Conversions-API-Key (nur serverseitig, nie lokalisiert) |
+| `oai_trk_server_validate_only` | `validate_only` — Events werden nur geprüft, **nicht gespeichert** |
+| `oai_trk_server_cookie_service` / `_id` | Consent (Server); Opt-in-Code `wp_sdtrk_backload_oai_s()` |
+
 ## LinkedIn
 
 | Feld | Bedeutung |

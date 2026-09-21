@@ -11,7 +11,7 @@ Priorität:
 2. `$_SERVER['HTTP_X_FORWARDED_FOR']`
 3. `$_SERVER['REMOTE_ADDR']`
 
-Verwendung: Meta `client_ip_address`, TikTok `context.ip`. (GA4 MP ermittelt die IP serverseitig selbst.)
+Verwendung: Meta `client_ip_address`, TikTok `user.ip`, ChatGPT Ads `user.ip_address`. (GA4 MP ermittelt die IP serverseitig selbst.)
 
 ### User-Agent
 
@@ -26,6 +26,8 @@ Priorität: `event.eventSourceAgent` (vom Browser) → `$_SERVER['HTTP_USER_AGEN
 | `cid` | GA4 | GA4-Client-ID |
 | `ttc` | TikTok | `ttclid` |
 | `ttp` | TikTok | TikTok-Cookie |
+| `oppref` | ChatGPT Ads | URL-Param `oppref` → Cookie `_oai_oppref` (30 Tage), Fallback Pixel-Cookie `__oppref`; Event-Ebene |
+| `obref` | ChatGPT Ads | Pixel-Cookie `__obref`, beim Senden gelesen; ungehasht in `user.obref` |
 
 Helper `getGetParamWithCookie($name, $firstParty=true)` liest GET-Parameter bzw. Erstpartei-Cookie (`wpsdtrk_{name}`).
 
@@ -34,9 +36,10 @@ Helper `getGetParamWithCookie($name, $firstParty=true)` liest GET-Parameter bzw.
 - **Algorithmus:** SHA256 (`hash('sha256', $value)`), **ohne Salt/HMAC**.
 - **Meta:** `em`, `fn`, `ln`.
 - **TikTok:** `email`.
+- **ChatGPT Ads (OpenAI):** `emails_sha256[]` (E-Mail getrimmt + kleingeschrieben). Keine weiteren Identifier.
 - **GA4:** kein Hashing (überträgt keine personenbezogenen Identitätsfelder).
 
-> ⚠️ Reines SHA256 ohne Salt ist für E-Mail/Name das von Meta/TikTok **geforderte** Format (die Plattformen hashen ihre Seite identisch). Es ist also kein Bug, aber bewusst zu dokumentieren (Rainbow-Table-Thema). Siehe [99 Befunde](../99-findings.md).
+> ⚠️ Reines SHA256 ohne Salt ist für E-Mail/Name das von Meta/TikTok/OpenAI **geforderte** Format (die Plattformen hashen ihre Seite identisch). Es ist also kein Bug, aber bewusst zu dokumentieren (Rainbow-Table-Thema). Siehe [99 Befunde](../99-findings.md).
 
 ## 3. Event-Deduplizierung
 
@@ -44,7 +47,7 @@ Ziel: Browser-Pixel-Event und Server-Event tragen dieselbe Identität, damit die
 
 ### Basis-ID — `event.getEventId()`
 
-Priorität: `eventData.eventId` → `orderId` → generiert (`substr(str_shuffle(md5(microtime())), 0, 10)`). Im Browser wird sie als `Math.floor(random*100) + Date.now()` gebildet.
+Priorität: `orderId` → `eventData.eventId` → generiert (`substr(str_shuffle(md5(microtime())), 0, 10)`). Im Browser entspricht ihr `grabOrderId()` (Order-ID, sonst die Engine-`eventId` `Math.floor(random*100) + Date.now()`).
 
 ### Suffixe für Signal-Events
 
@@ -64,7 +67,8 @@ Damit jedes Signal eindeutig bleibt, wird die Basis-ID erweitert:
 | Meta | `data[].event_id` |
 | GA4 | `params.transaction_id` |
 | TikTok | `event_id` = `{basis}_{hash}` (Browser-Hash zusätzlich) |
+| ChatGPT Ads | CAPI `events[].id` = Pixel `event_id` = `{basis}` (+ Signal-Suffix); OpenAI dedupliziert über Pixel-ID + Event-Name (bei `custom` der `custom_event_name`) + ID |
 
 ## 4. Debug-Modus
 
-Jeder Tracker hat `setAndGetDebugMode_frontend($debugMode)`. Aktiviert ergänzt er den jeweiligen Test-Event-Code (`*_trk_server_debug_code`) bzw. den Debug-Endpoint (GA4) und gibt Debug-Infos an das Frontend zurück (`['debug' => …]`).
+Jeder Tracker hat `setAndGetDebugMode_frontend($debugMode)`. Aktiviert ergänzt er den jeweiligen Test-Event-Code (`*_trk_server_debug_code`) bzw. den Debug-Endpoint (GA4) und gibt Debug-Infos an das Frontend zurück (`['debug' => …]`). ChatGPT Ads kennt keinen Test-Event-Code; das Gegenstück `validate_only` hängt am eigenen Schalter `oai_trk_server_validate_only` und nicht am Debug-Modus.

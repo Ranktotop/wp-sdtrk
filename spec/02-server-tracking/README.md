@@ -11,6 +11,7 @@ Dies ist der Kern des Plugins: Conversion-Events werden **server-seitig** per cU
 | [platform-meta-capi.md](platform-meta-capi.md) | Meta/Facebook Conversions API (`Wp_Sdtrk_Tracker_Meta`) |
 | [platform-google-ga4.md](platform-google-ga4.md) | Google Analytics 4 Measurement Protocol (`Wp_Sdtrk_Tracker_Ga`) |
 | [platform-tiktok.md](platform-tiktok.md) | TikTok Events API (`Wp_Sdtrk_Tracker_Tt`) |
+| [platform-openai.md](platform-openai.md) | ChatGPT Ads (OpenAI) Conversions API (`Wp_Sdtrk_Tracker_Oai`) |
 | [user-data-deduplication.md](user-data-deduplication.md) | User-Daten-Erfassung, SHA256-Hashing, Event-Deduplizierung |
 
 ## Unterstützte Plattformen (server-seitig)
@@ -20,6 +21,7 @@ Dies ist der Kern des Plugins: Conversion-Events werden **server-seitig** per cU
 | Meta CAPI | `Wp_Sdtrk_Tracker_Meta` | `graph.facebook.com/v23.0/{pixel}/events` | ✅ |
 | GA4 MP | `Wp_Sdtrk_Tracker_Ga` | `www.google-analytics.com/mp/collect` | ✅ |
 | TikTok | `Wp_Sdtrk_Tracker_Tt` | `business-api.tiktok.com/open_api/v1.3/event/track/` | ✅ |
+| ChatGPT Ads (OpenAI) | `Wp_Sdtrk_Tracker_Oai` | `bzr.openai.com/v1/events?pid={pixel}` | ✅ |
 
 > LinkedIn, Funnelytics, Mautic, Matomo besitzen **keinen** Server-Tracker — sie laufen ausschließlich browser-seitig ([03](../03-browser-tracking/README.md)).
 
@@ -36,6 +38,8 @@ Dies ist der Kern des Plugins: Conversion-Events werden **server-seitig** per cU
 | GA4 MP | Event-`params`: `items[]` `{item_id,item_name,price,quantity}`, `currency`, `value`, `transaction_id` | [MP-Events-Referenz](https://developers.google.com/analytics/devguides/collection/protocol/ga4/reference/events) · [E-Commerce-Events](https://developers.google.com/analytics/devguides/collection/ga4/ecommerce) |
 | TikTok Events API 2.0 | `properties`: `contents[]` `{content_id,content_name,content_type,quantity,price}`, `currency`, `value`; Identifier in `user` | [About Events API](https://ads.tiktok.com/help/article/events-api) · [Parameter](https://ads.tiktok.com/help/article/about-parameters) · Endpoint `v1.3/event/track/` |
 | TikTok Pixel (Browser) | `ttq.track(event, properties)` mit `contents[]`/`currency`/`value` | [About Events API](https://ads.tiktok.com/help/article/events-api) |
+| ChatGPT Ads Conversions API | `events[].data`: `type`, `amount` (Integer, Minor Unit), `currency`, `contents[]` `{id,name,content_type,quantity,amount,currency}`; `oppref` auf Event-Ebene; Identifier in `events[].user` | [Conversions API](https://developers.openai.com/ads/conversions-api) · [Supported Events](https://developers.openai.com/ads/supported-events) |
+| ChatGPT Ads Pixel (Browser) | `oaiq("measure", event, data, {event_id, custom_event_name})`; `contents[]` ohne `group_id`/`variant_dict` | [Measurement Pixel](https://developers.openai.com/ads/measurement-pixel) |
 
 Die nativen Browser-APIs **aller** Plattformen — inkl. der reinen Browser-Plattformen LinkedIn, Funnelytics, Mautic, Matomo (kein Server-Tracker) — sind mit offiziellen Doku-Links unter [03 › Catcher › Maßgebliche Anbieter-Dokumentation](../03-browser-tracking/catchers.md#2a-maßgebliche-anbieter-dokumentation-immer-beachten) erfasst.
 
@@ -46,7 +50,7 @@ Browser-Catcher.sendData(handler, data)
    └─ AJAX POST admin-ajax.php
         action = wp_sdtrk_handle_public_ajax_callback
         func   = 'validateTracker'
-        data   = { event:{…}, type:'meta|ga|tt', handler:'Page|Event|…', data:{fbp,fbc,cid,ttc,…} }
+        data   = { event:{…}, type:'meta|ga|tt|oai', handler:'Page|Event|…', data:{fbp,fbc,cid,ttc,oppref,…} }
         _nonce = security_wp-sdtrk
    ↓ (PHP)
 Wp_Sdtrk_Public_Ajax_Handler::handle_public_ajax_callback()
@@ -60,3 +64,18 @@ Wp_Sdtrk_Public_Ajax_Handler::handle_public_ajax_callback()
 ```
 
 Die gemeinsame Logik (Hashing, IP/User-Agent, `event_id`, cURL) lebt teilweise in `WP_SDTRK_Helper_Event` und teilweise pro Tracker. Details in den Unterseiten.
+
+## HTTP-Versand (`do_post`)
+
+Alle Server-Tracker senden über `WP_SDTRK_Helper_Event::do_post($url, $payload, $headers, $debug)` (`includes/helpers/class-wp-sdtrk-helper-event.php`): cURL-POST mit `Content-Type:application/json` plus den Tracker-Headern, ohne Retry und ohne eigenes Timeout. Das Ergebnis `{state, code, msg, payload_encoded, payload_decoded, destination}` bewertet die Antwort in dieser Reihenfolge:
+
+| Fall | `state` | `code` |
+|------|---------|--------|
+| cURL-Fehler | `false` | cURL-Fehlernummer |
+| Antwort ist kein JSON, HTTP 2xx | `true` | `'1'` |
+| Antwort ist kein JSON, sonst | `false` | Hinweistext, Rohantwort in `msg` |
+| JSON mit Feld `error` | `false` | Wert von `error` |
+| JSON, HTTP-Status außerhalb 2xx | `false` | HTTP-Status |
+| sonst | `true` | `'1'` |
+
+Fehlerfälle werden über `sdtrk_log()` protokolliert (nur mit `WP_DEBUG` + `WP_DEBUG_LOG` und aktivem Debug des Trackers).

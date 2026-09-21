@@ -17,7 +17,7 @@ Datei: `public/js/wp-sdtrk-engine.js`, Klasse `Wp_Sdtrk_Engine`.
       ├─ new Wp_Sdtrk_Event()          Event-Container
       ├─ new Wp_Sdtrk_Helper()         AJAX/Cookies/Consent
       ├─ new Wp_Sdtrk_Fp()             Fingerprinting
-      ├─ je 1 Catcher: Meta, Ga, Tt, Lin, Fl, Mtc, Mtm
+      ├─ je 1 Catcher: Meta, Ga, Tt, Oai, Lin, Fl, Mtc, Mtm
       ├─ collect_eventData()           UTMs, prodId, email, value, …
       └─ collect_items()               DOM-Scan nach .trkbtn-* und .watchitm-*
 

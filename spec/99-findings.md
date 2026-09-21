@@ -6,6 +6,12 @@ Legende: 🔴 funktionaler Bug · 🟡 Auffälligkeit/Hygiene · 🔵 Hinweis/In
 
 ---
 
+## 🟡 Frontend-Debug-Antwort der Server-Tracker kommt nie an
+
+`Wp_Sdtrk_Helper.send_ajax()` sendet den Debug-Schalter als POST-Feld `debug`, `Wp_Sdtrk_Public_Ajax_Handler::handle_public_ajax_callback()` übergibt aber `$_POST['meta']` (Default `array()`) als `$debugMode` an `validateTracker()`. `setAndGetDebugMode_frontend()` erhält damit nie `true`/`'1'`; die Server-Antwort der Plattform-API wird deshalb auch bei aktivem Debug nie ins Frontend gespiegelt (betrifft alle Server-Tracker). Das Tracking selbst ist nicht betroffen; das Server-Log (`sdtrk_log`) funktioniert.
+
+---
+
 ## 🔵 Mautic: Custom-Event-Erfassung setzt ein Mautic-Plugin voraus (by design)
 
 **Verifiziert.** `Wp_Sdtrk_Catcher_Mtc::fireData()` sendet Events via `mt('send', '<eventName>', {…})` mit echten Event-Namen (`purchase`, `view_item`, …). Natives MauticJS verarbeitet nur `mt('send', 'pageview', {…})` (Core prüft `type === 'pageview'`); zusätzliche Event-Typen werden von Plugins/Bundles über `CoreEvents::BUILD_MAUTIC_JS` (`appendJs`) in `mtc.js` injiziert (Mautic-Core-PR-Hinweis: „plugins/bundles can implement more tracking events"). Die Custom-Event-Erfassung des Catchers setzt daher ein entsprechendes **Mautic-seitiges Plugin** (z. B. „Mautic Custom Events") voraus. Bewusst **nicht** auf `pageview` umgebaut — Käufe/Events als PageView zu tracken wäre semantisch falsch. **Voraussetzung dokumentieren** (Mautic-Plugin nötig); der `pageview`-Hit selbst funktioniert nativ.
@@ -34,7 +40,7 @@ Das Feed-Token wird als `?token=…`-Query-Parameter übertragen (von Google/Met
 
 ## 🔵 SHA256-Hashing ohne Salt — by design
 
-E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bug**: Meta und TikTok verlangen exakt dieses Format, um die übermittelten Hashes mit ihren eigenen abzugleichen. Ein Salt würde das Matching verhindern. Dokumentiert wegen des Rainbow-Table-Themas bei E-Mail-Adressen.
+E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bug**: Meta, TikTok und ChatGPT Ads (OpenAI) verlangen exakt dieses Format, um die übermittelten Hashes mit ihren eigenen abzugleichen. Ein Salt würde das Matching verhindern. Dokumentiert wegen des Rainbow-Table-Themas bei E-Mail-Adressen.
 
 ---
 
@@ -44,4 +50,4 @@ E-Mail/Name werden mit reinem SHA256 (ohne Salt/HMAC) gehasht. Das ist **kein Bu
 
 ---
 
-> Aktuell sind keine offenen 🟡/🔴-Punkte verzeichnet — die verbleibenden Einträge sind 🔵-Hinweise (by design / Information).
+> Offen ist ein 🟡-Punkt (Frontend-Debug-Antwort); die übrigen Einträge sind 🔵-Hinweise (by design / Information).

@@ -55,6 +55,7 @@ return ['state' => false, 'debug' => false];
 |----------------------|------------------------|---------------------|----------|
 | `ga` | `Wp_Sdtrk_Tracker_Ga` | `Wp_Sdtrk_Tracker_Ga` | ✅ trifft |
 | `tt` | `Wp_Sdtrk_Tracker_Tt` | `Wp_Sdtrk_Tracker_Tt` | ✅ trifft |
+| `oai` | `Wp_Sdtrk_Tracker_Oai` | `Wp_Sdtrk_Tracker_Oai` | ✅ trifft |
 | `meta` | `Wp_Sdtrk_Tracker_Meta` | `Wp_Sdtrk_Tracker_Meta` | ✅ trifft |
 
 > Die Klasse liegt in `public/class-wp-sdtrk-tracker-meta.php` und heißt `Wp_Sdtrk_Tracker_Meta`. Ein `class_alias('Wp_Sdtrk_Tracker_Meta', 'Wp_Sdtrk_Tracker_Fb')` am Dateiende hält den historischen Namen `Wp_Sdtrk_Tracker_Fb` abwärtskompatibel.
@@ -88,6 +89,7 @@ return ['state' => false, 'debug' => false];
       "fbp": "fb.1.…", "fbc": "fb.1.…",   // Meta
       "cid": "GA1.1.…",                   // GA
       "ttc": "…", "ttp": "…", "hash": "…", // TikTok
+      "oppref": "…", "obref": "…",         // ChatGPT Ads (OpenAI)
       "percent": 50,               // Scroll
       "time": 10,                  // Time
       "tag": "button_purchase",    // Click/Visibility

@@ -41,7 +41,7 @@ Auf `is_product()` baut `build_view_item_payload($product)` das Objekt `wp_sdtrk
 
 > `seedWcCommerce()` entscheidet die Quelle clientseitig in derselben Reihenfolge `order > beginCheckout > addToCart > viewItem` (`if/else if`-Kette); `seedCommerceEvent(name, src)` setzt die gemeinsamen Commerce-Felder für alle Quellen (der `order`-Zweig ergänzt Order-ID, Käuferdaten und den `localStorage`-Once-Guard).
 
-`catchPageHit(2) → catchEventHit(2)` feuert daraufhin pro Catcher den Browser-Hit **und** den Server-Call. Plattform-Abbildung des Event-Namens: Meta `ViewContent`, GA4 `view_item`, TikTok `ViewContent` (jeweils über die bestehende `convert_eventname()`-Logik). Wert, Währung und Position reisen über die regulären `getValue()/getCurrency()/getItems()`-Pfade mit — identisch zum Purchase.
+`catchPageHit(2) → catchEventHit(2)` feuert daraufhin pro Catcher den Browser-Hit **und** den Server-Call. Plattform-Abbildung des Event-Namens: Meta `ViewContent`, GA4 `view_item`, TikTok `ViewContent`, ChatGPT Ads `contents_viewed` (jeweils über die bestehende `convert_eventname()`-Logik). Wert, Währung und Position reisen über die regulären `getValue()/getCurrency()/getItems()`-Pfade mit — identisch zum Purchase.
 
 ### Kein Once-Guard
 

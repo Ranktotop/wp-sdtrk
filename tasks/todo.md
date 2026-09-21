@@ -20,6 +20,6 @@ Details, Akzeptanzkriterien und Verifikation stehen in [plan.md](plan.md).
 
 ## Phase 3: Abschluss
 - [x] T8: WooCommerce-Pfad per Tests absichern (order_created / checkout_started / items_added / contents_viewed) (S)
-- [ ] T9: Spec nachführen (neue `platform-openai.md` und alle Querverweise) (M)
+- [x] T9: Spec nachführen (neue `platform-openai.md` und alle Querverweise) (M)
 - [ ] T10: i18n (.pot/.po/.mo), Version 1.16.0, Changelog (S)
 - [ ] **Checkpoint C:** Release-Zip gebaut, Live-Smoke-Test im Ads Manager, Freigabe für Tag
