@@ -120,6 +120,38 @@ const before = queue.length;
 catcher(unknown).fireData('Event', { state: true });
 check('no measure call', queue.length === before);
 
+console.log('OpenAI signal events — custom with custom_event_name');
+const sig = new Wp_Sdtrk_Event();
+sig.setEventId('555');
+const cs = catcher(sig);
+const mark = queue.length;
+cs.fireData('Scroll', { percent: '50' });
+cs.fireData('Time', { time: '30' });
+cs.fireData('Click', { tag: 'cta-top' });
+cs.fireData('Visibility', { tag: 'pricing' });
+const sigCalls = queue.slice(mark);
+check('four custom measures', sigCalls.length === 4 && sigCalls.every((a) => a[1] === 'custom' && a[2].type === 'custom'));
+check('scroll name + id', sigCalls[0][3].custom_event_name === 'scroll_depth_50' && sigCalls[0][3].event_id === '555-s50');
+check('time name + id', sigCalls[1][3].custom_event_name === 'time_spent_30' && sigCalls[1][3].event_id === '555-t30');
+check('click name + id (tag only in id)', sigCalls[2][3].custom_event_name === 'button_click' && sigCalls[2][3].event_id === '555-bcta-top');
+check('visibility name + id', sigCalls[3][3].custom_event_name === 'item_visit' && sigCalls[3][3].event_id === '555-vpricing');
+check('custom data carries no amount', sigCalls.every((a) => Object.keys(a[2]).length === 1));
+
+console.log('OpenAI custom_event_name validation');
+check('valid name', c0.isValidCustomEventName('scroll_depth_50') === true);
+check('rejects spaces/specials', c0.isValidCustomEventName('bad name!') === false);
+check('rejects leading underscore', c0.isValidCustomEventName('_x') === false);
+check('rejects trailing dash', c0.isValidCustomEventName('x-') === false);
+check('rejects > 64 chars', c0.isValidCustomEventName('a'.repeat(65)) === false);
+check('accepts 64 chars', c0.isValidCustomEventName('a'.repeat(64)) === true);
+check('rejects standard event name', c0.isValidCustomEventName('order_created') === false);
+check('rejects empty', c0.isValidCustomEventName('') === false);
+const bad = catcher(sig);
+bad.helper.get_EventName = () => 'bad name!';
+const mark2 = queue.length;
+bad.fireData('Scroll', { percent: '50' });
+check('invalid name is not measured', queue.length === mark2);
+
 if (fails > 0) {
 	console.log('\n' + fails + ' assertion(s) failed.');
 	process.exit(1);

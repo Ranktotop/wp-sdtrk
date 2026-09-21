@@ -210,6 +210,18 @@ class Wp_Sdtrk_Catcher_Oai {
 						this.measure(name, this.get_data_event(), { event_id: this.event.grabOrderId() }, handler);
 					}
 					break;
+				case 'Time':
+					this.measureCustom(this.helper.get_EventName(handler, data.time), this.event.grabOrderId() + "-t" + data.time, handler);
+					break;
+				case 'Scroll':
+					this.measureCustom(this.helper.get_EventName(handler, data.percent), this.event.grabOrderId() + "-s" + data.percent, handler);
+					break;
+				case 'Click':
+					this.measureCustom(this.helper.get_EventName(handler, data.tag), this.event.grabOrderId() + "-b" + data.tag, handler);
+					break;
+				case 'Visibility':
+					this.measureCustom(this.helper.get_EventName(handler, data.tag), this.event.grabOrderId() + "-v" + data.tag, handler);
+					break;
 			}
 		}
 	}
@@ -224,6 +236,34 @@ class Wp_Sdtrk_Catcher_Oai {
 	measure(name, eventData, options, handler) {
 		oaiq("measure", name, eventData, options);
 		this.helper.debugLog(this.localizedData.dbg, { event: name, data: eventData, options: options }, 'Fired in Browser (oai-' + handler + ')');
+	}
+
+	/**
+	* Queue a custom (signal) event — skipped if the name breaks OpenAI's rules
+	* @param {String} customName The custom_event_name
+	* @param {String} eventId The event_id shared with the server
+	* @param {String} handler The handler of event (for the log)
+	 */
+	measureCustom(customName, eventId, handler) {
+		if (!this.isValidCustomEventName(customName)) {
+			this.helper.debugLog(this.localizedData.dbg, { event: customName }, 'Skipped invalid custom event name (oai-' + handler + ')');
+			return;
+		}
+		this.measure('custom', { type: "custom" }, { custom_event_name: customName, event_id: eventId }, handler);
+	}
+
+	/**
+	* Checks a custom_event_name: 1–64 letters, digits, underscores or dashes,
+	* starting and ending alphanumeric, not a standard event name
+	* @param {String} name The custom event name
+	* @return  {Boolean} If the name is valid
+	 */
+	isValidCustomEventName(name) {
+		var standard = ['app_installed', 'app_opened', 'appointment_scheduled', 'checkout_started', 'contents_viewed', 'custom', 'items_added', 'lead_created', 'order_created', 'page_viewed', 'registration_completed', 'subscription_created', 'trial_started'];
+		if (typeof name !== 'string' || name.length > 64 || !/^[A-Za-z0-9](?:[A-Za-z0-9_-]*[A-Za-z0-9])?$/.test(name)) {
+			return false;
+		}
+		return !standard.includes(name.toLowerCase());
 	}
 
 	/**
