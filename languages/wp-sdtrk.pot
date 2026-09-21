@@ -1003,3 +1003,43 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Marc Meese"
 msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:769
+msgid "ChatGPT Ads (OpenAI)"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:778
+msgid "ChatGPT Ads Pixel-ID"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:779
+msgid "Insert your Pixel-ID from the conversions tab of the ChatGPT Ads Manager"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:785
+msgid "Check to log the pixel activity to the browser console"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:793
+msgid "Check to fire the ChatGPT Ads measurement pixel"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:819
+msgid "Check to send ChatGPT Ads events server-side to the Conversions API"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:826
+msgid "Conversions API key"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:827
+msgid "You can create the key in the conversions tab of the ChatGPT Ads Manager"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:833
+msgid "Validate only"
+msgstr ""
+
+#: admin/class-wp-sdtrk-admin.php:834
+msgid "OpenAI only validates the server events and does NOT store them. Use for testing only — no conversions are recorded while this is active!"
+msgstr ""

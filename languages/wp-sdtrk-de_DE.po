@@ -1076,6 +1076,46 @@ msgstr ""
 msgid "Marc Meese"
 msgstr "Marc Meese"
 
+#: admin/class-wp-sdtrk-admin.php:769
+msgid "ChatGPT Ads (OpenAI)"
+msgstr "ChatGPT Ads (OpenAI)"
+
+#: admin/class-wp-sdtrk-admin.php:778
+msgid "ChatGPT Ads Pixel-ID"
+msgstr "ChatGPT Ads Pixel-ID"
+
+#: admin/class-wp-sdtrk-admin.php:779
+msgid "Insert your Pixel-ID from the conversions tab of the ChatGPT Ads Manager"
+msgstr "Füge deine Pixel-ID aus dem Conversions-Tab des ChatGPT Ads Managers ein"
+
+#: admin/class-wp-sdtrk-admin.php:785
+msgid "Check to log the pixel activity to the browser console"
+msgstr "Aktiviere diese Option, um die Pixel-Aktivität in der Browser-Konsole zu protokollieren"
+
+#: admin/class-wp-sdtrk-admin.php:793
+msgid "Check to fire the ChatGPT Ads measurement pixel"
+msgstr "Aktiviere diese Option, um den ChatGPT Ads Measurement Pixel auszulösen"
+
+#: admin/class-wp-sdtrk-admin.php:819
+msgid "Check to send ChatGPT Ads events server-side to the Conversions API"
+msgstr "Aktiviere diese Option, um ChatGPT-Ads-Events serverseitig an die Conversions API zu senden"
+
+#: admin/class-wp-sdtrk-admin.php:826
+msgid "Conversions API key"
+msgstr "Conversions-API-Key"
+
+#: admin/class-wp-sdtrk-admin.php:827
+msgid "You can create the key in the conversions tab of the ChatGPT Ads Manager"
+msgstr "Den Key erstellst du im Conversions-Tab des ChatGPT Ads Managers"
+
+#: admin/class-wp-sdtrk-admin.php:833
+msgid "Validate only"
+msgstr "Nur validieren"
+
+#: admin/class-wp-sdtrk-admin.php:834
+msgid "OpenAI only validates the server events and does NOT store them. Use for testing only — no conversions are recorded while this is active!"
+msgstr "OpenAI prüft die Server-Events nur und speichert sie NICHT. Nur zum Testen verwenden — solange diese Option aktiv ist, werden keine Conversions erfasst!"
+
 #~ msgid "User is not admin"
 #~ msgstr "Nutzer ist kein Admin"
 

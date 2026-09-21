@@ -32,6 +32,10 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.16.0 =
+* New platform: ChatGPT Ads (OpenAI). The measurement pixel (oaiq) and the Conversions API run side by side like Meta and TikTok and share one event id, so OpenAI counts each conversion once. Page views, leads, sign-ups and the WooCommerce events (view item, add to cart, checkout, purchase) are mapped to OpenAI's standard events; scroll, time, click and visibility signals go out as custom events. Amounts are sent in the currency's smallest unit as OpenAI requires. The ChatGPT click id (oppref) is kept in a first-party cookie so server-only setups can still attribute clicks. Server events carry only the hashed e-mail, IP address and user agent. A "Validate only" switch lets you test the Conversions API without recording conversions
+* Server tracking: an API answering with an HTTP error status but a JSON body without an "error" field was logged as success. Any non-2xx status now counts as a failure for every platform
+
 = 1.15.1 =
 * Consent mode panel in the Google section: the code blocks were rendered with the browser default look, which collided with the dark admin theme — the theme forces light heading colours, so the headings were near invisible on the white background. The panel now follows the plugin's own styling and its presentation moved from inline styles into the admin stylesheet
 
