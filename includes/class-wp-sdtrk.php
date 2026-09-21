@@ -174,6 +174,11 @@ class Wp_Sdtrk
 		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-tracker-tt.php';
 
 		/**
+		 * Tracker ChatGPT Ads (OpenAI)
+		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-tracker-oai.php';
+
+		/**
 		 * Decrypter
 		 */
 		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-sdtrk-decryptor-ds24.php';

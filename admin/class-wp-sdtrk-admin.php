@@ -812,6 +812,39 @@ SNIPPET;
 					'required' => [['oai_trk_browser_cookie_service', '=', 'borlabs'], ['oai_trk_browser', '=', '1'], ['oai_pixelid', '!=', '']],
 					'desc' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_oai_b();</script>') . '</code></p>',
 				],
+				[
+					'id'       => 'oai_trk_server',
+					'type'     => 'switch',
+					'title'    => __('Activate server based tracking', 'wp-sdtrk'),
+					'subtitle'     => __('Check to send ChatGPT Ads events server-side to the Conversions API', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['oai_pixelid', '!=', ''],
+				],
+				[
+					'id'       => 'oai_trk_server_token',
+					'type'     => 'text',
+					'title'    => __('Conversions API key', 'wp-sdtrk'),
+					'subtitle'     => __('You can create the key in the conversions tab of the ChatGPT Ads Manager', 'wp-sdtrk'),
+					'required' => [['oai_trk_server', '=', '1'], ['oai_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'oai_trk_server_cookie_service',
+					'type'     => 'select',
+					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
+					'options'  => [
+						'none'     => __('Fire always', 'wp-sdtrk'),
+						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
+					],
+					'default'  => 'none',
+					'required' => [['oai_trk_server', '=', '1'], ['oai_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'oai_trk_server_cookie_id',
+					'type'     => 'text',
+					'title'    => __('Cookie ID', 'wp-sdtrk'),
+					'required' => [['oai_trk_server_cookie_service', '=', 'borlabs'], ['oai_trk_server', '=', '1'], ['oai_pixelid', '!=', '']],
+					'desc' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_oai_s();</script>') . '</code></p>',
+				],
 			],
 		]);
 

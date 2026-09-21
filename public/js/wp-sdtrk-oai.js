@@ -319,7 +319,7 @@ class Wp_Sdtrk_Catcher_Oai {
 					id: String(items[i].id || ''),
 					name: String(items[i].name || ''),
 					content_type: "product",
-					quantity: parseInt(items[i].qty, 10) || 1,
+					quantity: Math.max(1, parseInt(items[i].qty, 10) || 1),
 				};
 				var price = Number(items[i].price) || 0;
 				if (price > 0) {
