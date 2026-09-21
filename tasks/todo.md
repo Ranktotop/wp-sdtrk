@@ -15,7 +15,7 @@ Details, Akzeptanzkriterien und Verifikation stehen in [plan.md](plan.md).
 - [x] T4: `Wp_Sdtrk_Tracker_Oai`, Page und Events, Bearer-Auth, Admin-Server-Felder, Bootstrap (M)
 - [x] T5: `oppref`-Erfassung (eigenes Cookie), `obref`, `user` (email_sha256, ip, ua) (M)
 - [x] T6: Server-Signal-Events und Dedupe-Parität Browser ↔ Server (S)
-- [ ] T7: Fehlerauswertung (reale Antwort erfassen) und `validate_only`-Schalter (S)
+- [x] T7: Fehlerauswertung (reale Antwort erfassen) und `validate_only`-Schalter (S)
 - [ ] **Checkpoint B:** alle Tests grün, Hybrid-Dedupe lokal geprüft, Review
 
 ## Phase 3: Abschluss

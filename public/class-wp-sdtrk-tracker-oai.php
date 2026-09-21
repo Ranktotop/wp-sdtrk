@@ -16,6 +16,8 @@ class Wp_Sdtrk_Tracker_Oai
 
     private $trackServer;
 
+    private $validateOnly;
+
     public function __construct()
     {
         $this->pixelId = false;
@@ -23,6 +25,7 @@ class Wp_Sdtrk_Tracker_Oai
         $this->debugMode = false;
         $this->debugMode_frontend = false;
         $this->trackServer = false;
+        $this->validateOnly = false;
         $this->init();
     }
 
@@ -42,6 +45,9 @@ class Wp_Sdtrk_Tracker_Oai
 
         // Debug Mode
         $this->debugMode = WP_SDTRK_Helper_Options::get_bool_option('oai_trk_debug', false);
+
+        // Validate only: OpenAI checks the events but does not store them
+        $this->validateOnly = WP_SDTRK_Helper_Options::get_bool_option('oai_trk_server_validate_only', false);
     }
 
     /**
@@ -411,7 +417,7 @@ class Wp_Sdtrk_Tracker_Oai
     private function payLoadServerRequest($requestData)
     {
         $fields = array(
-            'validate_only' => false,
+            'validate_only' => (bool) $this->validateOnly,
             'events' => array($requestData)
         );
 

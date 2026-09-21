@@ -828,6 +828,14 @@ SNIPPET;
 					'required' => [['oai_trk_server', '=', '1'], ['oai_pixelid', '!=', '']],
 				],
 				[
+					'id'       => 'oai_trk_server_validate_only',
+					'type'     => 'switch',
+					'title'    => __('Validate only', 'wp-sdtrk'),
+					'subtitle'     => __('OpenAI only validates the server events and does NOT store them. Use for testing only — no conversions are recorded while this is active!', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => [['oai_trk_server', '=', '1'], ['oai_pixelid', '!=', '']],
+				],
+				[
 					'id'       => 'oai_trk_server_cookie_service',
 					'type'     => 'select',
 					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),

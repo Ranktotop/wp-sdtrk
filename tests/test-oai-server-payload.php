@@ -177,6 +177,16 @@ check('64 ok, 65 rejected', Wp_Sdtrk_Tracker_Oai::isValidCustomEventName(str_rep
 check('rejects standard name', Wp_Sdtrk_Tracker_Oai::isValidCustomEventName('Order_Created') === false);
 check('rejects empty', Wp_Sdtrk_Tracker_Oai::isValidCustomEventName('') === false);
 
+echo "OpenAI CAPI validate_only switch\n";
+$GLOBALS['bools']['oai_trk_server_validate_only'] = true;
+$req = fire($purchase, 'Event');
+check('validate_only true when switched on', json_decode($req['payload'], true)['validate_only'] === true);
+$GLOBALS['bools']['oai_trk_debug'] = true;
+$GLOBALS['bools']['oai_trk_server_validate_only'] = false;
+$req = fire($purchase, 'Event');
+check('debug alone does not validate-only', json_decode($req['payload'], true)['validate_only'] === false);
+$GLOBALS['bools']['oai_trk_debug'] = false;
+
 echo "OpenAI CAPI gates\n";
 $GLOBALS['bools']['oai_trk_server'] = false;
 check('server switch off => no request', fire($purchase, 'Event') === null);
