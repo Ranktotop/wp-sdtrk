@@ -18,6 +18,7 @@ const load = (f, cls) => new Function(js(f) + '\nreturn ' + cls + ';')();
 const Meta = load('wp-sdtrk-meta.js', 'Wp_Sdtrk_Catcher_Meta');
 const Ga = load('wp-sdtrk-ga.js', 'Wp_Sdtrk_Catcher_Ga');
 const Tt = load('wp-sdtrk-tt.js', 'Wp_Sdtrk_Catcher_Tt');
+const Oai = load('wp-sdtrk-oai.js', 'Wp_Sdtrk_Catcher_Oai');
 
 let fails = 0;
 function check(label, cond) {
@@ -44,6 +45,9 @@ check('ga no currency', !('currency' in ag));
 const at = make(Tt, a).get_data_custom();
 check('tt single content_id', at.content_id === '999');
 check('tt no contents array', !('contents' in at));
+const ao = make(Oai, a).get_data_event();
+check('oai single content', Array.isArray(ao.contents) && ao.contents.length === 1 && ao.contents[0].id === '999');
+check('oai no amount (no value)', !('amount' in ao) && !('currency' in ao));
 
 // --- Scenario B: generate_lead with value, no product ---
 console.log('Scenario B — lead with value, no product');
@@ -61,6 +65,9 @@ check('ga EUR fallback', bg.currency === 'EUR');
 check('ga no items (no product)', !('items' in bg));
 const bt = make(Tt, b).get_data_custom();
 check('tt EUR fallback', bt.currency === 'EUR');
+const bo = make(Oai, b).get_data_event();
+check('oai EUR fallback, amount 5000', bo.currency === 'EUR' && bo.amount === 5000);
+check('oai lead is customer_action without contents', bo.type === 'customer_action' && !('contents' in bo));
 
 if (fails > 0) {
 	console.log('\n' + fails + ' assertion(s) failed.');

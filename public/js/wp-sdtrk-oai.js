@@ -204,6 +204,12 @@ class Wp_Sdtrk_Catcher_Oai {
 				case 'Page':
 					this.measure('page_viewed', this.get_data_page(), { event_id: this.event.grabOrderId() }, handler);
 					break;
+				case 'Event':
+					var name = this.convert_eventname(this.event.grabEventName());
+					if (name !== false) {
+						this.measure(name, this.get_data_event(), { event_id: this.event.grabOrderId() }, handler);
+					}
+					break;
 			}
 		}
 	}
@@ -244,6 +250,112 @@ class Wp_Sdtrk_Catcher_Oai {
 				content_type: "page",
 			}],
 		};
+	}
+
+	/**
+	* Get the data object of a conversion event. Its type selects the OpenAI data
+	* shape; amounts are integers in the currency's minor unit.
+	* @return  {Object} The event data
+	*/
+	get_data_event() {
+		var name = this.convert_eventname(this.event.grabEventName());
+		var eventData = { type: this.get_data_type(name) };
+		var currency = this.event.getCurrency() || "EUR";
+		//Value
+		if (this.event.grabValue() > 0 || name === 'order_created') {
+			eventData.amount = this.toMinorUnits(this.event.grabValue(), currency);
+			eventData.currency = currency;
+		}
+		//customer_action carries no contents
+		if (eventData.type !== 'contents') {
+			return eventData;
+		}
+		//Product(s) — the whole cart as contents[] when present
+		var items = this.event.getItems();
+		if (items.length > 0) {
+			eventData.contents = [];
+			for (var i = 0; i < items.length; i++) {
+				var content = {
+					id: String(items[i].id || ''),
+					name: String(items[i].name || ''),
+					content_type: "product",
+					quantity: parseInt(items[i].qty, 10) || 1,
+				};
+				var price = Number(items[i].price) || 0;
+				if (price > 0) {
+					content.amount = this.toMinorUnits(price, currency);
+					content.currency = currency;
+				}
+				eventData.contents.push(content);
+			}
+		}
+		else if (this.event.grabProdId() !== "") {
+			eventData.contents = [{
+				id: String(this.event.grabProdId()),
+				name: String(this.event.grabProdName() || ''),
+				content_type: "product",
+				quantity: 1,
+			}];
+		}
+		return eventData;
+	}
+
+	/**
+	* Converts an amount to an integer in the currency's ISO 4217 minor unit
+	* (e.g. 25.99 EUR -> 2599, 1500 JPY -> 1500, 1.5 KWD -> 1500)
+	* @param {Number} value The amount in major units
+	* @param {String} currency The ISO 4217 currency code
+	* @return  {Number} The amount in minor units
+	*/
+	toMinorUnits(value, currency) {
+		var exponents = {
+			BIF: 0, CLP: 0, DJF: 0, GNF: 0, ISK: 0, JPY: 0, KMF: 0, KRW: 0, PYG: 0,
+			RWF: 0, UGX: 0, UYI: 0, VND: 0, VUV: 0, XAF: 0, XOF: 0, XPF: 0,
+			BHD: 3, IQD: 3, JOD: 3, KWD: 3, LYD: 3, OMR: 3, TND: 3,
+			CLF: 4, UYW: 4,
+		};
+		var code = String(currency || '').toUpperCase();
+		var exponent = exponents.hasOwnProperty(code) ? exponents[code] : 2;
+		return Math.round((Number(value) || 0) * Math.pow(10, exponent));
+	}
+
+	/**
+	* Returns the OpenAI data shape for an OpenAI event name
+	* @param {String} name The OpenAI event name
+	* @return  {String} The data type
+	*/
+	get_data_type(name) {
+		switch (name) {
+			case 'lead_created':
+			case 'registration_completed':
+				return 'customer_action';
+			default:
+				return 'contents';
+		}
+	}
+
+	/**
+	* Converts an EventName to an OpenAI event name
+	* @param {String} name The given event-name
+	* @return  {String|Boolean} The OpenAI event name or false if unsupported
+	 */
+	convert_eventname(name) {
+		switch (name) {
+			case 'view_item':
+				return 'contents_viewed';
+			case 'generate_lead':
+				return 'lead_created';
+			case 'sign_up':
+				return 'registration_completed';
+			case 'add_to_cart':
+				return 'items_added';
+			case 'begin_checkout':
+				return 'checkout_started';
+			case 'purchase':
+				return 'order_created';
+			default:
+				return false;
+		}
 	}
 }
 
