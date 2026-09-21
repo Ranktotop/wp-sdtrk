@@ -6,7 +6,7 @@ Details, Akzeptanzkriterien und Verifikation stehen in [plan.md](plan.md).
 - [ ] Offene Fragen 1–5 aus plan.md mit Marc klären
 
 ## Phase 1: Browser-Pixel
-- [ ] T1: Pixel lädt und misst `page_viewed` (Admin-Browser-Felder, registerScript, Engine, Catcher, Backload) (M)
+- [x] T1: Pixel lädt und misst `page_viewed` (Admin-Browser-Felder, registerScript, Engine, Catcher, Backload) (M)
 - [ ] T2: Conversion-Events mit Minor-Unit-Beträgen und `contents[]` (Browser) (S)
 - [ ] T3: Signal-Events als `custom` mit validiertem `custom_event_name` (Browser) (S)
 - [ ] **Checkpoint A:** JS-Tests grün, Smoke-Test mit Pixel `4J4brGr1XUDTEKZhUQjeaa`, Review

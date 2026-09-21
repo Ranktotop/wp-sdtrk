@@ -764,6 +764,57 @@ SNIPPET;
 			],
 		]);
 
+		// CHATGPT ADS (OPENAI) TRACKING
+		Redux::set_section('wp_sdtrk_options', [
+			'title'      => __('ChatGPT Ads (OpenAI)', 'wp-sdtrk'),
+			'id'         => 'openai_tracking_section',
+			'parent_id'  => 'tracking_services',
+			'icon'       => 'el el-comment',
+			'subsection' => true,
+			'fields'     => [
+				[
+					'id'    => 'oai_pixelid',
+					'type'  => 'text',
+					'title' => __('ChatGPT Ads Pixel-ID', 'wp-sdtrk'),
+					'subtitle'  => __('Insert your Pixel-ID from the conversions tab of the ChatGPT Ads Manager', 'wp-sdtrk'),
+				],
+				[
+					'id'       => 'oai_trk_debug',
+					'type'     => 'switch',
+					'title'    => __('Activate Debugging', 'wp-sdtrk'),
+					'subtitle'     => __('Check to log the pixel activity to the browser console', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['oai_pixelid', '!=', ''],
+				],
+				[
+					'id'       => 'oai_trk_browser',
+					'type'     => 'switch',
+					'title'    => __('Activate browser based tracking', 'wp-sdtrk'),
+					'subtitle'     => __('Check to fire the ChatGPT Ads measurement pixel', 'wp-sdtrk'),
+					'default'  => 0,
+					'required' => ['oai_pixelid', '!=', ''],
+				],
+				[
+					'id'       => 'oai_trk_browser_cookie_service',
+					'type'     => 'select',
+					'title'    => __('Choose cookie consent behavior', 'wp-sdtrk'),
+					'options'  => [
+						'none'     => __('Fire always', 'wp-sdtrk'),
+						'borlabs'  => __('Borlabs Cookie', 'wp-sdtrk'),
+					],
+					'default'  => 'none',
+					'required' => [['oai_trk_browser', '=', '1'], ['oai_pixelid', '!=', '']],
+				],
+				[
+					'id'       => 'oai_trk_browser_cookie_id',
+					'type'     => 'text',
+					'title'    => __('Cookie ID', 'wp-sdtrk'),
+					'required' => [['oai_trk_browser_cookie_service', '=', 'borlabs'], ['oai_trk_browser', '=', '1'], ['oai_pixelid', '!=', '']],
+					'desc' => '<p style="color:#57b957">' . __('For more accurate tracking, the following opt-in code should be stored in the cookie settings of Borlabs:', 'wp-sdtrk') . '</p><p><code style="font-style: italic;">' . htmlentities('<script>wp_sdtrk_backload_oai_b();</script>') . '</code></p>',
+				],
+			],
+		]);
+
 		// LINKEDIN TRACKING
 		Redux::set_section('wp_sdtrk_options', [
 			'title'      => __('LinkedIn', 'wp-sdtrk'),

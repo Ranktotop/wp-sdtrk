@@ -40,6 +40,7 @@ class Wp_Sdtrk_Engine {
 		this.catcher_meta = new Wp_Sdtrk_Catcher_Meta(this.event, this.helper);
 		this.catcher_ga = new Wp_Sdtrk_Catcher_Ga(this.event, this.helper);
 		this.catcher_tt = new Wp_Sdtrk_Catcher_Tt(this.event, this.helper);
+		this.catcher_oai = new Wp_Sdtrk_Catcher_Oai(this.event, this.helper);
 		this.catcher_lin = new Wp_Sdtrk_Catcher_Lin(this.event, this.helper);
 		this.catcher_fl = new Wp_Sdtrk_Catcher_Fl(this.event, this.helper);
 		this.catcher_mtc = new Wp_Sdtrk_Catcher_Mtc(this.event, this.helper);
@@ -86,6 +87,13 @@ class Wp_Sdtrk_Engine {
 	 */
 	get_catcher_tt() {
 		return this.catcher_tt;
+	}
+	/**
+	* Get the oai catcher
+	* @return  {Wp_Sdtrk_Catcher_Oai} The catcher-object
+	 */
+	get_catcher_oai() {
+		return this.catcher_oai;
 	}
 	/**
 	* Get the lin catcher
@@ -292,6 +300,7 @@ class Wp_Sdtrk_Engine {
 		var catcher_meta = this.catcher_meta;
 		var catcher_ga = this.catcher_ga;
 		var catcher_tt = this.catcher_tt;
+		var catcher_oai = this.catcher_oai;
 		var catcher_lin = this.catcher_lin;
 		var catcher_fl = this.catcher_fl;
 		var catcher_mtc = this.catcher_mtc;
@@ -301,6 +310,7 @@ class Wp_Sdtrk_Engine {
 		catcher_meta.catchPageHit(2);
 		catcher_ga.catchPageHit(2);
 		catcher_tt.catchPageHit(2);
+		catcher_oai.catchPageHit(2);
 		catcher_lin.catchPageHit(2);
 		catcher_fl.catchPageHit(2);
 		catcher_mtc.catchPageHit(2);
@@ -318,6 +328,7 @@ class Wp_Sdtrk_Engine {
 							catcher_meta.catchTimeHit(triggerTime, 2);
 							catcher_ga.catchTimeHit(triggerTime, 2);
 							catcher_tt.catchTimeHit(triggerTime, 2);
+							catcher_oai.catchTimeHit(triggerTime, 2);
 							catcher_lin.catchTimeHit(triggerTime, 2);
 							catcher_fl.catchTimeHit(triggerTime, 2);
 							catcher_mtc.catchTimeHit(triggerTime, 2);
@@ -339,6 +350,7 @@ class Wp_Sdtrk_Engine {
 						catcher_meta.catchClickHit(el[1], 2);
 						catcher_ga.catchClickHit(el[1], 2);
 						catcher_tt.catchClickHit(el[1], 2);
+						catcher_oai.catchClickHit(el[1], 2);
 						catcher_lin.catchClickHit(el[1], 2);
 						catcher_fl.catchClickHit(el[1], 2);
 						catcher_mtc.catchClickHit(el[1], 2);
@@ -363,6 +375,7 @@ class Wp_Sdtrk_Engine {
 								catcher_meta.catchScrollHit(depth, 2);
 								catcher_ga.catchScrollHit(depth, 2);
 								catcher_tt.catchScrollHit(depth, 2);
+								catcher_oai.catchScrollHit(depth, 2);
 								catcher_lin.catchScrollHit(depth, 2);
 								catcher_fl.catchScrollHit(depth, 2);
 								catcher_mtc.catchScrollHit(depth, 2);
@@ -388,6 +401,7 @@ class Wp_Sdtrk_Engine {
 						catcher_meta.catchVisibilityHit(el[1], 2);
 						catcher_ga.catchVisibilityHit(el[1], 2);
 						catcher_tt.catchVisibilityHit(el[1], 2);
+						catcher_oai.catchVisibilityHit(el[1], 2);
 						catcher_lin.catchVisibilityHit(el[1], 2);
 						catcher_fl.catchVisibilityHit(el[1], 2);
 						catcher_mtc.catchVisibilityHit(el[1], 2);

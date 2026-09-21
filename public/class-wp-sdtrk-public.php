@@ -106,6 +106,7 @@ class Wp_Sdtrk_Public
 		$this->registerScript_metaTracker($minifySwitch);
 		$this->registerScript_gaTracker($minifySwitch);
 		$this->registerScript_ttTracker($minifySwitch);
+		$this->registerScript_oaiTracker($minifySwitch);
 		$this->registerScript_linTracker($minifySwitch);
 		$this->registerScript_flTracker($minifySwitch);
 		$this->registerScript_mtcTracker($minifySwitch);
@@ -256,6 +257,46 @@ class Wp_Sdtrk_Public
 		// Register scripts
 		wp_register_script($this->get_jsHandler('name', 'tt'), plugins_url("js/" . $this->get_jsHandler('file', 'tt') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
 		wp_localize_script($this->get_jsHandler('name', 'tt'), $this->get_jsHandler('var', 'tt'), $localizedData);
+	}
+
+	/**
+	 * Collect all OAI-Data (ChatGPT Ads / OpenAI) and pass them to JS
+	 * The Conversions API token is never localized — it stays server-side.
+	 */
+	private function registerScript_oaiTracker($loadMinified = "")
+	{
+		// Init
+		$localizedData = array();
+
+		// Pixel ID
+		$oai_pixelId = WP_SDTRK_Helper_Options::get_string_option('oai_pixelid');
+
+		// Browser Settings
+		$browserEnabled = WP_SDTRK_Helper_Options::get_bool_option('oai_trk_browser', false);
+		$browserCookieService = WP_SDTRK_Helper_Options::get_string_option('oai_trk_browser_cookie_service');
+		$browserCookieId = WP_SDTRK_Helper_Options::get_string_option('oai_trk_browser_cookie_id');
+
+		// Server Settings
+		$serverEnabled = WP_SDTRK_Helper_Options::get_bool_option('oai_trk_server', false);
+		$serverCookieService = WP_SDTRK_Helper_Options::get_string_option('oai_trk_server_cookie_service');
+		$serverCookieId = WP_SDTRK_Helper_Options::get_string_option('oai_trk_server_cookie_id');
+
+		// Debug
+		$debugEnabled = WP_SDTRK_Helper_Options::get_bool_option('oai_trk_debug', false);
+
+		// Merge to array
+		$localizedData['pid'] = $oai_pixelId;
+		$localizedData['b_e'] = $browserEnabled;
+		$localizedData['b_cs'] = $browserCookieService;
+		$localizedData['b_ci'] = $browserCookieId;
+		$localizedData['s_e'] = $serverEnabled;
+		$localizedData['s_cs'] = $serverCookieService;
+		$localizedData['s_ci'] = $serverCookieId;
+		$localizedData['dbg'] = $debugEnabled;
+
+		// Register scripts
+		wp_register_script($this->get_jsHandler('name', 'oai'), plugins_url("js/" . $this->get_jsHandler('file', 'oai') . $loadMinified . ".js", __FILE__), array(), $this->version, false);
+		wp_localize_script($this->get_jsHandler('name', 'oai'), $this->get_jsHandler('var', 'oai'), $localizedData);
 	}
 
 	/**
@@ -582,6 +623,7 @@ class Wp_Sdtrk_Public
 			$this->get_jsHandler('name', 'meta'),
 			$this->get_jsHandler('name', 'ga'),
 			$this->get_jsHandler('name', 'tt'),
+			$this->get_jsHandler('name', 'oai'),
 			$this->get_jsHandler('name', 'lin'),
 			$this->get_jsHandler('name', 'fl'),
 			$this->get_jsHandler('name', 'mtc'),
