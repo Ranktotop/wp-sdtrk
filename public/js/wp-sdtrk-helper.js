@@ -150,7 +150,7 @@ class Wp_Sdtrk_Helper {
 	* @param {String} id The ID of the cookie
 	* @param {String} service The Name of the service
 	* @param {Wp_Sdtrk_Event} event The event
-	* @return  {Boolean|Number} The consent-state or -1 in error case
+	* @return  {Boolean|Number} The consent-state or -1 if no consent-service is configured (or bypassed)
 	*/
 	has_consent(id, service, event) {
 		if (event.getForce()) {
@@ -161,14 +161,16 @@ class Wp_Sdtrk_Helper {
 				if (typeof window.BorlabsCookie != "undefined") {
 					// borlabs v2
 					if (typeof window.BorlabsCookie.checkCookieConsent === "function") {
-						return window.BorlabsCookie.checkCookieConsent(id);
+						return window.BorlabsCookie.checkCookieConsent(id) === true;
 					}
 					// borlabs v3
 					if (typeof window.BorlabsCookie.Consents?.hasConsent === "function") {
-						return window.BorlabsCookie.Consents.hasConsent(id);
+						return window.BorlabsCookie.Consents.hasConsent(id) === true;
 					}
 				}
-				return -1;
+				// Borlabs is configured but not (yet) loaded: no consent. If it loads
+				// later and the visitor has consented, its opt-in code runs the backload.
+				return false;
 			default:
 				return -1;
 		}

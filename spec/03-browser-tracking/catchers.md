@@ -17,7 +17,7 @@ Jede Plattform hat im Browser eine Catcher-Klasse `Wp_Sdtrk_Catcher_*`. Sie kaps
 | Catcher | Natives API | `type` (Server) | Server? | Besonderheit |
 |---------|-------------|-----------------|:------:|--------------|
 | `Meta` | `fbq()` | `meta` | ✅ | verwaltet `_fbp`/`_fbc`; Pixel-Version `fb` |
-| `Ga` | `gtag()` | `ga` | ✅ | liefert `cid`; sendet [Consent-Mode-v2-Signale](consent-management.md#5-consent-mode-v2-google-tag) |
+| `Ga` | `gtag()` | `ga` | ✅ | liefert `cid`; sendet [Consent-Mode-v2-Signale](consent-management.md#6-consent-mode-v2-google-tag) |
 | `Tt` | `ttq()` | `tt` | ✅ | `ttc`/`ttp`; Hash aus UA+IP |
 | `Oai` | `oaiq()` | `oai` | ✅ | `oppref`/`obref`; Beträge in Minor Units; Signal-Events als `custom` (siehe [2c](#2c-chatgpt-ads-oai)) |
 | `Lin` | `lintrk()` | — | ❌ | Event→Conversion-ID-Mapping (siehe [05](../05-data-model/linkedin-mapping.md)) |

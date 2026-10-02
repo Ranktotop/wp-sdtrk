@@ -7,7 +7,7 @@ Datei: `public/js/wp-sdtrk-event.js`, Klasse `Wp_Sdtrk_Event` (Datencontainer) +
 | Quelle | Mechanismus | Beispiel |
 |--------|-------------|----------|
 | **URL-Parameter (GET)** | `helper.get_Param()` / `pmap`-Aliase | `?prodid=SKU123&type=purchase&email=…` |
-| **Cookies (Erstpartei)** | `helper.get_Cookies()` | persistente UTM-Werte (`wpsdtrk_utm_*`) |
+| **Cookies (Erstpartei)** | `helper.get_Cookies()` | persistente UTM-Werte (`wpsdtrk_utm_*`); URL-Werte haben Vorrang. Geschrieben werden die Cookies erst von `engine.persist_onConsent()`, sobald mindestens eine Plattform Consent hat ([Consent](consent-management.md#4-was-der-consent-abdeckt)) |
 | **Server-Localize** | `wp_sdtrk_engine.*` | `pageId`, `pageTitle`, `prodId`, `addr`, `agent` |
 | **Metabox** | über Localize gespiegelt | `wp_sdtrk_product_id`, `wp_sdtrk_bypass_consent` |
 | **WooCommerce-Commerce** | `wp_sdtrk_wc.{order\|beginCheckout\|addToCart\|viewItem}` (genau eine Quelle/Load, Präzedenz `order > beginCheckout > addToCart > viewItem`) | Purchase: `orderId`/`value`/`currency`/Käuferdaten/`items[]` ([07 › Purchase](../07-woocommerce/purchase-tracking.md)); InitiateCheckout: `value`/`currency`/`items[]` ([07 › InitiateCheckout](../07-woocommerce/initiate-checkout.md)); AddToCart/ViewItem: `value`/`currency`/`items[]` ([07 › ViewItem & AddToCart](../07-woocommerce/view-item-and-add-to-cart.md)) |

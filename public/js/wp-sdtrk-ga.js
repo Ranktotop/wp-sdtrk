@@ -28,16 +28,19 @@ class Wp_Sdtrk_Catcher_Ga {
 			this.helper.debugLog(this.localizedData.dbg, {}, 'Skip because user is admin (ga)');
 			return;
 		}
-		//This has to be fired first, because GA uses the cookie for identification
-		if (this.get_Cid()) {
-			this.cid = this.get_Cid();
+		var b_consent = (target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "";
+		var s_consent = (target === 2 || target === 1) && this.helper.has_consent(this.localizedData.s_ci, this.localizedData.s_cs, this.event) !== false && this.localizedData.s_e !== "";
+		//The _ga cookie (and the fingerprint behind it) needs consent; it is written
+		//before the tag loads, because GA uses the cookie for identification
+		if (b_consent || s_consent || this.b_enabled || this.s_enabled) {
+			this.cid = this.get_Cid() || false;
 		}
-		if ((target === 2 || target === 0) && this.helper.has_consent(this.localizedData.b_ci, this.localizedData.b_cs, this.event) !== false && this.localizedData.b_e !== "") {
+		if (b_consent) {
 			this.b_enabled = true;
 			//load the base pixel
 			this.loadPixel();
 		}
-		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.s_ci, this.localizedData.s_cs, this.event) !== false && this.localizedData.s_e !== "") {
+		if (s_consent) {
 			this.s_enabled = true;
 		}
 	}
@@ -518,6 +521,7 @@ function wp_sdtrk_backload_ga_b() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_ga = window.wp_sdtrk_engine_class.get_catcher_ga();
 		if (catcher_ga.isOngoingBackload('b')) {
+			window.wp_sdtrk_engine_class.persist_onConsent();
 			for (const h of window.wp_sdtrk_history) {
 				data = h.split("_");
 				switch (data[0]) {
@@ -549,6 +553,7 @@ function wp_sdtrk_backload_ga_s() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_ga = window.wp_sdtrk_engine_class.get_catcher_ga();
 		if (catcher_ga.isOngoingBackload('s')) {
+			window.wp_sdtrk_engine_class.persist_onConsent();
 			for (const h of window.wp_sdtrk_history) {
 				data = h.split("_");
 				switch (data[0]) {

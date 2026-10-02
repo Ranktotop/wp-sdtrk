@@ -37,11 +37,10 @@ class Wp_Sdtrk_Catcher_Tt {
 		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.s_ci, this.localizedData.s_cs, this.event) !== false && this.localizedData.s_e !== "") {
 			this.s_enabled = true;
 		}
-		if (this.get_Ttc()) {
-			this.ttc = this.get_Ttc();
-		}
-		if (this.get_Ttp()) {
-			this.ttp = this.get_Ttp();
+		//The _ttc/_ttp cookies are only written once a path has consent
+		if (this.b_enabled || this.s_enabled) {
+			this.ttc = this.get_Ttc() || false;
+			this.ttp = this.get_Ttp() || false;
 		}
 	}
 
@@ -446,6 +445,7 @@ function wp_sdtrk_backload_tt_b() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_tt = window.wp_sdtrk_engine_class.get_catcher_tt();
 		if (catcher_tt.isOngoingBackload('b')) {
+			window.wp_sdtrk_engine_class.persist_onConsent();
 			for (const h of window.wp_sdtrk_history) {
 				data = h.split("_");
 				switch (data[0]) {
@@ -477,6 +477,7 @@ function wp_sdtrk_backload_tt_s() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_tt = window.wp_sdtrk_engine_class.get_catcher_tt();
 		if (catcher_tt.isOngoingBackload('s')) {
+			window.wp_sdtrk_engine_class.persist_onConsent();
 			for (const h of window.wp_sdtrk_history) {
 				data = h.split("_");
 				switch (data[0]) {

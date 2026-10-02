@@ -276,6 +276,7 @@ function wp_sdtrk_backload_mtc_b() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_mtc = window.wp_sdtrk_engine_class.get_catcher_mtc();
 		if (catcher_mtc.isOngoingBackload('b')) {
+			window.wp_sdtrk_engine_class.persist_onConsent();
 			for (const h of window.wp_sdtrk_history) {
 				data = h.split("_");
 				switch (data[0]) {

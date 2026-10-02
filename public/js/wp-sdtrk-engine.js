@@ -46,8 +46,33 @@ class Wp_Sdtrk_Engine {
 		this.catcher_mtc = new Wp_Sdtrk_Catcher_Mtc(this.event, this.helper);
 		this.catcher_mtm = new Wp_Sdtrk_Catcher_Mtm(this.event, this.helper);
 
+		this.persist_onConsent();
+
 		//this has to be global
 		window.wp_sdtrk_scrollDepths = this.event.getScrollTrigger()
+	}
+
+	/**
+	* Write what may only be stored on the device with consent: the URL-UTMs as
+	* first-party cookies and the purchase once-guard. Runs once at least one
+	* platform has consent (or consent is bypassed). The backload functions call
+	* this again, so a later opt-in on the same page still stores them.
+	 */
+	persist_onConsent() {
+		if (this.consentPersisted) {
+			return;
+		}
+		var catchers = [this.catcher_meta, this.catcher_ga, this.catcher_tt, this.catcher_oai, this.catcher_lin, this.catcher_fl, this.catcher_mtc, this.catcher_mtm];
+		for (var catcher of catchers) {
+			if (catcher && (catcher.isEnabled('b') || catcher.isEnabled('s'))) {
+				this.helper.persist(this.utmParams);
+				if (this.orderGuardKey) {
+					try { window.localStorage.setItem(this.orderGuardKey, '1'); } catch (e) { }
+				}
+				this.consentPersisted = true;
+				return;
+			}
+		}
 	}
 
 	/**
@@ -168,10 +193,9 @@ class Wp_Sdtrk_Engine {
 	 */
 	collect_eventData() {
 
-		//UTMs
-		this.event.setUtm(this.helper.get_Params(this.helper.get_paramNames('utm')));
-		this.helper.persist(this.event.getUtm());
-		this.event.setUtm(this.helper.get_Cookies(this.event.getUtm()));
+		//UTMs (the URL values are persisted by persist_onConsent() once a platform has consent)
+		this.utmParams = this.helper.get_Params(this.helper.get_paramNames('utm'));
+		this.event.setUtm(this.helper.get_Cookies(Object.assign({}, this.utmParams)));
 
 		//Event
 		this.event.setProdId(this.helper.get_Params(this.helper.get_paramNames('prodid')));
@@ -198,7 +222,7 @@ class Wp_Sdtrk_Engine {
 		this.event.setEventUrl(window.location.href); //the url	
 		this.event.setUserFirstName(this.helper.get_Params(this.helper.get_paramNames('firstname')));
 		this.event.setUserLastName(this.helper.get_Params(this.helper.get_paramNames('lastname')));
-		this.event.setUserFP(this.fp.get_fp());
+		this.event.setUserFPSource(() => this.fp.get_fp());
 		this.event.setUserEmail(this.helper.get_Params(this.helper.get_paramNames('email')));
 
 		//Additional
@@ -239,7 +263,8 @@ class Wp_Sdtrk_Engine {
 	* one source; the else-if chain is the client-side safety net. The order branch
 	* additionally carries the buyer data and a per-order localStorage once-guard (a
 	* reload of the thankyou page is not a new purchase; GA4 does not dedup by
-	* transaction_id, so without the guard a refresh double-counts). BeginCheckout/
+	* transaction_id, so without the guard a refresh double-counts). The guard is read
+	* here but only written by persist_onConsent(). BeginCheckout/
 	* View/AddToCart have no guard — a begin_checkout fires on every checkout view, a
 	* view_item on every product view, an add_to_cart is consumed once server-side
 	* from the WC session.
@@ -259,7 +284,8 @@ class Wp_Sdtrk_Engine {
 			this.event.setUserEmail({ wc: String(order.email || '') });
 			this.event.setUserFirstName({ wc: String(order.firstName || '') });
 			this.event.setUserLastName({ wc: String(order.lastName || '') });
-			try { window.localStorage.setItem(orderKey, '1'); } catch (e) { }
+			//stored by persist_onConsent(), only once the purchase is actually tracked
+			this.orderGuardKey = orderKey;
 		}
 		else if (wc.beginCheckout) {
 			this.seedCommerceEvent('begin_checkout', wc.beginCheckout);

@@ -41,7 +41,7 @@ Welche Plattform wird **browser-seitig** (Pixel/Tag), welche zusätzlich **serve
 **Weitere Funktionsbereiche:**
 
 - **Signal-Events** (zusätzlich zu Standard-Conversions): Zeit auf Seite, Scroll-Tiefe, Button-Klicks, Element-Sichtbarkeit.
-- **Cookieloses Fingerprinting** als Fallback-Identifier.
+- **Browser-Fingerprinting** als Basis der GA-Client-ID (nur mit Consent).
 - **Cookie-Consent-Integration** für Borlabs Cookie (v2 **und** v3).
 - **Digistore24-Datenentschlüsselung** (verschlüsselte Thank-You-Page-Parameter).
 - **LinkedIn Conversion-Mapping** mit regelbasierter Zuordnung (eigene DB-Tabelle).

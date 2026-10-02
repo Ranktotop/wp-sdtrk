@@ -4,27 +4,35 @@ Datei: `public/js/wp-sdtrk-helper.js`, Methode `has_consent(id, service, event)`
 
 ## 1. Unterstützte Consent-Lösung: Borlabs Cookie
 
-Das Plugin prüft vor Pixel-Laden/Server-Senden den Consent. Aktuell ist **Borlabs Cookie** der einzige explizit unterstützte Dienst — sowohl **v2** als auch **v3** (v3-Kompatibilität in v1.7.6 ergänzt, Commits `f318c97`/`ad0481a`).
+Das Plugin prüft vor Pixel-Laden, Server-Senden und dem Schreiben eigener Cookies den Consent. **Borlabs Cookie** ist der einzige explizit unterstützte Dienst, in **v2** und **v3**.
 
 ```js
 has_consent(id, service, event) {
-  if (event.getForce()) return -1;        // Force/Bypass → Consent übersprungen
+  if (event.getForce()) return -1;        // Bypass pro Seite → Consent übersprungen
   switch (service) {
     case 'borlabs':
       // Borlabs v2
       if (typeof window.BorlabsCookie.checkCookieConsent === "function")
-        return window.BorlabsCookie.checkCookieConsent(id);
+        return window.BorlabsCookie.checkCookieConsent(id) === true;
       // Borlabs v3
       if (typeof window.BorlabsCookie.Consents?.hasConsent === "function")
-        return window.BorlabsCookie.Consents.hasConsent(id);
-      return -1;
+        return window.BorlabsCookie.Consents.hasConsent(id) === true;
+      return false;                        // Borlabs (noch) nicht geladen → kein Consent
     default:
-      return -1;                           // unbekannter/kein Dienst → kein Block
+      return -1;                           // Cookie-Service none → kein Block
   }
 }
 ```
 
-Rückgaben: `true`/`false` (Consent erteilt/abgelehnt) bzw. `-1` (keine Aussage → wird nicht blockiert).
+Rückgaben:
+
+| Wert | Bedeutung | Folge |
+|------|-----------|-------|
+| `true` | Borlabs meldet Consent | Pfad wird freigeschaltet |
+| `false` | Borlabs meldet keinen Consent, liefert keinen Boolean oder ist nicht geladen | blockiert |
+| `-1` | Consent bewusst umgangen: Bypass auf der Seite (§3) oder Cookie-Service `none` in den Settings | Pfad wird freigeschaltet |
+
+Die Catcher prüfen auf `!== false`. Consent wird also nur übersprungen, wenn das explizit konfiguriert ist. Ein Borlabs, das später lädt als die Engine, blockiert zunächst; hat der Besucher bereits zugestimmt, führt Borlabs den Opt-in-Code aus, und der Backload (§5) holt die Events nach.
 
 ## 2. Konfiguration je Plattform
 
@@ -46,13 +54,30 @@ if (this.localizedData.trkow !== "") this.event.enableForce();
 else this.event.disableForce();
 ```
 
-`trkow` (Tracking-Overwrite) stammt aus der Metabox-Option `wp_sdtrk_bypass_consent` der jeweiligen Seite (siehe [04 › Metabox](../04-admin-and-options/metabox-and-helpers.md)). Bei aktivem Force liefert `has_consent` immer `-1` → es wird unabhängig vom Consent getrackt.
+`trkow` (Tracking-Overwrite) stammt aus der Metabox-Option `wp_sdtrk_bypass_consent` der jeweiligen Seite (siehe [04 › Metabox](../04-admin-and-options/metabox-and-helpers.md)). Bei aktivem Force liefert `has_consent` immer `-1` → es wird unabhängig vom Consent getrackt, einschließlich der Cookies und des Fingerprints aus §4.
 
-## 4. Backload bei nachträglichem Consent
+## 4. Was der Consent abdeckt
 
-Events werden in `wp_sdtrk_history` gehalten, sodass bei späterer Zustimmung zuvor blockierte Events nachgespielt werden können (Backload-Mechanik der Engine). Jeder Catcher mit Consent-Gate stellt dafür globale Funktionen `wp_sdtrk_backload_<type>_b()` (Browser) und `_s()` (Server) bereit, z. B. `wp_sdtrk_backload_oai_b()`; die Admin-Oberfläche zeigt den passenden Opt-in-Code am Cookie-ID-Feld.
+Ohne Consent (bzw. ohne Bypass) speichert das Plugin nichts auf dem Endgerät und liest keine Gerätemerkmale aus:
 
-## 5. Consent Mode v2 (Google-Tag)
+| Element | Gate |
+|---------|------|
+| Pixel/Tag (`loadPixel()`) | Browser-Consent der Plattform |
+| `_fbc`, `_fbp` (Meta) | Browser- **oder** Server-Consent für Meta (`b_enabled \|\| s_enabled`) |
+| `_ga` (GA, Client-ID) | Browser- oder Server-Consent für GA; wird vor `loadPixel()` geschrieben, weil das Google-Tag das Cookie zur Identifikation übernimmt |
+| `_ttc`, `_ttp` (TikTok) | Browser- oder Server-Consent für TikTok |
+| `_oai_oppref` (ChatGPT Ads) | Browser- oder Server-Consent für ChatGPT Ads |
+| Fingerprint | wird erst in `get_Cid()` berechnet, also mit GA-Consent ([Fingerprinting](cookies-fingerprint-decryption.md#2-fingerprinting)) |
+| `wpsdtrk_utm_*` | Consent für mindestens eine Plattform; `engine.persist_onConsent()` nach dem Aufbau der Catcher und in jedem Backload |
+| `localStorage` `wp_sdtrk_wc_<orderId>` (Purchase-Reload-Guard) | wie `wpsdtrk_utm_*`; ohne Consent wird kein Purchase getrackt, also ist auch kein Guard nötig ([07 › Purchase](../07-woocommerce/purchase-tracking.md#6-deduplizierung)) |
+
+Die Cookie-Ermittlung läuft in `validate()` hinter der Consent-Prüfung. Da `isOngoingBackload()` `validate()` erneut aufruft, entstehen die Cookies bei einem späteren Opt-in auf derselben Seite.
+
+## 5. Backload bei nachträglichem Consent
+
+Events werden in `wp_sdtrk_history` gehalten, sodass bei späterer Zustimmung zuvor blockierte Events nachgespielt werden können (Backload-Mechanik der Engine). Jeder Catcher mit Consent-Gate stellt dafür globale Funktionen `wp_sdtrk_backload_<type>_b()` (Browser) und `_s()` (Server) bereit, z. B. `wp_sdtrk_backload_oai_b()`; die Admin-Oberfläche zeigt den passenden Opt-in-Code am Cookie-ID-Feld. Jede dieser Funktionen ruft beim tatsächlichen Nachholen zusätzlich `engine.persist_onConsent()` auf.
+
+## 6. Consent Mode v2 (Google-Tag)
 
 Nur der GA-Catcher (`wp-sdtrk-ga.js`) sendet zusätzlich zum Blockieren die vier Einwilligungssignale des Google Consent Mode v2 (`analytics_storage`, `ad_storage`, `ad_user_data`, `ad_personalization`). Ohne das Signal `ad_user_data` stellt Google den **Conversion-Export von GA4 nach Google Ads ein** — Analytics erfasst die Käufe weiterhin, in Ads bleibt die Conversion-Spalte auf 0.
 

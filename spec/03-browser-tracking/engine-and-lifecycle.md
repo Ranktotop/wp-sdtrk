@@ -16,10 +16,11 @@ Datei: `public/js/wp-sdtrk-engine.js`, Klasse `Wp_Sdtrk_Engine`.
 3. Konstruktor
       ├─ new Wp_Sdtrk_Event()          Event-Container
       ├─ new Wp_Sdtrk_Helper()         AJAX/Cookies/Consent
-      ├─ new Wp_Sdtrk_Fp()             Fingerprinting
-      ├─ je 1 Catcher: Meta, Ga, Tt, Oai, Lin, Fl, Mtc, Mtm
+      ├─ new Wp_Sdtrk_Fp()             Fingerprinting (berechnet erst bei Bedarf)
       ├─ collect_eventData()           UTMs, prodId, email, value, …
-      └─ collect_items()               DOM-Scan nach .trkbtn-* und .watchitm-*
+      ├─ collect_items()               DOM-Scan nach .trkbtn-* und .watchitm-*
+      ├─ je 1 Catcher: Meta, Ga, Tt, Oai, Lin, Fl, Mtc, Mtm
+      └─ persist_onConsent()           UTM-Cookies + Purchase-Guard, nur mit Consent
 
 4. engine.run()
       ├─ catchPageHit()                sofortiger Pageview an alle Catcher
@@ -41,7 +42,7 @@ Datei: `public/js/wp-sdtrk-engine.js`, Klasse `Wp_Sdtrk_Engine`.
 
 ## 3. Catcher-Aktivierung (Consent-gesteuert)
 
-Beim Erzeugen ruft jeder Catcher `validate(target)` mit `target ∈ {0:Browser, 1:Server, 2:beide}`. Geprüft wird der Consent (`helper.has_consent(cookieId, cookieService, event)`); bei Zustimmung wird das Pixel geladen (`loadPixel()`) und/oder Server-Tracking freigeschaltet. Details: [consent-management.md](consent-management.md).
+Beim Erzeugen ruft jeder Catcher `validate(target)` mit `target ∈ {0:Browser, 1:Server, 2:beide}`. Geprüft wird der Consent (`helper.has_consent(cookieId, cookieService, event)`); bei Zustimmung wird das Pixel geladen (`loadPixel()`) und/oder Server-Tracking freigeschaltet. Erst dann schreibt der Catcher seine Cookies. Details: [consent-management.md](consent-management.md#4-was-der-consent-abdeckt).
 
 ## 4. Konfigurationsübergabe (Auszug `wp_sdtrk_engine`)
 

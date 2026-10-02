@@ -87,8 +87,18 @@ class Wp_Sdtrk_Event {
 		this.userFP = value;
 	}
 
+	//Sets the source of the User-FP. The fingerprint reads device properties, which
+	//needs consent, so it is only computed on the first getUserFP() call. The source
+	//is non-enumerable to keep it out of the event payload sent to the server.
+	setUserFPSource(source) {
+		Object.defineProperty(this, 'userFPSource', { value: source, writable: true, enumerable: false, configurable: true });
+	}
+
 	//Gets the User-FP
 	getUserFP() {
+		if (typeof this.userFP === 'undefined' && typeof this.userFPSource === 'function') {
+			this.userFP = this.userFPSource();
+		}
 		return this.userFP;
 	}
 

@@ -318,6 +318,7 @@ function wp_sdtrk_backload_mtm_b() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_mtm = window.wp_sdtrk_engine_class.get_catcher_mtm();
 		if (catcher_mtm.isOngoingBackload('b')) {
+			window.wp_sdtrk_engine_class.persist_onConsent();
 			for (const h of window.wp_sdtrk_history) {
 				const data = h.split("_");
 				switch (data[0]) {
@@ -349,6 +350,7 @@ function wp_sdtrk_backload_mtm_s() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_mtm = window.wp_sdtrk_engine_class.get_catcher_mtm();
 		if (catcher_mtm.isOngoingBackload('s')) {
+			window.wp_sdtrk_engine_class.persist_onConsent();
 			for (const h of window.wp_sdtrk_history) {
 				const data = h.split("_");
 				switch (data[0]) {

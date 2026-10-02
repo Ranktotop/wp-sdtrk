@@ -311,6 +311,7 @@ function wp_sdtrk_backload_lin_b() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_lin = window.wp_sdtrk_engine_class.get_catcher_lin();
 		if (catcher_lin.isOngoingBackload('b')) {
+			window.wp_sdtrk_engine_class.persist_onConsent();
 			for (const h of window.wp_sdtrk_history) {
 				data = h.split("_");
 				switch (data[0]) {

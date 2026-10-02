@@ -39,11 +39,10 @@ class Wp_Sdtrk_Catcher_Meta {
 		if ((target === 2 || target === 1) && this.helper.has_consent(this.localizedData.s_ci, this.localizedData.s_cs, this.event) !== false && this.localizedData.s_e !== "") {
 			this.s_enabled = true;
 		}
-		if (this.get_fbc()) {
-			this.fbc = this.get_fbc();
-		}
-		if (this.get_fbp()) {
-			this.fbp = this.get_fbp();
+		//The _fbc/_fbp cookies are only written once a path has consent
+		if (this.b_enabled || this.s_enabled) {
+			this.fbc = this.get_fbc() || false;
+			this.fbp = this.get_fbp() || false;
 		}
 	}
 
@@ -424,6 +423,7 @@ function wp_sdtrk_backload_meta_b() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_meta = window.wp_sdtrk_engine_class.get_catcher_meta();
 		if (catcher_meta.isOngoingBackload('b')) {
+			window.wp_sdtrk_engine_class.persist_onConsent();
 			for (const h of window.wp_sdtrk_history) {
 				data = h.split("_");
 				switch (data[0]) {
@@ -455,6 +455,7 @@ function wp_sdtrk_backload_meta_s() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_meta = window.wp_sdtrk_engine_class.get_catcher_meta();
 		if (catcher_meta.isOngoingBackload('s')) {
+			window.wp_sdtrk_engine_class.persist_onConsent();
 			for (const h of window.wp_sdtrk_history) {
 				data = h.split("_");
 				switch (data[0]) {

@@ -451,6 +451,7 @@ function wp_sdtrk_backload_oai_b() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_oai = window.wp_sdtrk_engine_class.get_catcher_oai();
 		if (catcher_oai.isOngoingBackload('b')) {
+			window.wp_sdtrk_engine_class.persist_onConsent();
 			for (const h of window.wp_sdtrk_history) {
 				var data = h.split("_");
 				switch (data[0]) {
@@ -482,6 +483,7 @@ function wp_sdtrk_backload_oai_s() {
 	if (typeof window.wp_sdtrk_engine_class !== 'undefined') {
 		var catcher_oai = window.wp_sdtrk_engine_class.get_catcher_oai();
 		if (catcher_oai.isOngoingBackload('s')) {
+			window.wp_sdtrk_engine_class.persist_onConsent();
 			for (const h of window.wp_sdtrk_history) {
 				var data = h.split("_");
 				switch (data[0]) {

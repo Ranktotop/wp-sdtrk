@@ -99,11 +99,33 @@ console.log('no commerce source => nothing seeded');
 const none = seed({});
 check('eventName false (nothing set)', none.grabEventName() === false);
 
+// Seed an order and run the consent step with one catcher in the given state.
+const order = (id) => ({ order: { orderId: id, value: '5', items: [{ id: '5', name: 'x', qty: 1, price: 5 }] } });
+function seedOrder(id, consent) {
+	const engine = Object.create(Engine.prototype);
+	engine.event = new Event();
+	engine.helper = { persist: () => {} };
+	engine.utmParams = {};
+	engine.catcher_meta = { isEnabled: () => consent };
+	engine.seedWcCommerce(order(id));
+	engine.persist_onConsent();
+	return engine;
+}
+
 console.log('order localStorage once-guard (reload does not re-seed)');
-const first = seed({ order: { orderId: '999', value: '5', items: [{ id: '5', name: 'x', qty: 1, price: 5 }] } });
-check('first load seeds purchase', first.grabEventName() === 'purchase');
-const second = seed({ order: { orderId: '999', value: '5', items: [{ id: '5', name: 'x', qty: 1, price: 5 }] } });
-check('reload does not re-seed (guard)', second.grabEventName() === false && second.getCurrency() === '');
+const first = seedOrder('999', true);
+check('first load seeds purchase', first.event.grabEventName() === 'purchase');
+check('guard written with consent', mod.ls['wp_sdtrk_wc_999'] === '1');
+const second = seedOrder('999', true);
+check('reload does not re-seed (guard)', second.event.grabEventName() === false && second.event.getCurrency() === '');
+
+console.log('order once-guard needs consent');
+const noConsent = seedOrder('777', false);
+check('purchase seeded', noConsent.event.grabEventName() === 'purchase');
+check('no guard written without consent', !('wp_sdtrk_wc_777' in mod.ls));
+noConsent.catcher_meta.isEnabled = () => true;
+noConsent.persist_onConsent();
+check('guard written on later opt-in (backload)', mod.ls['wp_sdtrk_wc_777'] === '1');
 
 if (fails > 0) {
 	console.log('\n' + fails + ' assertion(s) failed.');

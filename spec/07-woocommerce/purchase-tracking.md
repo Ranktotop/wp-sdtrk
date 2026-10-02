@@ -65,7 +65,9 @@ Gemeinsame `event_id` = Order-ID:
 
 Mehrfaches Laden der Danke-Seite ist unkritisch: Die Engine seedet das Purchase pro Order **nur einmal je Browser** (`localStorage`-Marke `wp_sdtrk_wc_<orderId>`) und feuert es bei einem Reload gar nicht erneut. Das ist nötig, weil GA4 (Browser **und** Measurement Protocol) Käufe **nicht** zuverlässig per `transaction_id` dedupliziert — ohne den Guard würde ein Reload die GA4-Käufe doppelt zählen. Meta/TikTok/ChatGPT Ads würden über die gemeinsame `event_id` ohnehin deduplizieren.
 
+Geschrieben wird die Marke nicht beim Seeden, sondern von `engine.persist_onConsent()`, sobald mindestens ein Catcher Consent hat, also beim Engine-Aufbau oder beim Backload nach einem späteren Opt-in ([03 › Consent](../03-browser-tracking/consent-management.md#4-was-der-consent-abdeckt)). Ohne Consent entsteht keine Marke; ein Reload seedet den Purchase dann erneut, ohne dass ein Catcher feuert. Gilt der Consent nur für einen Teil der Plattformen, sperrt die Marke den Purchase bei einem späteren Reload auch für die übrigen.
+
 ## 7. Consent
 
-Browser- und Server-Consent werden wie sonst pro Catcher beim Engine-Aufbau ausgewertet (`helper.has_consent`, Borlabs v2/v3). Nur Catcher mit erteiltem Consent feuern den jeweiligen Pfad. Wird Consent erst nach dem Seitenaufbau erteilt, greift der bestehende Backload-Mechanismus der Catcher — eine Purchase-spezifische Sonderlogik gibt es nicht.
+Browser- und Server-Consent werden wie sonst pro Catcher beim Engine-Aufbau ausgewertet (`helper.has_consent`, Borlabs v2/v3). Nur Catcher mit erteiltem Consent feuern den jeweiligen Pfad. Wird Consent erst nach dem Seitenaufbau erteilt, greift der bestehende Backload-Mechanismus der Catcher — Einzige Purchase-spezifische Folge ist der Zeitpunkt, zu dem die Reload-Marke geschrieben wird (§6).
 </content>

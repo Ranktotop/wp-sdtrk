@@ -26,6 +26,8 @@ Verwaltete IDs (Auswahl):
 
 > Click-IDs werden persistiert, damit sie auch bei späterer Conversion (anderer Pageview) noch verfügbar sind und an die Server-API gehängt werden können.
 
+Alle Cookies dieser Tabelle, die das Plugin selbst schreibt, entstehen erst mit Consent für mindestens einen Pfad (Browser oder Server) der jeweiligen Plattform; die UTM-Cookies mit Consent für irgendeine Plattform. Siehe [Consent › Was der Consent abdeckt](consent-management.md#4-was-der-consent-abdeckt).
+
 ### Meta-Click-Window (`_fbc`)
 
 `get_fbc()` (`wp-sdtrk-meta.js`) hält den Wert im Format `fb.{subdomainIndex}.{creationTime}.{fbclid}`. Der Zeitstempel im dritten Segment ist Teil des Werts und markiert den Zeitpunkt des Klicks — Meta verwirft Klick-IDs, die älter als 90 Tage sind.
@@ -64,7 +66,9 @@ Der GA-Catcher persistiert **keine** `gclid`. Grund: Die GA4 Measurement Protoco
 
 Datei: `public/js/wp-sdtrk-fp.js`, Klasse `Wp_Sdtrk_Fp`.
 
-Aktivierbar über Option `trk_fp`. Bildet einen cookielosen Identifier aus Browser-Signalen (u. a. Canvas, User-Agent, Bildschirmauflösung). Verwendung: Fallback-Identität (`userFP` im Event) bzw. als Basis für stabile Pseudo-IDs, wenn keine Cookies/Consent vorliegen.
+Aktivierbar über Option `trk_fp`. Bildet einen Identifier aus Browser-Signalen (u. a. Canvas, User-Agent, Bildschirmauflösung). Einziger Verbraucher ist der GA-Catcher: Existiert noch kein `_ga`-Cookie, baut `get_Cid()` die Client-ID als `{fp}.{fp}`. Dadurch erhält ein Browser nach dem Löschen der Cookies dieselbe Client-ID wieder.
+
+Das Auslesen der Browser-Signale ist ein Zugriff auf das Endgerät und braucht deshalb Consent. Die Engine übergibt dem Event nur die Quelle (`event.setUserFPSource(() => fp.get_fp())`); berechnet wird der Fingerprint beim ersten `event.getUserFP()`, und das ruft nur `get_Cid()` auf, also nach erteiltem Consent. Die Quelle ist nicht aufzählbar und gelangt damit nicht in den Server-Payload; `userFP` steht dort erst, wenn der Wert berechnet wurde.
 
 > Lokalisierung: `wp_sdtrk_fp = { enabled: true|false }`.
 
