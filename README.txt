@@ -32,6 +32,10 @@ Genau wie auch beim Browser-basierten Tracking wird eine Zustimmung des Nutzers 
 
 == Changelog ==
 
+= 1.16.1 =
+* Consent: the pixels waited for Borlabs consent, but the plugin itself wrote the tracking cookies before the visitor had clicked anything in the banner — _fbp/_fbc (Meta), _ga (Google Analytics) and _ttc/_ttp (TikTok), plus the UTM cookies and the purchase reload marker. The Google Analytics client id was built from the browser fingerprint, so the same id came back after deleting cookies. All of this now waits for consent on the browser or server path of the platform; after an opt-in in the banner the backload writes it on the same page. The fingerprint is only computed once Google Analytics has consent
+* Consent: when Borlabs was configured but had not loaded yet, the plugin counted that as consent. It now counts as no consent; once Borlabs loads and the visitor has consented, its opt-in code runs the backload. Consent is only skipped where it is bypassed on purpose: the bypass switch on a page or the cookie service "none" in the settings
+
 = 1.16.0 =
 * New platform: ChatGPT Ads (OpenAI). The measurement pixel (oaiq) and the Conversions API run side by side like Meta and TikTok and share one event id, so OpenAI counts each conversion once. Page views, leads, sign-ups and the WooCommerce events (view item, add to cart, checkout, purchase) are mapped to OpenAI's standard events; scroll, time, click and visibility signals go out as custom events. Amounts are sent in the currency's smallest unit as OpenAI requires. The ChatGPT click id (oppref) is kept in a first-party cookie so server-only setups can still attribute clicks. Server events carry only the hashed e-mail, IP address and user agent. A "Validate only" switch lets you test the Conversions API without recording conversions
 * Server tracking: an API answering with an HTTP error status but a JSON body without an "error" field was logged as success. Any non-2xx status now counts as a failure for every platform
